@@ -129,6 +129,13 @@ app.get('/proxy', async (req, res) => {
   });
 });
 
+// Catch-all route for composer/work URLs (e.g., /domenico-scarlatti/magnificat)
+// This allows sharing direct links to works
+app.get('/:composer/:work', (req, res) => {
+  // Serve index.html, which will read the URL and load the appropriate work
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Serve index.html for root path
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -145,16 +152,18 @@ app.listen(PORT, async () => {
   const existingIndex = await scraper.loadIndex();
 
   if (existingIndex.length === 0) {
-    console.log('No existing index found. Building new index...');
-    // Build index in background (test mode - A composers only)
-    scraper.buildIndexInBackground(true);
+    console.log('No existing index found. Starting background index build (full index, all composers)...');
   } else {
     console.log(`Loaded existing index with ${existingIndex.length} composers`);
   }
 
+  // Always start background indexing to build/update the full index
+  console.log('Starting background index build (this will take some time)...');
+  scraper.buildIndexInBackground(false); // false = build full index, not just "A" composers
+
   // Schedule index rebuild every 24 hours
   setInterval(() => {
     console.log('Starting scheduled index rebuild...');
-    scraper.buildIndexInBackground(true); // Keep test mode for now
+    scraper.buildIndexInBackground(false); // Build full index
   }, 24 * 60 * 60 * 1000); // 24 hours
 });

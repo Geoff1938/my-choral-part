@@ -7,7 +7,8 @@ class ChoralMusicScraper {
   constructor() {
     this.baseUrl = 'https://www.learnchoralmusic.co.uk';
     this.composerListUrl = `${this.baseUrl}/complist.html#list`;
-    this.dataFile = path.join(__dirname, 'data', 'midi-index.json');
+    this.dataFile = path.join(__dirname, 'data', 'midi-index-full.json'); // Full index (all composers)
+    this.initialIndexFile = path.join(__dirname, 'data', 'initial-index.json'); // Initial index (A composers only)
     this.recentWorksFile = path.join(__dirname, 'data', 'recent-works.json');
   }
 
@@ -225,9 +226,19 @@ class ChoralMusicScraper {
 
   async loadIndex() {
     try {
+      // Try loading the full index first
       if (await fs.pathExists(this.dataFile)) {
+        console.log('Loading full MIDI index...');
         return await fs.readJSON(this.dataFile);
       }
+
+      // Fallback to initial index (A composers only)
+      if (await fs.pathExists(this.initialIndexFile)) {
+        console.log('Loading initial MIDI index (A composers only)...');
+        return await fs.readJSON(this.initialIndexFile);
+      }
+
+      console.log('No index file found');
     } catch (error) {
       console.error('Error loading index:', error.message);
     }

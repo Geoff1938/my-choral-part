@@ -31,19 +31,29 @@ class MIDIPlayer {
         this.loadPreferences();
         this.attachEventListeners();
         this.loadRecentWorks();
+        this.checkURLRoute();
     }
 
     initializeElements() {
+        // Tab elements
+        this.tabButtons = document.querySelectorAll('.tab-button');
+        this.tabContents = document.querySelectorAll('.tab-content');
+
         // MIDI selection elements
         this.composerSearch = document.getElementById('composer-search');
         this.composerResults = document.getElementById('composer-results');
         this.worksContainer = document.getElementById('works-container');
         this.worksList = document.getElementById('works-list');
-        this.sectionsContainer = document.getElementById('sections-container');
         this.sectionSelect = document.getElementById('section-select');
-        this.recentWorksContainer = document.getElementById('recent-works-container');
-        this.recentWorksList = document.getElementById('recent-works-list');
         this.loadingStatus = document.getElementById('loading-status');
+
+        // Play tab elements
+        this.currentWorkDisplay = document.getElementById('current-work-display');
+        this.shareableUrlSection = document.getElementById('shareable-url-section');
+        this.shareableUrlInput = document.getElementById('shareable-url');
+        this.copyUrlBtn = document.getElementById('copy-url-btn');
+        this.recentWorksDropdown = document.getElementById('recent-works-dropdown');
+        this.recentWorksSelect = document.getElementById('recent-works-select');
 
         // State for current selection
         this.selectedComposer = null;
@@ -64,9 +74,6 @@ class MIDIPlayer {
         this.stopBtn = document.getElementById('stop-btn');
         this.backwardBtn = document.getElementById('backward-btn');
         this.forwardBtn = document.getElementById('forward-btn');
-
-        // Info displays
-        this.midiTitle = document.getElementById('midi-title');
 
         // Progress bar
         this.progressBar = document.getElementById('progress-bar');
@@ -106,8 +113,37 @@ class MIDIPlayer {
     }
 
     attachEventListeners() {
+        // Tab switching
+        this.tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabName = button.dataset.tab;
+                this.switchTab(tabName);
+            });
+        });
+
+        // Copy URL button
+        this.copyUrlBtn.addEventListener('click', () => this.copyShareableURL());
+
+        // Recent works dropdown
+        this.recentWorksSelect.addEventListener('change', (e) => {
+            if (e.target.value) {
+                try {
+                    const workData = JSON.parse(e.target.value);
+                    this.selectComposer(workData.composer).then(() => {
+                        this.selectWork(workData.work);
+                    });
+                } catch (error) {
+                    console.error('Error loading recent work:', error);
+                }
+            }
+        });
+
         // Composer search with debounce
         this.composerSearch.addEventListener('input', (e) => {
+            // Clear and hide works dropdown when typing
+            this.worksList.innerHTML = '';
+            this.worksContainer.style.display = 'none';
+
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => {
                 this.searchComposers(e.target.value);
@@ -269,6 +305,77 @@ class MIDIPlayer {
         }
     }
 
+    switchTab(tabName) {
+        // Update tab buttons
+        this.tabButtons.forEach(button => {
+            if (button.dataset.tab === tabName) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+
+        // Update tab content
+        this.tabContents.forEach(content => {
+            if (content.id === `${tabName}-tab`) {
+                content.classList.add('active');
+            } else {
+                content.classList.remove('active');
+            }
+        });
+    }
+
+    checkURLRoute() {
+        // Check if URL contains composer/work path (e.g., /domenico-scarlatti/magnificat)
+        const path = window.location.pathname;
+        if (path && path !== '/') {
+            const parts = path.split('/').filter(p => p);
+            if (parts.length >= 2) {
+                const composer = decodeURIComponent(parts[0]);
+                const work = decodeURIComponent(parts[1]);
+
+                // Load the composer and work
+                this.selectComposer(composer).then(() => {
+                    this.selectWork(work);
+                });
+            }
+        }
+    }
+
+    updateWorkDisplay() {
+        if (this.selectedComposer && this.selectedWork) {
+            this.currentWorkDisplay.textContent = `${this.selectedComposer} - ${this.selectedWork}`;
+            this.updateShareableURL();
+        } else {
+            this.currentWorkDisplay.textContent = 'No work selected';
+            this.shareableUrlSection.style.display = 'none';
+        }
+    }
+
+    updateShareableURL() {
+        if (this.selectedComposer && this.selectedWork) {
+            const composerSlug = this.selectedComposer.toLowerCase().replace(/\s+/g, '-');
+            const workSlug = this.selectedWork.toLowerCase().replace(/\s+/g, '-');
+            const url = `${window.location.origin}/${composerSlug}/${workSlug}`;
+            this.shareableUrlInput.value = url;
+            this.shareableUrlSection.style.display = 'block';
+        }
+    }
+
+    async copyShareableURL() {
+        try {
+            await navigator.clipboard.writeText(this.shareableUrlInput.value);
+            const originalText = this.copyUrlBtn.textContent;
+            this.copyUrlBtn.textContent = '✓ Copied!';
+            setTimeout(() => {
+                this.copyUrlBtn.textContent = originalText;
+            }, 2000);
+        } catch (error) {
+            console.error('Failed to copy URL:', error);
+            this.showStatus('Failed to copy URL', 'error');
+        }
+    }
+
     async searchComposers(searchTerm) {
         if (!searchTerm || searchTerm.length < 2) {
             this.composerResults.innerHTML = '';
@@ -311,9 +418,14 @@ class MIDIPlayer {
 
         try {
             const response = await fetch(`/api/composer/${encodeURIComponent(composerName)}/works`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const works = await response.json();
 
-            if (works.length === 0) {
+            if (!works || works.length === 0) {
                 this.showStatus('No works found for this composer', 'error');
                 return;
             }
@@ -330,12 +442,9 @@ class MIDIPlayer {
                     this.selectWork(workName);
                 });
             });
-
-            // Hide sections container when showing works
-            this.sectionsContainer.style.display = 'none';
         } catch (error) {
             console.error('Error loading works:', error);
-            this.showStatus('Error loading works', 'error');
+            this.showStatus(`Error loading works: ${error.message}`, 'error');
         }
     }
 
@@ -343,12 +452,14 @@ class MIDIPlayer {
         this.selectedWork = workName;
 
         // Highlight selected work
-        this.worksList.querySelectorAll('.work-item').forEach(item => {
-            item.classList.remove('selected');
-            if (JSON.parse(item.dataset.work) === workName) {
-                item.classList.add('selected');
-            }
-        });
+        if (this.worksList) {
+            this.worksList.querySelectorAll('.work-item').forEach(item => {
+                item.classList.remove('selected');
+                if (JSON.parse(item.dataset.work) === workName) {
+                    item.classList.add('selected');
+                }
+            });
+        }
 
         try {
             const response = await fetch(`/api/composer/${encodeURIComponent(this.selectedComposer)}/work/${encodeURIComponent(workName)}/sections`);
@@ -363,7 +474,10 @@ class MIDIPlayer {
                 sections.map(section =>
                     `<option value='${JSON.stringify({ name: section.name, midiUrl: section.midiUrl })}'>${section.name}</option>`
                 ).join('');
-            this.sectionsContainer.style.display = 'block';
+
+            // Switch to Play tab and update display
+            this.switchTab('play-music');
+            this.updateWorkDisplay();
 
             // Save to recent works
             await this.saveRecentWork(this.selectedComposer, workName);
@@ -379,27 +493,20 @@ class MIDIPlayer {
             const recentWorks = await response.json();
 
             if (recentWorks.length === 0) {
-                this.recentWorksContainer.style.display = 'none';
+                this.recentWorksDropdown.style.display = 'none';
                 return;
             }
 
-            this.recentWorksList.innerHTML = recentWorks.map(item =>
-                `<div class="recent-work-item" data-composer='${JSON.stringify(item.composer)}' data-work='${JSON.stringify(item.work)}'>
-                    ${item.composer} - ${item.work}
-                </div>`
-            ).join('');
-            this.recentWorksContainer.style.display = 'block';
+            // Show only the 5 most recent works
+            const recentToShow = recentWorks.slice(0, 5);
 
-            // Add click handlers
-            this.recentWorksList.querySelectorAll('.recent-work-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const composer = JSON.parse(item.dataset.composer);
-                    const work = JSON.parse(item.dataset.work);
-                    this.selectComposer(composer).then(() => {
-                        this.selectWork(work);
-                    });
-                });
-            });
+            this.recentWorksSelect.innerHTML = '<option value="">Choose a recent work...</option>' +
+                recentToShow.map(item =>
+                    `<option value='${JSON.stringify({ composer: item.composer, work: item.work })}'>
+                        ${item.composer} - ${item.work}
+                    </option>`
+                ).join('');
+            this.recentWorksDropdown.style.display = 'block';
         } catch (error) {
             console.error('Error loading recent works:', error);
         }
@@ -485,16 +592,8 @@ class MIDIPlayer {
             // Setup the MIDI playback
             await this.setupPlayback();
 
-            // Update title if provided
-            if (title && this.midiTitle) {
-                this.midiTitle.textContent = `${this.selectedComposer} - ${this.selectedWork}: ${title}`;
-            } else if (this.midiTitle) {
-                this.midiTitle.textContent = this.midi.name || 'Untitled';
-            }
-
             // Update UI
             this.updateMIDIInfo();
-            this.controlsSection.style.display = 'block';
 
             // Initialize loop to full duration
             this.loopStart = 0;

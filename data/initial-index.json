@@ -1,0 +1,507 @@
+[
+  {
+    "name": "Albert, Prince Consort",
+    "works": [
+      {
+        "name": "Te Deum",
+        "url": "https://www.learnchoralmusic.co.uk/Albert/Te Deum/te-deum.html",
+        "sections": [
+          {
+            "name": "Te Deum",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Albert/Te Deum/TeDeum.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Aleotti",
+    "works": [
+      {
+        "name": "Angelus ad pastores ait",
+        "url": "https://www.learnchoralmusic.co.uk/Aleotti/Angelus ad pastores ait/angelus.html",
+        "sections": [
+          {
+            "name": "Angelus ad pastores ait",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Aleotti/Angelus ad pastores ait/01-Angelus.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Alfven",
+    "works": [
+      {
+        "name": "Julsang",
+        "url": "https://www.learnchoralmusic.co.uk/Alfven/Julsang/Julsang.html",
+        "sections": [
+          {
+            "name": "Julsang",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Alfven/Julsang/../../not-public.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Allegri",
+    "works": [
+      {
+        "name": "Miserere mei Deus",
+        "url": "https://www.learnchoralmusic.co.uk/Allegri/Miserere/miserere.html",
+        "sections": [
+          {
+            "name": "Miserere mei Deus",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Allegri/Miserere/Miserere.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Amner",
+    "works": [
+      {
+        "name": "Blessed be the Lord God",
+        "url": "https://www.learnchoralmusic.co.uk/Amner/Blessed-be/blessed-be.html",
+        "sections": [
+          {
+            "name": "Blessed be the Lord God",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Amner/Blessed-be/Blessed-be.mid"
+          }
+        ]
+      },
+      {
+        "name": "Remember not, Lord, our offences",
+        "url": "https://www.learnchoralmusic.co.uk/Amner/Remember-not/remember-not.html",
+        "sections": [
+          {
+            "name": "Remember not, Lord, our offences",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Amner/Remember-not/Remember-not.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Anerio",
+    "works": [
+      {
+        "name": "Christus factus est",
+        "url": "https://www.learnchoralmusic.co.uk/Anerio/Christus-factus-est/christus-factus-est.html",
+        "sections": [
+          {
+            "name": "Christus factus est",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Anerio/Christus-factus-est/Christus.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Anonymous",
+    "works": [
+      {
+        "name": "Carro della Morte",
+        "url": "https://www.learnchoralmusic.co.uk/Anon-Ingrao/Carro della Morte/carro-della-morte.html",
+        "sections": [
+          {
+            "name": "Carro della morte",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Anon-Ingrao/Carro della Morte/Carro della morte.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Arbo",
+    "works": [
+      {
+        "name": "Crossing the bar",
+        "url": "https://www.learnchoralmusic.co.uk/Arbo/Crossing the bar/CrossBar.html",
+        "sections": [
+          {
+            "name": "Crossing the bar",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Arbo/Crossing the bar/CrossBar.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Archer",
+    "works": [
+      {
+        "name": "Requiem",
+        "url": "https://www.learnchoralmusic.co.uk/Archer/Requiem/requiem.html",
+        "sections": [
+          {
+            "name": "1: Introit & Kyrie",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Archer/Requiem/../../not-public.html"
+          },
+          {
+            "name": "2: Offertory",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Archer/Requiem/../../not-public.html"
+          },
+          {
+            "name": "3: Sanctus",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Archer/Requiem/../../not-public.html"
+          },
+          {
+            "name": "4: Pie Jesu",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Archer/Requiem/../../not-public.html"
+          },
+          {
+            "name": "5: Agnus Dei",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Archer/Requiem/../../not-public.html"
+          },
+          {
+            "name": "6: Libera me, Domine",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Archer/Requiem/../../not-public.html"
+          },
+          {
+            "name": "7: In Paradisum",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Archer/Requiem/../../not-public.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Arnesen",
+    "works": [
+      {
+        "name": "Christmas Night",
+        "url": "https://www.learnchoralmusic.co.uk/Arnesen/Christmas Night/Christmas-Night.html",
+        "sections": [
+          {
+            "name": "Christmas Night",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Arnesen/Christmas Night/../../not-public.html"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Ash",
+    "works": [
+      {
+        "name": "The Pelicantata",
+        "url": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/pelicantata.html",
+        "sections": [
+          {
+            "name": "1: Hampshire House",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/1-Hamps.mid"
+          },
+          {
+            "name": "2: Narration I - 677 windows",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/2-677win.mid"
+          },
+          {
+            "name": "3: We will shine",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/3-shine.mid"
+          },
+          {
+            "name": "4: The Grubber",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/4-Junk.mid"
+          },
+          {
+            "name": "5: Narration III\n\t\t\t\t6: Monkey business",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/5-6-Monk.mid"
+          },
+          {
+            "name": "7: Go on! Hop in!\n\t\t\t\t8: Pelly's Patented Beak",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/7-8-beak.mid"
+          },
+          {
+            "name": "9:  Narration V\n\t\t\t\t10:  Hunger is catching",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/9-10-Hun.mid"
+          },
+          {
+            "name": "11:  Narration VI\n\t\t\t\t. . . Just look\n\t\t\t\t12: Cherries out of reach\n\t\t\t\t13: Narration VII",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/11-12-13.mid"
+          },
+          {
+            "name": "14: Monkey Business",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/14-Monky.mid"
+          },
+          {
+            "name": "15: Narration VIII\n\t\t\t\t16: Giraffey's Magical Neck",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/15-16nec.mid"
+          },
+          {
+            "name": "17: Amazing!",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/17-Amaze.mid"
+          },
+          {
+            "name": "18: The Burglar in His Beak",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/18-Burgl.mid"
+          },
+          {
+            "name": "18: He's got him!\n\t\t\t\tShake him up, Pelly!\n\t\t\t\tMy diamonds ...\n\t\t\t\tDon't worry!\n\t\t\t\t19: Narration XI",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/18-19Shk.mid"
+          },
+          {
+            "name": "20: Waving Goodbye\n\t\t\t\t21: Narration 21",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/20-21bye.mid"
+          },
+          {
+            "name": "22: Hampshire House Transformed\n\t\t\t\t23: Epilogue: \n\t\t\t\t    The Giraffe and the Pelly and Me",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ash/Pelicantata/22-23Ham.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Astorga",
+    "works": [
+      {
+        "name": "Stabat Mater",
+        "url": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/stabat-mater.html",
+        "sections": [
+          {
+            "name": "1: Stabat Mater Dolorosa",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/1-Stabat.mid"
+          },
+          {
+            "name": "2: O quam tristis et afflicta",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/2-O-quam.mid"
+          },
+          {
+            "name": "3: Quis est homo",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/3-Quis-est.mid"
+          },
+          {
+            "name": "4: Eia, Mater",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/4-Eia, Mater.mid"
+          },
+          {
+            "name": "5: Sancta Mater",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/5-Sancta-Mater.mid"
+          },
+          {
+            "name": "6: Fac me tecum pie flere",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/6-Fac-me.mid"
+          },
+          {
+            "name": "7: Virgo virginum praeclatra",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/7-Virgo.mid"
+          },
+          {
+            "name": "8: Fac me plagis vulnerari",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/8-Fac-me.mid"
+          },
+          {
+            "name": "9: Christe, quum sit hinc exire",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Astorga/Stabat Mater/9-Christe.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Austin",
+    "works": [
+      {
+        "name": "Songs in a farmhouse",
+        "url": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/farmhouse-songs.html",
+        "sections": [
+          {
+            "name": "1: Summer is a-coming in",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/1-Summer.mid"
+          },
+          {
+            "name": "2: The Poacher",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/2-Poachr.mid"
+          },
+          {
+            "name": "3: It was a lover and his lass",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/3-lover.mid"
+          },
+          {
+            "name": "4: The banks of Allan Water",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/4-AllanW.mid"
+          },
+          {
+            "name": "5: Drink to me only with thine eyes",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/5-Drink.mid"
+          },
+          {
+            "name": "6: Early one morning",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/6-Early.mid"
+          },
+          {
+            "name": "7: The Ash Grove",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/7-AshGro.mid"
+          },
+          {
+            "name": "8: John Peel",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Austin/Farmhouse-songs/8-JohnP.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Ayleward",
+    "works": [
+      {
+        "name": "Preces & Responses",
+        "url": "https://www.learnchoralmusic.co.uk/Ayleward/Preces+Responses/preces+responses.html",
+        "sections": [
+          {
+            "name": "O Lord, open thou our lips  \n\t\t\t\tO God, make speed to save us",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ayleward/Preces+Responses/1-lips.mid"
+          },
+          {
+            "name": "The Lord be with you  \n\t\t\t\tLet us pray",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ayleward/Preces+Responses/5-Lord.mid"
+          },
+          {
+            "name": "O Lord, shew thy mercy upon us  \n\t\t\t\tO Lord, save the King \n\t\t\t\tEndue thy ministers with righteousness \n\t\t\t\tO Lord, save thy people \n\t\t\t\tGive peace in our time, O Lord \n\t\t\t\tO God, make clean our hearts within us \n\t\t\t\t\t\n\t\t\t\tCollects",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Ayleward/Preces+Responses/7-mer.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Alessandro Scarlatti",
+    "works": [
+      {
+        "name": "Dixit Dominus a 4",
+        "url": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/dixit-dominus.html",
+        "sections": [
+          {
+            "name": "1: Dixit Dominus",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/1-Dixit.mid"
+          },
+          {
+            "name": "2: Virgam virtutis",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/2-Virgam.mid"
+          },
+          {
+            "name": "3: Tecum principium",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/3-Tecum.mid"
+          },
+          {
+            "name": "4: Juravit Dominus",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/4-Juravit.mid"
+          },
+          {
+            "name": "5: Dominus a dextris",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/5-Dominus.mid"
+          },
+          {
+            "name": "6: Judicabit",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/6-Judicabit.mid"
+          },
+          {
+            "name": "7: De torrente",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/7-torrente.mid"
+          },
+          {
+            "name": "8: Gloria",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit Dominus/8-Gloria.mid"
+          }
+        ]
+      },
+      {
+        "name": "Dixit Dominus a 5",
+        "url": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit a 5/dixit-a-5.html",
+        "sections": [
+          {
+            "name": "1: Dixit Dominus",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit a 5/1-Dixit.mid"
+          },
+          {
+            "name": "2: Donec ponam",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit a 5/2-Donec.mid"
+          },
+          {
+            "name": "3: Dominus a dextris",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit a 5/3-Dominus.mid"
+          },
+          {
+            "name": "4: De torrente",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit a 5/4-torrente.mid"
+          },
+          {
+            "name": "5: Gloria Patri",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit a 5/5-Gloria.mid"
+          },
+          {
+            "name": "6: Sicut erat in principio",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Dixit a 5/6-Sicut.mid"
+          }
+        ]
+      },
+      {
+        "name": "Magnificat",
+        "url": "https://www.learnchoralmusic.co.uk/Scarlatti/Magnificat/magnificat.html",
+        "sections": [
+          {
+            "name": "1: Magnificat",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Magnificat/1-Magnificat.mid"
+          },
+          {
+            "name": "2: Fecit potentiam",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Magnificat/2-Fecit.mid"
+          },
+          {
+            "name": "3: Esurientes implevit bonis",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Magnificat/3-Esurientes.mid"
+          },
+          {
+            "name": "4: Gloria Patri et Filio",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Magnificat/4-Gloria.mid"
+          }
+        ]
+      },
+      {
+        "name": "Stabat Mater",
+        "url": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/stabat-mater.html",
+        "sections": [
+          {
+            "name": "1: Stabat Mater",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/01-Staba.mid"
+          },
+          {
+            "name": "2: Cujus animam gementem \n\t\t\t\t   Quae maerebat\n\t\t\t\t   Quis est homo\n\t\t\t\t   Quis non posset\n\t\t\t\t   Pro peccatis suae gentis",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/02-Cujus.mid"
+          },
+          {
+            "name": "3: Eja mater, fons amoris",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/03-Eja.mid"
+          },
+          {
+            "name": "4: Sancta Mater, istud agas",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/04-Sanct.mid"
+          },
+          {
+            "name": "5: Fac me vere tecum flere",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/05-Fac-m.mid"
+          },
+          {
+            "name": "6: Juxta crucem tecum stare",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/06-Juxta.mid"
+          },
+          {
+            "name": "7: Inflammatus et accensus",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/07-Infla.mid"
+          },
+          {
+            "name": "8: Fac ut animae donetur paradisi gloria",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/08-Facut.mid"
+          },
+          {
+            "name": "9: Amen",
+            "midiUrl": "https://www.learnchoralmusic.co.uk/Scarlatti/Stabat Mater/09-Amen.mid"
+          }
+        ]
+      }
+    ]
+  }
+]

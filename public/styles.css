@@ -49,6 +49,172 @@ header h1 {
     color: var(--primary-color);
 }
 
+/* Tab Navigation */
+.tab-nav {
+    display: flex;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.tab-button {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+.tab-button.active {
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3);
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Work Info Section */
+.work-info-section {
+    background: var(--surface);
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* On wider screens, arrange work title and share section horizontally */
+@media (min-width: 769px) {
+    .work-info-section {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .work-title {
+        flex: 1;
+    }
+
+    .shareable-url-section {
+        flex: 0 0 auto;
+        min-width: 300px;
+        margin-top: 0;
+    }
+}
+
+.work-title h2 {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.shareable-url-section {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+}
+
+.url-copy-container {
+    display: flex;
+    gap: 8px;
+}
+
+.url-copy-container input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+.url-copy-container button {
+    white-space: nowrap;
+}
+
+/* Selection Controls */
+.selection-controls {
+    background: var(--surface);
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+    margin-bottom: 16px;
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.control-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.control-group label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    min-width: fit-content;
+}
+
+.control-group select {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.95rem;
+    background: white;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.control-group select:hover {
+    border-color: var(--primary-color);
+}
+
+.control-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
 header p {
     color: var(--text-secondary);
     font-size: 0.9rem;
@@ -213,6 +379,11 @@ section:last-child {
     font-size: 0.9rem;
 }
 
+.btn-icon {
+    padding: 8px 12px;
+    min-width: auto;
+}
+
 .icon {
     font-size: 1.2rem;
 }
@@ -255,6 +426,30 @@ section:last-child {
     border-radius: 6px;
     margin-bottom: 12px;
     text-align: center;
+}
+
+.section-select-main {
+    width: 100%;
+    padding: 10px 16px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    background: white;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+
+.section-select-main:hover {
+    border-color: var(--primary-color);
+}
+
+.section-select-main:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
 .midi-title-display {
