@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIDI Choral Practice</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 MIDI Choral Practice</h1>
+            <p>Load and practice with MIDI files</p>
+        </header>
+
+        <main>
+            <!-- MIDI URL Input Section -->
+            <section class="midi-input-section">
+                <div class="input-group">
+                    <label for="midi-url">MIDI File URL:</label>
+                    <input
+                        type="text"
+                        id="midi-url"
+                        placeholder="https://example.com/song.mid"
+                        aria-label="MIDI file URL"
+                    >
+                    <button id="load-btn" class="btn btn-primary">Load MIDI</button>
+                </div>
+                <div id="loading-status" class="status-message"></div>
+            </section>
+
+            <!-- Playback Controls Section -->
+            <section class="controls-section" id="controls-section" style="display: none;">
+                <div class="playback-info">
+                    <div class="info-item">
+                        <span class="label">Title:</span>
+                        <span id="midi-title">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Duration:</span>
+                        <span id="midi-duration">0:00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Current Time:</span>
+                        <span id="current-time">0:00</span>
+                    </div>
+                </div>
+
+                <!-- Main Playback Controls -->
+                <div class="main-controls">
+                    <button id="play-btn" class="btn btn-control" aria-label="Play">
+                        <span class="icon">▶️</span> Play
+                    </button>
+                    <button id="pause-btn" class="btn btn-control" aria-label="Pause" style="display: none;">
+                        <span class="icon">⏸️</span> Pause
+                    </button>
+                    <button id="stop-btn" class="btn btn-control" aria-label="Stop">
+                        <span class="icon">⏹️</span> Stop
+                    </button>
+                </div>
+
+                <!-- Seek Controls -->
+                <div class="seek-controls">
+                    <button id="backward-btn" class="btn btn-seek" aria-label="Go back 10 seconds">
+                        <span class="icon">⏪</span> -10s
+                    </button>
+                    <button id="forward-btn" class="btn btn-seek" aria-label="Go forward 10 seconds">
+                        <span class="icon">⏩</span> +10s
+                    </button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <input
+                        type="range"
+                        id="progress-bar"
+                        min="0"
+                        max="100"
+                        value="0"
+                        class="progress-bar"
+                        aria-label="Playback progress"
+                    >
+                </div>
+
+                <!-- Tempo Control -->
+                <div class="tempo-control">
+                    <label for="tempo-slider">Tempo: <span id="tempo-value">100</span>%</label>
+                    <div class="tempo-buttons">
+                        <button id="tempo-down" class="btn btn-small" aria-label="Decrease tempo">
+                            <span class="icon">🐢</span> Slower
+                        </button>
+                        <input
+                            type="range"
+                            id="tempo-slider"
+                            min="25"
+                            max="200"
+                            value="100"
+                            step="5"
+                            aria-label="Tempo slider"
+                        >
+                        <button id="tempo-up" class="btn btn-small" aria-label="Increase tempo">
+                            <span class="icon">🐇</span> Faster
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Channel Volume Controls -->
+                <div class="channel-controls">
+                    <h3>Channel Volume Controls</h3>
+                    <div id="channel-volumes" class="channel-list">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with <a href="https://tonejs.github.io/" target="_blank">Tone.js</a></p>
+        </footer>
+    </div>
+
+    <!-- Load Tone.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
+    <!-- Load MIDI file parser -->
+    <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
+    <!-- Our app logic -->
+    <script src="app.js"></script>
+</body>
+</html>

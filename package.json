@@ -1,0 +1,19 @@
+{
+  "name": "choral-practice",
+  "version": "1.0.0",
+  "description": "MIDI playback application for choral practice",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["midi", "music", "playback", "tone.js"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
