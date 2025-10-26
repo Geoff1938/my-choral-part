@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIDI Choral Practice</title>
+    <title>Learn Choral Music</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🎵 MIDI Choral Practice</h1>
+            <h1>🎵 Learn Choral Music</h1>
             <p>Load and practice with MIDI files</p>
         </header>
 
@@ -29,48 +29,61 @@
                 <div id="loading-status" class="status-message"></div>
             </section>
 
+            <!-- Voice Part Selection -->
+            <section class="voice-part-section">
+                <label for="voice-part" title="Select which voice part you sing">My Voice Part:</label>
+                <select id="voice-part" aria-label="Select your voice part" title="Choose your voice part (Soprano, Alto, Tenor, or Bass)">
+                    <option value="soprano">Soprano</option>
+                    <option value="alto">Alto</option>
+                    <option value="tenor">Tenor</option>
+                    <option value="bass">Bass</option>
+                </select>
+                <div id="channel-selector-container" style="display: none;">
+                    <label for="channel-selector" title="Select which specific channel to highlight">Which one:</label>
+                    <select id="channel-selector" aria-label="Select specific channel" title="Choose which specific part is yours (when multiple parts exist)">
+                        <!-- Dynamically populated -->
+                    </select>
+                </div>
+            </section>
+
             <!-- Playback Controls Section -->
             <section class="controls-section" id="controls-section" style="display: none;">
                 <div class="playback-info">
-                    <div class="info-item">
-                        <span class="label">Title:</span>
-                        <span id="midi-title">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Duration:</span>
-                        <span id="midi-duration">0:00</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Current Time:</span>
-                        <span id="current-time">0:00</span>
-                    </div>
+                    <div class="midi-title-display" id="midi-title">-</div>
                 </div>
 
                 <!-- Main Playback Controls -->
                 <div class="main-controls">
-                    <button id="play-btn" class="btn btn-control" aria-label="Play">
+                    <button id="play-btn" class="btn btn-control" aria-label="Play" title="Start playback">
                         <span class="icon">▶️</span> Play
                     </button>
-                    <button id="pause-btn" class="btn btn-control" aria-label="Pause" style="display: none;">
+                    <button id="pause-btn" class="btn btn-control" aria-label="Pause" style="display: none;" title="Pause playback">
                         <span class="icon">⏸️</span> Pause
                     </button>
-                    <button id="stop-btn" class="btn btn-control" aria-label="Stop">
+                    <button id="stop-btn" class="btn btn-control" aria-label="Stop" title="Stop playback and return to beginning">
                         <span class="icon">⏹️</span> Stop
                     </button>
                 </div>
 
                 <!-- Seek Controls -->
                 <div class="seek-controls">
-                    <button id="backward-btn" class="btn btn-seek" aria-label="Go back 10 seconds">
+                    <button id="backward-btn" class="btn btn-seek" aria-label="Go back 10 seconds" title="Skip backward 10 seconds">
                         <span class="icon">⏪</span> -10s
                     </button>
-                    <button id="forward-btn" class="btn btn-seek" aria-label="Go forward 10 seconds">
+                    <button id="forward-btn" class="btn btn-seek" aria-label="Go forward 10 seconds" title="Skip forward 10 seconds">
                         <span class="icon">⏩</span> +10s
                     </button>
                 </div>
 
                 <!-- Progress Bar -->
                 <div class="progress-container">
+                    <div class="progress-header">
+                        <span id="current-time">0:00</span>
+                    </div>
+                    <div class="progress-time-labels">
+                        <span>0:00</span>
+                        <span id="progress-duration">0:00</span>
+                    </div>
                     <input
                         type="range"
                         id="progress-bar"
@@ -79,44 +92,95 @@
                         value="0"
                         class="progress-bar"
                         aria-label="Playback progress"
+                        title="Drag to jump to any point in the song"
                     >
+                </div>
+
+                <!-- Loop Point Controls -->
+                <div class="loop-controls">
+                    <label title="Set a section of the song to loop repeatedly">Loop Section: <span id="loop-range-display">0:00 - 0:00</span></label>
+                    <div class="loop-slider-container">
+                        <input type="range" id="loop-start-slider" min="0" max="100" value="0" class="loop-slider" aria-label="Loop start position" title="Drag to set where the loop begins">
+                        <input type="range" id="loop-end-slider" min="0" max="100" value="100" class="loop-slider" aria-label="Loop end position" title="Drag to set where the loop ends">
+                        <div class="loop-track">
+                            <div id="loop-highlight" class="loop-highlight"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tempo Control -->
                 <div class="tempo-control">
-                    <label for="tempo-slider">Tempo: <span id="tempo-value">100</span>%</label>
+                    <label for="tempo-slider" title="Adjust playback speed from 60% (slower) to 120% (faster)">Tempo: <span id="tempo-value">100</span>%</label>
                     <div class="tempo-buttons">
-                        <button id="tempo-down" class="btn btn-small" aria-label="Decrease tempo">
+                        <button id="tempo-down" class="btn btn-small" aria-label="Decrease tempo" title="Decrease tempo by 5%">
                             <span class="icon">🐢</span> Slower
                         </button>
-                        <input
-                            type="range"
-                            id="tempo-slider"
-                            min="25"
-                            max="200"
-                            value="100"
-                            step="5"
-                            aria-label="Tempo slider"
-                        >
-                        <button id="tempo-up" class="btn btn-small" aria-label="Increase tempo">
+                        <div class="tempo-slider-container">
+                            <div class="tempo-labels">
+                                <span class="tempo-label-left">60%</span>
+                                <span class="tempo-label-center">100%</span>
+                                <span class="tempo-label-right">120%</span>
+                            </div>
+                            <input
+                                type="range"
+                                id="tempo-slider"
+                                min="60"
+                                max="120"
+                                value="100"
+                                step="5"
+                                aria-label="Tempo slider"
+                                title="Drag to adjust playback speed (100% is original tempo)"
+                            >
+                        </div>
+                        <button id="tempo-up" class="btn btn-small" aria-label="Increase tempo" title="Increase tempo by 5%">
                             <span class="icon">🐇</span> Faster
                         </button>
                     </div>
                 </div>
 
-                <!-- Channel Volume Controls -->
-                <div class="channel-controls">
-                    <h3>Channel Volume Controls</h3>
-                    <div id="channel-volumes" class="channel-list">
-                        <!-- Dynamically populated -->
+                <!-- Master Volume Control -->
+                <div class="master-volume-control">
+                    <div class="volume-control-item">
+                        <label for="master-volume" title="Adjust overall volume for all parts">Master Volume: <span id="master-volume-value">100</span>%</label>
+                        <input
+                            type="range"
+                            id="master-volume"
+                            min="0"
+                            max="100"
+                            value="100"
+                            step="5"
+                            class="volume-slider"
+                            aria-label="Master volume"
+                            title="Drag to adjust overall volume (0% is silent, 100% is full volume)"
+                        >
+                    </div>
+                </div>
+
+                <!-- Balance Control -->
+                <div class="balance-control">
+                    <div class="volume-control-item">
+                        <label for="balance-slider" title="Balance your part relative to other parts">My Part Balance: <span id="balance-value">0</span></label>
+                        <div class="balance-labels">
+                            <span>Others Louder</span>
+                            <span>Equal</span>
+                            <span>My Part Louder</span>
+                        </div>
+                        <input
+                            type="range"
+                            id="balance-slider"
+                            min="-100"
+                            max="100"
+                            value="0"
+                            step="5"
+                            class="volume-slider"
+                            aria-label="Balance between your part and others"
+                            title="Drag left to make other parts louder, right to make your part louder"
+                        >
                     </div>
                 </div>
             </section>
         </main>
 
-        <footer>
-            <p>Built with <a href="https://tonejs.github.io/" target="_blank">Tone.js</a></p>
-        </footer>
     </div>
 
     <!-- Load Tone.js from CDN -->

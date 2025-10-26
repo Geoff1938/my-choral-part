@@ -8,11 +8,27 @@ class MIDIPlayer {
         this.isPlaying = false;
         this.currentTime = 0;
         this.duration = 0;
+        this.originalDuration = 0; // Duration at original tempo
         this.tempoMultiplier = 1;
         this.channelVolumes = {};
         this.progressInterval = null;
+        this.masterVolume = 1.0;
+        this.balance = 0; // -100 to 100, 0 is equal
+        this.voicePart = 'soprano'; // Default voice part
+        this.selectedChannelIndex = null; // Specific channel index when multiple exist
+        this.loopStart = 0;
+        this.loopEnd = 0;
+
+        // Mapping of voice parts to MIDI instrument names
+        this.voicePartInstruments = {
+            soprano: 'piccolo',
+            alto: 'clarinet',
+            tenor: 'french_horn',
+            bass: 'bassoon'
+        };
 
         this.initializeElements();
+        this.loadPreferences();
         this.attachEventListeners();
     }
 
@@ -21,6 +37,11 @@ class MIDIPlayer {
         this.midiUrlInput = document.getElementById('midi-url');
         this.loadBtn = document.getElementById('load-btn');
         this.loadingStatus = document.getElementById('loading-status');
+
+        // Voice part selector
+        this.voicePartSelect = document.getElementById('voice-part');
+        this.channelSelectorContainer = document.getElementById('channel-selector-container');
+        this.channelSelector = document.getElementById('channel-selector');
 
         // Control section
         this.controlsSection = document.getElementById('controls-section');
@@ -34,11 +55,17 @@ class MIDIPlayer {
 
         // Info displays
         this.midiTitle = document.getElementById('midi-title');
-        this.midiDuration = document.getElementById('midi-duration');
-        this.currentTimeDisplay = document.getElementById('current-time');
 
         // Progress bar
         this.progressBar = document.getElementById('progress-bar');
+        this.progressDuration = document.getElementById('progress-duration');
+        this.currentTimeDisplay = document.getElementById('current-time');
+
+        // Loop controls
+        this.loopStartSlider = document.getElementById('loop-start-slider');
+        this.loopEndSlider = document.getElementById('loop-end-slider');
+        this.loopRangeDisplay = document.getElementById('loop-range-display');
+        this.loopHighlight = document.getElementById('loop-highlight');
 
         // Tempo controls
         this.tempoSlider = document.getElementById('tempo-slider');
@@ -46,14 +73,44 @@ class MIDIPlayer {
         this.tempoUpBtn = document.getElementById('tempo-up');
         this.tempoDownBtn = document.getElementById('tempo-down');
 
-        // Channel controls
-        this.channelVolumesContainer = document.getElementById('channel-volumes');
+        // Volume controls
+        this.masterVolumeSlider = document.getElementById('master-volume');
+        this.masterVolumeValue = document.getElementById('master-volume-value');
+        this.balanceSlider = document.getElementById('balance-slider');
+        this.balanceValue = document.getElementById('balance-value');
+    }
+
+    loadPreferences() {
+        // Load voice part from localStorage
+        const savedVoicePart = localStorage.getItem('voicePart');
+        if (savedVoicePart) {
+            this.voicePart = savedVoicePart;
+            this.voicePartSelect.value = savedVoicePart;
+        }
+    }
+
+    savePreferences() {
+        localStorage.setItem('voicePart', this.voicePart);
     }
 
     attachEventListeners() {
         this.loadBtn.addEventListener('click', () => this.loadMIDI());
         this.midiUrlInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.loadMIDI();
+        });
+
+        // Voice part selection
+        this.voicePartSelect.addEventListener('change', (e) => {
+            this.voicePart = e.target.value;
+            this.savePreferences();
+            this.updateChannelSelector(); // Update channel options if multiple exist
+            this.applyBalance(); // Reapply balance with new voice part
+        });
+
+        // Channel selector (for when multiple channels have same instrument)
+        this.channelSelector.addEventListener('change', (e) => {
+            this.selectedChannelIndex = parseInt(e.target.value);
+            this.applyBalance();
         });
 
         this.playBtn.addEventListener('click', () => this.play());
@@ -64,8 +121,37 @@ class MIDIPlayer {
         this.forwardBtn.addEventListener('click', () => this.seek(10));
 
         this.progressBar.addEventListener('input', (e) => {
-            const newTime = (e.target.value / 100) * this.duration;
+            const newTime = (e.target.value / 100) * this.originalDuration;
             this.seekTo(newTime);
+        });
+
+        // Loop controls
+        this.loopStartSlider.addEventListener('input', (e) => {
+            let startPercent = parseInt(e.target.value);
+            let endPercent = parseInt(this.loopEndSlider.value);
+
+            // Don't let start go past end
+            if (startPercent > endPercent) {
+                startPercent = endPercent;
+                e.target.value = startPercent;
+            }
+
+            this.loopStart = (startPercent / 100) * this.originalDuration;
+            this.updateLoopDisplay();
+        });
+
+        this.loopEndSlider.addEventListener('input', (e) => {
+            let endPercent = parseInt(e.target.value);
+            let startPercent = parseInt(this.loopStartSlider.value);
+
+            // Don't let end go before start
+            if (endPercent < startPercent) {
+                endPercent = startPercent;
+                e.target.value = endPercent;
+            }
+
+            this.loopEnd = (endPercent / 100) * this.originalDuration;
+            this.updateLoopDisplay();
         });
 
         this.tempoSlider.addEventListener('input', (e) => {
@@ -73,16 +159,84 @@ class MIDIPlayer {
         });
 
         this.tempoUpBtn.addEventListener('click', () => {
-            const newTempo = Math.min(200, parseInt(this.tempoSlider.value) + 10);
+            const newTempo = Math.min(120, parseInt(this.tempoSlider.value) + 5);
             this.tempoSlider.value = newTempo;
             this.setTempo(newTempo);
         });
 
         this.tempoDownBtn.addEventListener('click', () => {
-            const newTempo = Math.max(25, parseInt(this.tempoSlider.value) - 10);
+            const newTempo = Math.max(60, parseInt(this.tempoSlider.value) - 5);
             this.tempoSlider.value = newTempo;
             this.setTempo(newTempo);
         });
+
+        // Volume controls
+        this.masterVolumeSlider.addEventListener('input', (e) => {
+            this.masterVolume = parseInt(e.target.value) / 100;
+            this.masterVolumeValue.textContent = e.target.value;
+            this.applyBalance();
+        });
+
+        this.balanceSlider.addEventListener('input', (e) => {
+            this.balance = parseInt(e.target.value);
+            this.balanceValue.textContent = e.target.value;
+            this.applyBalance();
+        });
+    }
+
+    updateLoopDisplay() {
+        // Update the display text
+        this.loopRangeDisplay.textContent = `${this.formatTime(this.loopStart)} - ${this.formatTime(this.loopEnd)}`;
+
+        // Update the visual highlight
+        const startPercent = (this.loopStart / this.originalDuration) * 100;
+        const endPercent = (this.loopEnd / this.originalDuration) * 100;
+        const width = endPercent - startPercent;
+
+        this.loopHighlight.style.left = `${startPercent}%`;
+        this.loopHighlight.style.width = `${width}%`;
+    }
+
+    updateChannelSelector() {
+        // Find all channels that match the selected voice part instrument
+        const selectedInstrument = this.voicePartInstruments[this.voicePart];
+        const matchingChannels = [];
+
+        if (this.instruments && this.instruments.length > 0) {
+            for (let i = 0; i < this.instruments.length; i++) {
+                const { trackIndex } = this.instruments[i];
+                const track = this.midi.tracks[trackIndex];
+                const instrumentName = this.getInstrumentName(track);
+
+                if (instrumentName === selectedInstrument) {
+                    matchingChannels.push({
+                        index: i,
+                        name: track.name || `Channel ${trackIndex + 1}`
+                    });
+                }
+            }
+        }
+
+        // If multiple channels found, show selector
+        if (matchingChannels.length > 1) {
+            this.channelSelector.innerHTML = '';
+            matchingChannels.forEach(channel => {
+                const option = document.createElement('option');
+                option.value = channel.index;
+                option.textContent = channel.name;
+                this.channelSelector.appendChild(option);
+            });
+            this.channelSelectorContainer.style.display = 'flex';
+            this.selectedChannelIndex = matchingChannels[0].index;
+        } else if (matchingChannels.length === 1) {
+            // Only one channel, select it automatically
+            this.selectedChannelIndex = matchingChannels[0].index;
+            this.channelSelectorContainer.style.display = 'none';
+        } else {
+            // No matching channels
+            this.selectedChannelIndex = null;
+            this.channelSelectorContainer.style.display = 'none';
+        }
     }
 
     showStatus(message, type = 'info') {
@@ -127,16 +281,29 @@ class MIDIPlayer {
             }
 
             this.duration = this.midi.duration;
+            this.originalDuration = this.midi.duration;
 
             // Setup the MIDI playback
             await this.setupPlayback();
 
             // Update UI
             this.updateMIDIInfo();
-            this.createChannelControls();
             this.controlsSection.style.display = 'block';
 
+            // Initialize loop to full duration
+            this.loopStart = 0;
+            this.loopEnd = this.originalDuration;
+            this.loopStartSlider.value = 0;
+            this.loopEndSlider.value = 100;
+            this.updateLoopDisplay();
+
+            // Update channel selector based on voice part
+            this.updateChannelSelector();
+
             this.showStatus('MIDI file loaded successfully!', 'success');
+
+            // Auto-play after loading
+            setTimeout(() => this.play(), 500);
 
         } catch (error) {
             console.error('Error loading MIDI:', error);
@@ -169,8 +336,7 @@ class MIDIPlayer {
             }
         }
 
-        const totalTracks = trackData.length;
-        this.showStatus(`Loading ${totalTracks} instruments in parallel...`, 'info');
+        this.showStatus('Loading required musical instruments...', 'info');
 
         try {
             // Load all instruments in parallel
@@ -251,11 +417,12 @@ class MIDIPlayer {
                 this.synths.push(instrument); // Keep for compatibility
                 this.channelVolumes[trackIndex] = 100;
 
-                // Create a Tone.Part for this track
+                // Create a Tone.Part for this track with tempo scaling
+                const tempoScale = 1 / this.tempoMultiplier;
                 const notes = track.notes.map(note => ({
-                    time: note.time,
+                    time: note.time * tempoScale,
                     note: note.name,
-                    duration: note.duration,
+                    duration: note.duration * tempoScale,
                     velocity: note.velocity
                 }));
 
@@ -360,67 +527,50 @@ class MIDIPlayer {
         const filename = url.split('/').pop().split('?')[0];
         this.midiTitle.textContent = this.midi.name || filename || 'Untitled';
 
-        this.midiDuration.textContent = this.formatTime(this.duration);
+        // Update progress duration label and current time
+        this.progressDuration.textContent = this.formatTime(this.originalDuration);
         this.currentTimeDisplay.textContent = '0:00';
         this.progressBar.value = 0;
     }
 
-    createChannelControls() {
-        this.channelVolumesContainer.innerHTML = '';
+    applyBalance() {
+        // Apply master volume and balance to all instruments
+        if (!this.instruments || this.instruments.length === 0) return;
 
         for (let i = 0; i < this.instruments.length; i++) {
-            const trackIndex = this.instruments[i].trackIndex;
-            const track = this.midi.tracks[trackIndex];
-            const channelDiv = document.createElement('div');
-            channelDiv.className = 'channel-item';
+            const { instrument, gainNode, trackIndex } = this.instruments[i];
 
-            const trackName = track.name || `Channel ${trackIndex + 1}`;
-            const instrumentName = track.instrument?.name || 'Unknown';
+            let volumeMultiplier = 1.0;
 
-            channelDiv.innerHTML = `
-                <div class="channel-header">
-                    <div class="channel-name">${trackName} (${instrumentName})</div>
-                    <div class="channel-volume-value" id="channel-value-${i}">100%</div>
-                </div>
-                <div class="channel-slider-container">
-                    <span class="volume-label">Quiet</span>
-                    <input
-                        type="range"
-                        class="channel-slider"
-                        id="channel-${i}"
-                        min="0"
-                        max="200"
-                        value="100"
-                        data-channel="${i}"
-                    >
-                    <span class="volume-label">Loud</span>
-                </div>
-            `;
+            // Check if this is the user's selected channel
+            const isMyPart = (this.selectedChannelIndex !== null && i === this.selectedChannelIndex);
 
-            this.channelVolumesContainer.appendChild(channelDiv);
+            if (isMyPart) {
+                // This is the user's part
+                // Balance > 0 means make this part louder
+                if (this.balance > 0) {
+                    volumeMultiplier = 1.0 + (this.balance / 100);
+                } else if (this.balance < 0) {
+                    volumeMultiplier = 1.0 + (this.balance / 100);
+                }
+            } else {
+                // This is not the user's part
+                // Balance > 0 means make other parts quieter
+                if (this.balance > 0) {
+                    volumeMultiplier = 1.0 - (this.balance / 100);
+                } else if (this.balance < 0) {
+                    volumeMultiplier = 1.0 - (this.balance / 100);
+                }
+            }
 
-            // Attach event listener
-            const slider = channelDiv.querySelector(`#channel-${i}`);
-            const valueDisplay = channelDiv.querySelector(`#channel-value-${i}`);
+            // Ensure volume doesn't go negative
+            volumeMultiplier = Math.max(0, volumeMultiplier);
 
-            slider.addEventListener('input', (e) => {
-                const volume = parseInt(e.target.value);
-                this.setChannelVolume(i, volume);
-                valueDisplay.textContent = `${volume}%`;
-            });
+            // Apply master volume and balance
+            gainNode.gain.value = this.masterVolume * volumeMultiplier;
         }
     }
 
-    setChannelVolume(channelIndex, volumePercent) {
-        if (channelIndex >= 0 && channelIndex < this.instruments.length) {
-            // Convert percentage to gain value
-            // 0% = 0 (silent), 100% = 1.0 (normal), 200% = 2.0 (amplified)
-            const gain = volumePercent / 100;
-
-            this.instruments[channelIndex].gainNode.gain.value = gain;
-            this.channelVolumes[channelIndex] = volumePercent;
-        }
-    }
 
     play() {
         if (!this.midi) {
@@ -500,7 +650,7 @@ class MIDIPlayer {
     }
 
     seek(seconds) {
-        const newTime = Math.max(0, Math.min(this.duration, this.currentTime + seconds));
+        const newTime = Math.max(0, Math.min(this.originalDuration, this.currentTime + seconds));
         this.seekTo(newTime);
     }
 
@@ -511,18 +661,21 @@ class MIDIPlayer {
             this.pause();
         }
 
-        this.currentTime = Math.max(0, Math.min(this.duration, time));
+        // time parameter is in original time
+        this.currentTime = Math.max(0, Math.min(this.originalDuration, time));
 
         // Update UI
         this.currentTimeDisplay.textContent = this.formatTime(this.currentTime);
-        this.progressBar.value = (this.currentTime / this.duration) * 100;
+        this.progressBar.value = (this.currentTime / this.originalDuration) * 100;
 
         // Restart parts at new position
         this.parts.forEach(part => {
             part.stop();
         });
 
-        Tone.Transport.seconds = this.currentTime;
+        // Convert original time to scaled time for Transport
+        const scaledTime = this.currentTime / this.tempoMultiplier;
+        Tone.Transport.seconds = scaledTime;
 
         if (wasPlaying) {
             this.play();
@@ -530,6 +683,14 @@ class MIDIPlayer {
     }
 
     setTempo(tempoPercent) {
+        const wasPlaying = this.isPlaying;
+        const currentTime = this.currentTime;
+
+        // Stop everything cleanly
+        if (this.isPlaying) {
+            this.stop();
+        }
+
         this.tempoMultiplier = tempoPercent / 100;
 
         // Update BPM in Transport
@@ -539,6 +700,61 @@ class MIDIPlayer {
         }
 
         this.tempoValue.textContent = tempoPercent;
+
+        // Update actual duration based on tempo
+        // Slower tempo = longer duration
+        this.duration = this.originalDuration / this.tempoMultiplier;
+
+        // Recreate parts with new tempo
+        this.recreateParts();
+
+        // If was playing, seek to the saved position and restart
+        if (wasPlaying) {
+            this.currentTime = currentTime;
+            // Convert original time to scaled time
+            const scaledTime = currentTime / this.tempoMultiplier;
+            Tone.Transport.seconds = scaledTime;
+            setTimeout(() => this.play(), 100);
+        }
+    }
+
+    recreateParts() {
+        // Dispose old parts
+        this.parts.forEach(part => {
+            part.dispose();
+        });
+        this.parts = [];
+
+        // Recreate parts for each instrument with tempo-adjusted times
+        for (let i = 0; i < this.instruments.length; i++) {
+            const trackIndex = this.instruments[i].trackIndex;
+            const track = this.midi.tracks[trackIndex];
+
+            // Scale note times and durations by tempo multiplier
+            // Slower tempo (0.5) = notes at 2x time, faster (2.0) = notes at 0.5x time
+            const tempoScale = 1 / this.tempoMultiplier;
+
+            const notes = track.notes.map(note => ({
+                time: note.time * tempoScale,
+                note: note.name,
+                duration: note.duration * tempoScale,
+                velocity: note.velocity
+            }));
+
+            const part = new Tone.Part((time, value) => {
+                const { instrument } = this.instruments[i];
+                instrument.play(
+                    value.note,
+                    time,
+                    {
+                        duration: value.duration,
+                        gain: value.velocity
+                    }
+                );
+            }, notes);
+
+            this.parts.push(part);
+        }
     }
 
     startProgressUpdate() {
@@ -546,17 +762,28 @@ class MIDIPlayer {
 
         this.progressInterval = setInterval(() => {
             if (this.isPlaying) {
-                this.currentTime = Tone.Transport.seconds;
+                // Transport.seconds is in scaled time (affected by tempo)
+                // Convert back to original time for display and loop logic
+                const transportTime = Tone.Transport.seconds;
+                this.currentTime = transportTime * this.tempoMultiplier;
 
-                // Check if we've reached the end
-                if (this.currentTime >= this.duration) {
-                    this.stop();
+                // Check loop boundaries (in original time)
+                // If loop range is not full duration, loop within that range
+                const loopRangeSet = (this.loopStart > 0 || this.loopEnd < this.originalDuration - 0.5);
+
+                if (loopRangeSet && this.currentTime >= this.loopEnd) {
+                    // Loop back to loop start
+                    this.seekTo(this.loopStart);
+                    return;
+                } else if (!loopRangeSet && this.currentTime >= this.originalDuration) {
+                    // Full song loop: restart from beginning
+                    this.seekTo(0);
                     return;
                 }
 
-                // Update UI
+                // Update UI - current time and progress bar
                 this.currentTimeDisplay.textContent = this.formatTime(this.currentTime);
-                this.progressBar.value = (this.currentTime / this.duration) * 100;
+                this.progressBar.value = (this.currentTime / this.originalDuration) * 100;
             }
         }, 100);
     }
