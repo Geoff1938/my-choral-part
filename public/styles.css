@@ -636,3 +636,132 @@ section:last-child {
         font-size: 0.95rem;
     }
 }
+
+/* MIDI Selection Section */
+.midi-selection-section {
+    margin-bottom: 16px;
+}
+
+.search-results {
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-top: 8px;
+    background: var(--surface);
+}
+
+.composer-item,
+.work-item {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.2s;
+}
+
+.composer-item:last-child,
+.work-item:last-child {
+    border-bottom: none;
+}
+
+.composer-item:hover,
+.work-item:hover {
+    background-color: var(--background);
+}
+
+.work-item.selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.no-results {
+    padding: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.works-container,
+.sections-container {
+    margin-top: 16px;
+}
+
+.works-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+}
+
+.section-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    margin-top: 8px;
+    background: var(--surface);
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+.section-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.recent-works {
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--background);
+    border-radius: 6px;
+}
+
+.recent-works label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.recent-works-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recent-work-item {
+    padding: 6px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.recent-work-item:hover {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+#composer-search {
+    padding: 8px 12px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s;
+    width: 100%;
+}
+
+#composer-search:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}

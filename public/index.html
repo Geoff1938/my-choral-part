@@ -14,18 +14,40 @@
         </header>
 
         <main>
-            <!-- MIDI URL Input Section -->
-            <section class="midi-input-section">
+            <!-- MIDI Selection Section -->
+            <section class="midi-selection-section">
+                <!-- Recent Works -->
+                <div class="recent-works" id="recent-works-container" style="display: none;">
+                    <label>Recent Works:</label>
+                    <div id="recent-works-list" class="recent-works-list"></div>
+                </div>
+
+                <!-- Composer Search -->
                 <div class="input-group">
-                    <label for="midi-url">MIDI File URL:</label>
+                    <label for="composer-search">Search Composer:</label>
                     <input
                         type="text"
-                        id="midi-url"
-                        placeholder="https://example.com/song.mid"
-                        aria-label="MIDI file URL"
+                        id="composer-search"
+                        placeholder="Type to search composers..."
+                        aria-label="Search for composer"
                     >
-                    <button id="load-btn" class="btn btn-primary">Load MIDI</button>
                 </div>
+                <div id="composer-results" class="search-results"></div>
+
+                <!-- Works List -->
+                <div id="works-container" class="works-container" style="display: none;">
+                    <label>Select Work:</label>
+                    <div id="works-list" class="works-list"></div>
+                </div>
+
+                <!-- Sections Dropdown -->
+                <div id="sections-container" class="sections-container" style="display: none;">
+                    <label for="section-select">Select Section:</label>
+                    <select id="section-select" class="section-select">
+                        <option value="">Choose a section...</option>
+                    </select>
+                </div>
+
                 <div id="loading-status" class="status-message"></div>
             </section>
 

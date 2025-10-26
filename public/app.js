@@ -30,13 +30,25 @@ class MIDIPlayer {
         this.initializeElements();
         this.loadPreferences();
         this.attachEventListeners();
+        this.loadRecentWorks();
     }
 
     initializeElements() {
-        // Input elements
-        this.midiUrlInput = document.getElementById('midi-url');
-        this.loadBtn = document.getElementById('load-btn');
+        // MIDI selection elements
+        this.composerSearch = document.getElementById('composer-search');
+        this.composerResults = document.getElementById('composer-results');
+        this.worksContainer = document.getElementById('works-container');
+        this.worksList = document.getElementById('works-list');
+        this.sectionsContainer = document.getElementById('sections-container');
+        this.sectionSelect = document.getElementById('section-select');
+        this.recentWorksContainer = document.getElementById('recent-works-container');
+        this.recentWorksList = document.getElementById('recent-works-list');
         this.loadingStatus = document.getElementById('loading-status');
+
+        // State for current selection
+        this.selectedComposer = null;
+        this.selectedWork = null;
+        this.searchTimeout = null;
 
         // Voice part selector
         this.voicePartSelect = document.getElementById('voice-part');
@@ -83,7 +95,7 @@ class MIDIPlayer {
     loadPreferences() {
         // Load voice part from localStorage
         const savedVoicePart = localStorage.getItem('voicePart');
-        if (savedVoicePart) {
+        if (savedVoicePart && this.voicePartSelect) {
             this.voicePart = savedVoicePart;
             this.voicePartSelect.value = savedVoicePart;
         }
@@ -94,9 +106,27 @@ class MIDIPlayer {
     }
 
     attachEventListeners() {
-        this.loadBtn.addEventListener('click', () => this.loadMIDI());
-        this.midiUrlInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.loadMIDI();
+        // Composer search with debounce
+        this.composerSearch.addEventListener('input', (e) => {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+                this.searchComposers(e.target.value);
+            }, 300);
+        });
+
+        // Section selection
+        this.sectionSelect.addEventListener('change', (e) => {
+            console.log('Section dropdown changed, value:', e.target.value);
+            if (e.target.value) {
+                try {
+                    const sectionData = JSON.parse(e.target.value);
+                    console.log('Parsed section data:', sectionData);
+                    this.loadMIDIFromURL(sectionData.midiUrl, sectionData.name);
+                } catch (error) {
+                    console.error('Error parsing section data:', error);
+                    this.showStatus('Error loading section', 'error');
+                }
+            }
         });
 
         // Voice part selection
@@ -239,6 +269,156 @@ class MIDIPlayer {
         }
     }
 
+    async searchComposers(searchTerm) {
+        if (!searchTerm || searchTerm.length < 2) {
+            this.composerResults.innerHTML = '';
+            this.composerResults.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/search/composers?q=${encodeURIComponent(searchTerm)}`);
+            const composers = await response.json();
+
+            if (composers.length === 0) {
+                this.composerResults.innerHTML = '<div class="no-results">No composers found</div>';
+                this.composerResults.style.display = 'block';
+                return;
+            }
+
+            this.composerResults.innerHTML = composers.map(composer =>
+                `<div class="composer-item" data-composer='${JSON.stringify(composer.name)}'>${composer.name}</div>`
+            ).join('');
+            this.composerResults.style.display = 'block';
+
+            // Add click handlers to composer items
+            this.composerResults.querySelectorAll('.composer-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const composerName = JSON.parse(item.dataset.composer);
+                    this.selectComposer(composerName);
+                });
+            });
+        } catch (error) {
+            console.error('Error searching composers:', error);
+            this.showStatus('Error searching composers', 'error');
+        }
+    }
+
+    async selectComposer(composerName) {
+        this.selectedComposer = composerName;
+        this.composerSearch.value = composerName;
+        this.composerResults.style.display = 'none';
+
+        try {
+            const response = await fetch(`/api/composer/${encodeURIComponent(composerName)}/works`);
+            const works = await response.json();
+
+            if (works.length === 0) {
+                this.showStatus('No works found for this composer', 'error');
+                return;
+            }
+
+            this.worksList.innerHTML = works.map(work =>
+                `<div class="work-item" data-work='${JSON.stringify(work.name)}'>${work.name}</div>`
+            ).join('');
+            this.worksContainer.style.display = 'block';
+
+            // Add click handlers to work items
+            this.worksList.querySelectorAll('.work-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const workName = JSON.parse(item.dataset.work);
+                    this.selectWork(workName);
+                });
+            });
+
+            // Hide sections container when showing works
+            this.sectionsContainer.style.display = 'none';
+        } catch (error) {
+            console.error('Error loading works:', error);
+            this.showStatus('Error loading works', 'error');
+        }
+    }
+
+    async selectWork(workName) {
+        this.selectedWork = workName;
+
+        // Highlight selected work
+        this.worksList.querySelectorAll('.work-item').forEach(item => {
+            item.classList.remove('selected');
+            if (JSON.parse(item.dataset.work) === workName) {
+                item.classList.add('selected');
+            }
+        });
+
+        try {
+            const response = await fetch(`/api/composer/${encodeURIComponent(this.selectedComposer)}/work/${encodeURIComponent(workName)}/sections`);
+            const sections = await response.json();
+
+            if (sections.length === 0) {
+                this.showStatus('No sections found for this work', 'error');
+                return;
+            }
+
+            this.sectionSelect.innerHTML = '<option value="">Choose a section...</option>' +
+                sections.map(section =>
+                    `<option value='${JSON.stringify({ name: section.name, midiUrl: section.midiUrl })}'>${section.name}</option>`
+                ).join('');
+            this.sectionsContainer.style.display = 'block';
+
+            // Save to recent works
+            await this.saveRecentWork(this.selectedComposer, workName);
+        } catch (error) {
+            console.error('Error loading sections:', error);
+            this.showStatus('Error loading sections', 'error');
+        }
+    }
+
+    async loadRecentWorks() {
+        try {
+            const response = await fetch('/api/recent-works');
+            const recentWorks = await response.json();
+
+            if (recentWorks.length === 0) {
+                this.recentWorksContainer.style.display = 'none';
+                return;
+            }
+
+            this.recentWorksList.innerHTML = recentWorks.map(item =>
+                `<div class="recent-work-item" data-composer='${JSON.stringify(item.composer)}' data-work='${JSON.stringify(item.work)}'>
+                    ${item.composer} - ${item.work}
+                </div>`
+            ).join('');
+            this.recentWorksContainer.style.display = 'block';
+
+            // Add click handlers
+            this.recentWorksList.querySelectorAll('.recent-work-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const composer = JSON.parse(item.dataset.composer);
+                    const work = JSON.parse(item.dataset.work);
+                    this.selectComposer(composer).then(() => {
+                        this.selectWork(work);
+                    });
+                });
+            });
+        } catch (error) {
+            console.error('Error loading recent works:', error);
+        }
+    }
+
+    async saveRecentWork(composer, work) {
+        try {
+            await fetch('/api/recent-works', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ composer, work })
+            });
+            // Reload recent works list
+            await this.loadRecentWorks();
+        } catch (error) {
+            console.error('Error saving recent work:', error);
+        }
+    }
+
     showStatus(message, type = 'info') {
         this.loadingStatus.textContent = message;
         this.loadingStatus.className = `status-message show ${type}`;
@@ -250,20 +430,21 @@ class MIDIPlayer {
         }
     }
 
-    async loadMIDI() {
-        const url = this.midiUrlInput.value.trim();
+    async loadMIDIFromURL(url, title = null) {
+        console.log(`=== loadMIDIFromURL called with URL: ${url}`);
 
         if (!url) {
-            this.showStatus('Please enter a MIDI file URL', 'error');
+            this.showStatus('Invalid MIDI URL', 'error');
             return;
         }
 
         try {
-            this.loadBtn.disabled = true;
             this.showStatus('Loading MIDI file...', 'info');
 
             // Stop any currently playing MIDI
+            console.log('Calling stop()...');
             this.stop();
+            console.log('Calling cleanup()...');
             this.cleanup();
 
             // Fetch and parse MIDI file via proxy to avoid CORS issues
@@ -280,11 +461,36 @@ class MIDIPlayer {
                 throw new Error('Invalid MIDI file or no tracks found');
             }
 
-            this.duration = this.midi.duration;
-            this.originalDuration = this.midi.duration;
+            // Find the earliest note time to skip leading silence
+            let earliestNote = Infinity;
+            for (const track of this.midi.tracks) {
+                if (track.notes && track.notes.length > 0) {
+                    for (const note of track.notes) {
+                        if (note.time < earliestNote) {
+                            earliestNote = note.time;
+                        }
+                    }
+                }
+            }
+
+            // Only skip silence if there's more than 0.5 seconds of it
+            this.skipToTime = (earliestNote !== Infinity && earliestNote > 0.5) ? earliestNote : 0;
+            console.log(`Earliest note at ${earliestNote}s, skipping ${this.skipToTime}s of leading silence`);
+
+            // Adjust duration to account for removed leading silence
+            this.originalDuration = this.midi.duration - this.skipToTime;
+            this.duration = this.originalDuration;
+            console.log(`Adjusted duration: ${this.originalDuration}s (was ${this.midi.duration}s)`);
 
             // Setup the MIDI playback
             await this.setupPlayback();
+
+            // Update title if provided
+            if (title && this.midiTitle) {
+                this.midiTitle.textContent = `${this.selectedComposer} - ${this.selectedWork}: ${title}`;
+            } else if (this.midiTitle) {
+                this.midiTitle.textContent = this.midi.name || 'Untitled';
+            }
 
             // Update UI
             this.updateMIDIInfo();
@@ -293,8 +499,8 @@ class MIDIPlayer {
             // Initialize loop to full duration
             this.loopStart = 0;
             this.loopEnd = this.originalDuration;
-            this.loopStartSlider.value = 0;
-            this.loopEndSlider.value = 100;
+            if (this.loopStartSlider) this.loopStartSlider.value = 0;
+            if (this.loopEndSlider) this.loopEndSlider.value = 100;
             this.updateLoopDisplay();
 
             // Update channel selector based on voice part
@@ -308,8 +514,6 @@ class MIDIPlayer {
         } catch (error) {
             console.error('Error loading MIDI:', error);
             this.showStatus(`Error: ${error.message}`, 'error');
-        } finally {
-            this.loadBtn.disabled = false;
         }
     }
 
@@ -318,11 +522,6 @@ class MIDIPlayer {
         this.synths = [];
         this.parts = [];
         this.instruments = [];
-
-        // Initialize instrument cache if not exists
-        if (!window.instrumentCache) {
-            window.instrumentCache = {};
-        }
 
         // Get audio context from Tone.js
         const audioContext = Tone.context.rawContext;
@@ -350,18 +549,10 @@ class MIDIPlayer {
                 gainNode.connect(audioContext.destination);
 
                 try {
-                    // Check if we need to create a new instrument or can share from cache
-                    let instrument;
-                    const cacheKey = instrumentName;
-
-                    // Note: We can't share instruments between tracks if we need individual volume control
-                    // Each track needs its own instrument instance connected to its own gain node
-
                     // Load the SoundFont instrument (using FluidR3_GM for faster loading)
-                    instrument = await Soundfont.instrument(audioContext, instrumentName, {
+                    const instrument = await Soundfont.instrument(audioContext, instrumentName, {
                         soundfont: 'FluidR3_GM',
-                        destination: gainNode, // Connect to our gain node for volume control
-                        // Use remote SoundFont repository
+                        destination: gainNode,
                         nameToUrl: (name, soundfont, format) => {
                             format = format === 'ogg' ? format : 'mp3';
                             return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
@@ -377,7 +568,7 @@ class MIDIPlayer {
                     try {
                         const instrument = await Soundfont.instrument(audioContext, 'acoustic_grand_piano', {
                             soundfont: 'FluidR3_GM',
-                            destination: gainNode, // Connect to our gain node for volume control
+                            destination: gainNode,
                             nameToUrl: (name, soundfont, format) => {
                                 format = format === 'ogg' ? format : 'mp3';
                                 return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
@@ -414,13 +605,14 @@ class MIDIPlayer {
 
                 // Use the gain node that was created during instrument loading
                 this.instruments.push({ instrument, gainNode, trackIndex });
-                this.synths.push(instrument); // Keep for compatibility
+                this.synths.push(instrument);
                 this.channelVolumes[trackIndex] = 100;
 
                 // Create a Tone.Part for this track with tempo scaling
+                // Subtract skipToTime to remove leading silence from the timeline
                 const tempoScale = 1 / this.tempoMultiplier;
                 const notes = track.notes.map(note => ({
-                    time: note.time * tempoScale,
+                    time: (note.time - this.skipToTime) * tempoScale,
                     note: note.name,
                     duration: note.duration * tempoScale,
                     velocity: note.velocity
@@ -429,12 +621,7 @@ class MIDIPlayer {
                 const instrumentIndex = this.instruments.length - 1;
                 const part = new Tone.Part((time, value) => {
                     // Schedule the note with SoundFont instrument
-                    // Note: The instrument is already connected to the gain node
-                    // The gain control happens via the gainNode.gain.value
                     const { instrument } = this.instruments[instrumentIndex];
-
-                    // Play the note at the scheduled time
-                    // The 'time' parameter from Tone.Part is already the correct AudioContext time
                     instrument.play(
                         value.note,
                         time,
@@ -448,15 +635,23 @@ class MIDIPlayer {
                 this.parts.push(part);
             }
 
-            // Ensure Tone.js is ready
+            // Ensure Tone.js is ready and audio context is running
             await Tone.start();
+
+            // Resume audio context if it's suspended
+            if (Tone.context.state !== 'running') {
+                await Tone.context.resume();
+            }
+
+            console.log(`Audio context state: ${Tone.context.state}`);
+            console.log(`Loaded ${this.instruments.length} instruments`);
+            console.log(`Created ${this.parts.length} parts`);
 
             let statusMsg = `All instruments loaded! (${successCount} loaded`;
             if (fallbackCount > 0) {
                 statusMsg += `, ${fallbackCount} using piano fallback`;
             }
             statusMsg += ')';
-
             this.showStatus(statusMsg, 'success');
 
         } catch (error) {
@@ -522,15 +717,17 @@ class MIDIPlayer {
     }
 
     updateMIDIInfo() {
-        // Extract title from URL or use filename
-        const url = this.midiUrlInput.value;
-        const filename = url.split('/').pop().split('?')[0];
-        this.midiTitle.textContent = this.midi.name || filename || 'Untitled';
-
+        // The title is set by loadMIDIFromURL, so just update the progress UI
         // Update progress duration label and current time
-        this.progressDuration.textContent = this.formatTime(this.originalDuration);
-        this.currentTimeDisplay.textContent = '0:00';
-        this.progressBar.value = 0;
+        if (this.progressDuration) {
+            this.progressDuration.textContent = this.formatTime(this.originalDuration);
+        }
+        if (this.currentTimeDisplay) {
+            this.currentTimeDisplay.textContent = '0:00';
+        }
+        if (this.progressBar) {
+            this.progressBar.value = 0;
+        }
     }
 
     applyBalance() {
@@ -580,17 +777,27 @@ class MIDIPlayer {
 
         if (this.isPlaying) return;
 
-        // Start all parts
-        this.parts.forEach(part => {
-            part.start(Tone.now(), this.currentTime);
+        console.log(`Playing: ${this.parts.length} parts, ${this.instruments.length} instruments`);
+        console.log(`Current time offset: ${this.currentTime}`);
+
+        // Ensure currentTime is within valid range
+        if (this.currentTime < 0 || this.currentTime >= this.originalDuration) {
+            console.log(`Resetting invalid currentTime ${this.currentTime} to 0`);
+            this.currentTime = 0;
+        }
+
+        // Start parts immediately ("+0") so they sync with Transport timeline
+        this.parts.forEach((part, index) => {
+            part.start("+0", this.currentTime);
         });
 
-        Tone.Transport.start();
+        // Start Transport immediately from the current offset
+        Tone.Transport.start("+0", this.currentTime);
         this.isPlaying = true;
 
         // Update button visibility
-        this.playBtn.style.display = 'none';
-        this.pauseBtn.style.display = 'inline-flex';
+        if (this.playBtn) this.playBtn.style.display = 'none';
+        if (this.pauseBtn) this.pauseBtn.style.display = 'inline-flex';
 
         // Start progress update
         this.startProgressUpdate();
@@ -619,20 +826,26 @@ class MIDIPlayer {
         this.currentTime = 0;
 
         // Stop all parts
-        this.parts.forEach(part => {
-            part.stop();
-        });
+        if (this.parts) {
+            this.parts.forEach(part => {
+                try {
+                    part.stop();
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+        }
 
         // Immediately stop all playing notes
         this.stopAllNotes();
 
         // Update button visibility
-        this.playBtn.style.display = 'inline-flex';
-        this.pauseBtn.style.display = 'none';
+        if (this.playBtn) this.playBtn.style.display = 'inline-flex';
+        if (this.pauseBtn) this.pauseBtn.style.display = 'none';
 
         // Update UI
-        this.currentTimeDisplay.textContent = '0:00';
-        this.progressBar.value = 0;
+        if (this.currentTimeDisplay) this.currentTimeDisplay.textContent = '0:00';
+        if (this.progressBar) this.progressBar.value = 0;
 
         // Stop progress update
         this.stopProgressUpdate();
@@ -642,8 +855,15 @@ class MIDIPlayer {
         // Immediately stop all playing notes on all instruments
         if (this.instruments) {
             this.instruments.forEach(({ instrument }) => {
-                if (instrument && typeof instrument.stop === 'function') {
-                    instrument.stop();
+                if (instrument) {
+                    // For Tone.js PolySynth, use releaseAll()
+                    if (typeof instrument.releaseAll === 'function') {
+                        instrument.releaseAll();
+                    }
+                    // For SoundFont instruments, use stop()
+                    else if (typeof instrument.stop === 'function') {
+                        instrument.stop();
+                    }
                 }
             });
         }
@@ -802,24 +1022,54 @@ class MIDIPlayer {
     }
 
     cleanup() {
+        console.log('Cleanup called');
+        console.log(`Before cleanup: ${this.instruments.length} instruments, ${this.parts.length} parts`);
+        console.log(`Transport.seconds before cleanup: ${Tone.Transport.seconds}`);
+
+        // Stop and cancel all transport events
+        Tone.Transport.stop();
+        Tone.Transport.cancel();
+
+        // Reset transport position to 0
+        Tone.Transport.seconds = 0;
+        console.log(`Transport.seconds after reset: ${Tone.Transport.seconds}`);
+
         // Stop all instruments
         if (this.instruments) {
             this.instruments.forEach(({ instrument, gainNode }) => {
                 // Stop all playing notes
-                if (instrument && instrument.stop) {
-                    instrument.stop();
+                if (instrument) {
+                    // For Tone.js PolySynth, use releaseAll()
+                    if (typeof instrument.releaseAll === 'function') {
+                        instrument.releaseAll();
+                    }
+                    // For SoundFont instruments, use stop()
+                    else if (typeof instrument.stop === 'function') {
+                        instrument.stop();
+                    }
                 }
                 // Disconnect gain node
                 if (gainNode) {
-                    gainNode.disconnect();
+                    try {
+                        gainNode.disconnect();
+                    } catch (e) {
+                        // Ignore disconnect errors
+                    }
                 }
             });
         }
 
         // Clear all parts
-        this.parts.forEach(part => {
-            part.dispose();
-        });
+        if (this.parts) {
+            this.parts.forEach(part => {
+                try {
+                    part.stop();
+                    part.dispose();
+                } catch (e) {
+                    // Ignore disposal errors
+                }
+            });
+        }
 
         this.synths = [];
         this.instruments = [];
@@ -827,8 +1077,13 @@ class MIDIPlayer {
         this.midi = null;
         this.currentTime = 0;
         this.duration = 0;
+        this.originalDuration = 0;
+        this.isPlaying = false;
 
-        this.controlsSection.style.display = 'none';
+        console.log('Cleanup complete - currentTime reset to:', this.currentTime);
+
+        // Don't hide controls section - we might be loading a new MIDI
+        // this.controlsSection.style.display = 'none';
     }
 }
 
