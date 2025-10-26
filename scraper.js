@@ -16,6 +16,30 @@ class ChoralMusicScraper {
     await fs.ensureDir(path.dirname(this.dataFile));
   }
 
+  async ensureInitialIndex() {
+    // Ensure data directory exists
+    await this.initializeDataDirectory();
+
+    // Check if initial index exists in data directory
+    const initialIndexExists = await fs.pathExists(this.initialIndexFile);
+
+    if (!initialIndexExists) {
+      // Copy template from root to data directory
+      const templatePath = path.join(__dirname, 'initial-index-template.json');
+      const templateExists = await fs.pathExists(templatePath);
+
+      if (templateExists) {
+        console.log('Copying initial index template to data directory...');
+        await fs.copy(templatePath, this.initialIndexFile);
+        console.log('Initial index copied successfully');
+      } else {
+        console.log('Warning: No initial index template found');
+      }
+    } else {
+      console.log('Initial index already exists in data directory');
+    }
+  }
+
   async scrapeComposerList() {
     console.log('Starting to scrape composer list...');
     

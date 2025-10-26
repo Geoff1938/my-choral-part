@@ -145,8 +145,12 @@ app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Visit http://localhost:${PORT}`);
 
-  // Initialize scraper with test mode (A composers only)
+  // Initialize scraper
   console.log('Initializing MIDI index scraper...');
+
+  // Ensure initial index is copied to data directory
+  // (This handles Render's persistent disk mount which starts empty)
+  await scraper.ensureInitialIndex();
 
   // Check if index already exists
   const existingIndex = await scraper.loadIndex();
