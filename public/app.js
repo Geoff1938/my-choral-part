@@ -3,6 +3,7 @@ class MIDIPlayer {
     constructor() {
         this.midi = null;
         this.synths = [];
+        this.instruments = [];
         this.parts = [];
         this.isPlaying = false;
         this.currentTime = 0;
@@ -146,57 +147,211 @@ class MIDIPlayer {
     }
 
     async setupPlayback() {
-        // Create synths and parts for each track
+        // Create instruments and parts for each track
         this.synths = [];
         this.parts = [];
+        this.instruments = [];
 
-        for (let i = 0; i < this.midi.tracks.length; i++) {
-            const track = this.midi.tracks[i];
-
-            // Skip empty tracks
-            if (track.notes.length === 0) continue;
-
-            // Create a polyphonic synth for this track
-            const synth = new Tone.PolySynth(Tone.Synth, {
-                oscillator: {
-                    type: 'triangle'
-                },
-                envelope: {
-                    attack: 0.005,
-                    decay: 0.1,
-                    sustain: 0.3,
-                    release: 0.5
-                }
-            }).toDestination();
-
-            // Set initial volume
-            synth.volume.value = -10;
-
-            this.synths.push(synth);
-            this.channelVolumes[i] = 100;
-
-            // Create a Tone.Part for this track
-            const notes = track.notes.map(note => ({
-                time: note.time,
-                note: note.name,
-                duration: note.duration,
-                velocity: note.velocity
-            }));
-
-            const part = new Tone.Part((time, value) => {
-                synth.triggerAttackRelease(
-                    value.note,
-                    value.duration,
-                    time,
-                    value.velocity
-                );
-            }, notes);
-
-            this.parts.push(part);
+        // Initialize instrument cache if not exists
+        if (!window.instrumentCache) {
+            window.instrumentCache = {};
         }
 
-        // Ensure Tone.js is ready
-        await Tone.start();
+        // Get audio context from Tone.js
+        const audioContext = Tone.context.rawContext;
+
+        // Prepare track data for parallel loading
+        const trackData = [];
+        for (let i = 0; i < this.midi.tracks.length; i++) {
+            const track = this.midi.tracks[i];
+            if (track.notes.length > 0) {
+                trackData.push({ track, trackIndex: i });
+            }
+        }
+
+        const totalTracks = trackData.length;
+        this.showStatus(`Loading ${totalTracks} instruments in parallel...`, 'info');
+
+        try {
+            // Load all instruments in parallel
+            const instrumentPromises = trackData.map(async ({ track, trackIndex }) => {
+                const instrumentName = this.getInstrumentName(track);
+                console.log(`Track ${trackIndex}: ${track.name}, Instrument: ${instrumentName}`);
+
+                // Create a gain node for this track first
+                const gainNode = audioContext.createGain();
+                gainNode.gain.value = 1.0; // Default volume (100%)
+                gainNode.connect(audioContext.destination);
+
+                try {
+                    // Check if we need to create a new instrument or can share from cache
+                    let instrument;
+                    const cacheKey = instrumentName;
+
+                    // Note: We can't share instruments between tracks if we need individual volume control
+                    // Each track needs its own instrument instance connected to its own gain node
+
+                    // Load the SoundFont instrument (using FluidR3_GM for faster loading)
+                    instrument = await Soundfont.instrument(audioContext, instrumentName, {
+                        soundfont: 'FluidR3_GM',
+                        destination: gainNode, // Connect to our gain node for volume control
+                        // Use remote SoundFont repository
+                        nameToUrl: (name, soundfont, format) => {
+                            format = format === 'ogg' ? format : 'mp3';
+                            return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                        }
+                    });
+
+                    return { instrument, trackIndex, instrumentName, gainNode, success: true };
+
+                } catch (error) {
+                    console.error(`Failed to load ${instrumentName}, falling back to piano:`, error);
+
+                    // Fallback to piano
+                    try {
+                        const instrument = await Soundfont.instrument(audioContext, 'acoustic_grand_piano', {
+                            soundfont: 'FluidR3_GM',
+                            destination: gainNode, // Connect to our gain node for volume control
+                            nameToUrl: (name, soundfont, format) => {
+                                format = format === 'ogg' ? format : 'mp3';
+                                return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                            }
+                        });
+
+                        return { instrument, trackIndex, instrumentName: 'acoustic_grand_piano (fallback)', gainNode, success: false };
+                    } catch (fallbackError) {
+                        console.error(`Even piano fallback failed:`, fallbackError);
+                        return null;
+                    }
+                }
+            });
+
+            // Wait for all instruments to load
+            const loadedInstruments = await Promise.all(instrumentPromises);
+
+            // Create gain nodes and parts for each loaded instrument
+            let successCount = 0;
+            let fallbackCount = 0;
+
+            for (let i = 0; i < loadedInstruments.length; i++) {
+                const result = loadedInstruments[i];
+                if (!result) continue;
+
+                const { instrument, trackIndex, instrumentName, gainNode, success } = result;
+                const track = this.midi.tracks[trackIndex];
+
+                if (success) {
+                    successCount++;
+                } else {
+                    fallbackCount++;
+                }
+
+                // Use the gain node that was created during instrument loading
+                this.instruments.push({ instrument, gainNode, trackIndex });
+                this.synths.push(instrument); // Keep for compatibility
+                this.channelVolumes[trackIndex] = 100;
+
+                // Create a Tone.Part for this track
+                const notes = track.notes.map(note => ({
+                    time: note.time,
+                    note: note.name,
+                    duration: note.duration,
+                    velocity: note.velocity
+                }));
+
+                const instrumentIndex = this.instruments.length - 1;
+                const part = new Tone.Part((time, value) => {
+                    // Schedule the note with SoundFont instrument
+                    // Note: The instrument is already connected to the gain node
+                    // The gain control happens via the gainNode.gain.value
+                    const { instrument } = this.instruments[instrumentIndex];
+
+                    // Play the note at the scheduled time
+                    // The 'time' parameter from Tone.Part is already the correct AudioContext time
+                    instrument.play(
+                        value.note,
+                        time,
+                        {
+                            duration: value.duration,
+                            gain: value.velocity
+                        }
+                    );
+                }, notes);
+
+                this.parts.push(part);
+            }
+
+            // Ensure Tone.js is ready
+            await Tone.start();
+
+            let statusMsg = `All instruments loaded! (${successCount} loaded`;
+            if (fallbackCount > 0) {
+                statusMsg += `, ${fallbackCount} using piano fallback`;
+            }
+            statusMsg += ')';
+
+            this.showStatus(statusMsg, 'success');
+
+        } catch (error) {
+            console.error('Error during setup:', error);
+            throw error;
+        }
+    }
+
+    getInstrumentName(track) {
+        // MIDI General MIDI instrument mapping
+        // If track has instrument info, use it
+        if (track.instrument) {
+            const program = track.instrument.number;
+            return this.midiProgramToInstrument(program);
+        }
+
+        // Default to acoustic_grand_piano
+        return 'acoustic_grand_piano';
+    }
+
+    midiProgramToInstrument(program) {
+        // General MIDI instrument names (program 0-127)
+        const gmInstruments = [
+            'acoustic_grand_piano', 'bright_acoustic_piano', 'electric_grand_piano', 'honkytonk_piano',
+            'electric_piano_1', 'electric_piano_2', 'harpsichord', 'clavinet',
+            'celesta', 'glockenspiel', 'music_box', 'vibraphone',
+            'marimba', 'xylophone', 'tubular_bells', 'dulcimer',
+            'drawbar_organ', 'percussive_organ', 'rock_organ', 'church_organ',
+            'reed_organ', 'accordion', 'harmonica', 'tango_accordion',
+            'acoustic_guitar_nylon', 'acoustic_guitar_steel', 'electric_guitar_jazz', 'electric_guitar_clean',
+            'electric_guitar_muted', 'overdriven_guitar', 'distortion_guitar', 'guitar_harmonics',
+            'acoustic_bass', 'electric_bass_finger', 'electric_bass_pick', 'fretless_bass',
+            'slap_bass_1', 'slap_bass_2', 'synth_bass_1', 'synth_bass_2',
+            'violin', 'viola', 'cello', 'contrabass',
+            'tremolo_strings', 'pizzicato_strings', 'orchestral_harp', 'timpani',
+            'string_ensemble_1', 'string_ensemble_2', 'synth_strings_1', 'synth_strings_2',
+            'choir_aahs', 'voice_oohs', 'synth_choir', 'orchestra_hit',
+            'trumpet', 'trombone', 'tuba', 'muted_trumpet',
+            'french_horn', 'brass_section', 'synth_brass_1', 'synth_brass_2',
+            'soprano_sax', 'alto_sax', 'tenor_sax', 'baritone_sax',
+            'oboe', 'english_horn', 'bassoon', 'clarinet',
+            'piccolo', 'flute', 'recorder', 'pan_flute',
+            'blown_bottle', 'shakuhachi', 'whistle', 'ocarina',
+            'lead_1_square', 'lead_2_sawtooth', 'lead_3_calliope', 'lead_4_chiff',
+            'lead_5_charang', 'lead_6_voice', 'lead_7_fifths', 'lead_8_bass_lead',
+            'pad_1_new_age', 'pad_2_warm', 'pad_3_polysynth', 'pad_4_choir',
+            'pad_5_bowed', 'pad_6_metallic', 'pad_7_halo', 'pad_8_sweep',
+            'fx_1_rain', 'fx_2_soundtrack', 'fx_3_crystal', 'fx_4_atmosphere',
+            'fx_5_brightness', 'fx_6_goblins', 'fx_7_echoes', 'fx_8_scifi',
+            'sitar', 'banjo', 'shamisen', 'koto',
+            'kalimba', 'bagpipe', 'fiddle', 'shanai',
+            'tinkle_bell', 'agogo', 'steel_drums', 'woodblock',
+            'taiko_drum', 'melodic_tom', 'synth_drum', 'reverse_cymbal',
+            'guitar_fret_noise', 'breath_noise', 'seashore', 'bird_tweet',
+            'telephone_ring', 'helicopter', 'applause', 'gunshot'
+        ];
+
+        if (program >= 0 && program < gmInstruments.length) {
+            return gmInstruments[program];
+        }
+
+        return 'acoustic_grand_piano';
     }
 
     updateMIDIInfo() {
@@ -213,12 +368,13 @@ class MIDIPlayer {
     createChannelControls() {
         this.channelVolumesContainer.innerHTML = '';
 
-        for (let i = 0; i < this.synths.length; i++) {
-            const track = this.midi.tracks[i];
+        for (let i = 0; i < this.instruments.length; i++) {
+            const trackIndex = this.instruments[i].trackIndex;
+            const track = this.midi.tracks[trackIndex];
             const channelDiv = document.createElement('div');
             channelDiv.className = 'channel-item';
 
-            const trackName = track.name || `Channel ${i + 1}`;
+            const trackName = track.name || `Channel ${trackIndex + 1}`;
             const instrumentName = track.instrument?.name || 'Unknown';
 
             channelDiv.innerHTML = `
@@ -256,20 +412,12 @@ class MIDIPlayer {
     }
 
     setChannelVolume(channelIndex, volumePercent) {
-        if (channelIndex >= 0 && channelIndex < this.synths.length) {
-            // Convert percentage to decibels
-            // 100% = -10dB (default), 0% = -Infinity, 200% = +10dB
-            let db;
-            if (volumePercent === 0) {
-                db = -Infinity;
-            } else {
-                // Map 0-200 to -Infinity to +10
-                // At 100%, db = -10
-                // At 200%, db = +10
-                db = -10 + ((volumePercent - 100) * 0.2);
-            }
+        if (channelIndex >= 0 && channelIndex < this.instruments.length) {
+            // Convert percentage to gain value
+            // 0% = 0 (silent), 100% = 1.0 (normal), 200% = 2.0 (amplified)
+            const gain = volumePercent / 100;
 
-            this.synths[channelIndex].volume.value = db;
+            this.instruments[channelIndex].gainNode.gain.value = gain;
             this.channelVolumes[channelIndex] = volumePercent;
         }
     }
@@ -304,6 +452,9 @@ class MIDIPlayer {
         Tone.Transport.pause();
         this.isPlaying = false;
 
+        // Immediately stop all playing notes
+        this.stopAllNotes();
+
         // Update button visibility
         this.playBtn.style.display = 'inline-flex';
         this.pauseBtn.style.display = 'none';
@@ -322,6 +473,9 @@ class MIDIPlayer {
             part.stop();
         });
 
+        // Immediately stop all playing notes
+        this.stopAllNotes();
+
         // Update button visibility
         this.playBtn.style.display = 'inline-flex';
         this.pauseBtn.style.display = 'none';
@@ -332,6 +486,17 @@ class MIDIPlayer {
 
         // Stop progress update
         this.stopProgressUpdate();
+    }
+
+    stopAllNotes() {
+        // Immediately stop all playing notes on all instruments
+        if (this.instruments) {
+            this.instruments.forEach(({ instrument }) => {
+                if (instrument && typeof instrument.stop === 'function') {
+                    instrument.stop();
+                }
+            });
+        }
     }
 
     seek(seconds) {
@@ -410,10 +575,19 @@ class MIDIPlayer {
     }
 
     cleanup() {
-        // Dispose of all synths
-        this.synths.forEach(synth => {
-            synth.dispose();
-        });
+        // Stop all instruments
+        if (this.instruments) {
+            this.instruments.forEach(({ instrument, gainNode }) => {
+                // Stop all playing notes
+                if (instrument && instrument.stop) {
+                    instrument.stop();
+                }
+                // Disconnect gain node
+                if (gainNode) {
+                    gainNode.disconnect();
+                }
+            });
+        }
 
         // Clear all parts
         this.parts.forEach(part => {
@@ -421,6 +595,7 @@ class MIDIPlayer {
         });
 
         this.synths = [];
+        this.instruments = [];
         this.parts = [];
         this.midi = null;
         this.currentTime = 0;
