@@ -192,7 +192,22 @@ app.listen(PORT, async () => {
     console.log(`Loaded existing index with ${existingIndex.length} composers`);
   }
 
-  // Background indexing disabled to avoid rate limiting from source server
-  // The app will use the initial-index.json which contains A composers only
-  console.log('Background indexing is disabled. Using static initial index.');
+  // Background indexing strategy:
+  // - The full index is pre-built locally (run: npm run build-index)
+  // - The pre-built index is committed to the repository
+  // - Render uses the pre-built index (no scraping on startup)
+  // - Optional: Schedule weekly updates with long delays to stay current
+
+  console.log('Using pre-built index. Background scraping disabled.');
+
+  // Optional: Uncomment to enable weekly index updates (runs every 7 days)
+  // This is disabled by default to avoid rate limiting
+  /*
+  const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+  setInterval(() => {
+    console.log('Starting weekly index update...');
+    scraper.buildIndexInBackground(false);
+  }, ONE_WEEK);
+  console.log('Weekly index updates enabled (runs every 7 days).');
+  */
 });

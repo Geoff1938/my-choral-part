@@ -29,7 +29,7 @@ dist/
 build/
 
 # Generated/runtime data files
-data/midi-index-full.json
+# Note: midi-index-full.json is now committed (pre-built index)
 data/recent-works.json
 
 # Claude Code configuration
