@@ -139,17 +139,13 @@ class MIDIPlayer {
                 `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
             ).join('');
 
-        // Auto-select and load Hallelujah since it's the only movement
+        // Auto-select Hallelujah in the dropdown
         this.movementSelect.selectedIndex = 1;
-        const movementData = defaultMovements[0];
-        const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
-
-        // Load after a short delay to ensure everything is initialized
-        setTimeout(() => {
-            this.loadMIDIFromURL(absoluteUrl, movementData.name);
-        }, 100);
 
         this.updateWorkDisplay();
+
+        // Don't auto-load on page load - let user click play when ready
+        // This prevents errors on slower connections or during initialization
     }
 
     attachEventListeners() {

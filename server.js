@@ -130,11 +130,12 @@ app.get('/proxy', async (req, res) => {
   // Choose http or https based on protocol
   const protocol = parsedUrl.protocol === 'https:' ? https : http;
 
-  // Fetch the MIDI file
-  protocol.get(midiUrl, (midiRes) => {
+  // Fetch the MIDI file with timeout
+  const request = protocol.get(midiUrl, { timeout: 10000 }, (midiRes) => {
     if (midiRes.statusCode !== 200) {
+      console.error(`MIDI fetch failed: ${midiRes.statusCode} ${midiRes.statusMessage} for ${midiUrl}`);
       return res.status(midiRes.statusCode).json({
-        error: `Failed to fetch MIDI file: ${midiRes.statusMessage}`
+        error: `Failed to fetch MIDI file: ${midiRes.statusCode} ${midiRes.statusMessage}`
       });
     }
 
@@ -145,8 +146,12 @@ app.get('/proxy', async (req, res) => {
     // Pipe the response
     midiRes.pipe(res);
   }).on('error', (error) => {
-    console.error('Error fetching MIDI:', error);
+    console.error(`Error fetching MIDI from ${midiUrl}:`, error);
     res.status(500).json({ error: `Failed to fetch MIDI file: ${error.message}` });
+  }).on('timeout', () => {
+    request.destroy();
+    console.error(`Timeout fetching MIDI from ${midiUrl}`);
+    res.status(504).json({ error: 'Request timeout fetching MIDI file' });
   });
 });
 
