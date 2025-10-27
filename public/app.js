@@ -729,10 +729,10 @@ class MIDIPlayer {
             try {
                 const response = await fetch(url);
 
-                // If we get a 429, wait and retry (with exponential backoff)
+                // If we get a 429, wait and retry (with longer exponential backoff)
                 if (response.status === 429 && attempt < maxRetries - 1) {
-                    const waitTime = Math.pow(2, attempt) * 2000; // 2s, 4s, 8s
-                    this.showStatus(`Rate limited. Retrying in ${waitTime / 1000} seconds...`, 'info');
+                    const waitTime = Math.pow(3, attempt) * 10000; // 10s, 30s, 90s
+                    this.showStatus(`Rate limited. Retrying in ${waitTime / 1000} seconds... (attempt ${attempt + 1}/${maxRetries})`, 'info');
                     await new Promise(resolve => setTimeout(resolve, waitTime));
                     continue;
                 }
@@ -743,7 +743,7 @@ class MIDIPlayer {
                     throw error;
                 }
                 // Wait before retrying on network errors
-                const waitTime = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+                const waitTime = Math.pow(2, attempt) * 5000; // 5s, 10s, 20s
                 await new Promise(resolve => setTimeout(resolve, waitTime));
             }
         }
