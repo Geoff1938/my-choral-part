@@ -6,6 +6,8 @@
     <title>Learn Choral Music</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
     <link rel="stylesheet" href="styles.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
@@ -78,10 +80,10 @@
                     <div class="control-group">
                         <label for="voice-part" title="Select which voice part you sing">My Voice Part:</label>
                         <select id="voice-part" aria-label="Select your voice part" title="Select your voice part to adjust the balance - your part will be highlighted">
-                            <option value="soprano">Soprano</option>
-                            <option value="alto">Alto</option>
-                            <option value="tenor">Tenor</option>
-                            <option value="bass">Bass</option>
+                            <option value="soprano">Soprano (Piccolo)</option>
+                            <option value="alto">Alto (Clarinet)</option>
+                            <option value="tenor">Tenor (French Horn)</option>
+                            <option value="bass">Bass (Bassoon)</option>
                         </select>
                     </div>
 
@@ -121,22 +123,25 @@
                     <!-- Transport Controls Toolbar -->
                     <div class="transport-toolbar">
                         <button id="stop-btn" class="btn-transport" aria-label="Stop" title="Stop playback and return to beginning">
-                            <span class="icon">⏹</span>
+                            <i class="fa-solid fa-stop"></i>
                         </button>
                         <button id="play-btn" class="btn-transport btn-transport-primary" aria-label="Play" title="Start playback">
-                            <span class="icon">▶</span>
+                            <i class="fa-solid fa-play"></i>
                         </button>
                         <button id="pause-btn" class="btn-transport" aria-label="Pause" style="display: none;" title="Pause playback">
-                            <span class="icon">⏸</span>
+                            <i class="fa-solid fa-pause"></i>
                         </button>
                         <button id="backward-btn" class="btn-transport" aria-label="Go back 10 seconds" title="Skip backward 10 seconds">
-                            <span class="icon">⏪</span>
+                            <i class="fa-solid fa-backward"></i>
                         </button>
                         <button id="forward-btn" class="btn-transport" aria-label="Go forward 10 seconds" title="Skip forward 10 seconds">
-                            <span class="icon">⏩</span>
+                            <i class="fa-solid fa-forward"></i>
+                        </button>
+                        <button id="prev-movement-btn" class="btn-transport" aria-label="Skip to previous movement" title="Single click: Go to start | Double click: Previous movement">
+                            <i class="fa-solid fa-backward-step"></i>
                         </button>
                         <button id="next-movement-btn" class="btn-transport" aria-label="Skip to next movement" title="Skip to start of next movement">
-                            <span class="icon">⏭</span>
+                            <i class="fa-solid fa-forward-step"></i>
                         </button>
                     </div>
 
@@ -149,16 +154,19 @@
                             <span>0:00</span>
                             <span id="progress-duration">0:00</span>
                         </div>
-                        <input
-                            type="range"
-                            id="progress-bar"
-                            min="0"
-                            max="100"
-                            value="0"
-                            class="progress-bar"
-                            aria-label="Playback progress"
-                            title="Drag to jump to any point in the song"
-                        >
+                        <div class="slider-container">
+                            <input
+                                type="range"
+                                id="progress-bar"
+                                min="0"
+                                max="100"
+                                value="0"
+                                class="styled-slider"
+                                aria-label="Playback progress"
+                                title="Drag to jump to any point in the song"
+                            >
+                            <div class="slider-track"></div>
+                        </div>
                     </div>
 
                     <!-- Loop Point Controls -->

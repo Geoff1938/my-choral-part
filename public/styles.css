@@ -433,10 +433,10 @@ section:last-child {
     padding: 10px 16px;
     border: 2px solid var(--border);
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.3rem;
     font-weight: 600;
     background: white;
-    color: var(--text-primary);
+    color: var(--primary-color);
     cursor: pointer;
     text-align: center;
     transition: border-color 0.3s;
@@ -516,15 +516,19 @@ section:last-child {
     border-color: #229954;
 }
 
-.btn-transport .icon {
+.btn-transport i {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1rem;
 }
 
 /* Progress Bar */
 .progress-container {
     margin-bottom: 12px;
+    padding: 10px;
+    background: var(--background);
+    border-radius: 6px;
 }
 
 .progress-header {
@@ -532,7 +536,7 @@ section:last-child {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .progress-time-labels {
@@ -543,38 +547,8 @@ section:last-child {
     margin-bottom: 4px;
 }
 
-.progress-bar {
-    width: 100%;
-    height: 10px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: var(--border);
-    border-radius: 5px;
-    outline: none;
-    cursor: pointer;
-    margin: 0;
-    padding: 0;
-}
-
-.progress-bar::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--primary-color);
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.progress-bar::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: var(--primary-color);
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+.progress-container .slider-container {
+    margin-top: 0;
 }
 
 /* Loop Controls */
@@ -589,7 +563,7 @@ section:last-child {
     display: block;
     font-weight: 600;
     font-size: 0.85rem;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 #loop-range-display {
@@ -600,7 +574,7 @@ section:last-child {
 .loop-slider-container {
     position: relative;
     height: 40px;
-    margin-top: 8px;
+    margin-top: 0;
     padding: 0;
 }
 
@@ -686,7 +660,7 @@ section:last-child {
     display: block;
     font-weight: 600;
     font-size: 0.85rem;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 #tempo-value {
@@ -705,7 +679,7 @@ section:last-child {
     display: block;
     font-weight: 600;
     font-size: 0.85rem;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 #balance-value {
@@ -717,14 +691,14 @@ section:last-child {
     justify-content: space-between;
     font-size: 0.75rem;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
-/* Common Slider Container (for tempo and balance) */
+/* Common Slider Container (for tempo, balance, and progress) */
 .slider-container {
     position: relative;
     height: 40px;
-    margin-top: 8px;
+    margin-top: 0;
 }
 
 .slider-track {

@@ -37,9 +37,30 @@ class MIDIPlayer {
         this.initializeElements();
         this.loadPreferences();
         this.attachEventListeners();
+        this.initializeAudioContext(); // Initialize audio context on first user interaction
         this.loadDefaultWork(); // Load JS Bach - Mass in B Minor by default
         this.loadRecentWorks();
         this.checkURLRoute();
+    }
+
+    async initializeAudioContext() {
+        // Start audio context on first user interaction to comply with browser autoplay policies
+        const startAudio = async () => {
+            try {
+                await Tone.start();
+            } catch (error) {
+                console.error('Error starting audio context:', error);
+            }
+            // Remove listeners after first interaction
+            document.removeEventListener('click', startAudio);
+            document.removeEventListener('keydown', startAudio);
+            document.removeEventListener('touchstart', startAudio);
+        };
+
+        // Add listeners for first user interaction
+        document.addEventListener('click', startAudio);
+        document.addEventListener('keydown', startAudio);
+        document.addEventListener('touchstart', startAudio);
     }
 
     initializeElements() {
@@ -87,6 +108,7 @@ class MIDIPlayer {
         this.stopBtn = document.getElementById('stop-btn');
         this.backwardBtn = document.getElementById('backward-btn');
         this.forwardBtn = document.getElementById('forward-btn');
+        this.prevMovementBtn = document.getElementById('prev-movement-btn');
         this.nextMovementBtn = document.getElementById('next-movement-btn');
 
         // Progress bar
@@ -231,6 +253,25 @@ class MIDIPlayer {
 
         this.backwardBtn.addEventListener('click', () => this.seek(-10));
         this.forwardBtn.addEventListener('click', () => this.seek(10));
+
+        // Previous movement button - single click: go to start, double click: previous movement
+        let prevMovementClickTimer = null;
+        this.prevMovementBtn.addEventListener('click', () => {
+            if (prevMovementClickTimer === null) {
+                // First click - wait to see if there's a second click
+                prevMovementClickTimer = setTimeout(() => {
+                    // Single click - go to start of current movement
+                    this.seekTo(0);
+                    prevMovementClickTimer = null;
+                }, 300);
+            } else {
+                // Double click - go to previous movement
+                clearTimeout(prevMovementClickTimer);
+                prevMovementClickTimer = null;
+                this.skipToPreviousMovement();
+            }
+        });
+
         this.nextMovementBtn.addEventListener('click', () => this.skipToNextMovement());
 
         this.progressBar.addEventListener('input', (e) => {
@@ -997,10 +1038,22 @@ class MIDIPlayer {
     }
 
 
-    play() {
+    async play() {
         if (!this.midi) {
-            this.showStatus('Please load a MIDI file first', 'error');
-            return;
+            // If no MIDI is loaded but a movement is selected, load it automatically
+            if (this.movementSelect.value) {
+                const movementData = JSON.parse(this.movementSelect.value);
+                const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
+                await this.loadMIDIFromURL(absoluteUrl, movementData.name);
+                // Now try playing again
+                if (!this.midi) {
+                    this.showStatus('Failed to load MIDI file', 'error');
+                    return;
+                }
+            } else {
+                this.showStatus('Please select a movement first', 'error');
+                return;
+            }
         }
 
         if (this.isPlaying) return;
@@ -1258,6 +1311,22 @@ class MIDIPlayer {
         if (this.progressInterval) {
             clearInterval(this.progressInterval);
             this.progressInterval = null;
+        }
+    }
+
+    skipToPreviousMovement() {
+        // Get current selected index
+        const currentIndex = this.movementSelect.selectedIndex;
+
+        // Check if there's a previous movement (accounting for placeholder at index 0)
+        if (currentIndex > 1) {
+            // Select previous movement
+            this.movementSelect.selectedIndex = currentIndex - 1;
+
+            // Load the previous movement
+            const movementData = JSON.parse(this.movementSelect.value);
+            const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
+            this.loadMIDIFromURL(absoluteUrl, movementData.name);
         }
     }
 
