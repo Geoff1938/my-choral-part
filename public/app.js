@@ -145,14 +145,15 @@ class MIDIPlayer {
     }
 
     loadDefaultWork() {
-        // Load default work: Handel - Messiah
+        // Load default work: Allegri - Miserere mei Deus
         // This provides immediate usability when the app loads
-        this.selectedComposer = 'Handel';
-        this.selectedWork = 'Messiah';
+        // Using a work from the initial index (A composers) to avoid rate limiting
+        this.selectedComposer = 'Allegri';
+        this.selectedWork = 'Miserere mei Deus';
 
-        // Hardcoded movement for Messiah - Hallelujah (using relative URL)
+        // Hardcoded movement for Miserere (using relative URL)
         const defaultMovements = [
-            { name: 'Hallelujah', midiUrl: '/Handel/Messiah/42-allel.mid' }
+            { name: 'Miserere mei Deus', midiUrl: '/Allegri/Miserere/Miserere.mid' }
         ];
 
         // Populate movement dropdown
@@ -161,7 +162,7 @@ class MIDIPlayer {
                 `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
             ).join('');
 
-        // Auto-select Hallelujah in the dropdown
+        // Auto-select Miserere in the dropdown
         this.movementSelect.selectedIndex = 1;
 
         this.updateWorkDisplay();

@@ -187,18 +187,12 @@ app.listen(PORT, async () => {
   const existingIndex = await scraper.loadIndex();
 
   if (existingIndex.length === 0) {
-    console.log('No existing index found. Starting background index build (full index, all composers)...');
+    console.log('No existing index found. Using initial index only (A composers).');
   } else {
     console.log(`Loaded existing index with ${existingIndex.length} composers`);
   }
 
-  // Always start background indexing to build/update the full index
-  console.log('Starting background index build (this will take some time)...');
-  scraper.buildIndexInBackground(false); // false = build full index, not just "A" composers
-
-  // Schedule index rebuild every 24 hours
-  setInterval(() => {
-    console.log('Starting scheduled index rebuild...');
-    scraper.buildIndexInBackground(false); // Build full index
-  }, 24 * 60 * 60 * 1000); // 24 hours
+  // Background indexing disabled to avoid rate limiting from source server
+  // The app will use the initial-index.json which contains A composers only
+  console.log('Background indexing is disabled. Using static initial index.');
 });
