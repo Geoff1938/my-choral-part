@@ -2,11 +2,15 @@ const express = require('express');
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const compression = require('compression');
 const ChoralMusicScraper = require('./scraper');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const scraper = new ChoralMusicScraper();
+
+// Enable gzip compression for all responses
+app.use(compression());
 
 // Middleware to parse JSON
 app.use(express.json());
