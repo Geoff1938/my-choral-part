@@ -556,19 +556,35 @@ class MIDIPlayer {
         });
 
         this.composerResults.querySelectorAll('.movement-item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', async () => {
                 const composerName = JSON.parse(item.dataset.composer);
                 const workName = JSON.parse(item.dataset.work);
                 const movementName = JSON.parse(item.dataset.movement);
                 const midiUrl = JSON.parse(item.dataset.midiUrl);
 
                 // Select the composer and work first, then load the movement
-                this.selectComposer(composerName).then(() => {
-                    this.selectWork(workName);
-                    // Convert relative URL to absolute and load
-                    const absoluteUrl = this.toAbsoluteUrl(midiUrl);
-                    this.loadMIDIFromURL(absoluteUrl, movementName);
-                });
+                await this.selectComposer(composerName);
+                await this.selectWork(workName);
+
+                // Find and select the matching movement in the dropdown
+                for (let i = 0; i < this.movementSelect.options.length; i++) {
+                    const option = this.movementSelect.options[i];
+                    if (option.value) {
+                        try {
+                            const optionData = JSON.parse(option.value);
+                            if (optionData.midiUrl === midiUrl) {
+                                this.movementSelect.selectedIndex = i;
+                                break;
+                            }
+                        } catch (e) {
+                            // Skip invalid options
+                        }
+                    }
+                }
+
+                // Convert relative URL to absolute and load
+                const absoluteUrl = this.toAbsoluteUrl(midiUrl);
+                this.loadMIDIFromURL(absoluteUrl, movementName);
             });
         });
     }

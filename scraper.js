@@ -316,7 +316,12 @@ class ChoralMusicScraper {
       // Try loading the full index first
       if (await fs.pathExists(this.dataFile)) {
         console.log('Loading full MIDI index...');
-        return await fs.readJSON(this.dataFile);
+        const fullIndex = await fs.readJSON(this.dataFile);
+        // If full index has data, return it
+        if (fullIndex && fullIndex.length > 0) {
+          return fullIndex;
+        }
+        console.log('Full index is empty, falling back to initial index...');
       }
 
       // Fallback to initial index (A composers only)
