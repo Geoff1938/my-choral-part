@@ -107,6 +107,20 @@ class ChoralMusicScraper {
 
   async scrapeWorkSections(workUrl, visitedUrls = new Set()) {
     try {
+      // Convert relative URL to absolute URL if needed
+      let fullUrl;
+      if (workUrl.startsWith('http')) {
+        fullUrl = workUrl;
+      } else {
+        // For relative URLs, properly encode the path components
+        const relativePath = workUrl.startsWith('/') ? workUrl : '/' + workUrl;
+        // Split path, encode each component, then rejoin
+        const pathParts = relativePath.split('/');
+        const encodedParts = pathParts.map(part => encodeURIComponent(part));
+        const encodedPath = encodedParts.join('/');
+        fullUrl = `${this.baseUrl}${encodedPath}`;
+      }
+
       console.log(`Scraping work: ${workUrl}`);
 
       // Prevent infinite loops
@@ -116,7 +130,7 @@ class ChoralMusicScraper {
       }
       visitedUrls.add(workUrl);
 
-      const response = await axios.get(workUrl);
+      const response = await axios.get(fullUrl);
       const $ = cheerio.load(response.data);
 
       const sections = [];
