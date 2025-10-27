@@ -723,6 +723,31 @@ class MIDIPlayer {
         }
     }
 
+    async fetchWithRetry(url, maxRetries = 3) {
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                const response = await fetch(url);
+
+                // If we get a 429, wait and retry (with exponential backoff)
+                if (response.status === 429 && attempt < maxRetries - 1) {
+                    const waitTime = Math.pow(2, attempt) * 2000; // 2s, 4s, 8s
+                    this.showStatus(`Rate limited. Retrying in ${waitTime / 1000} seconds...`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                    continue;
+                }
+
+                return response;
+            } catch (error) {
+                if (attempt === maxRetries - 1) {
+                    throw error;
+                }
+                // Wait before retrying on network errors
+                const waitTime = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+            }
+        }
+    }
+
     async loadMIDIFromURL(url, title = null) {
         if (!url) {
             this.showStatus('Invalid MIDI URL', 'error');
@@ -736,11 +761,21 @@ class MIDIPlayer {
             this.stop();
             this.cleanup();
 
-            // Fetch and parse MIDI file via proxy to avoid CORS issues
+            // Fetch and parse MIDI file via proxy to avoid CORS issues (with retry logic)
             const proxyUrl = `/proxy?url=${encodeURIComponent(url)}`;
-            const response = await fetch(proxyUrl);
+            const response = await this.fetchWithRetry(proxyUrl);
             if (!response.ok) {
-                throw new Error(`Failed to fetch MIDI file: ${response.statusText}`);
+                // Try to get error message from response
+                let errorMsg = response.statusText;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.error) {
+                        errorMsg = errorData.error;
+                    }
+                } catch (e) {
+                    // Ignore JSON parse errors
+                }
+                throw new Error(errorMsg);
             }
 
             const arrayBuffer = await response.arrayBuffer();

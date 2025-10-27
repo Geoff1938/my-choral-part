@@ -234,7 +234,7 @@ class ChoralMusicScraper {
       // Scrape additional parts
       for (const partLink of additionalPartLinks) {
         console.log(`Following link to: ${partLink.text}`);
-        await new Promise(resolve => setTimeout(resolve, 500)); // Be respectful
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Be respectful - 2 second delay to avoid rate limiting
         const additionalSections = await this.scrapeWorkSections(partLink.url, visitedUrls);
         sections.push(...additionalSections);
       }
@@ -275,7 +275,7 @@ class ChoralMusicScraper {
       for (const work of composer.works) {
         console.log(`  Processing work: ${work.name}`);
         const sections = await this.scrapeWorkSections(work.url);
-        
+
         if (sections.length > 0) {
           composerData.works.push({
             name: work.name,
@@ -283,9 +283,9 @@ class ChoralMusicScraper {
             sections: sections
           });
         }
-        
-        // Add a small delay to be respectful to the server
-        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Add a delay to be respectful to the server and avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
       }
       
       if (composerData.works.length > 0) {

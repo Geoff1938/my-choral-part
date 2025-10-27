@@ -134,9 +134,14 @@ app.get('/proxy', async (req, res) => {
   const request = protocol.get(midiUrl, { timeout: 10000 }, (midiRes) => {
     if (midiRes.statusCode !== 200) {
       console.error(`MIDI fetch failed: ${midiRes.statusCode} ${midiRes.statusMessage} for ${midiUrl}`);
-      return res.status(midiRes.statusCode).json({
-        error: `Failed to fetch MIDI file: ${midiRes.statusCode} ${midiRes.statusMessage}`
-      });
+      let errorMsg = `Failed to fetch MIDI file: ${midiRes.statusCode} ${midiRes.statusMessage}`;
+
+      // Special handling for rate limiting
+      if (midiRes.statusCode === 429) {
+        errorMsg = 'The source server is temporarily rate limiting requests. Please try again in a few moments.';
+      }
+
+      return res.status(midiRes.statusCode).json({ error: errorMsg });
     }
 
     // Set appropriate headers
