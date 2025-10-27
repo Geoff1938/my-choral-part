@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn Choral Music</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,22 +16,40 @@
 
         <!-- Tab Navigation -->
         <nav class="tab-nav">
-            <button class="tab-button active" data-tab="find-music" title="Search for composers and their works">Find Music</button>
-            <button class="tab-button" data-tab="play-music" title="Play and practice with selected music">Play Music</button>
+            <button class="tab-button" data-tab="find-music" title="Search for composers and their works">Find Music</button>
+            <button class="tab-button active" data-tab="play-music" title="Play and practice with selected music">Play Music</button>
         </nav>
 
         <main>
             <!-- Find Music Tab -->
-            <div class="tab-content active" id="find-music-tab">
-                <!-- Composer Search -->
-                <div class="input-group">
-                    <label for="composer-search">Search Composer:</label>
+            <div class="tab-content" id="find-music-tab">
+                <!-- Search Section -->
+                <div class="search-section">
+                    <label class="search-label">🔍 Search:</label>
+
+                    <!-- Search Filters -->
+                    <div class="search-filters">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="search-composers" checked>
+                            <span>Composers</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="search-works">
+                            <span>Works</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="search-movements">
+                            <span>Movements/songs</span>
+                        </label>
+                    </div>
+
+                    <!-- Search Input -->
                     <input
                         type="text"
                         id="composer-search"
-                        placeholder="Type to search composers..."
-                        aria-label="Search for composer"
-                        title="Start typing a composer's name to search (e.g., 'Allegri', 'Bach', 'Mozart')"
+                        placeholder="Type to search..."
+                        aria-label="Search for music"
+                        title="Enter search terms (searches word beginnings only)"
                     >
                 </div>
                 <div id="composer-results" class="search-results"></div>
@@ -40,25 +59,10 @@
                     <label>Select Work:</label>
                     <div id="works-list" class="works-list"></div>
                 </div>
-
-                <div id="loading-status" class="status-message"></div>
             </div>
 
             <!-- Play Music Tab -->
-            <div class="tab-content" id="play-music-tab">
-                <!-- Work Info and Shareable URL -->
-                <div class="work-info-section">
-                    <div class="work-title">
-                        <h2 id="current-work-display">No work selected</h2>
-                    </div>
-                    <div class="shareable-url-section" id="shareable-url-section" style="display: none;">
-                        <div class="url-copy-container">
-                            <input type="text" id="shareable-url" readonly aria-label="Shareable URL" title="Share this URL with others to let them practice the same piece">
-                            <button id="copy-url-btn" class="btn btn-small btn-icon" title="Copy URL to clipboard">📋</button>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="tab-content active" id="play-music-tab">
                 <!-- Selection Controls -->
                 <div class="selection-controls">
 
@@ -90,34 +94,49 @@
                     </div>
                 </div>
 
+                <!-- Work Info and Shareable URL -->
+                <div class="work-info-section">
+                    <div class="work-title">
+                        <h2 id="current-work-display">No work selected</h2>
+                    </div>
+                    <div class="shareable-url-section" id="shareable-url-section" style="display: none;">
+                        <div class="url-copy-container">
+                            <input type="text" id="shareable-url" readonly aria-label="Shareable URL" title="Share this URL with others to let them practice the same piece">
+                            <button id="copy-url-btn" class="btn btn-small btn-icon" title="Copy URL to clipboard">📋</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Messages -->
+                <div id="loading-status" class="status-message"></div>
+
                 <!-- Playback Controls Section -->
                 <section class="controls-section" id="controls-section">
                     <div class="playback-info">
-                        <select id="section-select" class="section-select-main" title="Select which section/movement of the work to practice">
-                            <option value="">Choose a section...</option>
+                        <select id="movement-select" class="movement-select-main" title="Select which movement of the work to practice">
+                            <option value="">Choose a movement...</option>
                         </select>
                     </div>
 
-                    <!-- Main Playback Controls -->
-                    <div class="main-controls">
-                        <button id="play-btn" class="btn btn-control" aria-label="Play" title="Start playback">
-                            <span class="icon">▶️</span> Play
+                    <!-- Transport Controls Toolbar -->
+                    <div class="transport-toolbar">
+                        <button id="stop-btn" class="btn-transport" aria-label="Stop" title="Stop playback and return to beginning">
+                            <span class="icon">⏹</span>
                         </button>
-                        <button id="pause-btn" class="btn btn-control" aria-label="Pause" style="display: none;" title="Pause playback">
-                            <span class="icon">⏸️</span> Pause
+                        <button id="play-btn" class="btn-transport btn-transport-primary" aria-label="Play" title="Start playback">
+                            <span class="icon">▶</span>
                         </button>
-                        <button id="stop-btn" class="btn btn-control" aria-label="Stop" title="Stop playback and return to beginning">
-                            <span class="icon">⏹️</span> Stop
+                        <button id="pause-btn" class="btn-transport" aria-label="Pause" style="display: none;" title="Pause playback">
+                            <span class="icon">⏸</span>
                         </button>
-                    </div>
-
-                    <!-- Seek Controls -->
-                    <div class="seek-controls">
-                        <button id="backward-btn" class="btn btn-seek" aria-label="Go back 10 seconds" title="Skip backward 10 seconds">
-                            <span class="icon">⏪</span> -10s
+                        <button id="backward-btn" class="btn-transport" aria-label="Go back 10 seconds" title="Skip backward 10 seconds">
+                            <span class="icon">⏪</span>
                         </button>
-                        <button id="forward-btn" class="btn btn-seek" aria-label="Go forward 10 seconds" title="Skip forward 10 seconds">
-                            <span class="icon">⏩</span> +10s
+                        <button id="forward-btn" class="btn-transport" aria-label="Go forward 10 seconds" title="Skip forward 10 seconds">
+                            <span class="icon">⏩</span>
+                        </button>
+                        <button id="next-movement-btn" class="btn-transport" aria-label="Skip to next movement" title="Skip to start of next movement">
+                            <span class="icon">⏭</span>
                         </button>
                     </div>
 
@@ -144,7 +163,7 @@
 
                     <!-- Loop Point Controls -->
                     <div class="loop-controls">
-                        <label title="Set a section of the song to loop repeatedly for focused practice">Loop Section: <span id="loop-range-display">0:00 - 0:00</span></label>
+                        <label title="Set a section of the song to loop repeatedly for focused practice">Loop within movement: <span id="loop-range-display">0:00 - 0:00</span></label>
                         <div class="loop-slider-container">
                             <input type="range" id="loop-start-slider" min="0" max="100" value="0" class="loop-slider" aria-label="Loop start position" title="Set where the loop begins - playback will restart from this point">
                             <input type="range" id="loop-end-slider" min="0" max="100" value="100" class="loop-slider" aria-label="Loop end position" title="Set where the loop ends - playback will jump back to loop start at this point">
@@ -156,61 +175,32 @@
 
                     <!-- Tempo Control -->
                     <div class="tempo-control">
-                        <label for="tempo-slider" title="Adjust playback speed - slower for learning, faster as you improve">Tempo: <span id="tempo-value">100</span>%</label>
-                        <div class="tempo-buttons">
-                            <button id="tempo-down" class="btn btn-small" aria-label="Decrease tempo" title="Slow down the music by 5% to make it easier to learn">
-                                <span class="icon">🐢</span> Slower
-                            </button>
-                            <div class="tempo-slider-container">
-                                <div class="tempo-labels">
-                                    <span class="tempo-label-left">60%</span>
-                                    <span class="tempo-label-center">100%</span>
-                                    <span class="tempo-label-right">120%</span>
-                                </div>
-                                <input
-                                    type="range"
-                                    id="tempo-slider"
-                                    min="60"
-                                    max="120"
-                                    value="100"
-                                    step="5"
-                                    aria-label="Tempo slider"
-                                    title="Adjust playback speed (60%=very slow for learning, 100%=original tempo, 120%=faster)"
-                                >
-                            </div>
-                            <button id="tempo-up" class="btn btn-small" aria-label="Increase tempo" title="Speed up the music by 5% for a challenge">
-                                <span class="icon">🐇</span> Faster
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Master Volume Control -->
-                    <div class="master-volume-control">
-                        <div class="volume-control-item">
-                            <label for="master-volume" title="Control the overall volume for all parts together">Master Volume: <span id="master-volume-value">100</span>%</label>
+                        <label title="Adjust playback speed - slower for learning, faster as you improve">Tempo: <span id="tempo-value">100</span>%</label>
+                        <div class="slider-container">
                             <input
                                 type="range"
-                                id="master-volume"
-                                min="0"
-                                max="100"
+                                id="tempo-slider"
+                                min="60"
+                                max="120"
                                 value="100"
                                 step="5"
-                                class="volume-slider"
-                                aria-label="Master volume"
-                                title="Control overall volume - affects all parts equally (0%=silent, 100%=full volume)"
+                                class="styled-slider"
+                                aria-label="Tempo slider"
+                                title="Adjust playback speed (60%=very slow for learning, 100%=original tempo, 120%=faster)"
                             >
+                            <div class="slider-track"></div>
                         </div>
                     </div>
 
                     <!-- Balance Control -->
                     <div class="balance-control">
-                        <div class="volume-control-item">
-                            <label for="balance-slider" title="Adjust the balance between your part and the other parts">My Part Balance: <span id="balance-value">0</span></label>
-                            <div class="balance-labels">
-                                <span>Others Louder</span>
-                                <span>Equal</span>
-                                <span>My Part Louder</span>
-                            </div>
+                        <label for="balance-slider" title="Adjust the balance between your part and the other parts">My Part Balance: <span id="balance-value">0</span></label>
+                        <div class="balance-labels">
+                            <span>Others Louder</span>
+                            <span>Equal</span>
+                            <span>My Part Louder</span>
+                        </div>
+                        <div class="slider-container">
                             <input
                                 type="range"
                                 id="balance-slider"
@@ -218,10 +208,11 @@
                                 max="100"
                                 value="0"
                                 step="5"
-                                class="volume-slider"
+                                class="styled-slider"
                                 aria-label="Balance between your part and others"
                                 title="Balance your part vs. others - left=hear others better, center=equal, right=hear your part better"
                             >
+                            <div class="slider-track"></div>
                         </div>
                     </div>
                 </section>

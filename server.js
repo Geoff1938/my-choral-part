@@ -39,6 +39,27 @@ app.get('/api/search/composers', async (req, res) => {
   }
 });
 
+// Advanced search across composers, works, and movements
+app.get('/api/search', async (req, res) => {
+  try {
+    const searchTerm = req.query.q || '';
+    const searchComposers = req.query.composers === 'true';
+    const searchWorks = req.query.works === 'true';
+    const searchMovements = req.query.movements === 'true';
+
+    const results = await scraper.advancedSearch(searchTerm, {
+      composers: searchComposers,
+      works: searchWorks,
+      movements: searchMovements
+    });
+
+    res.json(results);
+  } catch (error) {
+    console.error('Error performing advanced search:', error);
+    res.status(500).json({ error: 'Failed to perform search' });
+  }
+});
+
 // Get works for a composer
 app.get('/api/composer/:composerName/works', async (req, res) => {
   try {

@@ -1,8 +1,10 @@
 // MIDI Player Application
 class MIDIPlayer {
     constructor() {
+        // Base URL for all MIDI files (stored separately to reduce JSON size)
+        this.baseUrl = 'https://www.learnchoralmusic.co.uk';
+
         this.midi = null;
-        this.synths = [];
         this.instruments = [];
         this.parts = [];
         this.isPlaying = false;
@@ -19,6 +21,11 @@ class MIDIPlayer {
         this.loopStart = 0;
         this.loopEnd = 0;
 
+        // Instrument cache for reusing loaded Soundfont instruments
+        // This significantly speeds up loading when switching between movements
+        this.instrumentCache = new Map(); // Map<instrumentName, instrument>
+        this.maxCacheSize = 30; // Keep up to 30 instruments cached
+
         // Mapping of voice parts to MIDI instrument names
         this.voicePartInstruments = {
             soprano: 'piccolo',
@@ -30,6 +37,7 @@ class MIDIPlayer {
         this.initializeElements();
         this.loadPreferences();
         this.attachEventListeners();
+        this.loadDefaultWork(); // Load JS Bach - Mass in B Minor by default
         this.loadRecentWorks();
         this.checkURLRoute();
     }
@@ -44,8 +52,13 @@ class MIDIPlayer {
         this.composerResults = document.getElementById('composer-results');
         this.worksContainer = document.getElementById('works-container');
         this.worksList = document.getElementById('works-list');
-        this.sectionSelect = document.getElementById('section-select');
+        this.movementSelect = document.getElementById('movement-select');
         this.loadingStatus = document.getElementById('loading-status');
+
+        // Search filter checkboxes
+        this.searchComposersCheckbox = document.getElementById('search-composers');
+        this.searchWorksCheckbox = document.getElementById('search-works');
+        this.searchMovementsCheckbox = document.getElementById('search-movements');
 
         // Play tab elements
         this.currentWorkDisplay = document.getElementById('current-work-display');
@@ -74,6 +87,7 @@ class MIDIPlayer {
         this.stopBtn = document.getElementById('stop-btn');
         this.backwardBtn = document.getElementById('backward-btn');
         this.forwardBtn = document.getElementById('forward-btn');
+        this.nextMovementBtn = document.getElementById('next-movement-btn');
 
         // Progress bar
         this.progressBar = document.getElementById('progress-bar');
@@ -89,12 +103,8 @@ class MIDIPlayer {
         // Tempo controls
         this.tempoSlider = document.getElementById('tempo-slider');
         this.tempoValue = document.getElementById('tempo-value');
-        this.tempoUpBtn = document.getElementById('tempo-up');
-        this.tempoDownBtn = document.getElementById('tempo-down');
 
         // Volume controls
-        this.masterVolumeSlider = document.getElementById('master-volume');
-        this.masterVolumeValue = document.getElementById('master-volume-value');
         this.balanceSlider = document.getElementById('balance-slider');
         this.balanceValue = document.getElementById('balance-value');
     }
@@ -110,6 +120,36 @@ class MIDIPlayer {
 
     savePreferences() {
         localStorage.setItem('voicePart', this.voicePart);
+    }
+
+    loadDefaultWork() {
+        // Load default work: Handel - Messiah
+        // This provides immediate usability when the app loads
+        this.selectedComposer = 'Handel';
+        this.selectedWork = 'Messiah';
+
+        // Hardcoded movement for Messiah - Hallelujah (using relative URL)
+        const defaultMovements = [
+            { name: 'Hallelujah', midiUrl: '/Handel/Messiah/42-allel.mid' }
+        ];
+
+        // Populate movement dropdown
+        this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
+            defaultMovements.map(movement =>
+                `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
+            ).join('');
+
+        // Auto-select and load Hallelujah since it's the only movement
+        this.movementSelect.selectedIndex = 1;
+        const movementData = defaultMovements[0];
+        const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
+
+        // Load after a short delay to ensure everything is initialized
+        setTimeout(() => {
+            this.loadMIDIFromURL(absoluteUrl, movementData.name);
+        }, 100);
+
+        this.updateWorkDisplay();
     }
 
     attachEventListeners() {
@@ -138,7 +178,7 @@ class MIDIPlayer {
             }
         });
 
-        // Composer search with debounce
+        // Search input with debounce
         this.composerSearch.addEventListener('input', (e) => {
             // Clear and hide works dropdown when typing
             this.worksList.innerHTML = '';
@@ -146,21 +186,31 @@ class MIDIPlayer {
 
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => {
-                this.searchComposers(e.target.value);
+                this.performSearch(e.target.value);
             }, 300);
         });
 
-        // Section selection
-        this.sectionSelect.addEventListener('change', (e) => {
-            console.log('Section dropdown changed, value:', e.target.value);
+        // Search filter checkboxes - trigger search when changed
+        [this.searchComposersCheckbox, this.searchWorksCheckbox, this.searchMovementsCheckbox].forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const searchTerm = this.composerSearch.value;
+                if (searchTerm) {
+                    this.performSearch(searchTerm);
+                }
+            });
+        });
+
+        // Movement selection
+        this.movementSelect.addEventListener('change', (e) => {
             if (e.target.value) {
                 try {
-                    const sectionData = JSON.parse(e.target.value);
-                    console.log('Parsed section data:', sectionData);
-                    this.loadMIDIFromURL(sectionData.midiUrl, sectionData.name);
+                    const movementData = JSON.parse(e.target.value);
+                    // Convert relative URL to absolute
+                    const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
+                    this.loadMIDIFromURL(absoluteUrl, movementData.name);
                 } catch (error) {
-                    console.error('Error parsing section data:', error);
-                    this.showStatus('Error loading section', 'error');
+                    console.error('Error parsing movement data:', error);
+                    this.showStatus('Error loading movement', 'error');
                 }
             }
         });
@@ -185,6 +235,7 @@ class MIDIPlayer {
 
         this.backwardBtn.addEventListener('click', () => this.seek(-10));
         this.forwardBtn.addEventListener('click', () => this.seek(10));
+        this.nextMovementBtn.addEventListener('click', () => this.skipToNextMovement());
 
         this.progressBar.addEventListener('input', (e) => {
             const newTime = (e.target.value / 100) * this.originalDuration;
@@ -204,6 +255,11 @@ class MIDIPlayer {
 
             this.loopStart = (startPercent / 100) * this.originalDuration;
             this.updateLoopDisplay();
+
+            // If left slider moved ahead of current time, jump to it
+            if (this.loopStart > this.currentTime) {
+                this.seekTo(this.loopStart);
+            }
         });
 
         this.loopEndSlider.addEventListener('input', (e) => {
@@ -218,30 +274,19 @@ class MIDIPlayer {
 
             this.loopEnd = (endPercent / 100) * this.originalDuration;
             this.updateLoopDisplay();
+
+            // If right slider moved before current time, jump back to loop start
+            if (this.loopEnd < this.currentTime) {
+                this.seekTo(this.loopStart);
+            }
         });
 
         this.tempoSlider.addEventListener('input', (e) => {
             this.setTempo(parseInt(e.target.value));
         });
 
-        this.tempoUpBtn.addEventListener('click', () => {
-            const newTempo = Math.min(120, parseInt(this.tempoSlider.value) + 5);
-            this.tempoSlider.value = newTempo;
-            this.setTempo(newTempo);
-        });
-
-        this.tempoDownBtn.addEventListener('click', () => {
-            const newTempo = Math.max(60, parseInt(this.tempoSlider.value) - 5);
-            this.tempoSlider.value = newTempo;
-            this.setTempo(newTempo);
-        });
-
-        // Volume controls
-        this.masterVolumeSlider.addEventListener('input', (e) => {
-            this.masterVolume = parseInt(e.target.value) / 100;
-            this.masterVolumeValue.textContent = e.target.value;
-            this.applyBalance();
-        });
+        // Volume controls - master volume fixed at 100%
+        this.masterVolume = 1.0;
 
         this.balanceSlider.addEventListener('input', (e) => {
             this.balance = parseInt(e.target.value);
@@ -376,7 +421,7 @@ class MIDIPlayer {
         }
     }
 
-    async searchComposers(searchTerm) {
+    async performSearch(searchTerm) {
         if (!searchTerm || searchTerm.length < 2) {
             this.composerResults.innerHTML = '';
             this.composerResults.style.display = 'none';
@@ -384,31 +429,111 @@ class MIDIPlayer {
         }
 
         try {
-            const response = await fetch(`/api/search/composers?q=${encodeURIComponent(searchTerm)}`);
-            const composers = await response.json();
+            const searchComposers = this.searchComposersCheckbox.checked;
+            const searchWorks = this.searchWorksCheckbox.checked;
+            const searchMovements = this.searchMovementsCheckbox.checked;
 
-            if (composers.length === 0) {
-                this.composerResults.innerHTML = '<div class="no-results">No composers found</div>';
-                this.composerResults.style.display = 'block';
-                return;
-            }
+            const params = new URLSearchParams({
+                q: searchTerm,
+                composers: searchComposers,
+                works: searchWorks,
+                movements: searchMovements
+            });
 
-            this.composerResults.innerHTML = composers.map(composer =>
-                `<div class="composer-item" data-composer='${JSON.stringify(composer.name)}'>${composer.name}</div>`
-            ).join('');
+            const response = await fetch(`/api/search?${params}`);
+            const results = await response.json();
+
+            this.displaySearchResults(results);
+        } catch (error) {
+            console.error('Error performing search:', error);
+            this.showStatus('Error performing search', 'error');
+        }
+    }
+
+    displaySearchResults(results) {
+        const hasResults = results.composers.length > 0 ||
+                          results.works.length > 0 ||
+                          results.movements.length > 0;
+
+        if (!hasResults) {
+            this.composerResults.innerHTML = '<div class="no-results">No results found</div>';
             this.composerResults.style.display = 'block';
+            return;
+        }
 
-            // Add click handlers to composer items
-            this.composerResults.querySelectorAll('.composer-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const composerName = JSON.parse(item.dataset.composer);
-                    this.selectComposer(composerName);
+        let html = '';
+
+        // Display composer results
+        if (results.composers.length > 0) {
+            html += '<div class="result-category"><strong>Composers:</strong></div>';
+            results.composers.forEach(composer => {
+                html += `<div class="composer-item" data-type="composer" data-composer='${JSON.stringify(composer.name)}'>${composer.name}</div>`;
+            });
+        }
+
+        // Display work results
+        if (results.works.length > 0) {
+            html += '<div class="result-category"><strong>Works:</strong></div>';
+            results.works.forEach(work => {
+                html += `<div class="work-item result-item" data-type="work" data-composer='${JSON.stringify(work.composer)}' data-work='${JSON.stringify(work.work)}'>
+                    <div class="result-main">${work.work}</div>
+                    <div class="result-sub">${work.composer}</div>
+                </div>`;
+            });
+        }
+
+        // Display movement results
+        if (results.movements.length > 0) {
+            html += '<div class="result-category"><strong>Movements/songs:</strong></div>';
+            results.movements.forEach(movement => {
+                html += `<div class="movement-item result-item" data-type="movement"
+                    data-composer='${JSON.stringify(movement.composer)}'
+                    data-work='${JSON.stringify(movement.work)}'
+                    data-movement='${JSON.stringify(movement.movement)}'
+                    data-midi-url='${JSON.stringify(movement.midiUrl)}'>
+                    <div class="result-main">${movement.movement}</div>
+                    <div class="result-sub">${movement.composer} - ${movement.work}</div>
+                </div>`;
+            });
+        }
+
+        this.composerResults.innerHTML = html;
+        this.composerResults.style.display = 'block';
+
+        // Add click handlers
+        this.composerResults.querySelectorAll('.composer-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const composerName = JSON.parse(item.dataset.composer);
+                this.selectComposer(composerName);
+            });
+        });
+
+        this.composerResults.querySelectorAll('.work-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const composerName = JSON.parse(item.dataset.composer);
+                const workName = JSON.parse(item.dataset.work);
+                this.selectComposer(composerName).then(() => {
+                    this.selectWork(workName);
                 });
             });
-        } catch (error) {
-            console.error('Error searching composers:', error);
-            this.showStatus('Error searching composers', 'error');
-        }
+        });
+
+        this.composerResults.querySelectorAll('.movement-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const composerName = JSON.parse(item.dataset.composer);
+                const workName = JSON.parse(item.dataset.work);
+                const movementName = JSON.parse(item.dataset.movement);
+                const midiUrl = JSON.parse(item.dataset.midiUrl);
+
+                // Select the composer and work first, then load the movement
+                this.selectComposer(composerName).then(() => {
+                    this.selectWork(workName);
+                    // Convert relative URL to absolute and load
+                    const absoluteUrl = this.toAbsoluteUrl(midiUrl);
+                    this.loadMIDIFromURL(absoluteUrl, movementName);
+                });
+            });
+        });
     }
 
     async selectComposer(composerName) {
@@ -463,27 +588,35 @@ class MIDIPlayer {
 
         try {
             const response = await fetch(`/api/composer/${encodeURIComponent(this.selectedComposer)}/work/${encodeURIComponent(workName)}/sections`);
-            const sections = await response.json();
+            const movements = await response.json();
 
-            if (sections.length === 0) {
-                this.showStatus('No sections found for this work', 'error');
+            if (movements.length === 0) {
+                this.showStatus('No movements found for this work', 'error');
                 return;
             }
 
-            this.sectionSelect.innerHTML = '<option value="">Choose a section...</option>' +
-                sections.map(section =>
-                    `<option value='${JSON.stringify({ name: section.name, midiUrl: section.midiUrl })}'>${section.name}</option>`
+            this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
+                movements.map(movement =>
+                    `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
                 ).join('');
 
             // Switch to Play tab and update display
             this.switchTab('play-music');
             this.updateWorkDisplay();
 
+            // If only one movement, auto-select and load it
+            if (movements.length === 1) {
+                this.movementSelect.selectedIndex = 1; // Select the first movement (index 1 after the placeholder)
+                const movementData = movements[0];
+                const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
+                this.loadMIDIFromURL(absoluteUrl, movementData.name);
+            }
+
             // Save to recent works
             await this.saveRecentWork(this.selectedComposer, workName);
         } catch (error) {
-            console.error('Error loading sections:', error);
-            this.showStatus('Error loading sections', 'error');
+            console.error('Error loading movements:', error);
+            this.showStatus('Error loading movements', 'error');
         }
     }
 
@@ -538,8 +671,6 @@ class MIDIPlayer {
     }
 
     async loadMIDIFromURL(url, title = null) {
-        console.log(`=== loadMIDIFromURL called with URL: ${url}`);
-
         if (!url) {
             this.showStatus('Invalid MIDI URL', 'error');
             return;
@@ -549,9 +680,7 @@ class MIDIPlayer {
             this.showStatus('Loading MIDI file...', 'info');
 
             // Stop any currently playing MIDI
-            console.log('Calling stop()...');
             this.stop();
-            console.log('Calling cleanup()...');
             this.cleanup();
 
             // Fetch and parse MIDI file via proxy to avoid CORS issues
@@ -582,12 +711,10 @@ class MIDIPlayer {
 
             // Only skip silence if there's more than 0.5 seconds of it
             this.skipToTime = (earliestNote !== Infinity && earliestNote > 0.5) ? earliestNote : 0;
-            console.log(`Earliest note at ${earliestNote}s, skipping ${this.skipToTime}s of leading silence`);
 
             // Adjust duration to account for removed leading silence
             this.originalDuration = this.midi.duration - this.skipToTime;
             this.duration = this.originalDuration;
-            console.log(`Adjusted duration: ${this.originalDuration}s (was ${this.midi.duration}s)`);
 
             // Setup the MIDI playback
             await this.setupPlayback();
@@ -618,7 +745,6 @@ class MIDIPlayer {
 
     async setupPlayback() {
         // Create instruments and parts for each track
-        this.synths = [];
         this.parts = [];
         this.instruments = [];
 
@@ -637,10 +763,9 @@ class MIDIPlayer {
         this.showStatus('Loading required musical instruments...', 'info');
 
         try {
-            // Load all instruments in parallel
+            // Load all instruments in parallel (with caching)
             const instrumentPromises = trackData.map(async ({ track, trackIndex }) => {
                 const instrumentName = this.getInstrumentName(track);
-                console.log(`Track ${trackIndex}: ${track.name}, Instrument: ${instrumentName}`);
 
                 // Create a gain node for this track first
                 const gainNode = audioContext.createGain();
@@ -648,15 +773,36 @@ class MIDIPlayer {
                 gainNode.connect(audioContext.destination);
 
                 try {
-                    // Load the SoundFont instrument (using FluidR3_GM for faster loading)
-                    const instrument = await Soundfont.instrument(audioContext, instrumentName, {
-                        soundfont: 'FluidR3_GM',
-                        destination: gainNode,
-                        nameToUrl: (name, soundfont, format) => {
-                            format = format === 'ogg' ? format : 'mp3';
-                            return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
-                        }
-                    });
+                    let instrument;
+
+                    // Check cache first
+                    if (this.instrumentCache.has(instrumentName)) {
+                        // Get cached instrument and connect to new gain node
+                        const cachedInstrument = this.instrumentCache.get(instrumentName);
+                        // Note: Soundfont instruments need to be reloaded with new destination
+                        // But we can still benefit from browser HTTP cache
+                        instrument = await Soundfont.instrument(audioContext, instrumentName, {
+                            soundfont: 'FluidR3_GM',
+                            destination: gainNode,
+                            nameToUrl: (name, soundfont, format) => {
+                                format = format === 'ogg' ? format : 'mp3';
+                                return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                            }
+                        });
+                    } else {
+                        // Load the SoundFont instrument (using FluidR3_GM for faster loading)
+                        instrument = await Soundfont.instrument(audioContext, instrumentName, {
+                            soundfont: 'FluidR3_GM',
+                            destination: gainNode,
+                            nameToUrl: (name, soundfont, format) => {
+                                format = format === 'ogg' ? format : 'mp3';
+                                return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                            }
+                        });
+
+                        // Add to cache
+                        this.addToInstrumentCache(instrumentName, instrument);
+                    }
 
                     return { instrument, trackIndex, instrumentName, gainNode, success: true };
 
@@ -704,7 +850,6 @@ class MIDIPlayer {
 
                 // Use the gain node that was created during instrument loading
                 this.instruments.push({ instrument, gainNode, trackIndex });
-                this.synths.push(instrument);
                 this.channelVolumes[trackIndex] = 100;
 
                 // Create a Tone.Part for this track with tempo scaling
@@ -741,10 +886,6 @@ class MIDIPlayer {
             if (Tone.context.state !== 'running') {
                 await Tone.context.resume();
             }
-
-            console.log(`Audio context state: ${Tone.context.state}`);
-            console.log(`Loaded ${this.instruments.length} instruments`);
-            console.log(`Created ${this.parts.length} parts`);
 
             let statusMsg = `All instruments loaded! (${successCount} loaded`;
             if (fallbackCount > 0) {
@@ -843,20 +984,12 @@ class MIDIPlayer {
 
             if (isMyPart) {
                 // This is the user's part
-                // Balance > 0 means make this part louder
-                if (this.balance > 0) {
-                    volumeMultiplier = 1.0 + (this.balance / 100);
-                } else if (this.balance < 0) {
-                    volumeMultiplier = 1.0 + (this.balance / 100);
-                }
+                // Balance adjusts this part's volume
+                volumeMultiplier = 1.0 + (this.balance / 100);
             } else {
                 // This is not the user's part
-                // Balance > 0 means make other parts quieter
-                if (this.balance > 0) {
-                    volumeMultiplier = 1.0 - (this.balance / 100);
-                } else if (this.balance < 0) {
-                    volumeMultiplier = 1.0 - (this.balance / 100);
-                }
+                // Balance inversely adjusts other parts' volume
+                volumeMultiplier = 1.0 - (this.balance / 100);
             }
 
             // Ensure volume doesn't go negative
@@ -876,14 +1009,16 @@ class MIDIPlayer {
 
         if (this.isPlaying) return;
 
-        console.log(`Playing: ${this.parts.length} parts, ${this.instruments.length} instruments`);
-        console.log(`Current time offset: ${this.currentTime}`);
-
         // Ensure currentTime is within valid range
         if (this.currentTime < 0 || this.currentTime >= this.originalDuration) {
-            console.log(`Resetting invalid currentTime ${this.currentTime} to 0`);
             this.currentTime = 0;
         }
+
+        // Cancel any previously scheduled events before starting
+        this.parts.forEach((part, index) => {
+            part.stop();
+            part.cancel();
+        });
 
         // Start parts immediately ("+0") so they sync with Transport timeline
         this.parts.forEach((part, index) => {
@@ -976,9 +1111,20 @@ class MIDIPlayer {
     seekTo(time) {
         const wasPlaying = this.isPlaying;
 
+        // Always stop playback first
         if (this.isPlaying) {
-            this.pause();
+            this.isPlaying = false;
+            this.stopProgressUpdate();
         }
+
+        // Stop and cancel everything completely
+        this.parts.forEach(part => {
+            part.stop();
+            part.cancel();
+        });
+
+        Tone.Transport.stop();
+        Tone.Transport.cancel();
 
         // time parameter is in original time
         this.currentTime = Math.max(0, Math.min(this.originalDuration, time));
@@ -987,15 +1133,11 @@ class MIDIPlayer {
         this.currentTimeDisplay.textContent = this.formatTime(this.currentTime);
         this.progressBar.value = (this.currentTime / this.originalDuration) * 100;
 
-        // Restart parts at new position
-        this.parts.forEach(part => {
-            part.stop();
-        });
-
         // Convert original time to scaled time for Transport
         const scaledTime = this.currentTime / this.tempoMultiplier;
         Tone.Transport.seconds = scaledTime;
 
+        // Resume playback if it was playing before
         if (wasPlaying) {
             this.play();
         }
@@ -1087,16 +1229,25 @@ class MIDIPlayer {
                 this.currentTime = transportTime * this.tempoMultiplier;
 
                 // Check loop boundaries (in original time)
-                // If loop range is not full duration, loop within that range
+                // If loop range is not full duration, loop within that range (stay in same movement)
                 const loopRangeSet = (this.loopStart > 0 || this.loopEnd < this.originalDuration - 0.5);
 
                 if (loopRangeSet && this.currentTime >= this.loopEnd) {
-                    // Loop back to loop start
+                    // Loop back to loop start within the same movement
                     this.seekTo(this.loopStart);
                     return;
                 } else if (!loopRangeSet && this.currentTime >= this.originalDuration) {
-                    // Full song loop: restart from beginning
-                    this.seekTo(0);
+                    // End of movement reached without loop set - advance to next movement
+                    const currentIndex = this.movementSelect.selectedIndex;
+                    const totalMovements = this.movementSelect.options.length;
+
+                    if (currentIndex < totalMovements - 1 && currentIndex > 0) {
+                        // Auto-advance to next movement
+                        this.skipToNextMovement();
+                    } else {
+                        // Last movement - loop back to start of current movement
+                        this.seekTo(0);
+                    }
                     return;
                 }
 
@@ -1114,6 +1265,42 @@ class MIDIPlayer {
         }
     }
 
+    skipToNextMovement() {
+        // Get current selected index
+        const currentIndex = this.movementSelect.selectedIndex;
+        const totalMovements = this.movementSelect.options.length;
+
+        // Check if there's a next movement (accounting for placeholder at index 0)
+        if (currentIndex < totalMovements - 1 && currentIndex > 0) {
+            // Select next movement
+            this.movementSelect.selectedIndex = currentIndex + 1;
+
+            // Load the next movement
+            const movementData = JSON.parse(this.movementSelect.value);
+            const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
+            this.loadMIDIFromURL(absoluteUrl, movementData.name);
+        }
+    }
+
+    // Helper function to convert relative URL to absolute (adds base URL)
+    toAbsoluteUrl(relativeUrl) {
+        if (relativeUrl.startsWith('http')) {
+            return relativeUrl; // Already absolute
+        }
+        return this.baseUrl + relativeUrl;
+    }
+
+    // Add instrument to cache with LRU eviction
+    addToInstrumentCache(instrumentName, instrument) {
+        // If cache is full, remove oldest entry (first entry in Map)
+        if (this.instrumentCache.size >= this.maxCacheSize) {
+            const firstKey = this.instrumentCache.keys().next().value;
+            this.instrumentCache.delete(firstKey);
+        }
+
+        this.instrumentCache.set(instrumentName, instrument);
+    }
+
     formatTime(seconds) {
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
@@ -1121,17 +1308,12 @@ class MIDIPlayer {
     }
 
     cleanup() {
-        console.log('Cleanup called');
-        console.log(`Before cleanup: ${this.instruments.length} instruments, ${this.parts.length} parts`);
-        console.log(`Transport.seconds before cleanup: ${Tone.Transport.seconds}`);
-
         // Stop and cancel all transport events
         Tone.Transport.stop();
         Tone.Transport.cancel();
 
         // Reset transport position to 0
         Tone.Transport.seconds = 0;
-        console.log(`Transport.seconds after reset: ${Tone.Transport.seconds}`);
 
         // Stop all instruments
         if (this.instruments) {
@@ -1170,7 +1352,6 @@ class MIDIPlayer {
             });
         }
 
-        this.synths = [];
         this.instruments = [];
         this.parts = [];
         this.midi = null;
@@ -1178,11 +1359,6 @@ class MIDIPlayer {
         this.duration = 0;
         this.originalDuration = 0;
         this.isPlaying = false;
-
-        console.log('Cleanup complete - currentTime reset to:', this.currentTime);
-
-        // Don't hide controls section - we might be loading a new MIDI
-        // this.controlsSection.style.display = 'none';
     }
 }
 

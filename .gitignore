@@ -27,3 +27,10 @@ Thumbs.db
 # Build outputs
 dist/
 build/
+
+# Generated/runtime data files
+data/midi-index-full.json
+data/recent-works.json
+
+# Claude Code configuration
+.claude/

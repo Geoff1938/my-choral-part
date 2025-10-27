@@ -12,6 +12,14 @@ class ChoralMusicScraper {
     this.recentWorksFile = path.join(__dirname, 'data', 'recent-works.json');
   }
 
+  // Helper function to convert absolute URL to relative (removes base URL)
+  toRelativeUrl(absoluteUrl) {
+    if (absoluteUrl.startsWith(this.baseUrl)) {
+      return absoluteUrl.substring(this.baseUrl.length);
+    }
+    return absoluteUrl;
+  }
+
   async initializeDataDirectory() {
     await fs.ensureDir(path.dirname(this.dataFile));
   }
@@ -70,11 +78,11 @@ class ChoralMusicScraper {
               const workUrl = $workLink.attr('href');
               
               if (workName && workUrl) {
-                // Convert relative URL to absolute
+                // Convert to absolute URL first (if needed), then store as relative
                 const fullWorkUrl = workUrl.startsWith('http') ? workUrl : `${this.baseUrl}/${workUrl}`;
                 works.push({
                   name: workName,
-                  url: fullWorkUrl
+                  url: this.toRelativeUrl(fullWorkUrl)
                 });
               }
             });
@@ -97,14 +105,22 @@ class ChoralMusicScraper {
     }
   }
 
-  async scrapeWorkSections(workUrl) {
+  async scrapeWorkSections(workUrl, visitedUrls = new Set()) {
     try {
       console.log(`Scraping work: ${workUrl}`);
+
+      // Prevent infinite loops
+      if (visitedUrls.has(workUrl)) {
+        console.log(`Already visited ${workUrl}, skipping`);
+        return [];
+      }
+      visitedUrls.add(workUrl);
+
       const response = await axios.get(workUrl);
       const $ = cheerio.load(response.data);
-      
+
       const sections = [];
-      
+
       // Look for tables with MIDI file information
       $('table').each((tableIndex, table) => {
         const $table = $(table);
@@ -152,16 +168,17 @@ class ChoralMusicScraper {
                   const midiUrl = midiLink.attr('href');
                   console.log(`Found MIDI link: ${midiUrl}`);
                   if (midiUrl && midiUrl !== '#') {
-                    // Convert relative URL to absolute
+                    // Convert relative URL to absolute first
                     const fullMidiUrl = midiUrl.startsWith('http') ? midiUrl :
                       midiUrl.startsWith('/') ? `${this.baseUrl}${midiUrl}` :
                       `${workUrl.substring(0, workUrl.lastIndexOf('/'))}/${midiUrl}`;
 
+                    // Store as relative URL to save space
                     sections.push({
                       name: sectionName,
-                      midiUrl: fullMidiUrl
+                      midiUrl: this.toRelativeUrl(fullMidiUrl)
                     });
-                    console.log(`Added section: ${sectionName} -> ${fullMidiUrl}`);
+                    console.log(`Added section: ${sectionName} -> ${this.toRelativeUrl(fullMidiUrl)}`);
                   }
                 } else {
                   // Check if the cell has "yes" text which might indicate availability
@@ -175,8 +192,40 @@ class ChoralMusicScraper {
           });
         }
       });
-      
-      console.log(`Found ${sections.length} sections with MIDI files`);
+
+      // Look for links to additional parts (Part 2, Part 3, etc.)
+      const additionalPartLinks = [];
+      $('a').each((index, link) => {
+        const $link = $(link);
+        const linkText = $link.text().trim();
+        const linkHref = $link.attr('href');
+
+        if (linkHref && linkHref !== '#') {
+          // Look for patterns like "Part 2", "Part II", "Part 3", etc.
+          const partPattern = /part\s*(\d+|[ivxIVX]+)/i;
+          const match = linkText.match(partPattern);
+
+          if (match) {
+            // Convert relative URL to absolute
+            let fullUrl = linkHref.startsWith('http') ? linkHref :
+              linkHref.startsWith('/') ? `${this.baseUrl}${linkHref}` :
+              `${workUrl.substring(0, workUrl.lastIndexOf('/'))}/${linkHref}`;
+
+            console.log(`Found link to additional part: "${linkText}" -> ${fullUrl}`);
+            additionalPartLinks.push({ text: linkText, url: fullUrl });
+          }
+        }
+      });
+
+      // Scrape additional parts
+      for (const partLink of additionalPartLinks) {
+        console.log(`Following link to: ${partLink.text}`);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Be respectful
+        const additionalSections = await this.scrapeWorkSections(partLink.url, visitedUrls);
+        sections.push(...additionalSections);
+      }
+
+      console.log(`Found ${sections.length} sections total with MIDI files`);
       return sections;
     } catch (error) {
       console.error(`Error scraping work ${workUrl}:`, error.message);
@@ -272,10 +321,97 @@ class ChoralMusicScraper {
   async searchComposers(searchTerm) {
     const index = await this.loadIndex();
     const searchLower = searchTerm.toLowerCase();
-    
-    return index.filter(composer => 
+
+    return index.filter(composer =>
       composer.name.toLowerCase().includes(searchLower)
     );
+  }
+
+  // Advanced search that matches word beginnings only and searches across multiple categories
+  async advancedSearch(searchTerms, options = { composers: true, works: false, movements: false }) {
+    const index = await this.loadIndex();
+    const results = {
+      composers: [],
+      works: [],
+      movements: []
+    };
+
+    // Split search terms and convert to lowercase
+    const terms = searchTerms.trim().toLowerCase().split(/\s+/).filter(t => t.length > 0);
+    if (terms.length === 0) return results;
+
+    // Helper function to check if any word in text starts with the search term
+    const matchesWordStart = (text, term) => {
+      const words = text.toLowerCase().split(/\s+/);
+      return words.some(word => word.startsWith(term));
+    };
+
+    // Helper function to check if all terms match (in any combination)
+    const matchesAllTerms = (text) => {
+      return terms.every(term => matchesWordStart(text, term));
+    };
+
+    // Search through the index
+    for (const composer of index) {
+      let composerMatches = false;
+
+      // Check composer name
+      if (options.composers && matchesAllTerms(composer.name)) {
+        results.composers.push({
+          name: composer.name
+        });
+        composerMatches = true;
+      }
+
+      // Check works
+      if (options.works || options.movements) {
+        for (const work of composer.works) {
+          let workMatches = false;
+
+          // Check work name
+          if (options.works && matchesAllTerms(work.name)) {
+            results.works.push({
+              composer: composer.name,
+              work: work.name
+            });
+            workMatches = true;
+          }
+
+          // Check if all terms match across composer + work combination
+          if (options.works && !workMatches && !composerMatches) {
+            const combinedText = `${composer.name} ${work.name}`;
+            if (matchesAllTerms(combinedText)) {
+              results.works.push({
+                composer: composer.name,
+                work: work.name
+              });
+              workMatches = true;
+            }
+          }
+
+          // Check movements/sections
+          if (options.movements && work.sections) {
+            for (const section of work.sections) {
+              const sectionMatches = matchesAllTerms(section.name);
+              const combinedWithWork = matchesAllTerms(`${work.name} ${section.name}`);
+              const combinedWithComposer = matchesAllTerms(`${composer.name} ${section.name}`);
+              const combinedAll = matchesAllTerms(`${composer.name} ${work.name} ${section.name}`);
+
+              if (sectionMatches || combinedWithWork || combinedWithComposer || combinedAll) {
+                results.movements.push({
+                  composer: composer.name,
+                  work: work.name,
+                  movement: section.name,
+                  midiUrl: section.midiUrl
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return results;
   }
 
   async getComposerWorks(composerName) {
