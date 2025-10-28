@@ -787,6 +787,10 @@ class MIDIPlayer {
                 this.loadMIDIFromURL(absoluteUrl, movementData.name);
             }
 
+            // Pre-load common instruments in the background to speed up playback
+            // This happens asynchronously and doesn't block the UI
+            this.preloadCommonInstruments();
+
             // Save to recent works
             await this.saveRecentWork(this.selectedComposer, workName);
         } catch (error) {
@@ -1551,6 +1555,51 @@ class MIDIPlayer {
         }
 
         this.instrumentCache.set(instrumentName, instrument);
+    }
+
+    // Pre-load common instruments in the background to speed up playback
+    async preloadCommonInstruments() {
+        // Top 5 most commonly used instruments based on MIDI file analysis
+        const commonInstruments = [
+            'acoustic_grand_piano',  // Most common - 98 uses in "A" composers
+            'piccolo',               // Soprano part
+            'clarinet',              // Alto part
+            'french_horn',           // Tenor part
+            'bassoon'                // Bass part
+        ];
+
+        // Don't await - let this happen in the background
+        // Instruments already loaded will skip quickly
+        commonInstruments.forEach(async (instrumentName) => {
+            try {
+                // Skip if already in cache
+                if (this.instrumentCache.has(instrumentName)) {
+                    return;
+                }
+
+                // Load instrument with temporary gain node to trigger browser HTTP cache
+                const audioContext = Tone.context.rawContext;
+                const tempGainNode = audioContext.createGain();
+                tempGainNode.connect(audioContext.destination);
+                tempGainNode.gain.value = 0; // Silent - just for caching
+
+                await Soundfont.instrument(audioContext, instrumentName, {
+                    soundfont: 'FluidR3_GM',
+                    destination: tempGainNode,
+                    nameToUrl: (name, soundfont, format) => {
+                        format = format === 'ogg' ? format : 'mp3';
+                        return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                    }
+                });
+
+                // Don't need to store in cache - browser HTTP cache is what matters
+                // Disconnect the temp gain node
+                tempGainNode.disconnect();
+            } catch (error) {
+                // Silently fail - pre-loading is a performance optimization, not critical
+                console.log(`Pre-load of ${instrumentName} failed, will load on demand:`, error.message);
+            }
+        });
     }
 
     formatTime(seconds) {
