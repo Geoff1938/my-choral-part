@@ -159,7 +159,11 @@ app.get('/proxy', async (req, res) => {
         errorMsg = 'The source server is temporarily rate limiting requests. Please try again in a few moments.';
       }
 
-      return res.status(midiRes.statusCode).json({ error: errorMsg });
+      // Only send error if headers haven't been sent yet
+      if (!res.headersSent) {
+        return res.status(midiRes.statusCode).json({ error: errorMsg });
+      }
+      return;
     }
 
     // Set appropriate headers
@@ -170,11 +174,17 @@ app.get('/proxy', async (req, res) => {
     midiRes.pipe(res);
   }).on('error', (error) => {
     console.error(`Error fetching MIDI from ${midiUrl}:`, error);
-    res.status(500).json({ error: `Failed to fetch MIDI file: ${error.message}` });
+    // Only send error if headers haven't been sent yet
+    if (!res.headersSent) {
+      res.status(500).json({ error: `Failed to fetch MIDI file: ${error.message}` });
+    }
   }).on('timeout', () => {
     request.destroy();
     console.error(`Timeout fetching MIDI from ${midiUrl}`);
-    res.status(504).json({ error: 'Request timeout fetching MIDI file' });
+    // Only send error if headers haven't been sent yet
+    if (!res.headersSent) {
+      res.status(504).json({ error: 'Request timeout fetching MIDI file' });
+    }
   });
 });
 
