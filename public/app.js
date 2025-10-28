@@ -226,6 +226,20 @@ class MIDIPlayer {
             }
         });
 
+        // Pause music and clear search box when user clicks in it
+        this.composerSearch.addEventListener('focus', (e) => {
+            // Pause music if currently playing
+            if (this.isPlaying) {
+                this.pause();
+            }
+            // Clear the search box
+            e.target.value = '';
+            // Clear search results
+            this.composerResults.innerHTML = '';
+            this.worksList.innerHTML = '';
+            this.worksContainer.style.display = 'none';
+        });
+
         // Search input with debounce
         this.composerSearch.addEventListener('input', (e) => {
             // Clear and hide works dropdown when typing
