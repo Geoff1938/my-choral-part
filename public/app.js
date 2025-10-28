@@ -1237,7 +1237,7 @@ class MIDIPlayer {
 
         // Cancel any previously scheduled events before starting
         this.parts.forEach((part, index) => {
-            part.stop();
+            part.stop(0);  // Pass explicit 0 to avoid floating-point precision issues
             part.cancel();
         });
 
@@ -1284,7 +1284,7 @@ class MIDIPlayer {
         if (this.parts) {
             this.parts.forEach(part => {
                 try {
-                    part.stop();
+                    part.stop(0);  // Pass explicit 0 to avoid floating-point precision issues
                 } catch (e) {
                     // Ignore errors
                 }
@@ -1340,7 +1340,7 @@ class MIDIPlayer {
 
         // Stop and cancel everything completely
         this.parts.forEach(part => {
-            part.stop();
+            part.stop(0);  // Pass explicit 0 to avoid floating-point precision issues
             part.cancel();
         });
 
@@ -1582,7 +1582,7 @@ class MIDIPlayer {
         if (this.parts) {
             this.parts.forEach(part => {
                 try {
-                    part.stop();
+                    part.stop(0);  // Pass explicit 0 to avoid floating-point precision issues
                     part.dispose();
                 } catch (e) {
                     // Ignore disposal errors
