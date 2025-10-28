@@ -75,6 +75,7 @@ class MIDIPlayer {
         this.worksList = document.getElementById('works-list');
         this.movementSelect = document.getElementById('movement-select');
         this.loadingStatus = document.getElementById('loading-status');
+        this.findMusicStatus = document.getElementById('find-music-status');
 
         // Search filter checkboxes
         this.searchComposersCheckbox = document.getElementById('search-composers');
@@ -145,15 +146,14 @@ class MIDIPlayer {
     }
 
     loadDefaultWork() {
-        // Load default work: Allegri - Miserere mei Deus
+        // Load default work: Handel - Messiah
         // This provides immediate usability when the app loads
-        // Using a work from the initial index (A composers) to avoid rate limiting
-        this.selectedComposer = 'Allegri';
-        this.selectedWork = 'Miserere mei Deus';
+        this.selectedComposer = 'Handel';
+        this.selectedWork = 'Messiah';
 
-        // Hardcoded movement for Miserere (using relative URL)
+        // Hardcoded movement for Messiah - Hallelujah (using relative URL)
         const defaultMovements = [
-            { name: 'Miserere mei Deus', midiUrl: '/Allegri/Miserere/Miserere.mid' }
+            { name: 'Hallelujah', midiUrl: '/Handel/Messiah/42-allel.mid' }
         ];
 
         // Populate movement dropdown
@@ -162,7 +162,7 @@ class MIDIPlayer {
                 `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
             ).join('');
 
-        // Auto-select Miserere in the dropdown
+        // Auto-select Hallelujah in the dropdown
         this.movementSelect.selectedIndex = 1;
 
         this.updateWorkDisplay();
@@ -202,6 +202,9 @@ class MIDIPlayer {
             // Clear and hide works dropdown when typing
             this.worksList.innerHTML = '';
             this.worksContainer.style.display = 'none';
+
+            // Clear any status messages
+            this.findMusicStatus.classList.remove('show');
 
             clearTimeout(this.searchTimeout);
             this.searchTimeout = setTimeout(() => {
@@ -501,34 +504,46 @@ class MIDIPlayer {
 
         let html = '';
 
-        // Display composer results
+        // Display composer results (sorted alphabetically)
         if (results.composers.length > 0) {
             html += '<div class="result-category"><strong>Composers:</strong></div>';
-            results.composers.forEach(composer => {
-                html += `<div class="composer-item" data-type="composer" data-composer='${JSON.stringify(composer.name)}'>${composer.name}</div>`;
+            const sortedComposers = results.composers.sort((a, b) => a.name.localeCompare(b.name));
+            sortedComposers.forEach(composer => {
+                const composerJson = JSON.stringify(composer.name).replace(/"/g, '&quot;');
+                html += `<div class="composer-item" data-type="composer" data-composer="${composerJson}">${composer.name}</div>`;
             });
         }
 
-        // Display work results
+        // Display work results (sorted alphabetically by work name)
         if (results.works.length > 0) {
             html += '<div class="result-category"><strong>Works:</strong></div>';
-            results.works.forEach(work => {
-                html += `<div class="work-item result-item" data-type="work" data-composer='${JSON.stringify(work.composer)}' data-work='${JSON.stringify(work.work)}'>
+            const sortedWorks = results.works.sort((a, b) => a.work.localeCompare(b.work));
+            sortedWorks.forEach(work => {
+                // Escape JSON for HTML attributes by replacing quotes
+                const composerJson = JSON.stringify(work.composer).replace(/"/g, '&quot;');
+                const workJson = JSON.stringify(work.work).replace(/"/g, '&quot;');
+                html += `<div class="work-item result-item" data-type="work" data-composer="${composerJson}" data-work="${workJson}">
                     <div class="result-main">${work.work}</div>
                     <div class="result-sub">${work.composer}</div>
                 </div>`;
             });
         }
 
-        // Display movement results
+        // Display movement results (sorted alphabetically by movement name)
         if (results.movements.length > 0) {
             html += '<div class="result-category"><strong>Movements/songs:</strong></div>';
-            results.movements.forEach(movement => {
+            const sortedMovements = results.movements.sort((a, b) => a.movement.localeCompare(b.movement));
+            sortedMovements.forEach(movement => {
+                // Escape JSON for HTML attributes
+                const composerJson = JSON.stringify(movement.composer).replace(/"/g, '&quot;');
+                const workJson = JSON.stringify(movement.work).replace(/"/g, '&quot;');
+                const movementJson = JSON.stringify(movement.movement).replace(/"/g, '&quot;');
+                const midiUrlJson = JSON.stringify(movement.midiUrl).replace(/"/g, '&quot;');
                 html += `<div class="movement-item result-item" data-type="movement"
-                    data-composer='${JSON.stringify(movement.composer)}'
-                    data-work='${JSON.stringify(movement.work)}'
-                    data-movement='${JSON.stringify(movement.movement)}'
-                    data-midi-url='${JSON.stringify(movement.midiUrl)}'>
+                    data-composer="${composerJson}"
+                    data-work="${workJson}"
+                    data-movement="${movementJson}"
+                    data-midi-url="${midiUrlJson}">
                     <div class="result-main">${movement.movement}</div>
                     <div class="result-sub">${movement.composer} - ${movement.work}</div>
                 </div>`;
@@ -547,12 +562,18 @@ class MIDIPlayer {
         });
 
         this.composerResults.querySelectorAll('.work-item').forEach(item => {
-            item.addEventListener('click', () => {
+            item.addEventListener('click', async () => {
                 const composerName = JSON.parse(item.dataset.composer);
                 const workName = JSON.parse(item.dataset.work);
-                this.selectComposer(composerName).then(() => {
-                    this.selectWork(workName);
-                });
+
+                console.log('Work clicked:', composerName, workName);
+
+                // Hide search results immediately
+                this.composerResults.style.display = 'none';
+
+                // Don't show works list or update search box when clicking from search
+                await this.selectComposer(composerName, false, false);
+                await this.selectWork(workName);
             });
         });
 
@@ -563,8 +584,14 @@ class MIDIPlayer {
                 const movementName = JSON.parse(item.dataset.movement);
                 const midiUrl = JSON.parse(item.dataset.midiUrl);
 
+                console.log('Movement clicked:', composerName, workName, movementName);
+
+                // Hide search results immediately
+                this.composerResults.style.display = 'none';
+
                 // Select the composer and work first, then load the movement
-                await this.selectComposer(composerName);
+                // Pass false to prevent showing the works list and updating search box
+                await this.selectComposer(composerName, false, false);
                 await this.selectWork(workName);
 
                 // Find and select the matching movement in the dropdown
@@ -590,9 +617,11 @@ class MIDIPlayer {
         });
     }
 
-    async selectComposer(composerName) {
+    async selectComposer(composerName, showWorksList = true, updateSearchBox = true) {
         this.selectedComposer = composerName;
-        this.composerSearch.value = composerName;
+        if (updateSearchBox) {
+            this.composerSearch.value = composerName;
+        }
         this.composerResults.style.display = 'none';
 
         try {
@@ -609,10 +638,15 @@ class MIDIPlayer {
                 return;
             }
 
-            this.worksList.innerHTML = works.map(work =>
-                `<div class="work-item" data-work='${JSON.stringify(work.name)}'>${work.name}</div>`
-            ).join('');
-            this.worksContainer.style.display = 'block';
+            this.worksList.innerHTML = works.map(work => {
+                const workJson = JSON.stringify(work.name).replace(/"/g, '&quot;');
+                return `<div class="work-item" data-work="${workJson}">${work.name}</div>`;
+            }).join('');
+
+            // Only show works container if requested (for direct composer selection)
+            if (showWorksList) {
+                this.worksContainer.style.display = 'block';
+            }
 
             // Add click handlers to work items
             this.worksList.querySelectorAll('.work-item').forEach(item => {
@@ -630,6 +664,9 @@ class MIDIPlayer {
     async selectWork(workName) {
         this.selectedWork = workName;
 
+        // Clear any previous status messages
+        this.findMusicStatus.classList.remove('show');
+
         // Highlight selected work
         if (this.worksList) {
             this.worksList.querySelectorAll('.work-item').forEach(item => {
@@ -646,6 +683,15 @@ class MIDIPlayer {
 
             if (movements.length === 0) {
                 this.showStatus('No movements found for this work', 'error');
+                return;
+            }
+
+            // Check if this work is copyright-protected (all movements point to .html files)
+            const firstMovementUrl = movements[0].midiUrl;
+            if (firstMovementUrl.endsWith('.html') || firstMovementUrl.endsWith('.htm')) {
+                // Show copyright message on Find Music tab (where the user currently is)
+                this.findMusicStatus.textContent = 'Sorry, this work is not publicly available for copyright reasons.';
+                this.findMusicStatus.className = 'status-message show error';
                 return;
             }
 
@@ -752,6 +798,12 @@ class MIDIPlayer {
     async loadMIDIFromURL(url, title = null) {
         if (!url) {
             this.showStatus('Invalid MIDI URL', 'error');
+            return;
+        }
+
+        // Check if URL points to an HTML page (copyright-protected works)
+        if (url.endsWith('.html') || url.endsWith('.htm')) {
+            this.showStatus('Sorry, this work is not publicly available for copyright reasons.', 'error');
             return;
         }
 
@@ -945,7 +997,7 @@ class MIDIPlayer {
                 // Subtract skipToTime to remove leading silence from the timeline
                 const tempoScale = 1 / this.tempoMultiplier;
                 const notes = track.notes.map(note => ({
-                    time: (note.time - this.skipToTime) * tempoScale,
+                    time: Math.max(0, (note.time - this.skipToTime) * tempoScale),
                     note: note.name,
                     duration: note.duration * tempoScale,
                     velocity: note.velocity
@@ -1294,10 +1346,11 @@ class MIDIPlayer {
 
             // Scale note times and durations by tempo multiplier
             // Slower tempo (0.5) = notes at 2x time, faster (2.0) = notes at 0.5x time
+            // Also subtract skipToTime to be consistent with setupPlayback
             const tempoScale = 1 / this.tempoMultiplier;
 
             const notes = track.notes.map(note => ({
-                time: note.time * tempoScale,
+                time: Math.max(0, (note.time - this.skipToTime) * tempoScale),
                 note: note.name,
                 duration: note.duration * tempoScale,
                 velocity: note.velocity

@@ -1,17 +1,27 @@
 [
   {
+    "composer": "Archer",
+    "work": "Requiem",
+    "timestamp": "2025-10-28T08:23:28.374Z"
+  },
+  {
+    "composer": "Bach, CPE",
+    "work": "Magnificat (Wq 215)",
+    "timestamp": "2025-10-28T08:18:07.822Z"
+  },
+  {
+    "composer": "Handel",
+    "work": "Nabal",
+    "timestamp": "2025-10-28T08:14:10.270Z"
+  },
+  {
+    "composer": "Bach, JS",
+    "work": "Sheep may safely graze (BWV 208) - James Winfield arrangement",
+    "timestamp": "2025-10-28T08:13:48.901Z"
+  },
+  {
     "composer": "Alessandro Scarlatti",
     "work": "Magnificat",
-    "timestamp": "2025-10-27T09:01:23.857Z"
-  },
-  {
-    "composer": "Allegri",
-    "work": "Miserere mei Deus",
-    "timestamp": "2025-10-26T22:49:52.890Z"
-  },
-  {
-    "composer": "Austin",
-    "work": "Songs in a farmhouse",
-    "timestamp": "2025-10-26T21:54:28.675Z"
+    "timestamp": "2025-10-28T08:13:16.884Z"
   }
 ]
