@@ -17,6 +17,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@tonejs/midi": "^2.0.28",
     "axios": "^1.6.0",
     "cheerio": "^1.0.0-rc.12",
     "compression": "^1.8.1",
