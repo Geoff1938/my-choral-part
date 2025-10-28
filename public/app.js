@@ -849,10 +849,18 @@ class MIDIPlayer {
         }
     }
 
-    async fetchWithRetry(url, maxRetries = 3) {
+    async fetchWithRetry(url, maxRetries = 3, timeoutMs = 30000) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
+            // Create abort controller for timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
             try {
-                const response = await fetch(url);
+                const response = await fetch(url, {
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
 
                 // If we get a 429, wait and retry (with longer exponential backoff)
                 if (response.status === 429 && attempt < maxRetries - 1) {
@@ -862,8 +870,31 @@ class MIDIPlayer {
                     continue;
                 }
 
+                // If we get 502/504, it's a gateway/timeout error - retry
+                if ((response.status === 502 || response.status === 504) && attempt < maxRetries - 1) {
+                    clearTimeout(timeoutId);
+                    const waitTime = Math.pow(2, attempt) * 3000; // 3s, 6s, 12s
+                    this.showStatus(`Server timeout. Retrying... (attempt ${attempt + 1}/${maxRetries})`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                    continue;
+                }
+
                 return response;
             } catch (error) {
+                clearTimeout(timeoutId);
+
+                // Check if it was an abort (timeout)
+                if (error.name === 'AbortError') {
+                    console.warn(`Request timeout after ${timeoutMs}ms (attempt ${attempt + 1})`);
+                    if (attempt === maxRetries - 1) {
+                        throw new Error(`Request timed out after ${maxRetries} attempts`);
+                    }
+                    // Wait before retrying timeout
+                    const waitTime = 3000;
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                    continue;
+                }
+
                 if (attempt === maxRetries - 1) {
                     throw error;
                 }
@@ -1568,38 +1599,51 @@ class MIDIPlayer {
             'bassoon'                // Bass part
         ];
 
+        // Load sequentially with delays to avoid overwhelming mobile devices
         // Don't await - let this happen in the background
-        // Instruments already loaded will skip quickly
-        commonInstruments.forEach(async (instrumentName) => {
-            try {
-                // Skip if already in cache
-                if (this.instrumentCache.has(instrumentName)) {
-                    return;
-                }
-
-                // Load instrument with temporary gain node to trigger browser HTTP cache
-                const audioContext = Tone.context.rawContext;
-                const tempGainNode = audioContext.createGain();
-                tempGainNode.connect(audioContext.destination);
-                tempGainNode.gain.value = 0; // Silent - just for caching
-
-                await Soundfont.instrument(audioContext, instrumentName, {
-                    soundfont: 'FluidR3_GM',
-                    destination: tempGainNode,
-                    nameToUrl: (name, soundfont, format) => {
-                        format = format === 'ogg' ? format : 'mp3';
-                        return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+        (async () => {
+            for (const instrumentName of commonInstruments) {
+                try {
+                    // Skip if already in cache
+                    if (this.instrumentCache.has(instrumentName)) {
+                        continue;
                     }
-                });
 
-                // Don't need to store in cache - browser HTTP cache is what matters
-                // Disconnect the temp gain node
-                tempGainNode.disconnect();
-            } catch (error) {
-                // Silently fail - pre-loading is a performance optimization, not critical
-                console.log(`Pre-load of ${instrumentName} failed, will load on demand:`, error.message);
+                    // Load instrument with temporary gain node to trigger browser HTTP cache
+                    const audioContext = Tone.context.rawContext;
+                    const tempGainNode = audioContext.createGain();
+                    tempGainNode.connect(audioContext.destination);
+                    tempGainNode.gain.value = 0; // Silent - just for caching
+
+                    // Add timeout to prevent hanging
+                    const loadPromise = Soundfont.instrument(audioContext, instrumentName, {
+                        soundfont: 'FluidR3_GM',
+                        destination: tempGainNode,
+                        nameToUrl: (name, soundfont, format) => {
+                            format = format === 'ogg' ? format : 'mp3';
+                            return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                        }
+                    });
+
+                    // Timeout after 10 seconds
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Preload timeout')), 10000)
+                    );
+
+                    await Promise.race([loadPromise, timeoutPromise]);
+
+                    // Disconnect the temp gain node
+                    tempGainNode.disconnect();
+
+                    // Small delay between loads to avoid overwhelming device
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                } catch (error) {
+                    // Silently fail - pre-loading is a performance optimization, not critical
+                    console.log(`Pre-load of ${instrumentName} failed, will load on demand:`, error.message);
+                }
             }
-        });
+        })();
     }
 
     formatTime(seconds) {
