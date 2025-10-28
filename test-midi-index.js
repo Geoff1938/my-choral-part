@@ -306,8 +306,28 @@ class MidiIndexTester {
             rows.push(row.map(v => this.escapeCSV(v)).join(','));
         }
 
-        await fs.writeFile(filename, rows.join('\n'), 'utf8');
-        console.log(`\nResults written to: ${filename}`);
+        // Try to write, with fallback filenames if file is locked
+        let actualFilename = filename;
+        let attempt = 0;
+        while (attempt < 10) {
+            try {
+                await fs.writeFile(actualFilename, rows.join('\n'), 'utf8');
+                console.log(`\nResults written to: ${actualFilename}`);
+                return;
+            } catch (error) {
+                if (error.code === 'EBUSY' || error.code === 'EPERM') {
+                    attempt++;
+                    // Generate alternate filename: file.csv -> file(1).csv
+                    const ext = path.extname(filename);
+                    const base = filename.slice(0, -ext.length);
+                    actualFilename = `${base}(${attempt})${ext}`;
+                    console.log(`File locked, trying: ${actualFilename}`);
+                } else {
+                    throw error;
+                }
+            }
+        }
+        throw new Error('Could not write file after 10 attempts - all filenames locked');
     }
 
     async writeInstrumentStatsCSV(filename) {
@@ -324,8 +344,28 @@ class MidiIndexTester {
             rows.push(row.map(v => this.escapeCSV(v)).join(','));
         }
 
-        await fs.writeFile(filename, rows.join('\n'), 'utf8');
-        console.log(`Instrument statistics written to: ${filename}`);
+        // Try to write, with fallback filenames if file is locked
+        let actualFilename = filename;
+        let attempt = 0;
+        while (attempt < 10) {
+            try {
+                await fs.writeFile(actualFilename, rows.join('\n'), 'utf8');
+                console.log(`Instrument statistics written to: ${actualFilename}`);
+                return;
+            } catch (error) {
+                if (error.code === 'EBUSY' || error.code === 'EPERM') {
+                    attempt++;
+                    // Generate alternate filename: file.csv -> file(1).csv
+                    const ext = path.extname(filename);
+                    const base = filename.slice(0, -ext.length);
+                    actualFilename = `${base}(${attempt})${ext}`;
+                    console.log(`File locked, trying: ${actualFilename}`);
+                } else {
+                    throw error;
+                }
+            }
+        }
+        throw new Error('Could not write file after 10 attempts - all filenames locked');
     }
 
     printSummary() {
@@ -366,8 +406,8 @@ class MidiIndexTester {
 async function main() {
     const tester = new MidiIndexTester();
 
-    // Test only composers starting with "A" for now
-    await tester.runTests('A');
+    // Test all composers
+    await tester.runTests();
 
     // Write results to CSV
     const outputFile = path.join(__dirname, 'midi-test-results.csv');
