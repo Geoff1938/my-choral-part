@@ -1006,3 +1006,104 @@ section:last-child {
     outline: none;
     border-color: var(--primary-color);
 }
+
+/* Settings Tab Styles */
+.settings-section {
+    background: var(--surface);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.settings-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.copyright-section {
+    background: #f8f9fa;
+    border-left: 4px solid var(--primary-color);
+}
+
+.copyright-section p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.copyright-section a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.copyright-section a:hover {
+    text-decoration: underline;
+}
+
+/* Movement Channels Section */
+.movement-channels-section {
+    background: var(--surface);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.movement-channels-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+/* Channels Table */
+.channels-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.channels-table thead {
+    background: var(--background);
+}
+
+.channels-table th {
+    padding: 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border);
+}
+
+.channels-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.channels-table tr:hover {
+    background: var(--background);
+}
+
+.channels-table input[type="radio"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+/* Voice Part Dropdown Styling */
+#voice-part-settings {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    padding: 8px 12px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    width: 100%;
+    background: var(--surface);
+    cursor: pointer;
+}
+
+#voice-part-settings:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}

@@ -84,21 +84,30 @@ class MIDIPlayer {
 
         // Play tab elements
         this.currentWorkDisplay = document.getElementById('current-work-display');
-        this.shareableUrlSection = document.getElementById('shareable-url-section');
-        this.shareableUrlInput = document.getElementById('shareable-url');
-        this.copyUrlBtn = document.getElementById('copy-url-btn');
         this.recentWorksDropdown = document.getElementById('recent-works-dropdown');
         this.recentWorksSelect = document.getElementById('recent-works-select');
+
+        // Currently selected movement section
+        this.movementChannelsSection = document.getElementById('movement-channels-section');
+        this.currentMovementName = document.getElementById('current-movement-name');
+        this.channelsTbody = document.getElementById('channels-tbody');
+        this.channelsNotLoadedMsg = document.getElementById('channels-not-loaded-msg');
+        this.channelsListContainer = document.getElementById('channels-list-container');
+
+        // Settings tab elements
+        this.voicePartSelect = document.getElementById('voice-part-settings');
+        this.shareableUrlSectionSettings = document.getElementById('shareable-url-section-settings');
+        this.shareableUrlInputSettings = document.getElementById('shareable-url-settings');
+        this.copyUrlBtnSettings = document.getElementById('copy-url-btn-settings');
+        this.noWorkSelectedMsg = document.getElementById('no-work-selected-msg');
+
+        // Balance label elements
+        this.balanceVoicePartSpan = document.getElementById('balance-voice-part');
 
         // State for current selection
         this.selectedComposer = null;
         this.selectedWork = null;
         this.searchTimeout = null;
-
-        // Voice part selector
-        this.voicePartSelect = document.getElementById('voice-part');
-        this.channelSelectorContainer = document.getElementById('channel-selector-container');
-        this.channelSelector = document.getElementById('channel-selector');
 
         // Control section
         this.controlsSection = document.getElementById('controls-section');
@@ -138,11 +147,20 @@ class MIDIPlayer {
         if (savedVoicePart && this.voicePartSelect) {
             this.voicePart = savedVoicePart;
             this.voicePartSelect.value = savedVoicePart;
+            this.updateBalanceLabel(); // Update balance label to show loaded voice part
         }
     }
 
     savePreferences() {
         localStorage.setItem('voicePart', this.voicePart);
+    }
+
+    updateBalanceLabel() {
+        // Update the balance label to show the current voice part
+        const voicePartName = this.voicePart.charAt(0).toUpperCase() + this.voicePart.slice(1);
+        if (this.balanceVoicePartSpan) {
+            this.balanceVoicePartSpan.textContent = voicePartName;
+        }
     }
 
     loadDefaultWork() {
@@ -167,6 +185,17 @@ class MIDIPlayer {
 
         this.updateWorkDisplay();
 
+        // Update the currently selected movement display on Settings tab
+        if (this.currentMovementName) {
+            this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - Hallelujah`;
+        }
+        if (this.movementChannelsSection) {
+            this.movementChannelsSection.style.display = 'block';
+        }
+
+        // Update channels list to show the "Click Play to load..." message
+        this.updateChannelsList();
+
         // Don't auto-load on page load - let user click play when ready
         // This prevents errors on slower connections or during initialization
     }
@@ -180,8 +209,8 @@ class MIDIPlayer {
             });
         });
 
-        // Copy URL button
-        this.copyUrlBtn.addEventListener('click', () => this.copyShareableURL());
+        // Copy URL button (Settings tab)
+        this.copyUrlBtnSettings.addEventListener('click', () => this.copyShareableURL());
 
         // Recent works dropdown
         this.recentWorksSelect.addEventListener('change', (e) => {
@@ -241,14 +270,9 @@ class MIDIPlayer {
         this.voicePartSelect.addEventListener('change', (e) => {
             this.voicePart = e.target.value;
             this.savePreferences();
-            this.updateChannelSelector(); // Update channel options if multiple exist
+            this.updateBalanceLabel(); // Update the balance label to show new voice part
+            this.updateChannelsList(); // Update the channels list with new selection
             this.applyBalance(); // Reapply balance with new voice part
-        });
-
-        // Channel selector (for when multiple channels have same instrument)
-        this.channelSelector.addEventListener('change', (e) => {
-            this.selectedChannelIndex = parseInt(e.target.value);
-            this.applyBalance();
         });
 
         this.playBtn.addEventListener('click', () => this.play());
@@ -349,46 +373,76 @@ class MIDIPlayer {
         this.loopHighlight.style.width = `${width}%`;
     }
 
-    updateChannelSelector() {
-        // Find all channels that match the selected voice part instrument
-        const selectedInstrument = this.voicePartInstruments[this.voicePart];
-        const matchingChannels = [];
-
-        if (this.instruments && this.instruments.length > 0) {
-            for (let i = 0; i < this.instruments.length; i++) {
-                const { trackIndex } = this.instruments[i];
-                const track = this.midi.tracks[trackIndex];
-                const instrumentName = this.getInstrumentName(track);
-
-                if (instrumentName === selectedInstrument) {
-                    matchingChannels.push({
-                        index: i,
-                        name: track.name || `Channel ${trackIndex + 1}`
-                    });
-                }
+    updateChannelsList() {
+        // Show/populate the channels list section
+        if (!this.instruments || this.instruments.length === 0) {
+            // MIDI file not loaded yet - show message, hide channels table
+            if (this.channelsNotLoadedMsg) {
+                this.channelsNotLoadedMsg.style.display = 'block';
             }
+            if (this.channelsListContainer) {
+                this.channelsListContainer.style.display = 'none';
+            }
+            return;
         }
 
-        // If multiple channels found, show selector
-        if (matchingChannels.length > 1) {
-            this.channelSelector.innerHTML = '';
-            matchingChannels.forEach(channel => {
-                const option = document.createElement('option');
-                option.value = channel.index;
-                option.textContent = channel.name;
-                this.channelSelector.appendChild(option);
-            });
-            this.channelSelectorContainer.style.display = 'flex';
-            this.selectedChannelIndex = matchingChannels[0].index;
-        } else if (matchingChannels.length === 1) {
-            // Only one channel, select it automatically
-            this.selectedChannelIndex = matchingChannels[0].index;
-            this.channelSelectorContainer.style.display = 'none';
-        } else {
-            // No matching channels
-            this.selectedChannelIndex = null;
-            this.channelSelectorContainer.style.display = 'none';
+        // MIDI file loaded - hide message, show channels table
+        if (this.channelsNotLoadedMsg) {
+            this.channelsNotLoadedMsg.style.display = 'none';
         }
+        if (this.channelsListContainer) {
+            this.channelsListContainer.style.display = 'block';
+        }
+
+        this.movementChannelsSection.style.display = 'block';
+
+        // Find the channel that matches the selected voice part instrument (for auto-selection)
+        const selectedInstrument = this.voicePartInstruments[this.voicePart];
+        let autoSelectedIndex = null;
+
+        // Build the channels table
+        let html = '';
+        for (let i = 0; i < this.instruments.length; i++) {
+            const { trackIndex } = this.instruments[i];
+            const track = this.midi.tracks[trackIndex];
+            const instrumentName = this.getInstrumentName(track);
+            const channelName = track.name || `Channel ${trackIndex + 1}`;
+
+            // Check if this channel matches the voice part instrument
+            const isMatching = (instrumentName === selectedInstrument);
+            if (isMatching && autoSelectedIndex === null) {
+                autoSelectedIndex = i;
+            }
+
+            // Determine if this channel should be checked
+            const isChecked = (this.selectedChannelIndex !== null ? this.selectedChannelIndex === i : isMatching);
+
+            html += `
+                <tr>
+                    <td style="text-align: center;">
+                        <input type="radio" name="channel-selection" value="${i}" ${isChecked ? 'checked' : ''} />
+                    </td>
+                    <td>${channelName}</td>
+                    <td>${instrumentName.replace(/_/g, ' ')}</td>
+                </tr>
+            `;
+        }
+
+        this.channelsTbody.innerHTML = html;
+
+        // If no manual selection has been made, use auto-selected channel
+        if (this.selectedChannelIndex === null && autoSelectedIndex !== null) {
+            this.selectedChannelIndex = autoSelectedIndex;
+        }
+
+        // Add event listeners to radio buttons
+        const radioButtons = this.channelsTbody.querySelectorAll('input[type="radio"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                this.selectedChannelIndex = parseInt(e.target.value);
+                this.applyBalance(); // Reapply balance with new selection
+            });
+        });
     }
 
     switchTab(tabName) {
@@ -430,7 +484,7 @@ class MIDIPlayer {
 
     updateWorkDisplay() {
         if (this.selectedComposer && this.selectedWork) {
-            this.currentWorkDisplay.textContent = `${this.selectedComposer} - ${this.selectedWork}`;
+            this.currentWorkDisplay.textContent = `${this.selectedComposer}, ${this.selectedWork}`;
             this.updateShareableURL();
         } else {
             this.currentWorkDisplay.textContent = 'No work selected';
@@ -443,18 +497,25 @@ class MIDIPlayer {
             const composerSlug = this.selectedComposer.toLowerCase().replace(/\s+/g, '-');
             const workSlug = this.selectedWork.toLowerCase().replace(/\s+/g, '-');
             const url = `${window.location.origin}/${composerSlug}/${workSlug}`;
-            this.shareableUrlInput.value = url;
-            this.shareableUrlSection.style.display = 'block';
+
+            // Update Settings tab shareable URL
+            this.shareableUrlInputSettings.value = url;
+            this.shareableUrlSectionSettings.style.display = 'block';
+            this.noWorkSelectedMsg.style.display = 'none';
+        } else {
+            // Hide shareable URL section if no work selected
+            this.shareableUrlSectionSettings.style.display = 'none';
+            this.noWorkSelectedMsg.style.display = 'block';
         }
     }
 
     async copyShareableURL() {
         try {
-            await navigator.clipboard.writeText(this.shareableUrlInput.value);
-            const originalText = this.copyUrlBtn.textContent;
-            this.copyUrlBtn.textContent = '✓ Copied!';
+            await navigator.clipboard.writeText(this.shareableUrlInputSettings.value);
+            const originalText = this.copyUrlBtnSettings.textContent;
+            this.copyUrlBtnSettings.textContent = '✓ Copied!';
             setTimeout(() => {
-                this.copyUrlBtn.textContent = originalText;
+                this.copyUrlBtnSettings.textContent = originalText;
             }, 2000);
         } catch (error) {
             console.error('Failed to copy URL:', error);
@@ -545,7 +606,7 @@ class MIDIPlayer {
                     data-movement="${movementJson}"
                     data-midi-url="${midiUrlJson}">
                     <div class="result-main">${movement.movement}</div>
-                    <div class="result-sub">${movement.composer} - ${movement.work}</div>
+                    <div class="result-sub">${movement.composer}, ${movement.work}</div>
                 </div>`;
             });
         }
@@ -736,7 +797,7 @@ class MIDIPlayer {
             this.recentWorksSelect.innerHTML = '<option value="">Choose a recent work...</option>' +
                 recentToShow.map(item =>
                     `<option value='${JSON.stringify({ composer: item.composer, work: item.work })}'>
-                        ${item.composer} - ${item.work}
+                        ${item.composer}, ${item.work}
                     </option>`
                 ).join('');
             this.recentWorksDropdown.style.display = 'block';
@@ -870,8 +931,15 @@ class MIDIPlayer {
             if (this.loopEndSlider) this.loopEndSlider.value = 100;
             this.updateLoopDisplay();
 
-            // Update channel selector based on voice part
-            this.updateChannelSelector();
+            // Update channels list based on voice part
+            this.updateChannelsList();
+
+            // Update the current movement name display with composer, work, and movement
+            if (title && this.selectedComposer && this.selectedWork) {
+                this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
+            } else if (title) {
+                this.currentMovementName.textContent = title;
+            }
 
             this.showStatus('MIDI file loaded successfully!', 'success');
 

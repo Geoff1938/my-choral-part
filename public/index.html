@@ -20,6 +20,7 @@
         <nav class="tab-nav">
             <button class="tab-button" data-tab="find-music" title="Search for composers and their works">Find Music</button>
             <button class="tab-button active" data-tab="play-music" title="Play and practice with selected music">Play Music</button>
+            <button class="tab-button" data-tab="settings" title="Configure your preferences">Settings</button>
         </nav>
 
         <main>
@@ -73,42 +74,17 @@
 
                     <!-- Recent Works Dropdown -->
                     <div class="control-group" id="recent-works-dropdown" style="display: none;">
-                        <label for="recent-works-select">Recent Works:</label>
+                        <label for="recent-works-select">Recently played works:</label>
                         <select id="recent-works-select" aria-label="Select from recent works" title="Quickly switch to a recently practiced work">
                             <option value="">Choose a recent work...</option>
                         </select>
                     </div>
-
-                    <!-- Voice Part Selection -->
-                    <div class="control-group">
-                        <label for="voice-part" title="Select which voice part you sing">My Voice Part:</label>
-                        <select id="voice-part" aria-label="Select your voice part" title="Select your voice part to adjust the balance - your part will be highlighted">
-                            <option value="soprano">Soprano (Piccolo)</option>
-                            <option value="alto">Alto (Clarinet)</option>
-                            <option value="tenor">Tenor (French Horn)</option>
-                            <option value="bass">Bass (Bassoon)</option>
-                        </select>
-                    </div>
-
-                    <!-- Channel Selector (when multiple channels match voice part) -->
-                    <div class="control-group" id="channel-selector-container" style="display: none;">
-                        <label for="channel-selector" title="Select which specific channel to highlight">Which one:</label>
-                        <select id="channel-selector" aria-label="Select specific channel" title="When multiple parts match your voice type, choose which one is yours">
-                            <!-- Dynamically populated -->
-                        </select>
-                    </div>
                 </div>
 
-                <!-- Work Info and Shareable URL -->
+                <!-- Work Info -->
                 <div class="work-info-section">
                     <div class="work-title">
                         <h2 id="current-work-display">No work selected</h2>
-                    </div>
-                    <div class="shareable-url-section" id="shareable-url-section" style="display: none;">
-                        <div class="url-copy-container">
-                            <input type="text" id="shareable-url" readonly aria-label="Shareable URL" title="Share this URL with others to let them practice the same piece">
-                            <button id="copy-url-btn" class="btn btn-small btn-icon" title="Copy URL to clipboard">📋</button>
-                        </div>
                     </div>
                 </div>
 
@@ -205,7 +181,7 @@
 
                     <!-- Balance Control -->
                     <div class="balance-control">
-                        <label for="balance-slider" title="Adjust the balance between your part and the other parts">My Part Balance: <span id="balance-value">0</span></label>
+                        <label for="balance-slider" id="balance-label" title="Adjust the balance between your part and the other parts. Change your voice part via Settings.">My Part (<span id="balance-voice-part">Soprano</span>) Balance: <span id="balance-value">0</span></label>
                         <div class="balance-labels">
                             <span>Others Louder</span>
                             <span>Equal</span>
@@ -221,12 +197,73 @@
                                 step="5"
                                 class="styled-slider"
                                 aria-label="Balance between your part and others"
-                                title="Balance your part vs. others - left=hear others better, center=equal, right=hear your part better"
+                                title="Balance your part vs. others - left=hear others better, center=equal, right=hear your part better. Change your voice part via Settings."
                             >
                             <div class="slider-track"></div>
                         </div>
                     </div>
                 </section>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings-tab">
+                <h2>Settings</h2>
+
+                <!-- Voice Part Selection -->
+                <div class="settings-section">
+                    <h3>Your voice part</h3>
+                    <div class="control-group">
+                        <select id="voice-part-settings" aria-label="Select your voice part" title="Select your voice part to adjust the balance - your part will be highlighted">
+                            <option value="soprano">Soprano (piccolo)</option>
+                            <option value="alto">Alto (clarinet)</option>
+                            <option value="tenor">Tenor (french horn)</option>
+                            <option value="bass">Bass (bassoon)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Currently Selected Movement and Channel Selection -->
+                <div class="settings-section" id="movement-channels-section" style="display: none;">
+                    <h3>Currently selected midi file – <span id="current-movement-name">-</span></h3>
+
+                    <p id="channels-not-loaded-msg" style="color: #666; margin-top: 10px;">Click Play to load the MIDI file and see available channels</p>
+
+                    <div class="channels-list" id="channels-list-container" style="display: none;">
+                        <p style="margin-bottom: 10px;">Override which channel represents your part in this midi file:</p>
+                        <table class="channels-table">
+                            <thead>
+                                <tr>
+                                    <th>Your Part</th>
+                                    <th>Channel name</th>
+                                    <th>Instrument</th>
+                                </tr>
+                            </thead>
+                            <tbody id="channels-tbody">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Shareable URL Section -->
+                <div class="settings-section">
+                    <h3>Share This Work</h3>
+                    <div class="shareable-url-section" id="shareable-url-section-settings" style="display: none;">
+                        <p>Share this URL with others to let them practice the same piece:</p>
+                        <div class="url-copy-container">
+                            <input type="text" id="shareable-url-settings" readonly aria-label="Shareable URL" title="Share this URL with others">
+                            <button id="copy-url-btn-settings" class="btn btn-small btn-icon" title="Copy URL to clipboard">📋</button>
+                        </div>
+                    </div>
+                    <p id="no-work-selected-msg" style="color: #666;">No work currently selected</p>
+                </div>
+
+                <!-- Copyright Notice -->
+                <div class="settings-section copyright-section">
+                    <h3>Copyright Notice</h3>
+                    <p>The MIDI files used by this player were created by John Hooper and he is the Copyright owner. They may be used for the purpose of private individuals rehearsing music but not for any other purpose without prior written permission from John Hooper.</p>
+                    <p>For more information please visit <a href="https://www.learnchoralmusic.co.uk/" target="_blank" rel="noopener noreferrer">https://www.learnchoralmusic.co.uk/</a></p>
+                </div>
             </div>
         </main>
 

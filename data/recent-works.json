@@ -1,5 +1,15 @@
 [
   {
+    "composer": "Rutter   -  not publicly             available",
+    "work": "The Rutter Collection",
+    "timestamp": "2025-10-28T09:11:51.800Z"
+  },
+  {
+    "composer": "Alessandro Scarlatti",
+    "work": "Magnificat",
+    "timestamp": "2025-10-28T09:00:38.007Z"
+  },
+  {
     "composer": "Archer",
     "work": "Requiem",
     "timestamp": "2025-10-28T08:23:28.374Z"
@@ -13,15 +23,5 @@
     "composer": "Handel",
     "work": "Nabal",
     "timestamp": "2025-10-28T08:14:10.270Z"
-  },
-  {
-    "composer": "Bach, JS",
-    "work": "Sheep may safely graze (BWV 208) - James Winfield arrangement",
-    "timestamp": "2025-10-28T08:13:48.901Z"
-  },
-  {
-    "composer": "Alessandro Scarlatti",
-    "work": "Magnificat",
-    "timestamp": "2025-10-28T08:13:16.884Z"
   }
 ]
