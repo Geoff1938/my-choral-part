@@ -134,8 +134,22 @@ app.get('/proxy', async (req, res) => {
   // Choose http or https based on protocol
   const protocol = parsedUrl.protocol === 'https:' ? https : http;
 
-  // Fetch the MIDI file with timeout
-  const request = protocol.get(midiUrl, { timeout: 10000 }, (midiRes) => {
+  // Configure request options with browser-like headers to avoid blocking
+  const requestOptions = {
+    timeout: 10000,
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'audio/midi,audio/*,*/*',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Referer': 'https://www.learnchoralmusic.co.uk/',
+      'Connection': 'keep-alive',
+      'Cache-Control': 'no-cache'
+    }
+  };
+
+  // Fetch the MIDI file with browser-like headers
+  const request = protocol.get(midiUrl, requestOptions, (midiRes) => {
     if (midiRes.statusCode !== 200) {
       console.error(`MIDI fetch failed: ${midiRes.statusCode} ${midiRes.statusMessage} for ${midiUrl}`);
       let errorMsg = `Failed to fetch MIDI file: ${midiRes.statusCode} ${midiRes.statusMessage}`;

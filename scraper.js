@@ -10,6 +10,19 @@ class ChoralMusicScraper {
     this.dataFile = path.join(__dirname, 'data', 'midi-index-full.json'); // Full index (all composers)
     this.initialIndexFile = path.join(__dirname, 'data', 'initial-index.json'); // Initial index (A composers only)
     this.recentWorksFile = path.join(__dirname, 'data', 'recent-works.json');
+
+    // Configure axios with browser-like headers to avoid blocking
+    this.axiosConfig = {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Referer': 'https://www.learnchoralmusic.co.uk/',
+        'Connection': 'keep-alive',
+        'Cache-Control': 'no-cache'
+      }
+    };
   }
 
   // Helper function to convert absolute URL to relative (removes base URL)
@@ -50,9 +63,9 @@ class ChoralMusicScraper {
 
   async scrapeComposerList() {
     console.log('Starting to scrape composer list...');
-    
+
     try {
-      const response = await axios.get(this.composerListUrl);
+      const response = await axios.get(this.composerListUrl, this.axiosConfig);
       const $ = cheerio.load(response.data);
       
       const composers = [];
@@ -130,7 +143,7 @@ class ChoralMusicScraper {
       }
       visitedUrls.add(workUrl);
 
-      const response = await axios.get(fullUrl);
+      const response = await axios.get(fullUrl, this.axiosConfig);
       const $ = cheerio.load(response.data);
 
       const sections = [];
