@@ -100,6 +100,12 @@ function createApiRoutes(scraper) {
     }
   });
 
+  // Catch-all 404 handler for unknown API routes
+  // This prevents API routes from falling through to the main app's catch-all route
+  router.use((req, res) => {
+    res.status(404).json({ error: 'API endpoint not found' });
+  });
+
   return router;
 }
 

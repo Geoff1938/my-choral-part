@@ -45,45 +45,48 @@ app.use(notFoundHandler);
 // Error handling middleware - must be last
 app.use(errorHandler);
 
-app.listen(PORT, async () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Visit http://localhost:${PORT}`);
+// Only start server if not being required by another module (e.g., tests)
+if (require.main === module) {
+  app.listen(PORT, async () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log(`Visit http://localhost:${PORT}`);
 
-  // Initialize scraper
-  console.log('Initializing MIDI index scraper...');
+    // Initialize scraper
+    console.log('Initializing MIDI index scraper...');
 
-  // Ensure initial index is copied to data directory
-  // (This handles Render's persistent disk mount which starts empty)
-  await scraper.ensureInitialIndex();
+    // Ensure initial index is copied to data directory
+    // (This handles Render's persistent disk mount which starts empty)
+    await scraper.ensureInitialIndex();
 
-  // Check if index already exists
-  const existingIndex = await scraper.loadIndex();
+    // Check if index already exists
+    const existingIndex = await scraper.loadIndex();
 
-  if (existingIndex.length === 0) {
-    console.log('No existing index found. Using initial index only (A composers).');
-  } else {
-    console.log(`Loaded existing index with ${existingIndex.length} composers`);
-  }
+    if (existingIndex.length === 0) {
+      console.log('No existing index found. Using initial index only (A composers).');
+    } else {
+      console.log(`Loaded existing index with ${existingIndex.length} composers`);
+    }
 
-  // Background indexing strategy:
-  // - The full index is pre-built locally (run: npm run build-index)
-  // - The pre-built index is committed to the repository
-  // - Render uses the pre-built index (no scraping on startup)
-  // - Optional: Schedule weekly updates with long delays to stay current
+    // Background indexing strategy:
+    // - The full index is pre-built locally (run: npm run build-index)
+    // - The pre-built index is committed to the repository
+    // - Render uses the pre-built index (no scraping on startup)
+    // - Optional: Schedule weekly updates with long delays to stay current
 
-  console.log('Using pre-built index. Background scraping disabled.');
+    console.log('Using pre-built index. Background scraping disabled.');
 
-  // Optional: Uncomment to enable weekly index updates (runs every 7 days)
-  // This is disabled by default to avoid rate limiting
-  /*
-  const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
-  setInterval(() => {
-    console.log('Starting weekly index update...');
-    scraper.buildIndexInBackground(false);
-  }, ONE_WEEK);
-  console.log('Weekly index updates enabled (runs every 7 days).');
-  */
-});
+    // Optional: Uncomment to enable weekly index updates (runs every 7 days)
+    // This is disabled by default to avoid rate limiting
+    /*
+    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+    setInterval(() => {
+      console.log('Starting weekly index update...');
+      scraper.buildIndexInBackground(false);
+    }, ONE_WEEK);
+    console.log('Weekly index updates enabled (runs every 7 days).');
+    */
+  });
+}
 
 // Export app for testing
 module.exports = app;

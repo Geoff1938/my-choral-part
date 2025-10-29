@@ -1,16 +1,16 @@
-// Example integration test - Server API endpoints
-// NOTE: This requires 'supertest' package: npm install --save-dev supertest
+/**
+ * Integration tests for Server API endpoints
+ * Tests all routes and error handling
+ */
 
 const request = require('supertest');
 
-// Mock the server without starting it
-// You'll need to export 'app' from server.js: module.exports = app;
 describe('API Integration Tests', () => {
   let app;
 
   beforeAll(() => {
-    // Load the Express app
-    // app = require('../../server');
+    // Load the Express app (server.js exports the app)
+    app = require('../../server');
   });
 
   describe('GET /api/index', () => {
@@ -67,7 +67,7 @@ describe('API Integration Tests', () => {
   describe('GET /api/composer/:composerName/works', () => {
     test('returns works for existing composer', async () => {
       const response = await request(app)
-        .get('/api/composer/Bach/works');
+        .get('/api/composer/Bach, JS/works');
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
