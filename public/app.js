@@ -31,6 +31,11 @@ import {
     volumePercentToDb
 } from './utils/formatters.js';
 
+// Import helper modules
+import { InstrumentLoader } from './player/InstrumentLoader.js';
+import { StatusManager } from './ui/StatusManager.js';
+import { RecentWorksManager } from './api/RecentWorksManager.js';
+
 class MIDIPlayer {
     constructor() {
         // Base URL for all MIDI files (stored separately to reduce JSON size)
@@ -62,6 +67,12 @@ class MIDIPlayer {
         this.voicePartInstruments = VOICE_TO_INSTRUMENT;
 
         this.initializeElements();
+
+        // Initialize helper modules
+        this.instrumentLoader = new InstrumentLoader(this.maxCacheSize);
+        this.statusManager = new StatusManager(this.loadingStatus);
+        this.recentWorksManager = new RecentWorksManager();
+
         this.loadPreferences();
         this.attachEventListeners();
         this.initializeAudioContext(); // Initialize audio context on first user interaction
@@ -910,8 +921,8 @@ class MIDIPlayer {
 
     async loadRecentWorks() {
         try {
-            const response = await fetch('/api/recent-works');
-            const recentWorks = await response.json();
+            // Load recent works using RecentWorksManager
+            const recentWorks = await this.recentWorksManager.loadFromServer();
 
             if (recentWorks.length === 0) {
                 this.recentWorksDropdown.style.display = 'none';
@@ -935,11 +946,8 @@ class MIDIPlayer {
 
     async saveRecentWork(composer, work) {
         try {
-            await fetch('/api/recent-works', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ composer, work })
-            });
+            // Save recent work using RecentWorksManager
+            await this.recentWorksManager.saveToServer(composer, work);
             // Reload recent works list
             await this.loadRecentWorks();
         } catch (error) {
@@ -948,14 +956,8 @@ class MIDIPlayer {
     }
 
     showStatus(message, type = 'info') {
-        this.loadingStatus.textContent = message;
-        this.loadingStatus.className = `status-message show ${type}`;
-
-        if (type === 'success') {
-            setTimeout(() => {
-                this.loadingStatus.classList.remove('show');
-            }, 3000);
-        }
+        // Delegate to StatusManager
+        this.statusManager.show(message, type);
     }
 
     async fetchWithRetry(url, maxRetries = 3, timeoutMs = TIMEOUTS.MIDI_FETCH) {
@@ -1288,59 +1290,13 @@ class MIDIPlayer {
     }
 
     getInstrumentName(track) {
-        // MIDI General MIDI instrument mapping
-        // If track has instrument info, use it
-        if (track.instrument) {
-            const program = track.instrument.number;
-            return this.midiProgramToInstrument(program);
-        }
-
-        // Default to acoustic_grand_piano
-        return 'acoustic_grand_piano';
+        // Delegate to InstrumentLoader
+        return this.instrumentLoader.getInstrumentName(track);
     }
 
     midiProgramToInstrument(program) {
-        // General MIDI instrument names (program 0-127)
-        const gmInstruments = [
-            'acoustic_grand_piano', 'bright_acoustic_piano', 'electric_grand_piano', 'honkytonk_piano',
-            'electric_piano_1', 'electric_piano_2', 'harpsichord', 'clavinet',
-            'celesta', 'glockenspiel', 'music_box', 'vibraphone',
-            'marimba', 'xylophone', 'tubular_bells', 'dulcimer',
-            'drawbar_organ', 'percussive_organ', 'rock_organ', 'church_organ',
-            'reed_organ', 'accordion', 'harmonica', 'tango_accordion',
-            'acoustic_guitar_nylon', 'acoustic_guitar_steel', 'electric_guitar_jazz', 'electric_guitar_clean',
-            'electric_guitar_muted', 'overdriven_guitar', 'distortion_guitar', 'guitar_harmonics',
-            'acoustic_bass', 'electric_bass_finger', 'electric_bass_pick', 'fretless_bass',
-            'slap_bass_1', 'slap_bass_2', 'synth_bass_1', 'synth_bass_2',
-            'violin', 'viola', 'cello', 'contrabass',
-            'tremolo_strings', 'pizzicato_strings', 'orchestral_harp', 'timpani',
-            'string_ensemble_1', 'string_ensemble_2', 'synth_strings_1', 'synth_strings_2',
-            'choir_aahs', 'voice_oohs', 'synth_choir', 'orchestra_hit',
-            'trumpet', 'trombone', 'tuba', 'muted_trumpet',
-            'french_horn', 'brass_section', 'synth_brass_1', 'synth_brass_2',
-            'soprano_sax', 'alto_sax', 'tenor_sax', 'baritone_sax',
-            'oboe', 'english_horn', 'bassoon', 'clarinet',
-            'piccolo', 'flute', 'recorder', 'pan_flute',
-            'blown_bottle', 'shakuhachi', 'whistle', 'ocarina',
-            'lead_1_square', 'lead_2_sawtooth', 'lead_3_calliope', 'lead_4_chiff',
-            'lead_5_charang', 'lead_6_voice', 'lead_7_fifths', 'lead_8_bass_lead',
-            'pad_1_new_age', 'pad_2_warm', 'pad_3_polysynth', 'pad_4_choir',
-            'pad_5_bowed', 'pad_6_metallic', 'pad_7_halo', 'pad_8_sweep',
-            'fx_1_rain', 'fx_2_soundtrack', 'fx_3_crystal', 'fx_4_atmosphere',
-            'fx_5_brightness', 'fx_6_goblins', 'fx_7_echoes', 'fx_8_scifi',
-            'sitar', 'banjo', 'shamisen', 'koto',
-            'kalimba', 'bagpipe', 'fiddle', 'shanai',
-            'tinkle_bell', 'agogo', 'steel_drums', 'woodblock',
-            'taiko_drum', 'melodic_tom', 'synth_drum', 'reverse_cymbal',
-            'guitar_fret_noise', 'breath_noise', 'seashore', 'bird_tweet',
-            'telephone_ring', 'helicopter', 'applause', 'gunshot'
-        ];
-
-        if (program >= 0 && program < gmInstruments.length) {
-            return gmInstruments[program];
-        }
-
-        return 'acoustic_grand_piano';
+        // Delegate to InstrumentLoader
+        return this.instrumentLoader.midiProgramToInstrument(program);
     }
 
     updateMIDIInfo() {
@@ -1708,71 +1664,21 @@ class MIDIPlayer {
 
     // Add instrument to cache with LRU eviction
     addToInstrumentCache(instrumentName, instrument) {
-        // If cache is full, remove oldest entry (first entry in Map)
+        // Delegate to InstrumentLoader
+        this.instrumentLoader.addToCache(instrumentName, instrument);
+        // Also keep local cache for compatibility
         if (this.instrumentCache.size >= this.maxCacheSize) {
             const firstKey = this.instrumentCache.keys().next().value;
             this.instrumentCache.delete(firstKey);
         }
-
         this.instrumentCache.set(instrumentName, instrument);
     }
 
     // Pre-load common instruments in the background to speed up playback
     async preloadCommonInstruments() {
-        // Top 5 most commonly used instruments based on MIDI file analysis
-        const commonInstruments = [
-            'acoustic_grand_piano',  // Most common - 98 uses in "A" composers
-            'piccolo',               // Soprano part
-            'clarinet',              // Alto part
-            'french_horn',           // Tenor part
-            'bassoon'                // Bass part
-        ];
-
-        // Load sequentially with delays to avoid overwhelming mobile devices
-        // Don't await - let this happen in the background
-        (async () => {
-            for (const instrumentName of commonInstruments) {
-                try {
-                    // Skip if already in cache
-                    if (this.instrumentCache.has(instrumentName)) {
-                        continue;
-                    }
-
-                    // Load instrument with temporary gain node to trigger browser HTTP cache
-                    const audioContext = Tone.context.rawContext;
-                    const tempGainNode = audioContext.createGain();
-                    tempGainNode.connect(audioContext.destination);
-                    tempGainNode.gain.value = 0; // Silent - just for caching
-
-                    // Add timeout to prevent hanging
-                    const loadPromise = Soundfont.instrument(audioContext, instrumentName, {
-                        soundfont: 'FluidR3_GM',
-                        destination: tempGainNode,
-                        nameToUrl: (name, soundfont, format) => {
-                            format = format === 'ogg' ? format : 'mp3';
-                            return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
-                        }
-                    });
-
-                    // Timeout after 10 seconds
-                    const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Preload timeout')), TIMEOUTS.INSTRUMENT_LOAD)
-                    );
-
-                    await Promise.race([loadPromise, timeoutPromise]);
-
-                    // Disconnect the temp gain node
-                    tempGainNode.disconnect();
-
-                    // Small delay between loads to avoid overwhelming device
-                    await new Promise(resolve => setTimeout(resolve, 500));
-
-                } catch (error) {
-                    // Silently fail - pre-loading is a performance optimization, not critical
-                    console.log(`Pre-load of ${instrumentName} failed, will load on demand:`, error.message);
-                }
-            }
-        })();
+        // Delegate to InstrumentLoader
+        const audioContext = Tone.context.rawContext;
+        this.instrumentLoader.preloadCommonInstruments(audioContext);
     }
 
     cleanup() {

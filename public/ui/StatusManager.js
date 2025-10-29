@@ -20,11 +20,13 @@ export class StatusManager {
         if (!this.statusElement) return;
 
         this.statusElement.textContent = message;
-        this.statusElement.className = `status ${type}`;
+        this.statusElement.className = `status-message show ${type}`;
 
-        // Auto-hide success messages after 5 seconds
+        // Auto-hide success messages after 3 seconds
         if (type === 'success') {
-            setTimeout(() => this.clear(), 5000);
+            setTimeout(() => {
+                this.statusElement.classList.remove('show');
+            }, 3000);
         }
     }
 
