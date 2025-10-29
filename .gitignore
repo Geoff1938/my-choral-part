@@ -32,5 +32,9 @@ build/
 # Note: midi-index-full.json is now committed (pre-built index)
 data/recent-works.json
 
+# Test output files
+midi-test-results*.csv
+instrument-statistics*.csv
+
 # Claude Code configuration
 .claude/

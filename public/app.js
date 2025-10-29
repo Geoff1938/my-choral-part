@@ -1707,6 +1707,36 @@ class MIDIPlayer {
     }
 }
 
+// Register service worker for caching soundfonts
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+                console.log('[App] Service Worker registered successfully:', registration.scope);
+
+                // Request persistent storage to reduce eviction risk
+                if (navigator.storage && navigator.storage.persist) {
+                    navigator.storage.persist().then((persistent) => {
+                        console.log(`[App] Persistent storage granted: ${persistent}`);
+                    });
+                }
+
+                // Listen for updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('[App] New service worker available - will update on next reload');
+                        }
+                    });
+                });
+            })
+            .catch((error) => {
+                console.warn('[App] Service Worker registration failed:', error);
+            });
+    });
+}
+
 // Initialize the player when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.midiPlayer = new MIDIPlayer();
