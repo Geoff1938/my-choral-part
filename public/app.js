@@ -38,7 +38,7 @@ class MIDIPlayer {
         this.loadPreferences();
         this.attachEventListeners();
         this.initializeAudioContext(); // Initialize audio context on first user interaction
-        this.loadDefaultWork(); // Load JS Bach - Mass in B Minor by default
+        this.loadDefaultWork(); // Load most recent work or Alessandro Scarlatti - Magnificat by default
         this.loadRecentWorks();
         this.checkURLRoute();
     }
@@ -163,41 +163,104 @@ class MIDIPlayer {
         }
     }
 
-    loadDefaultWork() {
-        // Load default work: Handel - Messiah
+    async loadDefaultWork() {
+        // Try to load the most recent work first, otherwise load Alessandro Scarlatti - Magnificat
         // This provides immediate usability when the app loads
-        this.selectedComposer = 'Handel';
-        this.selectedWork = 'Messiah';
+        try {
+            // Check if there are recent works
+            const response = await fetch('/api/recent-works');
+            const recentWorks = await response.json();
 
-        // Hardcoded movement for Messiah - Hallelujah (using relative URL)
-        const defaultMovements = [
-            { name: 'Hallelujah', midiUrl: '/Handel/Messiah/42-allel.mid' }
-        ];
+            let composer, work, movements;
 
-        // Populate movement dropdown
-        this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
-            defaultMovements.map(movement =>
-                `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
-            ).join('');
+            if (recentWorks && recentWorks.length > 0) {
+                // Load the most recent work
+                const mostRecent = recentWorks[0];
+                composer = mostRecent.composer;
+                work = mostRecent.work;
 
-        // Auto-select Hallelujah in the dropdown
-        this.movementSelect.selectedIndex = 1;
+                // Fetch movements for this work
+                const movementsResponse = await fetch(`/api/composer/${encodeURIComponent(composer)}/work/${encodeURIComponent(work)}/sections`);
+                movements = await movementsResponse.json();
+            } else {
+                // No recent works - load Alessandro Scarlatti - Magnificat as default
+                composer = 'Alessandro Scarlatti';
+                work = 'Magnificat';
 
-        this.updateWorkDisplay();
+                // Hardcoded movements for Alessandro Scarlatti - Magnificat (all use cached instruments)
+                movements = [
+                    { name: '1: Magnificat', midiUrl: '/Scarlatti/Magnificat/1-Magnificat.mid' },
+                    { name: '2: Fecit potentiam', midiUrl: '/Scarlatti/Magnificat/2-Fecit.mid' },
+                    { name: '3: Esurientes implevit bonis', midiUrl: '/Scarlatti/Magnificat/3-Esurientes.mid' },
+                    { name: '4: Gloria Patri et Filio', midiUrl: '/Scarlatti/Magnificat/4-Gloria.mid' }
+                ];
+            }
 
-        // Update the currently selected movement display on Settings tab
-        if (this.currentMovementName) {
-            this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - Hallelujah`;
+            // Check if this work is copyright-protected
+            if (movements.length > 0) {
+                const firstMovementUrl = movements[0].midiUrl;
+                if (firstMovementUrl.endsWith('.html') || firstMovementUrl.endsWith('.htm')) {
+                    // This work is copyright-protected, fall back to Scarlatti
+                    composer = 'Alessandro Scarlatti';
+                    work = 'Magnificat';
+                    movements = [
+                        { name: '1: Magnificat', midiUrl: '/Scarlatti/Magnificat/1-Magnificat.mid' },
+                        { name: '2: Fecit potentiam', midiUrl: '/Scarlatti/Magnificat/2-Fecit.mid' },
+                        { name: '3: Esurientes implevit bonis', midiUrl: '/Scarlatti/Magnificat/3-Esurientes.mid' },
+                        { name: '4: Gloria Patri et Filio', midiUrl: '/Scarlatti/Magnificat/4-Gloria.mid' }
+                    ];
+                }
+            }
+
+            this.selectedComposer = composer;
+            this.selectedWork = work;
+
+            // Populate movement dropdown with all movements
+            this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
+                movements.map(movement =>
+                    `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
+                ).join('');
+
+            // Auto-select the first movement in the dropdown
+            this.movementSelect.selectedIndex = 1;
+
+            this.updateWorkDisplay();
+
+            // Update the currently selected movement display on Settings tab
+            if (this.currentMovementName) {
+                const firstMovementName = movements[0].name;
+                this.currentMovementName.textContent = `${composer}, ${work} - ${firstMovementName}`;
+            }
+            if (this.movementChannelsSection) {
+                this.movementChannelsSection.style.display = 'block';
+            }
+
+            // Update channels list to show the "Click Play to load..." message
+            this.updateChannelsList();
+
+            // Don't auto-load on page load - let user click play when ready
+            // This prevents errors on slower connections or during initialization
+        } catch (error) {
+            console.error('Error loading default work:', error);
+            // Fall back to hardcoded Scarlatti if API fails
+            this.selectedComposer = 'Alessandro Scarlatti';
+            this.selectedWork = 'Magnificat';
+
+            const fallbackMovements = [
+                { name: '1: Magnificat', midiUrl: '/Scarlatti/Magnificat/1-Magnificat.mid' },
+                { name: '2: Fecit potentiam', midiUrl: '/Scarlatti/Magnificat/2-Fecit.mid' },
+                { name: '3: Esurientes implevit bonis', midiUrl: '/Scarlatti/Magnificat/3-Esurientes.mid' },
+                { name: '4: Gloria Patri et Filio', midiUrl: '/Scarlatti/Magnificat/4-Gloria.mid' }
+            ];
+
+            this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
+                fallbackMovements.map(movement =>
+                    `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
+                ).join('');
+
+            this.movementSelect.selectedIndex = 1;
+            this.updateWorkDisplay();
         }
-        if (this.movementChannelsSection) {
-            this.movementChannelsSection.style.display = 'block';
-        }
-
-        // Update channels list to show the "Click Play to load..." message
-        this.updateChannelsList();
-
-        // Don't auto-load on page load - let user click play when ready
-        // This prevents errors on slower connections or during initialization
     }
 
     attachEventListeners() {
