@@ -3,7 +3,14 @@ const cheerio = require('cheerio');
 const fs = require('fs-extra');
 const path = require('path');
 
+/**
+ * Choral Music Scraper
+ * Scrapes MIDI file metadata from learnchoralmusic.co.uk and provides search/query APIs
+ */
 class ChoralMusicScraper {
+  /**
+   * Initialize the scraper with configuration
+   */
   constructor() {
     this.baseUrl = 'https://www.learnchoralmusic.co.uk';
     this.composerListUrl = `${this.baseUrl}/complist.html#list`;
@@ -37,6 +44,11 @@ class ChoralMusicScraper {
     await fs.ensureDir(path.dirname(this.dataFile));
   }
 
+  /**
+   * Ensure the initial index file exists in the data directory
+   * Copies from template if needed (important for Render's ephemeral filesystem)
+   * @returns {Promise<void>}
+   */
   async ensureInitialIndex() {
     // Ensure data directory exists
     await this.initializeDataDirectory();
@@ -324,6 +336,14 @@ class ChoralMusicScraper {
     }
   }
 
+  /**
+   * Load the MIDI index from disk
+   * Tries full index first, falls back to initial index (A composers) if full index unavailable
+   * @returns {Promise<Array>} Array of composer objects with works and sections
+   * @example
+   * const index = await scraper.loadIndex();
+   * // Returns: [{ name: "Bach", works: [...] }, ...]
+   */
   async loadIndex() {
     try {
       // Try loading the full index first
@@ -350,6 +370,14 @@ class ChoralMusicScraper {
     return [];
   }
 
+  /**
+   * Search for composers by name (substring match, case-insensitive)
+   * @param {string} searchTerm - Search query
+   * @returns {Promise<Array>} Array of matching composers
+   * @example
+   * const results = await scraper.searchComposers('bach');
+   * // Returns: [{ name: "Bach", works: [...] }, { name: "Offenbach", ... }]
+   */
   async searchComposers(searchTerm) {
     const index = await this.loadIndex();
     const searchLower = searchTerm.toLowerCase();
@@ -359,7 +387,19 @@ class ChoralMusicScraper {
     );
   }
 
-  // Advanced search that matches word beginnings only and searches across multiple categories
+  /**
+   * Advanced search across composers, works, and movements
+   * Matches word beginnings only (e.g., "mag" matches "Magnificat" but not "Image")
+   * @param {string} searchTerms - Space-separated search terms (all must match)
+   * @param {Object} options - Search options
+   * @param {boolean} options.composers - Search composer names (default: true)
+   * @param {boolean} options.works - Search work names (default: false)
+   * @param {boolean} options.movements - Search movement/section names (default: false)
+   * @returns {Promise<Object>} Object with arrays: { composers, works, movements }
+   * @example
+   * const results = await scraper.advancedSearch('bach mag', { works: true });
+   * // Returns: { composers: [], works: [{ composer: "Bach", work: "Magnificat" }], movements: [] }
+   */
   async advancedSearch(searchTerms, options = { composers: true, works: false, movements: false }) {
     const index = await this.loadIndex();
     const results = {
@@ -446,21 +486,44 @@ class ChoralMusicScraper {
     return results;
   }
 
+  /**
+   * Get all works for a specific composer
+   * @param {string} composerName - Exact composer name
+   * @returns {Promise<Array>} Array of works with sections
+   * @example
+   * const works = await scraper.getComposerWorks('Bach');
+   * // Returns: [{ name: "Mass in B Minor", sections: [...] }, ...]
+   */
   async getComposerWorks(composerName) {
     const index = await this.loadIndex();
     const composer = index.find(c => c.name === composerName);
     return composer ? composer.works : [];
   }
 
+  /**
+   * Get all sections/movements for a specific work
+   * @param {string} composerName - Exact composer name
+   * @param {string} workName - Exact work name
+   * @returns {Promise<Array>} Array of sections with MIDI URLs
+   * @example
+   * const sections = await scraper.getWorkSections('Bach', 'Mass in B Minor');
+   * // Returns: [{ name: "Kyrie", midiUrl: "/Bach/..." }, ...]
+   */
   async getWorkSections(composerName, workName) {
     const index = await this.loadIndex();
     const composer = index.find(c => c.name === composerName);
     if (!composer) return [];
-    
+
     const work = composer.works.find(w => w.name === workName);
     return work ? work.sections : [];
   }
 
+  /**
+   * Save a work to recent works list (max 5, most recent first)
+   * @param {string} composerName - Composer name
+   * @param {string} workName - Work name
+   * @returns {Promise<Array>} Updated recent works array
+   */
   async saveRecentWork(composerName, workName) {
     await this.initializeDataDirectory();
     
@@ -492,6 +555,13 @@ class ChoralMusicScraper {
     return recentWorks;
   }
 
+  /**
+   * Get recent works list
+   * @returns {Promise<Array>} Array of recent works (max 5, most recent first)
+   * @example
+   * const recent = await scraper.getRecentWorks();
+   * // Returns: [{ composer: "Bach", work: "...", timestamp: "..." }, ...]
+   */
   async getRecentWorks() {
     if (await fs.pathExists(this.recentWorksFile)) {
       try {
