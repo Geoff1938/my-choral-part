@@ -1,0 +1,106 @@
+/**
+ * API Routes
+ * Handles all /api/* endpoints for MIDI index operations
+ */
+
+const express = require('express');
+const router = express.Router();
+
+/**
+ * Initialize routes with scraper instance
+ * @param {ChoralMusicScraper} scraper - Scraper instance
+ * @returns {express.Router} Configured router
+ */
+function createApiRoutes(scraper) {
+  // Get the complete MIDI index
+  router.get('/index', async (req, res, next) => {
+    try {
+      const index = await scraper.loadIndex();
+      res.json(index);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Search composers
+  router.get('/search/composers', async (req, res, next) => {
+    try {
+      const searchTerm = req.query.q || '';
+      const results = await scraper.searchComposers(searchTerm);
+      res.json(results);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Advanced search across composers, works, and movements
+  router.get('/search', async (req, res, next) => {
+    try {
+      const searchTerm = req.query.q || '';
+      const searchComposers = req.query.composers === 'true';
+      const searchWorks = req.query.works === 'true';
+      const searchMovements = req.query.movements === 'true';
+
+      const results = await scraper.advancedSearch(searchTerm, {
+        composers: searchComposers,
+        works: searchWorks,
+        movements: searchMovements
+      });
+
+      res.json(results);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get works for a composer
+  router.get('/composer/:composerName/works', async (req, res, next) => {
+    try {
+      const works = await scraper.getComposerWorks(req.params.composerName);
+      res.json(works);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get sections for a work
+  router.get('/composer/:composerName/work/:workName/sections', async (req, res, next) => {
+    try {
+      const sections = await scraper.getWorkSections(
+        req.params.composerName,
+        req.params.workName
+      );
+      res.json(sections);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get recent works
+  router.get('/recent-works', async (req, res, next) => {
+    try {
+      const recentWorks = await scraper.getRecentWorks();
+      res.json(recentWorks);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Save recent work
+  router.post('/recent-works', async (req, res, next) => {
+    try {
+      const { composer, work } = req.body;
+      if (!composer || !work) {
+        return res.status(400).json({ error: 'Composer and work are required' });
+      }
+      const recentWorks = await scraper.saveRecentWork(composer, work);
+      res.json(recentWorks);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  return router;
+}
+
+module.exports = createApiRoutes;
