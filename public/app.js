@@ -1,8 +1,40 @@
 // MIDI Player Application
+
+// Import constants and utilities
+import {
+    BASE_URL,
+    TIMEOUTS,
+    AUDIO,
+    MEMORY,
+    VOICE_TO_INSTRUMENT,
+    VOICE_PARTS
+} from './constants.js';
+
+import {
+    MIDILoadError,
+    InstrumentLoadError,
+    MemoryError,
+    NetworkError,
+    CopyrightError,
+    TimeoutError,
+    PlaybackError
+} from './errors.js';
+
+import {
+    isMobile,
+    hasLimitedMemory,
+    checkDeviceCapabilities
+} from './utils/deviceDetection.js';
+
+import {
+    formatTime,
+    volumePercentToDb
+} from './utils/formatters.js';
+
 class MIDIPlayer {
     constructor() {
         // Base URL for all MIDI files (stored separately to reduce JSON size)
-        this.baseUrl = 'https://www.learnchoralmusic.co.uk';
+        this.baseUrl = BASE_URL;
 
         this.midi = null;
         this.instruments = [];
@@ -27,12 +59,7 @@ class MIDIPlayer {
         this.maxCacheSize = 30; // Keep up to 30 instruments cached
 
         // Mapping of voice parts to MIDI instrument names
-        this.voicePartInstruments = {
-            soprano: 'piccolo',
-            alto: 'clarinet',
-            tenor: 'french_horn',
-            bass: 'bassoon'
-        };
+        this.voicePartInstruments = VOICE_TO_INSTRUMENT;
 
         this.initializeElements();
         this.loadPreferences();
@@ -67,50 +94,18 @@ class MIDIPlayer {
     checkDeviceCapabilities() {
         // Check device memory and show warning if limited
         // This helps prevent crashes on low-memory devices
-
-        let showWarning = false;
-        let deviceInfo = '';
-
-        // Check 1: Device Memory API (Chrome/Edge only)
-        if (navigator.deviceMemory) {
-            deviceInfo += `Device Memory: ${navigator.deviceMemory}GB`;
-            // Show warning if device has 4GB or less
-            if (navigator.deviceMemory <= 4) {
-                showWarning = true;
-            }
-        }
-
-        // Check 2: Mobile detection
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        if (isMobile) {
-            deviceInfo += (deviceInfo ? ', ' : '') + 'Mobile Device';
-            // Mobile devices are more memory-constrained
-            if (!navigator.deviceMemory || navigator.deviceMemory <= 6) {
-                showWarning = true;
-            }
-        }
-
-        // Check 3: Connection quality (if available)
-        if (navigator.connection) {
-            const effectiveType = navigator.connection.effectiveType;
-            deviceInfo += (deviceInfo ? ', ' : '') + `Connection: ${effectiveType}`;
-        }
+        const capabilities = checkDeviceCapabilities();
 
         // Show warning if device seems limited
-        if (showWarning && this.memoryWarning) {
+        if (capabilities.hasLimitedMemory && this.memoryWarning) {
             this.memoryWarning.style.display = 'block';
-            console.warn('Limited device capabilities detected:', deviceInfo);
-        } else if (deviceInfo) {
-            console.log('Device capabilities:', deviceInfo);
+            console.warn('Limited device capabilities detected:', capabilities.info);
+        } else if (capabilities.info) {
+            console.log('Device capabilities:', capabilities.info);
         }
 
         // Store device info for error handling
-        this.deviceInfo = {
-            hasLimitedMemory: showWarning,
-            isMobile: isMobile,
-            deviceMemory: navigator.deviceMemory,
-            info: deviceInfo
-        };
+        this.deviceInfo = capabilities;
     }
 
     initializeElements() {
@@ -490,7 +485,7 @@ class MIDIPlayer {
 
     updateLoopDisplay() {
         // Update the display text
-        this.loopRangeDisplay.textContent = `${this.formatTime(this.loopStart)} - ${this.formatTime(this.loopEnd)}`;
+        this.loopRangeDisplay.textContent = `${formatTime(this.loopStart)} - ${formatTime(this.loopEnd)}`;
 
         // Update the visual highlight
         const startPercent = (this.loopStart / this.originalDuration) * 100;
@@ -817,7 +812,7 @@ class MIDIPlayer {
             const response = await fetch(`/api/composer/${encodeURIComponent(composerName)}/works`);
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new NetworkError(`HTTP error! status: ${response.status}`, `/api/composer/${composerName}/works`, response.status);
             }
 
             const works = await response.json();
@@ -963,7 +958,7 @@ class MIDIPlayer {
         }
     }
 
-    async fetchWithRetry(url, maxRetries = 3, timeoutMs = 30000) {
+    async fetchWithRetry(url, maxRetries = 3, timeoutMs = TIMEOUTS.MIDI_FETCH) {
         for (let attempt = 0; attempt < maxRetries; attempt++) {
             // Create abort controller for timeout
             const controller = new AbortController();
@@ -978,7 +973,7 @@ class MIDIPlayer {
 
                 // If we get a 429, wait and retry (with longer exponential backoff)
                 if (response.status === 429 && attempt < maxRetries - 1) {
-                    const waitTime = Math.pow(3, attempt) * 10000; // 10s, 30s, 90s
+                    const waitTime = Math.pow(3, attempt) * TIMEOUTS.INSTRUMENT_LOAD; // 10s, 30s, 90s
                     this.showStatus(`Rate limited. Retrying in ${waitTime / 1000} seconds... (attempt ${attempt + 1}/${maxRetries})`, 'info');
                     await new Promise(resolve => setTimeout(resolve, waitTime));
                     continue;
@@ -1001,7 +996,7 @@ class MIDIPlayer {
                 if (error.name === 'AbortError') {
                     console.warn(`Request timeout after ${timeoutMs}ms (attempt ${attempt + 1})`);
                     if (attempt === maxRetries - 1) {
-                        throw new Error(`Request timed out after ${maxRetries} attempts`);
+                        throw new TimeoutError(`Request timed out after ${maxRetries} attempts`, 'fetch');
                     }
                     // Wait before retrying timeout
                     const waitTime = 3000;
@@ -1052,14 +1047,14 @@ class MIDIPlayer {
                 } catch (e) {
                     // Ignore JSON parse errors
                 }
-                throw new Error(errorMsg);
+                throw new MIDILoadError(errorMsg, absoluteMidiUrl);
             }
 
             const arrayBuffer = await response.arrayBuffer();
             this.midi = new Midi(arrayBuffer);
 
             if (!this.midi || !this.midi.tracks || this.midi.tracks.length === 0) {
-                throw new Error('Invalid MIDI file or no tracks found');
+                throw new MIDILoadError('Invalid MIDI file or no tracks found', absoluteMidiUrl);
             }
 
             // Find the earliest note time to skip leading silence
@@ -1352,7 +1347,7 @@ class MIDIPlayer {
         // The title is set by loadMIDIFromURL, so just update the progress UI
         // Update progress duration label and current time
         if (this.progressDuration) {
-            this.progressDuration.textContent = this.formatTime(this.originalDuration);
+            this.progressDuration.textContent = formatTime(this.originalDuration);
         }
         if (this.currentTimeDisplay) {
             this.currentTimeDisplay.textContent = '0:00';
@@ -1534,7 +1529,7 @@ class MIDIPlayer {
         this.currentTime = Math.max(0, Math.min(this.originalDuration, time));
 
         // Update UI
-        this.currentTimeDisplay.textContent = this.formatTime(this.currentTime);
+        this.currentTimeDisplay.textContent = formatTime(this.currentTime);
         this.progressBar.value = (this.currentTime / this.originalDuration) * 100;
 
         // Convert original time to scaled time for Transport
@@ -1657,7 +1652,7 @@ class MIDIPlayer {
                 }
 
                 // Update UI - current time and progress bar
-                this.currentTimeDisplay.textContent = this.formatTime(this.currentTime);
+                this.currentTimeDisplay.textContent = formatTime(this.currentTime);
                 this.progressBar.value = (this.currentTime / this.originalDuration) * 100;
             }
         }, 100);
@@ -1761,7 +1756,7 @@ class MIDIPlayer {
 
                     // Timeout after 10 seconds
                     const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Preload timeout')), 10000)
+                        setTimeout(() => reject(new Error('Preload timeout')), TIMEOUTS.INSTRUMENT_LOAD)
                     );
 
                     await Promise.race([loadPromise, timeoutPromise]);
@@ -1778,12 +1773,6 @@ class MIDIPlayer {
                 }
             }
         })();
-    }
-
-    formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
     cleanup() {
