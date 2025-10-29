@@ -38,3 +38,8 @@ instrument-statistics*.csv
 
 # Claude Code configuration
 .claude/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
