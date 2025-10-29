@@ -38,6 +38,7 @@ class MIDIPlayer {
         this.loadPreferences();
         this.attachEventListeners();
         this.initializeAudioContext(); // Initialize audio context on first user interaction
+        this.checkDeviceCapabilities(); // Check device memory and show warning if limited
         this.loadDefaultWork(); // Load most recent work or Alessandro Scarlatti - Magnificat by default
         this.loadRecentWorks();
         this.checkURLRoute();
@@ -63,6 +64,55 @@ class MIDIPlayer {
         document.addEventListener('touchstart', startAudio);
     }
 
+    checkDeviceCapabilities() {
+        // Check device memory and show warning if limited
+        // This helps prevent crashes on low-memory devices
+
+        let showWarning = false;
+        let deviceInfo = '';
+
+        // Check 1: Device Memory API (Chrome/Edge only)
+        if (navigator.deviceMemory) {
+            deviceInfo += `Device Memory: ${navigator.deviceMemory}GB`;
+            // Show warning if device has 4GB or less
+            if (navigator.deviceMemory <= 4) {
+                showWarning = true;
+            }
+        }
+
+        // Check 2: Mobile detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) {
+            deviceInfo += (deviceInfo ? ', ' : '') + 'Mobile Device';
+            // Mobile devices are more memory-constrained
+            if (!navigator.deviceMemory || navigator.deviceMemory <= 6) {
+                showWarning = true;
+            }
+        }
+
+        // Check 3: Connection quality (if available)
+        if (navigator.connection) {
+            const effectiveType = navigator.connection.effectiveType;
+            deviceInfo += (deviceInfo ? ', ' : '') + `Connection: ${effectiveType}`;
+        }
+
+        // Show warning if device seems limited
+        if (showWarning && this.memoryWarning) {
+            this.memoryWarning.style.display = 'block';
+            console.warn('Limited device capabilities detected:', deviceInfo);
+        } else if (deviceInfo) {
+            console.log('Device capabilities:', deviceInfo);
+        }
+
+        // Store device info for error handling
+        this.deviceInfo = {
+            hasLimitedMemory: showWarning,
+            isMobile: isMobile,
+            deviceMemory: navigator.deviceMemory,
+            info: deviceInfo
+        };
+    }
+
     initializeElements() {
         // Tab elements
         this.tabButtons = document.querySelectorAll('.tab-button');
@@ -86,6 +136,7 @@ class MIDIPlayer {
         this.currentWorkDisplay = document.getElementById('current-work-display');
         this.recentWorksDropdown = document.getElementById('recent-works-dropdown');
         this.recentWorksSelect = document.getElementById('recent-works-select');
+        this.memoryWarning = document.getElementById('memory-warning');
 
         // Currently selected movement section
         this.movementChannelsSection = document.getElementById('movement-channels-section');
@@ -1060,7 +1111,27 @@ class MIDIPlayer {
 
         } catch (error) {
             console.error('Error loading MIDI:', error);
-            this.showStatus(`Error: ${error.message}`, 'error');
+
+            // Provide specific error messages for common issues
+            let errorMessage = error.message;
+
+            // Check if this is a memory-related error
+            if (error.message.includes('memory') ||
+                error.message.includes('allocation') ||
+                error.message.includes('quota') ||
+                error.name === 'QuotaExceededError' ||
+                error.name === 'RangeError') {
+
+                errorMessage = 'Insufficient memory to load this work. ';
+
+                if (this.deviceInfo && this.deviceInfo.hasLimitedMemory) {
+                    errorMessage += 'Your device has limited memory. Try selecting a simpler work with fewer instruments, or close other browser tabs.';
+                } else {
+                    errorMessage += 'This work may have too many instruments for your device. Try selecting a simpler work or close other browser tabs.';
+                }
+            }
+
+            this.showStatus(`Error: ${errorMessage}`, 'error');
         }
     }
 

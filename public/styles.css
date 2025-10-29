@@ -419,6 +419,13 @@ section:last-child {
     border: 1px solid var(--primary-color);
 }
 
+.status-message.warning {
+    background: #fff8e1;
+    color: #f57c00;
+    border: 1px solid #ffb74d;
+    display: block; /* Always show warnings */
+}
+
 /* Playback Info */
 .playback-info {
     padding: 12px;
