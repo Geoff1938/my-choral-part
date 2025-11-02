@@ -61,6 +61,8 @@ class MIDIPlayer {
         // Bar/measure tracking
         this.bars = []; // Array of bar positions in seconds
         this.timeSignature = { numerator: 4, denominator: 4 }; // Default 4/4
+        this.timeSignatureOverrides = {}; // User overrides for ambiguous time signatures
+        this.startingBarOffset = 0; // Offset to add to all bar numbers (e.g., if score starts at bar 262)
 
         // Instrument cache for reusing loaded Soundfont instruments
         // This significantly speeds up loading when switching between movements
@@ -79,6 +81,7 @@ class MIDIPlayer {
 
         this.loadPreferences();
         this.attachEventListeners();
+        this.populateTimeSignatureSettings(); // Initialize time signature section (will show "not loaded" initially)
         this.initializeAudioContext(); // Initialize audio context on first user interaction
         this.checkDeviceCapabilities(); // Check device memory and show warning if limited
         this.loadDefaultWork(); // Load most recent work or Alessandro Scarlatti - Magnificat by default
@@ -154,6 +157,21 @@ class MIDIPlayer {
         this.channelsTbody = document.getElementById('channels-tbody');
         this.channelsNotLoadedMsg = document.getElementById('channels-not-loaded-msg');
         this.channelsListContainer = document.getElementById('channels-list-container');
+
+        // Time signature settings section
+        this.timeSignatureSection = document.getElementById('time-signature-section');
+        this.tsMovementName = document.getElementById('ts-movement-name');
+        this.tsNotLoadedMsg = document.getElementById('ts-not-loaded-msg');
+        this.tsSettingsContainer = document.getElementById('ts-settings-container');
+        this.timeSigTbody = document.getElementById('time-sig-tbody');
+        this.startingBarNumber = document.getElementById('starting-bar-number');
+        this.applyStartingBarBtn = document.getElementById('apply-starting-bar-btn');
+
+        // Help modal elements
+        this.helpModal = document.getElementById('help-modal');
+        this.helpModalTitle = document.getElementById('help-modal-title');
+        this.helpModalText = document.getElementById('help-modal-text');
+        this.helpModalClose = document.getElementById('help-modal-close');
 
         // Settings tab elements
         this.voicePartSelect = document.getElementById('voice-part-settings');
@@ -305,11 +323,19 @@ class MIDIPlayer {
             });
         }
 
-        // Store current time signature for display
-        this.timeSignature = {
-            numerator: timeSignatures[0].timeSignature[0] || 4,
-            denominator: timeSignatures[0].timeSignature[1] || 4
-        };
+        // Store current time signature for display (check for override on first bar)
+        const firstBarOverride = this.timeSignatureOverrides['bar_1'];
+        if (firstBarOverride === '2/2') {
+            this.timeSignature = {
+                numerator: 2,
+                denominator: 2
+            };
+        } else {
+            this.timeSignature = {
+                numerator: timeSignatures[0].timeSignature[0] || 4,
+                denominator: timeSignatures[0].timeSignature[1] || 4
+            };
+        }
 
         // Get PPQ (pulses per quarter note) for tick-to-time conversion
         const ppq = this.midi.header.ppq || 480;
@@ -340,10 +366,29 @@ class MIDIPlayer {
             let numerator = currentTS.timeSignature[0] || 4;
             let denominator = currentTS.timeSignature[1] || 4;
 
+            // Check for user override
+            const barNumForOverride = tsIndex === 0 ? 1 : (currentTS.measures || tsIndex);
+            const overrideKey = `bar_${barNumForOverride}`;
+            const override = this.timeSignatureOverrides[overrideKey];
+
             // Calculate beats per bar (in quarter notes)
             // For 8/4 time: 8 * (4/4) = 8 quarter notes per bar
-            // This represents Alla Breve (2/2) in the score but with 8 quarter notes duration
+            // For 2/2 time (Alla Breve): Should be twice as long as what MIDI indicates
             let beatsPerBar = numerator * (4 / denominator);
+
+            // Track the display time signature (may differ from MIDI if overridden)
+            let displayNumerator = numerator;
+            let displayDenominator = denominator;
+
+            // Apply override if present
+            if (override && override === '2/2') {
+                // When overriding to 2/2 (Alla Breve), double the beats per bar
+                // This is because 8/4 or 4/4 in MIDI often represents bars that should be
+                // combined into longer 2/2 bars in the actual score
+                beatsPerBar = beatsPerBar * 2;
+                displayNumerator = 2;
+                displayDenominator = 2;
+            }
 
             // Determine how many bars to calculate in this section
             // The measures field indicates where the NEXT time signature starts (in bar numbers)
@@ -383,7 +428,7 @@ class MIDIPlayer {
                     number: barNumber,
                     time: currentTime,
                     bpm: bpm,
-                    timeSignature: `${numerator}/${denominator}`
+                    timeSignature: `${displayNumerator}/${displayDenominator}`
                 });
 
                 // Calculate seconds for this bar
@@ -441,6 +486,261 @@ class MIDIPlayer {
         return time;
     }
 
+    // Load time signature overrides from localStorage
+    loadTimeSignatureOverrides() {
+        if (!this.selectedComposer || !this.selectedWork || !this.currentMovement) {
+            return;
+        }
+
+        const key = `ts_override_${this.selectedComposer}_${this.selectedWork}_${this.currentMovement}`;
+        const stored = localStorage.getItem(key);
+
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                this.timeSignatureOverrides = data.overrides || {};
+                this.startingBarOffset = data.startingBarOffset || 0;
+            } catch (e) {
+                console.error('Error loading time signature overrides:', e);
+                this.timeSignatureOverrides = {};
+                this.startingBarOffset = 0;
+            }
+        } else {
+            this.timeSignatureOverrides = {};
+            this.startingBarOffset = 0;
+        }
+    }
+
+    // Save time signature overrides to localStorage
+    saveTimeSignatureOverrides() {
+        if (!this.selectedComposer || !this.selectedWork || !this.currentMovement) {
+            return;
+        }
+
+        const key = `ts_override_${this.selectedComposer}_${this.selectedWork}_${this.currentMovement}`;
+        const data = {
+            overrides: this.timeSignatureOverrides,
+            startingBarOffset: this.startingBarOffset
+        };
+
+        localStorage.setItem(key, JSON.stringify(data));
+    }
+
+    // Send override to server for logging
+    async sendOverrideToServer(barNumber, originalSig, overrideSig) {
+        if (!this.selectedComposer || !this.selectedWork || !this.currentMovement) {
+            return;
+        }
+
+        try {
+            await fetch('/api/log-signature-override', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    composer: this.selectedComposer,
+                    work: this.selectedWork,
+                    movement: this.currentMovement,
+                    barNumber: barNumber,
+                    originalSignature: originalSig,
+                    overrideSignature: overrideSig,
+                    timestamp: new Date().toISOString()
+                })
+            });
+        } catch (error) {
+            console.error('Error sending override to server:', error);
+            // Don't show error to user - this is just for logging
+        }
+    }
+
+    // Populate time signature settings UI
+    populateTimeSignatureSettings() {
+        if (!this.midi || !this.midi.header) {
+            // No MIDI loaded - show "not loaded" message
+            if (this.tsNotLoadedMsg) {
+                this.tsNotLoadedMsg.style.display = 'block';
+            }
+            if (this.tsSettingsContainer) {
+                this.tsSettingsContainer.style.display = 'none';
+            }
+            return;
+        }
+
+        // Update movement name
+        if (this.tsMovementName) {
+            this.tsMovementName.textContent = this.currentMovement || '-';
+        }
+
+        // Hide "not loaded" message, show settings
+        if (this.tsNotLoadedMsg) {
+            this.tsNotLoadedMsg.style.display = 'none';
+        }
+        if (this.tsSettingsContainer) {
+            this.tsSettingsContainer.style.display = 'block';
+        }
+
+        // Set starting bar number
+        if (this.startingBarNumber) {
+            this.startingBarNumber.value = this.startingBarOffset + 1;
+        }
+
+        // Get time signatures
+        const timeSignatures = this.midi.header.timeSignatures || [];
+        if (timeSignatures.length === 0) {
+            timeSignatures.push({
+                ticks: 0,
+                timeSignature: [4, 4],
+                measures: 0
+            });
+        }
+
+        // Clear existing rows
+        if (this.timeSigTbody) {
+            this.timeSigTbody.innerHTML = '';
+        }
+
+        // Add rows for each time signature
+        timeSignatures.forEach((ts, index) => {
+            const numerator = ts.timeSignature[0] || 4;
+            const denominator = ts.timeSignature[1] || 4;
+            const barNum = index === 0 ? 1 : (ts.measures || index);
+
+            // Determine if this is ambiguous (4/4 could be 2/2, or 8/4 could be 2/2)
+            const isAmbiguous = (numerator === 4 && denominator === 4) || (numerator === 8 && denominator === 4);
+
+            const row = document.createElement('tr');
+
+            // Bar number cell
+            const barCell = document.createElement('td');
+            barCell.textContent = barNum + this.startingBarOffset;
+            row.appendChild(barCell);
+
+            // Time signature cell
+            const sigCell = document.createElement('td');
+            const sigText = `${numerator}/${denominator}`;
+            sigCell.textContent = sigText;
+            if (isAmbiguous) {
+                const warning = document.createElement('div');
+                warning.className = 'ambiguous-warning';
+                warning.textContent = '(may be Alla Breve)';
+                sigCell.appendChild(warning);
+            }
+            row.appendChild(sigCell);
+
+            // Override cell
+            const overrideCell = document.createElement('td');
+            if (isAmbiguous) {
+                const select = document.createElement('select');
+                select.dataset.barIndex = index;
+                select.dataset.barNumber = barNum;
+
+                // Options
+                const options = [
+                    { value: 'default', label: `${numerator}/${denominator} (default)` },
+                    { value: '2/2', label: '2/2 (Alla Breve)' }
+                ];
+
+                if (numerator === 8 && denominator === 4) {
+                    options[0].label = '8/4 (as written)';
+                }
+
+                options.forEach(opt => {
+                    const option = document.createElement('option');
+                    option.value = opt.value;
+                    option.textContent = opt.label;
+                    select.appendChild(option);
+                });
+
+                // Load saved override
+                const overrideKey = `bar_${barNum}`;
+                if (this.timeSignatureOverrides[overrideKey]) {
+                    select.value = this.timeSignatureOverrides[overrideKey];
+                }
+
+                // Event listener
+                select.addEventListener('change', (e) => {
+                    const barNum = parseInt(e.target.dataset.barNumber);
+                    const overrideKey = `bar_${barNum}`;
+                    const value = e.target.value;
+                    const originalSig = sigText;
+
+                    if (value === 'default') {
+                        delete this.timeSignatureOverrides[overrideKey];
+                    } else {
+                        this.timeSignatureOverrides[overrideKey] = value;
+                    }
+
+                    this.saveTimeSignatureOverrides();
+                    this.sendOverrideToServer(barNum, originalSig, value);
+
+                    // Recalculate bars
+                    this.calculateBars();
+
+                    // Update current bar display immediately
+                    const currentBar = this.getCurrentBar();
+                    if (currentBar && this.currentBarDisplay) {
+                        this.currentBarDisplay.textContent = `Bar: ${currentBar}`;
+                    }
+                });
+
+                overrideCell.appendChild(select);
+            } else {
+                overrideCell.textContent = '-';
+            }
+            row.appendChild(overrideCell);
+
+            this.timeSigTbody.appendChild(row);
+        });
+    }
+
+    showHelpModal(title, text) {
+        if (this.helpModal && this.helpModalTitle && this.helpModalText) {
+            this.helpModalTitle.textContent = title || 'Help';
+            this.helpModalText.textContent = text || 'No help available';
+            this.helpModal.style.display = 'flex';
+        }
+    }
+
+    hideHelpModal() {
+        if (this.helpModal) {
+            this.helpModal.style.display = 'none';
+        }
+    }
+
+    attachDoubleClickHelp() {
+        // Get all elements with title attributes (these have help text)
+        const elementsWithHelp = document.querySelectorAll('[title]');
+
+        elementsWithHelp.forEach(element => {
+            // Skip if already has double-click listener
+            if (element.dataset.hasDoubleClickHelp) return;
+            element.dataset.hasDoubleClickHelp = 'true';
+
+            // For mobile: detect double-tap
+            let lastTap = 0;
+            element.addEventListener('touchend', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+
+                if (tapLength < 300 && tapLength > 0) {
+                    // Double tap detected
+                    e.preventDefault();
+                    const title = element.getAttribute('aria-label') || element.textContent.trim().substring(0, 30) || 'Control';
+                    const helpText = element.getAttribute('title');
+                    this.showHelpModal(title, helpText);
+                }
+                lastTap = currentTime;
+            });
+
+            // For desktop: double-click
+            element.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                const title = element.getAttribute('aria-label') || element.textContent.trim().substring(0, 30) || 'Control';
+                const helpText = element.getAttribute('title');
+                this.showHelpModal(title, helpText);
+            });
+        });
+    }
+
     updateBarMarkers() {
         // Clear existing markers
         if (this.barMarkersContainer) {
@@ -451,7 +751,22 @@ class MIDIPlayer {
             return;
         }
 
-        // Add markers for bars (show every 4th bar as major)
+        // Determine label interval based on total number of bars to prevent overlap
+        const totalBars = this.bars.length;
+        let labelInterval;
+        if (totalBars <= 50) {
+            labelInterval = 4;  // Show every 4th bar
+        } else if (totalBars <= 100) {
+            labelInterval = 8;  // Show every 8th bar
+        } else if (totalBars <= 150) {
+            labelInterval = 12; // Show every 12th bar
+        } else if (totalBars <= 200) {
+            labelInterval = 16; // Show every 16th bar
+        } else {
+            labelInterval = 20; // Show every 20th bar
+        }
+
+        // Add markers for bars
         this.bars.forEach((bar, index) => {
             const percentage = (bar.time / this.originalDuration) * 100;
 
@@ -461,15 +776,15 @@ class MIDIPlayer {
             const marker = document.createElement('div');
             marker.className = 'bar-marker';
 
-            // Every 4th bar is major
-            const isMajor = (bar.number % 4 === 1);
-            if (isMajor) {
+            // Determine if this bar should have a label
+            const shouldShowLabel = (bar.number % labelInterval === 1) || (bar.number === 1);
+            if (shouldShowLabel) {
                 marker.classList.add('major');
 
                 // Add label for major bars
                 const label = document.createElement('span');
                 label.className = 'bar-marker-label';
-                label.textContent = bar.number;
+                label.textContent = bar.number + this.startingBarOffset;
                 marker.appendChild(label);
             }
 
@@ -486,27 +801,33 @@ class MIDIPlayer {
 
         for (let i = this.bars.length - 1; i >= 0; i--) {
             if (this.currentTime >= this.bars[i].time) {
-                return this.bars[i].number;
+                // Add the starting bar offset (e.g., if movement starts at bar 262)
+                return this.bars[i].number + this.startingBarOffset;
             }
         }
 
-        return 1; // Default to bar 1
+        // Default to bar 1 plus offset
+        return 1 + this.startingBarOffset;
     }
 
     jumpToBar() {
-        // Jump to a specific bar number
-        const barNumber = parseInt(this.barJumpInput.value);
+        // Jump to a specific bar number (user enters the bar number as shown, including offset)
+        const displayedBarNumber = parseInt(this.barJumpInput.value);
 
-        if (isNaN(barNumber) || barNumber < 1) {
+        if (isNaN(displayedBarNumber) || displayedBarNumber < 1) {
             this.showStatus('Please enter a valid bar number', 'error');
             return;
         }
 
+        // Convert displayed bar number to internal bar number (subtract offset)
+        const internalBarNumber = displayedBarNumber - this.startingBarOffset;
+
         // Find the bar
-        const bar = this.bars.find(b => b.number === barNumber);
+        const bar = this.bars.find(b => b.number === internalBarNumber);
 
         if (!bar) {
-            this.showStatus(`Bar ${barNumber} not found (max: ${this.bars.length})`, 'error');
+            const maxDisplayedBar = this.bars.length + this.startingBarOffset;
+            this.showStatus(`Bar ${displayedBarNumber} not found (max: ${maxDisplayedBar})`, 'error');
             return;
         }
 
@@ -639,6 +960,40 @@ class MIDIPlayer {
 
         // Copy URL button (Settings tab)
         this.copyUrlBtnSettings.addEventListener('click', () => this.copyShareableURL());
+
+        // Starting bar number apply button
+        if (this.applyStartingBarBtn) {
+            this.applyStartingBarBtn.addEventListener('click', () => {
+                const value = parseInt(this.startingBarNumber.value) || 1;
+                this.startingBarOffset = value - 1; // Convert to 0-based offset
+                this.saveTimeSignatureOverrides();
+                this.calculateBars();
+                this.populateTimeSignatureSettings(); // Refresh display
+
+                // Update current bar display immediately
+                const currentBar = this.getCurrentBar();
+                if (currentBar && this.currentBarDisplay) {
+                    this.currentBarDisplay.textContent = `Bar: ${currentBar}`;
+                }
+            });
+        }
+
+        // Help modal close button
+        if (this.helpModalClose) {
+            this.helpModalClose.addEventListener('click', () => this.hideHelpModal());
+        }
+
+        // Help modal background click
+        if (this.helpModal) {
+            this.helpModal.addEventListener('click', (e) => {
+                if (e.target === this.helpModal) {
+                    this.hideHelpModal();
+                }
+            });
+        }
+
+        // Attach double-click/tap help to all elements with title attributes
+        this.attachDoubleClickHelp();
 
         // Recent works dropdown
         this.recentWorksSelect.addEventListener('change', (e) => {
@@ -1307,11 +1662,14 @@ class MIDIPlayer {
             const recentToShow = recentWorks.slice(0, 5);
 
             this.recentWorksSelect.innerHTML = '<option value="">Choose a recent work...</option>' +
-                recentToShow.map(item =>
-                    `<option value='${JSON.stringify({ composer: item.composer, work: item.work })}'>
-                        ${item.composer}, ${item.work}
-                    </option>`
-                ).join('');
+                recentToShow.map(item => {
+                    const displayText = item.movement
+                        ? `${item.composer}, ${item.work} - ${item.movement}`
+                        : `${item.composer}, ${item.work}`;
+                    return `<option value='${JSON.stringify({ composer: item.composer, work: item.work })}'>
+                        ${displayText}
+                    </option>`;
+                }).join('');
             this.recentWorksDropdown.style.display = 'block';
         } catch (error) {
             console.error('Error loading recent works:', error);
@@ -1468,8 +1826,14 @@ class MIDIPlayer {
             // Update channels list based on voice part
             this.updateChannelsList();
 
+            // Load time signature overrides from localStorage
+            this.loadTimeSignatureOverrides();
+
             // Calculate bar positions
             this.calculateBars();
+
+            // Populate time signature settings UI
+            this.populateTimeSignatureSettings();
 
             // Update the current movement name display with composer, work, and movement
             if (title && this.selectedComposer && this.selectedWork) {

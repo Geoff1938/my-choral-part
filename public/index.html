@@ -267,6 +267,43 @@
                     </div>
                 </div>
 
+                <!-- Time Signature Settings -->
+                <div class="settings-section" id="time-signature-section">
+                    <h3>Time Signatures and Bar Numbering</h3>
+                    <p id="ts-movement-name-display" style="color: #666; margin-bottom: 10px;"><strong>Movement:</strong> <span id="ts-movement-name">No movement loaded</span></p>
+
+                    <p id="ts-not-loaded-msg" style="color: #666; margin-top: 10px;">Load and play a movement to see and override time signatures</p>
+
+                    <div id="ts-settings-container" style="display: none;">
+                        <!-- Starting Bar Number -->
+                        <div class="control-group" style="margin-bottom: 20px;">
+                            <label for="starting-bar-number">Starting bar number in your score:</label>
+                            <input type="number" id="starting-bar-number" min="1" value="1" style="width: 80px;">
+                            <button id="apply-starting-bar-btn" class="btn btn-small">Apply</button>
+                            <p style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                                If your score starts this movement at a different bar number (e.g., bar 262), enter it here.
+                            </p>
+                        </div>
+
+                        <!-- Time Signature List -->
+                        <div>
+                            <p style="margin-bottom: 10px;">Time signature changes in this movement:</p>
+                            <table class="time-sig-table">
+                                <thead>
+                                    <tr>
+                                        <th>Bar</th>
+                                        <th>Time Signature</th>
+                                        <th>Override</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="time-sig-tbody">
+                                    <!-- Dynamically populated -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Shareable URL Section -->
                 <div class="settings-section">
                     <h3>Share This Work</h3>
@@ -289,6 +326,19 @@
             </div>
         </main>
 
+    </div>
+
+    <!-- Help Modal (shown on double-click/tap) -->
+    <div id="help-modal" class="help-modal" style="display: none;">
+        <div class="help-modal-content">
+            <div class="help-modal-header">
+                <h3 id="help-modal-title">Help</h3>
+                <button id="help-modal-close" class="help-modal-close">&times;</button>
+            </div>
+            <div class="help-modal-body">
+                <p id="help-modal-text"></p>
+            </div>
+        </div>
     </div>
 
     <!-- Load Tone.js from CDN -->

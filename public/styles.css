@@ -1165,6 +1165,49 @@ section:last-child {
     height: 18px;
 }
 
+/* Time Signature Table */
+.time-sig-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.time-sig-table thead {
+    background: var(--background);
+}
+
+.time-sig-table th {
+    padding: 10px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--border);
+}
+
+.time-sig-table td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.time-sig-table tr:hover {
+    background: var(--background);
+}
+
+.time-sig-table select {
+    font-size: 1rem;
+    padding: 5px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--card-background);
+    color: var(--text-primary);
+}
+
+.time-sig-table .ambiguous-warning {
+    color: #e67e22;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
 /* Voice Part Dropdown Styling */
 #voice-part-settings {
     font-size: 1.1rem;
@@ -1181,4 +1224,84 @@ section:last-child {
 #voice-part-settings:focus {
     outline: none;
     border-color: var(--primary-color);
+}
+
+/* Help Modal */
+.help-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.help-modal-content {
+    background: var(--card-background);
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    animation: help-modal-slide-in 0.2s ease-out;
+}
+
+@keyframes help-modal-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.help-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.help-modal-header h3 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 1.3rem;
+}
+
+.help-modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.help-modal-close:hover {
+    background: var(--background);
+}
+
+.help-modal-body {
+    padding: 20px;
+}
+
+.help-modal-body p {
+    margin: 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 1rem;
 }

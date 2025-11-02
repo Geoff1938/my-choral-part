@@ -100,6 +100,28 @@ function createApiRoutes(scraper) {
     }
   });
 
+  // Log time signature override for analytics
+  router.post('/log-signature-override', async (req, res, next) => {
+    try {
+      const { composer, work, movement, barNumber, originalSignature, overrideSignature, timestamp } = req.body;
+
+      // Log to console (in future, could save to database)
+      console.log('Time Signature Override:', {
+        composer,
+        work,
+        movement,
+        barNumber,
+        originalSignature,
+        overrideSignature,
+        timestamp
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Catch-all 404 handler for unknown API routes
   // This prevents API routes from falling through to the main app's catch-all route
   router.use((req, res) => {
