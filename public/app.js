@@ -278,6 +278,7 @@ class MIDIPlayer {
 
     calculateBars() {
         // Calculate bar positions from MIDI data, accounting for time signature and tempo changes
+        // Key insight: 8/4 in MIDI often represents 2/2 (Alla Breve) in the score
         if (!this.midi || !this.midi.header) {
             this.bars = [];
             return;
@@ -324,48 +325,75 @@ class MIDIPlayer {
             time: this.ticksToSeconds(t.ticks, tempos, ppq)
         }));
 
-        // Generate bar positions accounting for changes
+        // Generate bar positions based on time signature CHANGES, not arbitrary MIDI bars
         this.bars = [];
-        let currentTime = 0;
         let barNumber = 1;
-        let currentTSIndex = 0;
-        let currentTempoIndex = 0;
 
-        while (currentTime <= this.originalDuration) {
-            // Check if we need to switch to a new time signature
-            if (currentTSIndex < timeSignaturesWithTime.length - 1 &&
-                currentTime >= timeSignaturesWithTime[currentTSIndex + 1].time) {
-                currentTSIndex++;
+        // Process each time signature section
+        for (let tsIndex = 0; tsIndex < timeSignaturesWithTime.length; tsIndex++) {
+            const currentTS = timeSignaturesWithTime[tsIndex];
+            const nextTS = timeSignaturesWithTime[tsIndex + 1];
+
+            const sectionStart = currentTS.time;
+            const sectionEnd = nextTS ? nextTS.time : this.originalDuration;
+
+            let numerator = currentTS.timeSignature[0] || 4;
+            let denominator = currentTS.timeSignature[1] || 4;
+
+            // Calculate beats per bar (in quarter notes)
+            // For 8/4 time: 8 * (4/4) = 8 quarter notes per bar
+            // This represents Alla Breve (2/2) in the score but with 8 quarter notes duration
+            let beatsPerBar = numerator * (4 / denominator);
+
+            // Determine how many bars to calculate in this section
+            // The measures field indicates where the NEXT time signature starts (in bar numbers)
+            let maxBarsInSection = Infinity;
+            if (nextTS && nextTS.measures !== undefined && nextTS.measures > 0) {
+                // nextTS.measures tells us the bar number where it starts
+                // So this section should have (nextTS.measures - current barNumber + 1) bars
+                maxBarsInSection = nextTS.measures - barNumber + 1;
             }
 
-            // Check if we need to switch to a new tempo
-            if (currentTempoIndex < temposWithTime.length - 1 &&
-                currentTime >= temposWithTime[currentTempoIndex + 1].time) {
-                currentTempoIndex++;
+            // Calculate bars within this time signature section
+            let currentTime = sectionStart;
+            let currentTempoIndex = 0;
+            let barsCreatedInSection = 0;
+
+            // Find the tempo index at the start of this section
+            for (let i = 0; i < temposWithTime.length; i++) {
+                if (temposWithTime[i].time <= currentTime) {
+                    currentTempoIndex = i;
+                }
             }
 
-            const currentTS = timeSignaturesWithTime[currentTSIndex];
-            const currentTempo = temposWithTime[currentTempoIndex];
+            while (currentTime < sectionEnd &&
+                   currentTime <= this.originalDuration &&
+                   barsCreatedInSection < maxBarsInSection) {
+                // Update tempo if we've crossed a tempo change
+                while (currentTempoIndex < temposWithTime.length - 1 &&
+                       currentTime >= temposWithTime[currentTempoIndex + 1].time) {
+                    currentTempoIndex++;
+                }
 
-            const numerator = currentTS.timeSignature[0] || 4;
-            const denominator = currentTS.timeSignature[1] || 4;
-            const bpm = currentTempo.bpm;
+                const currentTempo = temposWithTime[currentTempoIndex];
+                const bpm = currentTempo.bpm;
 
-            // Store bar with its tempo and time signature
-            this.bars.push({
-                number: barNumber,
-                time: currentTime,
-                bpm: bpm,
-                timeSignature: `${numerator}/${denominator}`
-            });
+                // Store bar
+                this.bars.push({
+                    number: barNumber,
+                    time: currentTime,
+                    bpm: bpm,
+                    timeSignature: `${numerator}/${denominator}`
+                });
 
-            // Calculate seconds per bar with current time signature and tempo
-            const secondsPerBeat = 60 / bpm;
-            const beatsPerBar = numerator * (4 / denominator);
-            const secondsPerBar = secondsPerBeat * beatsPerBar;
+                // Calculate seconds for this bar
+                const secondsPerBeat = 60 / bpm;
+                const secondsPerBar = secondsPerBeat * beatsPerBar;
 
-            currentTime += secondsPerBar;
-            barNumber++;
+                currentTime += secondsPerBar;
+                barNumber++;
+                barsCreatedInSection++;
+            }
         }
 
         // Update bar markers on progress bar
