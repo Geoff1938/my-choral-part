@@ -206,10 +206,23 @@ class MIDIPlayer {
             this.voicePartSelect.value = savedVoicePart;
             this.updateBalanceLabel(); // Update balance label to show loaded voice part
         }
+
+        // Load balance from localStorage
+        const savedBalance = localStorage.getItem('balance');
+        if (savedBalance !== null) {
+            this.balance = parseInt(savedBalance);
+            if (this.balanceSlider) {
+                this.balanceSlider.value = this.balance;
+            }
+            if (this.balanceValue) {
+                this.balanceValue.textContent = this.balance;
+            }
+        }
     }
 
     savePreferences() {
         localStorage.setItem('voicePart', this.voicePart);
+        localStorage.setItem('balance', this.balance);
     }
 
     updateBalanceLabel() {
@@ -218,6 +231,39 @@ class MIDIPlayer {
         if (this.balanceVoicePartSpan) {
             this.balanceVoicePartSpan.textContent = voicePartName;
         }
+    }
+
+    addSliderClickToJump(slider) {
+        // Allow clicking anywhere on the slider track to jump to that position
+        if (!slider) return;
+
+        slider.addEventListener('mousedown', (e) => {
+            // Check if click was on the track (not just dragging the thumb)
+            const rect = slider.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percentage = (clickX / rect.width) * 100;
+            const min = parseFloat(slider.min);
+            const max = parseFloat(slider.max);
+            const value = min + (percentage / 100) * (max - min);
+
+            // Set the value and trigger input event
+            slider.value = value;
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        // Also support touch events for mobile
+        slider.addEventListener('touchstart', (e) => {
+            const rect = slider.getBoundingClientRect();
+            const touch = e.touches[0];
+            const clickX = touch.clientX - rect.left;
+            const percentage = (clickX / rect.width) * 100;
+            const min = parseFloat(slider.min);
+            const max = parseFloat(slider.max);
+            const value = min + (percentage / 100) * (max - min);
+
+            slider.value = value;
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+        });
     }
 
     async loadDefaultWork() {
@@ -235,10 +281,20 @@ class MIDIPlayer {
                 const mostRecent = recentWorks[0];
                 composer = mostRecent.composer;
                 work = mostRecent.work;
+                const recentMovement = mostRecent.movement; // Store recent movement if available
 
                 // Fetch movements for this work
                 const movementsResponse = await fetch(`/api/composer/${encodeURIComponent(composer)}/work/${encodeURIComponent(work)}/sections`);
                 movements = await movementsResponse.json();
+
+                // If recent movement is available, find and select it
+                if (recentMovement && movements.length > 0) {
+                    const recentMovementIndex = movements.findIndex(m => m.name === recentMovement);
+                    if (recentMovementIndex >= 0) {
+                        // We'll set this after populating the dropdown
+                        this.recentMovementIndex = recentMovementIndex + 1; // +1 for placeholder option
+                    }
+                }
             } else {
                 // No recent works - load Alessandro Scarlatti - Magnificat as default
                 composer = 'Alessandro Scarlatti';
@@ -278,8 +334,12 @@ class MIDIPlayer {
                     `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
                 ).join('');
 
-            // Auto-select the first movement in the dropdown
-            this.movementSelect.selectedIndex = 1;
+            // Auto-select the recent movement or first movement in the dropdown
+            if (this.recentMovementIndex && this.recentMovementIndex < this.movementSelect.options.length) {
+                this.movementSelect.selectedIndex = this.recentMovementIndex;
+            } else {
+                this.movementSelect.selectedIndex = 1; // Default to first movement
+            }
 
             this.updateWorkDisplay();
 
@@ -416,6 +476,11 @@ class MIDIPlayer {
         this.backwardBtn.addEventListener('click', () => this.seek(-10));
         this.forwardBtn.addEventListener('click', () => this.seek(10));
 
+        // Add click-to-jump functionality for progress bar, tempo, and balance sliders (NOT loop sliders)
+        this.addSliderClickToJump(this.progressBar);
+        this.addSliderClickToJump(this.tempoSlider);
+        this.addSliderClickToJump(this.balanceSlider);
+
         // Previous movement button - single click: go to start, double click: previous movement
         let prevMovementClickTimer = null;
         this.prevMovementBtn.addEventListener('click', () => {
@@ -436,10 +501,39 @@ class MIDIPlayer {
 
         this.nextMovementBtn.addEventListener('click', () => this.skipToNextMovement());
 
+        // Progress bar with pause/resume on interaction
+        let wasPlayingBeforeSeek = false;
+
+        this.progressBar.addEventListener('mousedown', () => {
+            wasPlayingBeforeSeek = this.isPlaying;
+            if (this.isPlaying) {
+                this.pause();
+            }
+        });
+
+        this.progressBar.addEventListener('touchstart', () => {
+            wasPlayingBeforeSeek = this.isPlaying;
+            if (this.isPlaying) {
+                this.pause();
+            }
+        });
+
         this.progressBar.addEventListener('input', (e) => {
             const newTime = (e.target.value / 100) * this.originalDuration;
-            this.seekTo(newTime);
+            // Update position without triggering auto-resume (seekTo will handle it if needed)
+            this.seekTo(newTime, false); // Pass false to prevent auto-resume
         });
+
+        const resumeAfterSeek = () => {
+            if (wasPlayingBeforeSeek) {
+                setTimeout(() => this.play(), 50);
+                wasPlayingBeforeSeek = false;
+            }
+        };
+
+        this.progressBar.addEventListener('mouseup', resumeAfterSeek);
+        this.progressBar.addEventListener('touchend', resumeAfterSeek);
+        this.progressBar.addEventListener('touchcancel', resumeAfterSeek);
 
         // Loop controls
         this.loopStartSlider.addEventListener('input', (e) => {
@@ -491,6 +585,24 @@ class MIDIPlayer {
             this.balance = parseInt(e.target.value);
             this.balanceValue.textContent = e.target.value;
             this.applyBalance();
+            this.savePreferences(); // Save balance whenever it changes
+        });
+
+        // Add spacebar toggle for play/pause
+        document.addEventListener('keydown', (e) => {
+            // Only trigger if not typing in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+
+            if (e.code === 'Space' || e.key === ' ') {
+                e.preventDefault(); // Prevent page scroll
+                if (this.isPlaying) {
+                    this.pause();
+                } else {
+                    this.play();
+                }
+            }
         });
     }
 
@@ -899,9 +1011,13 @@ class MIDIPlayer {
             this.switchTab('play-music');
             this.updateWorkDisplay();
 
-            // If only one movement, auto-select and load it
-            if (movements.length === 1) {
+            // Auto-select first movement in the dropdown
+            if (movements.length > 0) {
                 this.movementSelect.selectedIndex = 1; // Select the first movement (index 1 after the placeholder)
+            }
+
+            // If only one movement, auto-load it
+            if (movements.length === 1) {
                 const movementData = movements[0];
                 const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
                 this.loadMIDIFromURL(absoluteUrl, movementData.name);
@@ -910,9 +1026,6 @@ class MIDIPlayer {
             // Pre-load common instruments in the background to speed up playback
             // This happens asynchronously and doesn't block the UI
             this.preloadCommonInstruments();
-
-            // Save to recent works
-            await this.saveRecentWork(this.selectedComposer, workName);
         } catch (error) {
             console.error('Error loading movements:', error);
             this.showStatus('Error loading movements', 'error');
@@ -944,10 +1057,10 @@ class MIDIPlayer {
         }
     }
 
-    async saveRecentWork(composer, work) {
+    async saveRecentWork(composer, work, movement = null) {
         try {
             // Save recent work using RecentWorksManager
-            await this.recentWorksManager.saveToServer(composer, work);
+            await this.recentWorksManager.saveToServer(composer, work, movement);
             // Reload recent works list
             await this.loadRecentWorks();
         } catch (error) {
@@ -1097,6 +1210,8 @@ class MIDIPlayer {
             // Update the current movement name display with composer, work, and movement
             if (title && this.selectedComposer && this.selectedWork) {
                 this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
+                // Save recent work with movement
+                await this.saveRecentWork(this.selectedComposer, this.selectedWork, title);
             } else if (title) {
                 this.currentMovementName.textContent = title;
             }
@@ -1463,7 +1578,7 @@ class MIDIPlayer {
         this.seekTo(newTime);
     }
 
-    seekTo(time) {
+    seekTo(time, autoResume = true) {
         const wasPlaying = this.isPlaying;
 
         // Always stop playback first
@@ -1492,8 +1607,8 @@ class MIDIPlayer {
         const scaledTime = this.currentTime / this.tempoMultiplier;
         Tone.Transport.seconds = scaledTime;
 
-        // Resume playback if it was playing before
-        if (wasPlaying) {
+        // Resume playback if it was playing before and autoResume is true
+        if (wasPlaying && autoResume) {
             this.play();
         }
     }
@@ -1590,7 +1705,10 @@ class MIDIPlayer {
 
                 if (loopRangeSet && this.currentTime >= this.loopEnd) {
                     // Loop back to loop start within the same movement
-                    this.seekTo(this.loopStart);
+                    // Pause briefly then resume
+                    this.pause();
+                    this.seekTo(this.loopStart, false);
+                    setTimeout(() => this.play(), 50);
                     return;
                 } else if (!loopRangeSet && this.currentTime >= this.originalDuration) {
                     // End of movement reached without loop set - advance to next movement
@@ -1637,20 +1755,28 @@ class MIDIPlayer {
         }
     }
 
-    skipToNextMovement() {
+    skipToNextMovement(delayMs = 1500) {
         // Get current selected index
         const currentIndex = this.movementSelect.selectedIndex;
         const totalMovements = this.movementSelect.options.length;
 
         // Check if there's a next movement (accounting for placeholder at index 0)
         if (currentIndex < totalMovements - 1 && currentIndex > 0) {
-            // Select next movement
-            this.movementSelect.selectedIndex = currentIndex + 1;
+            // Pause playback
+            if (this.isPlaying) {
+                this.pause();
+            }
 
-            // Load the next movement
-            const movementData = JSON.parse(this.movementSelect.value);
-            const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
-            this.loadMIDIFromURL(absoluteUrl, movementData.name);
+            // Wait for the specified delay before loading next movement
+            setTimeout(() => {
+                // Select next movement
+                this.movementSelect.selectedIndex = currentIndex + 1;
+
+                // Load the next movement
+                const movementData = JSON.parse(this.movementSelect.value);
+                const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
+                this.loadMIDIFromURL(absoluteUrl, movementData.name);
+            }, delayMs);
         }
     }
 

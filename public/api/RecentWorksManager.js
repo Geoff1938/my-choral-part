@@ -34,9 +34,10 @@ export class RecentWorksManager {
      * Save a recent work
      * @param {string} composer - Composer name
      * @param {string} work - Work name
+     * @param {string} movement - Movement name (optional)
      * @returns {Promise<Array>} Updated array of recent works
      */
-    async save(composer, work) {
+    async save(composer, work, movement = null) {
         try {
             let recent = await this.load();
 
@@ -46,7 +47,11 @@ export class RecentWorksManager {
             );
 
             // Add to the beginning
-            recent.unshift({ composer, work });
+            const entry = { composer, work };
+            if (movement) {
+                entry.movement = movement;
+            }
+            recent.unshift(entry);
 
             // Limit to max count
             if (recent.length > this.maxCount) {
@@ -79,16 +84,22 @@ export class RecentWorksManager {
      * Send recent works to server (if API is available)
      * @param {string} composer - Composer name
      * @param {string} work - Work name
+     * @param {string} movement - Movement name (optional)
      * @returns {Promise<Array>} Server response or local recent works
      */
-    async saveToServer(composer, work) {
+    async saveToServer(composer, work, movement = null) {
         try {
+            const body = { composer, work };
+            if (movement) {
+                body.movement = movement;
+            }
+
             const response = await fetch('/api/recent-works', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ composer, work })
+                body: JSON.stringify(body)
             });
 
             if (!response.ok) {
@@ -99,7 +110,7 @@ export class RecentWorksManager {
         } catch (error) {
             console.error('Error saving recent work to server:', error);
             // Fallback to local storage
-            return await this.save(composer, work);
+            return await this.save(composer, work, movement);
         }
     }
 

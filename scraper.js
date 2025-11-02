@@ -522,11 +522,12 @@ class ChoralMusicScraper {
    * Save a work to recent works list (max 5, most recent first)
    * @param {string} composerName - Composer name
    * @param {string} workName - Work name
+   * @param {string} movementName - Movement name (optional)
    * @returns {Promise<Array>} Updated recent works array
    */
-  async saveRecentWork(composerName, workName) {
+  async saveRecentWork(composerName, workName, movementName = null) {
     await this.initializeDataDirectory();
-    
+
     let recentWorks = [];
     if (await fs.pathExists(this.recentWorksFile)) {
       try {
@@ -535,22 +536,26 @@ class ChoralMusicScraper {
         console.error('Error loading recent works:', error.message);
       }
     }
-    
+
     // Remove if already exists
-    recentWorks = recentWorks.filter(item => 
+    recentWorks = recentWorks.filter(item =>
       !(item.composer === composerName && item.work === workName)
     );
-    
+
     // Add to beginning
-    recentWorks.unshift({
+    const entry = {
       composer: composerName,
       work: workName,
       timestamp: new Date().toISOString()
-    });
-    
+    };
+    if (movementName) {
+      entry.movement = movementName;
+    }
+    recentWorks.unshift(entry);
+
     // Keep only last 5
     recentWorks = recentWorks.slice(0, 5);
-    
+
     await fs.writeJSON(this.recentWorksFile, recentWorks, { spaces: 2 });
     return recentWorks;
   }

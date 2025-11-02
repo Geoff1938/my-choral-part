@@ -89,11 +89,11 @@ function createApiRoutes(scraper) {
   // Save recent work
   router.post('/recent-works', async (req, res, next) => {
     try {
-      const { composer, work } = req.body;
+      const { composer, work, movement } = req.body;
       if (!composer || !work) {
         return res.status(400).json({ error: 'Composer and work are required' });
       }
-      const recentWorks = await scraper.saveRecentWork(composer, work);
+      const recentWorks = await scraper.saveRecentWork(composer, work, movement);
       res.json(recentWorks);
     } catch (error) {
       next(error);
