@@ -761,6 +761,74 @@ section:last-child {
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
+/* Bar Markers */
+.bar-markers {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 10px;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bar-marker {
+    position: absolute;
+    width: 1px;
+    height: 14px;
+    background: rgba(123, 104, 238, 0.3);
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.bar-marker.major {
+    height: 18px;
+    background: rgba(123, 104, 238, 0.5);
+    width: 2px;
+}
+
+.bar-marker-label {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    margin-bottom: 2px;
+}
+
+/* Bar Jump Control */
+.bar-jump-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+    background: var(--background);
+    border-radius: 6px;
+}
+
+.bar-jump-control label {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.bar-jump-input {
+    width: 80px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.bar-jump-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
 
 /* Responsive Design */
 /* Medium screens - 2x2 button grid */

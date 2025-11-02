@@ -58,6 +58,10 @@ class MIDIPlayer {
         this.loopStart = 0;
         this.loopEnd = 0;
 
+        // Bar/measure tracking
+        this.bars = []; // Array of bar positions in seconds
+        this.timeSignature = { numerator: 4, denominator: 4 }; // Default 4/4
+
         // Instrument cache for reusing loaded Soundfont instruments
         // This significantly speeds up loading when switching between movements
         this.instrumentCache = new Map(); // Map<instrumentName, instrument>
@@ -182,6 +186,12 @@ class MIDIPlayer {
         this.progressBar = document.getElementById('progress-bar');
         this.progressDuration = document.getElementById('progress-duration');
         this.currentTimeDisplay = document.getElementById('current-time');
+        this.currentBarDisplay = document.getElementById('current-bar');
+        this.barMarkersContainer = document.getElementById('bar-markers');
+
+        // Bar jump controls
+        this.barJumpInput = document.getElementById('bar-jump-input');
+        this.barJumpBtn = document.getElementById('bar-jump-btn');
 
         // Loop controls
         this.loopStartSlider = document.getElementById('loop-start-slider');
@@ -264,6 +274,128 @@ class MIDIPlayer {
             slider.value = value;
             slider.dispatchEvent(new Event('input', { bubbles: true }));
         });
+    }
+
+    calculateBars() {
+        // Calculate bar positions from MIDI data
+        if (!this.midi || !this.midi.header) {
+            this.bars = [];
+            return;
+        }
+
+        // Get time signature (use first one, or default to 4/4)
+        if (this.midi.header.timeSignatures && this.midi.header.timeSignatures.length > 0) {
+            const ts = this.midi.header.timeSignatures[0];
+            this.timeSignature = {
+                numerator: ts.timeSignature[0] || 4,
+                denominator: ts.timeSignature[1] || 4
+            };
+        } else {
+            this.timeSignature = { numerator: 4, denominator: 4 };
+        }
+
+        // Get tempo (BPM)
+        let bpm = 120; // Default
+        if (this.midi.header.tempos && this.midi.header.tempos.length > 0) {
+            bpm = this.midi.header.tempos[0].bpm;
+        }
+
+        // Calculate seconds per beat
+        const secondsPerBeat = 60 / bpm;
+
+        // Calculate seconds per bar
+        const beatsPerBar = this.timeSignature.numerator * (4 / this.timeSignature.denominator);
+        const secondsPerBar = secondsPerBeat * beatsPerBar;
+
+        // Generate bar positions
+        this.bars = [];
+        let currentTime = 0;
+        let barNumber = 1;
+
+        while (currentTime <= this.originalDuration) {
+            this.bars.push({
+                number: barNumber,
+                time: currentTime
+            });
+            currentTime += secondsPerBar;
+            barNumber++;
+        }
+
+        // Update bar markers on progress bar
+        this.updateBarMarkers();
+    }
+
+    updateBarMarkers() {
+        // Clear existing markers
+        if (this.barMarkersContainer) {
+            this.barMarkersContainer.innerHTML = '';
+        }
+
+        if (!this.bars || this.bars.length === 0 || !this.originalDuration) {
+            return;
+        }
+
+        // Add markers for bars (show every 4th bar as major)
+        this.bars.forEach((bar, index) => {
+            const percentage = (bar.time / this.originalDuration) * 100;
+
+            // Skip if too close to edges
+            if (percentage < 1 || percentage > 99) return;
+
+            const marker = document.createElement('div');
+            marker.className = 'bar-marker';
+
+            // Every 4th bar is major
+            const isMajor = (bar.number % 4 === 1);
+            if (isMajor) {
+                marker.classList.add('major');
+
+                // Add label for major bars
+                const label = document.createElement('span');
+                label.className = 'bar-marker-label';
+                label.textContent = bar.number;
+                marker.appendChild(label);
+            }
+
+            marker.style.left = `${percentage}%`;
+            this.barMarkersContainer.appendChild(marker);
+        });
+    }
+
+    getCurrentBar() {
+        // Find which bar the current time is in
+        if (!this.bars || this.bars.length === 0) {
+            return null;
+        }
+
+        for (let i = this.bars.length - 1; i >= 0; i--) {
+            if (this.currentTime >= this.bars[i].time) {
+                return this.bars[i].number;
+            }
+        }
+
+        return 1; // Default to bar 1
+    }
+
+    jumpToBar() {
+        // Jump to a specific bar number
+        const barNumber = parseInt(this.barJumpInput.value);
+
+        if (isNaN(barNumber) || barNumber < 1) {
+            this.showStatus('Please enter a valid bar number', 'error');
+            return;
+        }
+
+        // Find the bar
+        const bar = this.bars.find(b => b.number === barNumber);
+
+        if (!bar) {
+            this.showStatus(`Bar ${barNumber} not found (max: ${this.bars.length})`, 'error');
+            return;
+        }
+
+        // Seek to that bar
+        this.seekTo(bar.time);
     }
 
     async loadDefaultWork() {
@@ -396,6 +528,11 @@ class MIDIPlayer {
         this.recentWorksSelect.addEventListener('change', (e) => {
             if (e.target.value) {
                 try {
+                    // Stop any current playback
+                    if (this.isPlaying) {
+                        this.stop();
+                    }
+
                     const workData = JSON.parse(e.target.value);
                     this.selectComposer(workData.composer).then(() => {
                         this.selectWork(workData.work);
@@ -602,6 +739,14 @@ class MIDIPlayer {
                 } else {
                     this.play();
                 }
+            }
+        });
+
+        // Bar jump controls
+        this.barJumpBtn.addEventListener('click', () => this.jumpToBar());
+        this.barJumpInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.jumpToBar();
             }
         });
     }
@@ -1207,6 +1352,9 @@ class MIDIPlayer {
             // Update channels list based on voice part
             this.updateChannelsList();
 
+            // Calculate bar positions
+            this.calculateBars();
+
             // Update the current movement name display with composer, work, and movement
             if (title && this.selectedComposer && this.selectedWork) {
                 this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
@@ -1550,6 +1698,7 @@ class MIDIPlayer {
         // Update UI
         if (this.currentTimeDisplay) this.currentTimeDisplay.textContent = '0:00';
         if (this.progressBar) this.progressBar.value = 0;
+        if (this.currentBarDisplay) this.currentBarDisplay.textContent = 'Bar: -';
 
         // Stop progress update
         this.stopProgressUpdate();
@@ -1602,6 +1751,12 @@ class MIDIPlayer {
         // Update UI
         this.currentTimeDisplay.textContent = formatTime(this.currentTime);
         this.progressBar.value = (this.currentTime / this.originalDuration) * 100;
+
+        // Update current bar display
+        const currentBar = this.getCurrentBar();
+        if (currentBar && this.currentBarDisplay) {
+            this.currentBarDisplay.textContent = `Bar: ${currentBar}`;
+        }
 
         // Convert original time to scaled time for Transport
         const scaledTime = this.currentTime / this.tempoMultiplier;
@@ -1725,9 +1880,15 @@ class MIDIPlayer {
                     return;
                 }
 
-                // Update UI - current time and progress bar
+                // Update UI - current time, bar number, and progress bar
                 this.currentTimeDisplay.textContent = formatTime(this.currentTime);
                 this.progressBar.value = (this.currentTime / this.originalDuration) * 100;
+
+                // Update current bar display
+                const currentBar = this.getCurrentBar();
+                if (currentBar && this.currentBarDisplay) {
+                    this.currentBarDisplay.textContent = `Bar: ${currentBar}`;
+                }
             }
         }, 100);
     }

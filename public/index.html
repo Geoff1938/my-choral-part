@@ -133,6 +133,7 @@
                     <div class="progress-container">
                         <div class="progress-header">
                             <span id="current-time">0:00</span>
+                            <span id="current-bar" style="margin-left: 10px; color: #7f8c8d;">Bar: -</span>
                         </div>
                         <div class="progress-time-labels">
                             <span>0:00</span>
@@ -150,7 +151,23 @@
                                 title="Drag to jump to any point in the song"
                             >
                             <div class="slider-track"></div>
+                            <div id="bar-markers" class="bar-markers"></div>
                         </div>
+                    </div>
+
+                    <!-- Bar Jump Control -->
+                    <div class="bar-jump-control">
+                        <label for="bar-jump-input">Jump to bar:</label>
+                        <input
+                            type="number"
+                            id="bar-jump-input"
+                            min="1"
+                            value="1"
+                            class="bar-jump-input"
+                            aria-label="Bar number to jump to"
+                            title="Enter a bar number and press Enter to jump"
+                        >
+                        <button id="bar-jump-btn" class="btn btn-small" title="Jump to the specified bar number">Go</button>
                     </div>
 
                     <!-- Loop Point Controls -->
