@@ -277,52 +277,140 @@ class MIDIPlayer {
     }
 
     calculateBars() {
-        // Calculate bar positions from MIDI data
+        // Calculate bar positions from MIDI data, accounting for time signature and tempo changes
         if (!this.midi || !this.midi.header) {
             this.bars = [];
             return;
         }
 
-        // Get time signature (use first one, or default to 4/4)
-        if (this.midi.header.timeSignatures && this.midi.header.timeSignatures.length > 0) {
-            const ts = this.midi.header.timeSignatures[0];
-            this.timeSignature = {
-                numerator: ts.timeSignature[0] || 4,
-                denominator: ts.timeSignature[1] || 4
-            };
-        } else {
-            this.timeSignature = { numerator: 4, denominator: 4 };
+        // Get all time signatures and tempos
+        const timeSignatures = this.midi.header.timeSignatures || [];
+        const tempos = this.midi.header.tempos || [];
+
+        // Set default time signature if none provided
+        if (timeSignatures.length === 0) {
+            timeSignatures.push({
+                ticks: 0,
+                timeSignature: [4, 4],
+                measures: 0
+            });
         }
 
-        // Get tempo (BPM)
-        let bpm = 120; // Default
-        if (this.midi.header.tempos && this.midi.header.tempos.length > 0) {
-            bpm = this.midi.header.tempos[0].bpm;
+        // Set default tempo if none provided
+        if (tempos.length === 0) {
+            tempos.push({
+                ticks: 0,
+                bpm: 120
+            });
         }
 
-        // Calculate seconds per beat
-        const secondsPerBeat = 60 / bpm;
+        // Store current time signature for display
+        this.timeSignature = {
+            numerator: timeSignatures[0].timeSignature[0] || 4,
+            denominator: timeSignatures[0].timeSignature[1] || 4
+        };
 
-        // Calculate seconds per bar
-        const beatsPerBar = this.timeSignature.numerator * (4 / this.timeSignature.denominator);
-        const secondsPerBar = secondsPerBeat * beatsPerBar;
+        // Get PPQ (pulses per quarter note) for tick-to-time conversion
+        const ppq = this.midi.header.ppq || 480;
 
-        // Generate bar positions
+        // Convert ticks to seconds for all events
+        const timeSignaturesWithTime = timeSignatures.map(ts => ({
+            ...ts,
+            time: this.ticksToSeconds(ts.ticks, tempos, ppq)
+        }));
+
+        const temposWithTime = tempos.map(t => ({
+            ...t,
+            time: this.ticksToSeconds(t.ticks, tempos, ppq)
+        }));
+
+        // Generate bar positions accounting for changes
         this.bars = [];
         let currentTime = 0;
         let barNumber = 1;
+        let currentTSIndex = 0;
+        let currentTempoIndex = 0;
 
         while (currentTime <= this.originalDuration) {
+            // Check if we need to switch to a new time signature
+            if (currentTSIndex < timeSignaturesWithTime.length - 1 &&
+                currentTime >= timeSignaturesWithTime[currentTSIndex + 1].time) {
+                currentTSIndex++;
+            }
+
+            // Check if we need to switch to a new tempo
+            if (currentTempoIndex < temposWithTime.length - 1 &&
+                currentTime >= temposWithTime[currentTempoIndex + 1].time) {
+                currentTempoIndex++;
+            }
+
+            const currentTS = timeSignaturesWithTime[currentTSIndex];
+            const currentTempo = temposWithTime[currentTempoIndex];
+
+            const numerator = currentTS.timeSignature[0] || 4;
+            const denominator = currentTS.timeSignature[1] || 4;
+            const bpm = currentTempo.bpm;
+
+            // Store bar with its tempo and time signature
             this.bars.push({
                 number: barNumber,
-                time: currentTime
+                time: currentTime,
+                bpm: bpm,
+                timeSignature: `${numerator}/${denominator}`
             });
+
+            // Calculate seconds per bar with current time signature and tempo
+            const secondsPerBeat = 60 / bpm;
+            const beatsPerBar = numerator * (4 / denominator);
+            const secondsPerBar = secondsPerBeat * beatsPerBar;
+
             currentTime += secondsPerBar;
             barNumber++;
         }
 
         // Update bar markers on progress bar
         this.updateBarMarkers();
+    }
+
+    ticksToSeconds(ticks, tempos, ppq) {
+        // Convert MIDI ticks to seconds, accounting for tempo changes
+        if (!tempos || tempos.length === 0) {
+            // Default: 120 BPM
+            return (ticks / ppq) * 0.5; // 60/120 = 0.5 seconds per quarter note
+        }
+
+        let time = 0;
+        let lastTicks = 0;
+        let lastTempo = tempos[0].bpm;
+
+        for (let i = 0; i < tempos.length; i++) {
+            const tempo = tempos[i];
+
+            if (tempo.ticks > ticks) {
+                // We've passed the target tick
+                const tickDelta = ticks - lastTicks;
+                const secondsPerBeat = 60 / lastTempo;
+                time += (tickDelta / ppq) * secondsPerBeat;
+                return time;
+            }
+
+            if (i > 0) {
+                // Add time for the previous tempo segment
+                const tickDelta = tempo.ticks - lastTicks;
+                const secondsPerBeat = 60 / lastTempo;
+                time += (tickDelta / ppq) * secondsPerBeat;
+            }
+
+            lastTicks = tempo.ticks;
+            lastTempo = tempo.bpm;
+        }
+
+        // Handle remaining ticks after last tempo change
+        const tickDelta = ticks - lastTicks;
+        const secondsPerBeat = 60 / lastTempo;
+        time += (tickDelta / ppq) * secondsPerBeat;
+
+        return time;
     }
 
     updateBarMarkers() {
