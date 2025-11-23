@@ -1,0 +1,24 @@
+<svg width="220" height="220" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+    <!-- Square icon background -->
+    <rect x="40" y="40" width="140" height="140" rx="20" fill="white" stroke="#E8E8E8" stroke-width="3"/>
+    
+    <!-- Four layers with labels -->
+    <rect x="60" y="68" width="100" height="16" rx="8" fill="#E74C3C" opacity="0.9"/>
+    <text x="70" y="80" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">S</text>
+    
+    <rect x="60" y="92" width="100" height="16" rx="8" fill="#3498DB" opacity="0.9"/>
+    <text x="70" y="104" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">A</text>
+    
+    <rect x="60" y="116" width="100" height="16" rx="8" fill="#2ECC71" opacity="0.9"/>
+    <text x="70" y="128" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">T</text>
+    
+    <rect x="60" y="140" width="100" height="16" rx="8" fill="#9B59B6" opacity="0.9"/>
+    <text x="70" y="152" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">B</text>
+    
+    <!-- Quarter note -->
+    <ellipse cx="108" cy="124" rx="8" ry="6" fill="#2C3E50" transform="rotate(-20 108 124)"/>
+    <rect x="113.5" y="86" width="2.5" height="38" fill="#2C3E50"/>
+    
+    <!-- Text below -->
+    <text x="110" y="200" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#2C3E50" text-anchor="middle">mychoralpart</text>
+</svg>

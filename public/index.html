@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learn Choral Music</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
+    <title>My Choral Part</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/branding/logo-icon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/branding/logo-icon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/branding/logo-icon-256.png">
     <link rel="stylesheet" href="styles.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,8 +14,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎵 Learn Choral Music</h1>
-            <p>Find music and rehearse your part on any device</p>
+            <img src="/branding/logo-horizontal.svg" alt="My Choral Part" class="header-logo">
+            <p class="tagline">Find music and rehearse your part on any device</p>
         </header>
 
         <!-- Tab Navigation -->
@@ -104,6 +106,48 @@
                         </select>
                     </div>
 
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress-header">
+                            <div class="progress-info">
+                                <span id="current-time">0:00</span>
+                                <span id="current-bar" style="margin-left: 10px; color: #7f8c8d;">Bar: 1</span>
+                            </div>
+                        </div>
+                        <div class="progress-time-labels">
+                            <span>0:00</span>
+                            <span id="progress-duration">0:00</span>
+                        </div>
+                        <div class="slider-container">
+                            <input
+                                type="range"
+                                id="progress-bar"
+                                min="0"
+                                max="100"
+                                value="0"
+                                class="styled-slider"
+                                aria-label="Playback progress"
+                                title="Drag to jump to any point in the song"
+                            >
+                            <div class="slider-track"></div>
+                            <div id="bar-markers" class="bar-markers"></div>
+                            <!-- Loop markers integrated into progress bar -->
+                            <div id="loop-highlight" class="loop-highlight"></div>
+                            <div id="loop-start-marker" class="loop-marker loop-marker-start" style="left: 0%; display: block; visibility: visible;" title="Drag to set loop start point">
+                                <div class="loop-marker-triangle" style="display: block;"></div>
+                                <div class="loop-marker-label">Bar: 1</div>
+                            </div>
+                            <div id="loop-end-marker" class="loop-marker loop-marker-end" style="left: 100%; display: block; visibility: visible;" title="Drag to set loop end point">
+                                <div class="loop-marker-triangle" style="display: block;"></div>
+                                <div class="loop-marker-label">Bar: 1</div>
+                            </div>
+                        </div>
+                        <!-- Loop range display -->
+                        <div class="loop-range-info">
+                            <span>Move triangles to loop within a section of the movement</span>
+                        </div>
+                    </div>
+
                     <!-- Transport Controls Toolbar -->
                     <div class="transport-toolbar">
                         <button id="stop-btn" class="btn-transport" aria-label="Stop" title="Stop playback and return to beginning">
@@ -129,59 +173,6 @@
                         </button>
                     </div>
 
-                    <!-- Progress Bar -->
-                    <div class="progress-container">
-                        <div class="progress-header">
-                            <span id="current-time">0:00</span>
-                            <span id="current-bar" style="margin-left: 10px; color: #7f8c8d;">Bar: -</span>
-                        </div>
-                        <div class="progress-time-labels">
-                            <span>0:00</span>
-                            <span id="progress-duration">0:00</span>
-                        </div>
-                        <div class="slider-container">
-                            <input
-                                type="range"
-                                id="progress-bar"
-                                min="0"
-                                max="100"
-                                value="0"
-                                class="styled-slider"
-                                aria-label="Playback progress"
-                                title="Drag to jump to any point in the song"
-                            >
-                            <div class="slider-track"></div>
-                            <div id="bar-markers" class="bar-markers"></div>
-                        </div>
-                    </div>
-
-                    <!-- Bar Jump Control -->
-                    <div class="bar-jump-control">
-                        <label for="bar-jump-input">Jump to bar:</label>
-                        <input
-                            type="number"
-                            id="bar-jump-input"
-                            min="1"
-                            value="1"
-                            class="bar-jump-input"
-                            aria-label="Bar number to jump to"
-                            title="Enter a bar number and press Enter to jump"
-                        >
-                        <button id="bar-jump-btn" class="btn btn-small" title="Jump to the specified bar number">Go</button>
-                    </div>
-
-                    <!-- Loop Point Controls -->
-                    <div class="loop-controls">
-                        <label title="Set a section of the song to loop repeatedly for focused practice">Loop within movement: <span id="loop-range-display">0:00 - 0:00</span></label>
-                        <div class="loop-slider-container">
-                            <input type="range" id="loop-start-slider" min="0" max="100" value="0" class="loop-slider" aria-label="Loop start position" title="Set where the loop begins - playback will restart from this point">
-                            <input type="range" id="loop-end-slider" min="0" max="100" value="100" class="loop-slider" aria-label="Loop end position" title="Set where the loop ends - playback will jump back to loop start at this point">
-                            <div class="loop-track">
-                                <div id="loop-highlight" class="loop-highlight"></div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Tempo Control -->
                     <div class="tempo-control">
                         <label title="Adjust playback speed - slower for learning, faster as you improve">Tempo: <span id="tempo-value">100</span>%</label>
@@ -190,12 +181,12 @@
                                 type="range"
                                 id="tempo-slider"
                                 min="60"
-                                max="120"
+                                max="140"
                                 value="100"
                                 step="5"
                                 class="styled-slider"
                                 aria-label="Tempo slider"
-                                title="Adjust playback speed (60%=very slow for learning, 100%=original tempo, 120%=faster)"
+                                title="Adjust playback speed (60%=very slow for learning, 100%=original tempo, 140%=faster)"
                             >
                             <div class="slider-track"></div>
                         </div>

@@ -6,31 +6,107 @@
 }
 
 :root {
-    --primary-color: #4a90e2;
-    --primary-hover: #357abd;
-    --secondary-color: #7b68ee;
-    --background: #f5f7fa;
-    --surface: #ffffff;
-    --text-primary: #2c3e50;
-    --text-secondary: #7f8c8d;
-    --border: #e1e8ed;
-    --success: #27ae60;
-    --danger: #e74c3c;
+    /* Colors - Voice Parts */
+    --color-soprano: #E74C3C;
+    --color-alto: #3498DB;
+    --color-tenor: #2ECC71;
+    --color-bass: #9B59B6;
+
+    /* Colors - UI */
+    --color-highlight: #F39C12;
+    --color-text-dark: #2C3E50;
+    --color-text-medium: #7F8C8D;
+    --color-text-light: #95A5A6;
+    --color-border: #E8E8E8;
+    --color-background: #FFFFFF;
+    --color-background-alt: #F5F7FA;
+
+    /* Legacy compatibility - map old vars to new */
+    --primary-color: var(--color-alto);
+    --primary-hover: #2980B9;
+    --secondary-color: var(--color-bass);
+    --background: var(--color-background-alt);
+    --surface: var(--color-background);
+    --text-primary: var(--color-text-dark);
+    --text-secondary: var(--color-text-medium);
+    --border: var(--color-border);
+    --success: var(--color-tenor);
+    --danger: var(--color-soprano);
     --shadow: rgba(0, 0, 0, 0.1);
+
+    /* Typography */
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+    --font-size-h1: 32px;
+    --font-size-h2: 24px;
+    --font-size-h3: 20px;
+    --font-size-base: 16px;
+    --font-size-small: 14px;
+    --font-size-tiny: 12px;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.7;
+
+    /* Spacing */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+    /* Transitions */
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+
+    --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: var(--font-family);
     background: var(--background);
     color: var(--text-primary);
-    line-height: 1.6;
+    line-height: var(--line-height-normal);
     min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Global focus styles for accessibility */
+*:focus {
+    outline: 2px solid var(--color-alto);
+    outline-offset: 2px;
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--color-alto);
+    outline-offset: 2px;
 }
 
 .container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 0 20px 20px 20px; /* No top padding, 20px on sides and bottom */
 }
 
 /* Header */
@@ -40,7 +116,37 @@ header {
     background: var(--surface);
     border-radius: 8px;
     box-shadow: 0 2px 8px var(--shadow);
-    margin-bottom: 16px;
+    margin-bottom: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Add a pseudo-element for the gap that stays with the header */
+header::after {
+    content: '';
+    display: block;
+    height: 5px;
+    background: var(--background);
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+header .header-logo {
+    max-width: 280px;
+    height: auto;
+    margin: 0 auto var(--space-sm) auto;
+    display: block;
+}
+
+header .tagline {
+    font-size: var(--font-size-small);
+    color: var(--color-text-medium);
+    margin: 0;
+    font-weight: var(--font-weight-normal);
 }
 
 header h1 {
@@ -55,8 +161,11 @@ header h1 {
     background: var(--surface);
     border-radius: 8px;
     padding: 4px;
-    margin-bottom: 16px;
+    margin-bottom: 5px;
     box-shadow: 0 2px 8px var(--shadow);
+    position: sticky;
+    top: 91px; /* Stick right below header */
+    z-index: 99;
 }
 
 .tab-button {
@@ -110,7 +219,7 @@ header h1 {
     padding: 16px;
     border-radius: 8px;
     box-shadow: 0 2px 8px var(--shadow);
-    margin-bottom: 16px;
+    margin-bottom: 5px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -172,7 +281,7 @@ header h1 {
     padding: 16px;
     border-radius: 8px;
     box-shadow: 0 2px 8px var(--shadow);
-    margin-bottom: 16px;
+    margin-bottom: 5px;
     display: grid;
     gap: 12px;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -431,7 +540,7 @@ section:last-child {
     padding: 12px;
     background: var(--background);
     border-radius: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 5px;
     text-align: center;
 }
 
@@ -471,7 +580,7 @@ section:last-child {
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 5px;
     padding: 12px;
     background: var(--background);
     border-radius: 8px;
@@ -513,9 +622,9 @@ section:last-child {
     background: var(--success);
     color: white;
     border-color: var(--success);
-    width: 56px;
-    height: 56px;
-    font-size: 1.8rem;
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
 }
 
 .btn-transport-primary:hover:not(:disabled) {
@@ -532,18 +641,51 @@ section:last-child {
 
 /* Progress Bar */
 .progress-container {
-    margin-bottom: 12px;
-    padding: 10px;
+    margin-bottom: 0;
+    padding: 8px;
     background: var(--background);
     border-radius: 6px;
+    overflow: visible;
 }
 
 .progress-header {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4px;
+    gap: 10px;
+}
+
+.progress-info {
+    display: flex;
+    align-items: center;
+}
+
+.bar-jump-inline {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: normal;
+}
+
+.bar-jump-inline label {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.bar-jump-inline .bar-jump-input {
+    width: 60px;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+}
+
+.bar-jump-inline .btn-small {
+    padding: 4px 8px;
+    font-size: 0.8rem;
 }
 
 .progress-time-labels {
@@ -556,21 +698,15 @@ section:last-child {
 
 .progress-container .slider-container {
     margin-top: 0;
+    padding-bottom: 25px;
 }
 
-/* Loop Controls */
-.loop-controls {
-    margin-bottom: 12px;
-    padding: 10px;
-    background: var(--background);
-    border-radius: 6px;
-}
-
-.loop-controls > label {
-    display: block;
-    font-weight: 600;
-    font-size: 0.85rem;
-    margin-bottom: 4px;
+/* Loop Range Display */
+.loop-range-info {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
 }
 
 #loop-range-display {
@@ -578,87 +714,87 @@ section:last-child {
     font-weight: 600;
 }
 
-.loop-slider-container {
-    position: relative;
-    height: 40px;
-    margin-top: 0;
-    padding: 0;
-}
-
-.loop-track {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 10px;
-    background: var(--border);
-    border-radius: 5px;
-    transform: translateY(-50%);
-    pointer-events: none;
-    z-index: 1;
-}
-
+/* Loop Highlight on Progress Bar */
 .loop-highlight {
     position: absolute;
     top: 0;
-    height: 100%;
+    bottom: 0;
     background: var(--secondary-color);
-    opacity: 0.3;
-    border-radius: 3px;
+    opacity: 0.1;
+    pointer-events: none;
+    z-index: 1;
     transition: left 0.1s, width 0.1s;
 }
 
-.loop-slider {
+/* Loop Markers */
+.loop-marker {
     position: absolute;
-    width: 100%;
-    height: 10px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: transparent;
+    bottom: -18px;
+    width: 20px;
+    height: 20px;
+    cursor: grab;
+    z-index: 4;
+    user-select: none;
+    transform: translateX(-50%);
+    display: block;
+    visibility: visible;
+}
+
+.loop-marker:active {
+    cursor: grabbing;
+}
+
+.loop-marker-triangle {
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    display: block;
+}
+
+.loop-marker-start .loop-marker-triangle {
+    border-bottom: 15px solid #7b68ee;  /* Medium slate blue - matches slider controls */
+}
+
+.loop-marker-end .loop-marker-triangle {
+    border-bottom: 15px solid #7b68ee;  /* Medium slate blue - matches slider controls */
+}
+
+/* Debug: Make start marker more visible */
+.loop-marker-start {
+    /* Start marker at left edge */
+}
+
+.loop-marker-end {
+    /* End marker at right edge */
+}
+
+.loop-marker-label {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    opacity: 0;
     pointer-events: none;
-    top: 50%;
-    transform: translateY(-50%);
-    margin: 0;
-    padding: 0;
-    z-index: 2;
+    transition: opacity 0.2s;
 }
 
-.loop-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 24px;
-    height: 24px;
-    background: var(--secondary-color);
-    border: 3px solid white;
-    border-radius: 50%;
-    cursor: pointer;
-    pointer-events: auto;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+.loop-marker:hover .loop-marker-label,
+.loop-marker.dragging .loop-marker-label {
+    opacity: 1;
 }
 
-.loop-slider::-moz-range-thumb {
-    width: 24px;
-    height: 24px;
-    background: var(--secondary-color);
-    border: 3px solid white;
-    border-radius: 50%;
-    cursor: pointer;
-    pointer-events: auto;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-
-#loop-start-slider {
-    z-index: 3;
-}
-
-#loop-end-slider {
-    z-index: 3;
-}
 
 /* Tempo Control */
 .tempo-control {
-    margin-bottom: 12px;
-    padding: 10px;
+    margin-bottom: 5px;
+    padding: 8px;
     background: var(--background);
     border-radius: 6px;
 }
@@ -676,8 +812,8 @@ section:last-child {
 
 /* Balance Control */
 .balance-control {
-    margin-bottom: 12px;
-    padding: 10px;
+    margin-bottom: 5px;
+    padding: 8px;
     background: var(--background);
     border-radius: 6px;
 }
@@ -706,6 +842,7 @@ section:last-child {
     position: relative;
     height: 40px;
     margin-top: 0;
+    overflow: visible;
 }
 
 .slider-track {
@@ -770,7 +907,7 @@ section:last-child {
     height: 10px;
     transform: translateY(-50%);
     pointer-events: none;
-    z-index: 0;
+    z-index: 2;
 }
 
 .bar-marker {
@@ -804,8 +941,8 @@ section:last-child {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 12px;
-    padding: 8px 10px;
+    margin-bottom: 5px;
+    padding: 6px 8px;
     background: var(--background);
     border-radius: 6px;
 }
@@ -948,7 +1085,8 @@ section:last-child {
 }
 
 .composer-item,
-.result-item {
+.result-item,
+.work-item {
     padding: 12px;
     cursor: pointer;
     border-bottom: 1px solid var(--border);
@@ -956,12 +1094,14 @@ section:last-child {
 }
 
 .composer-item:last-child,
-.result-item:last-child {
+.result-item:last-child,
+.work-item:last-child {
     border-bottom: none;
 }
 
 .composer-item:hover,
-.result-item:hover {
+.result-item:hover,
+.work-item:hover {
     background-color: var(--background);
 }
 

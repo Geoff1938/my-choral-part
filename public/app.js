@@ -45,6 +45,7 @@ class MIDIPlayer {
         this.instruments = [];
         this.parts = [];
         this.isPlaying = false;
+        this.wasPlayingBeforeDrag = false; // Track playing state before dragging progress bar
         this.currentTime = 0;
         this.duration = 0;
         this.originalDuration = 0; // Duration at original tempo
@@ -207,14 +208,9 @@ class MIDIPlayer {
         this.currentBarDisplay = document.getElementById('current-bar');
         this.barMarkersContainer = document.getElementById('bar-markers');
 
-        // Bar jump controls
-        this.barJumpInput = document.getElementById('bar-jump-input');
-        this.barJumpBtn = document.getElementById('bar-jump-btn');
-
         // Loop controls
-        this.loopStartSlider = document.getElementById('loop-start-slider');
-        this.loopEndSlider = document.getElementById('loop-end-slider');
-        this.loopRangeDisplay = document.getElementById('loop-range-display');
+        this.loopStartMarker = document.getElementById('loop-start-marker');
+        this.loopEndMarker = document.getElementById('loop-end-marker');
         this.loopHighlight = document.getElementById('loop-highlight');
 
         // Tempo controls
@@ -751,44 +747,68 @@ class MIDIPlayer {
             return;
         }
 
-        // Determine label interval based on total number of bars to prevent overlap
+        // Calculate adaptive label interval based on available screen width
         const totalBars = this.bars.length;
+
+        // Get the actual width of the progress bar in pixels
+        const progressBarWidth = this.progressBar ? this.progressBar.offsetWidth : 600;
+
+        // Each label needs approximately 35px of space (text + padding)
+        const labelWidth = 35;
+
+        // Calculate how many labels we can fit
+        const maxLabels = Math.floor(progressBarWidth / labelWidth);
+
+        // Determine label interval (5, 10, 20, or 40) based on how many we can fit
         let labelInterval;
-        if (totalBars <= 50) {
-            labelInterval = 4;  // Show every 4th bar
-        } else if (totalBars <= 100) {
-            labelInterval = 8;  // Show every 8th bar
-        } else if (totalBars <= 150) {
-            labelInterval = 12; // Show every 12th bar
-        } else if (totalBars <= 200) {
-            labelInterval = 16; // Show every 16th bar
+        if (totalBars / 5 <= maxLabels) {
+            labelInterval = 5;   // Show every 5th bar
+        } else if (totalBars / 10 <= maxLabels) {
+            labelInterval = 10;  // Show every 10th bar
+        } else if (totalBars / 20 <= maxLabels) {
+            labelInterval = 20;  // Show every 20th bar
         } else {
-            labelInterval = 20; // Show every 20th bar
+            labelInterval = 40;  // Show every 40th bar
         }
+
+        // Always show lines every 5 bars
+        const lineInterval = 5;
 
         // Add markers for bars
         this.bars.forEach((bar, index) => {
             const percentage = (bar.time / this.originalDuration) * 100;
+            const displayBarNumber = bar.number + this.startingBarOffset;
+            const isFirstBar = bar.number === 1;
+            const isLastBar = index === this.bars.length - 1;
 
-            // Skip if too close to edges
-            if (percentage < 1 || percentage > 99) return;
+            // Determine if this bar should have a line marker
+            const shouldShowLine = isFirstBar || isLastBar || (displayBarNumber % lineInterval === 0);
+
+            if (!shouldShowLine) return; // Skip bars that don't need lines
 
             const marker = document.createElement('div');
             marker.className = 'bar-marker';
 
             // Determine if this bar should have a label
-            const shouldShowLabel = (bar.number % labelInterval === 1) || (bar.number === 1);
+            const shouldShowLabel = isFirstBar || isLastBar || (displayBarNumber % labelInterval === 0);
+
             if (shouldShowLabel) {
                 marker.classList.add('major');
 
                 // Add label for major bars
                 const label = document.createElement('span');
                 label.className = 'bar-marker-label';
-                label.textContent = bar.number + this.startingBarOffset;
+                label.textContent = displayBarNumber;
                 marker.appendChild(label);
             }
 
+            // Account for slider thumb positioning (24px width)
+            // The thumb center is offset from the percentage position
+            const thumbWidth = 24;
+            const offset = thumbWidth / 2 - (percentage * thumbWidth / 100);
+
             marker.style.left = `${percentage}%`;
+            marker.style.transform = `translate(calc(-50% + ${offset}px), -50%)`;
             this.barMarkersContainer.appendChild(marker);
         });
     }
@@ -924,8 +944,15 @@ class MIDIPlayer {
             // Update channels list to show the "Click Play to load..." message
             this.updateChannelsList();
 
-            // Don't auto-load on page load - let user click play when ready
-            // This prevents errors on slower connections or during initialization
+            // Auto-load the first movement to show bars and markers immediately
+            const selectedMovementData = JSON.parse(this.movementSelect.value);
+            if (selectedMovementData && selectedMovementData.midiUrl) {
+                const absoluteUrl = selectedMovementData.midiUrl.startsWith('http')
+                    ? selectedMovementData.midiUrl
+                    : `https://www.learnchoralmusic.co.uk${selectedMovementData.midiUrl}`;
+
+                await this.loadMIDIFromURL(absoluteUrl, selectedMovementData.name);
+            }
         } catch (error) {
             console.error('Error loading default work:', error);
             // Fall back to hardcoded Scarlatti if API fails
@@ -1110,77 +1137,68 @@ class MIDIPlayer {
         this.nextMovementBtn.addEventListener('click', () => this.skipToNextMovement());
 
         // Progress bar with pause/resume on interaction
-        let wasPlayingBeforeSeek = false;
+        let isSeeking = false;
 
+        // Use capture phase to intercept events BEFORE the input event fires
         this.progressBar.addEventListener('mousedown', () => {
-            wasPlayingBeforeSeek = this.isPlaying;
-            if (this.isPlaying) {
-                this.pause();
-            }
-        });
+            // Capture playing state IMMEDIATELY before any other events can modify it
+            this.wasPlayingBeforeDrag = this.isPlaying;
+            isSeeking = true;
+            console.log('Mousedown on progress bar (capture) - wasPlaying:', this.wasPlayingBeforeDrag);
+        }, { capture: true });
 
         this.progressBar.addEventListener('touchstart', () => {
-            wasPlayingBeforeSeek = this.isPlaying;
-            if (this.isPlaying) {
-                this.pause();
-            }
-        });
+            // Capture playing state IMMEDIATELY before any other events can modify it
+            this.wasPlayingBeforeDrag = this.isPlaying;
+            isSeeking = true;
+        }, { capture: true });
 
         this.progressBar.addEventListener('input', (e) => {
-            const newTime = (e.target.value / 100) * this.originalDuration;
-            // Update position without triggering auto-resume (seekTo will handle it if needed)
-            this.seekTo(newTime, false); // Pass false to prevent auto-resume
+            let newTime = (e.target.value / 100) * this.originalDuration;
+
+            // Constrain to loop range - if outside, jump to nearest loop marker
+            if (newTime < this.loopStart) {
+                newTime = this.loopStart;
+            } else if (newTime > this.loopEnd) {
+                newTime = this.loopEnd;
+            }
+
+            // Update position without triggering auto-resume
+            this.seekTo(newTime, false);
         });
 
         const resumeAfterSeek = () => {
-            if (wasPlayingBeforeSeek) {
+            console.log('resumeAfterSeek called - isSeeking:', isSeeking, 'wasPlaying:', this.wasPlayingBeforeDrag);
+            if (isSeeking && this.wasPlayingBeforeDrag) {
+                console.log('Resuming playback...');
                 setTimeout(() => this.play(), 50);
-                wasPlayingBeforeSeek = false;
             }
+            isSeeking = false;
+            this.wasPlayingBeforeDrag = false;
         };
 
         this.progressBar.addEventListener('mouseup', resumeAfterSeek);
         this.progressBar.addEventListener('touchend', resumeAfterSeek);
         this.progressBar.addEventListener('touchcancel', resumeAfterSeek);
 
-        // Loop controls
-        this.loopStartSlider.addEventListener('input', (e) => {
-            let startPercent = parseInt(e.target.value);
-            let endPercent = parseInt(this.loopEndSlider.value);
+        // Also resume on change event (for clicks/releases on the slider)
+        this.progressBar.addEventListener('change', resumeAfterSeek);
 
-            // Don't let start go past end
-            if (startPercent > endPercent) {
-                startPercent = endPercent;
-                e.target.value = startPercent;
+        // Catch mouseup anywhere on the document (in case user releases outside slider)
+        document.addEventListener('mouseup', (e) => {
+            if (isSeeking) {
+                resumeAfterSeek();
             }
-
-            this.loopStart = (startPercent / 100) * this.originalDuration;
-            this.updateLoopDisplay();
-
-            // If left slider moved ahead of current time, jump to it
-            if (this.loopStart > this.currentTime) {
-                this.seekTo(this.loopStart);
+        });
+        document.addEventListener('touchend', (e) => {
+            if (isSeeking) {
+                resumeAfterSeek();
             }
         });
 
-        this.loopEndSlider.addEventListener('input', (e) => {
-            let endPercent = parseInt(e.target.value);
-            let startPercent = parseInt(this.loopStartSlider.value);
-
-            // Don't let end go before start
-            if (endPercent < startPercent) {
-                endPercent = startPercent;
-                e.target.value = endPercent;
-            }
-
-            this.loopEnd = (endPercent / 100) * this.originalDuration;
-            this.updateLoopDisplay();
-
-            // If right slider moved before current time, jump back to loop start
-            if (this.loopEnd < this.currentTime) {
-                this.seekTo(this.loopStart);
-            }
-        });
+        // Loop marker drag functionality
+        this.initializeLoopMarkerDrag(this.loopStartMarker, true);
+        this.initializeLoopMarkerDrag(this.loopEndMarker, false);
 
         this.tempoSlider.addEventListener('input', (e) => {
             this.setTempo(parseInt(e.target.value));
@@ -1213,19 +1231,9 @@ class MIDIPlayer {
             }
         });
 
-        // Bar jump controls
-        this.barJumpBtn.addEventListener('click', () => this.jumpToBar());
-        this.barJumpInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                this.jumpToBar();
-            }
-        });
     }
 
     updateLoopDisplay() {
-        // Update the display text
-        this.loopRangeDisplay.textContent = `${formatTime(this.loopStart)} - ${formatTime(this.loopEnd)}`;
-
         // Update the visual highlight
         const startPercent = (this.loopStart / this.originalDuration) * 100;
         const endPercent = (this.loopEnd / this.originalDuration) * 100;
@@ -1233,6 +1241,128 @@ class MIDIPlayer {
 
         this.loopHighlight.style.left = `${startPercent}%`;
         this.loopHighlight.style.width = `${width}%`;
+
+        // Update marker positions and labels
+        if (this.loopStartMarker && this.loopEndMarker) {
+            // Account for slider thumb width (24px)
+            // At 0%, thumb center is at 12px. At 100%, thumb center is at calc(100% - 12px)
+            // Offset = 12px - (percentage * 24px / 100)
+            const thumbWidth = 24;
+            const startOffset = thumbWidth / 2 - (startPercent * thumbWidth / 100);
+            const endOffset = thumbWidth / 2 - (endPercent * thumbWidth / 100);
+
+            this.loopStartMarker.style.left = `${startPercent}%`;
+            this.loopStartMarker.style.transform = `translateX(calc(-50% + ${startOffset}px))`;
+
+            this.loopEndMarker.style.left = `${endPercent}%`;
+            this.loopEndMarker.style.transform = `translateX(calc(-50% + ${endOffset}px))`;
+
+            // Make markers visible
+            this.loopStartMarker.style.display = 'block';
+            this.loopEndMarker.style.display = 'block';
+
+            // Update bar number labels
+            const startBar = this.getBarAtTime(this.loopStart);
+            const endBar = this.getBarAtTime(this.loopEnd);
+
+            const startLabel = this.loopStartMarker.querySelector('.loop-marker-label');
+            const endLabel = this.loopEndMarker.querySelector('.loop-marker-label');
+
+            if (startLabel) startLabel.textContent = `Bar: ${startBar}`;
+            if (endLabel) endLabel.textContent = `Bar: ${endBar}`;
+        }
+    }
+
+    getBarAtTime(time) {
+        // Find which bar corresponds to a given time
+        if (!this.bars || this.bars.length === 0) {
+            return 1;
+        }
+
+        for (let i = this.bars.length - 1; i >= 0; i--) {
+            if (time >= this.bars[i].time) {
+                return this.bars[i].number + this.startingBarOffset;
+            }
+        }
+
+        return 1 + this.startingBarOffset;
+    }
+
+    initializeLoopMarkerDrag(marker, isStart) {
+        if (!marker) return;
+
+        let isDragging = false;
+        let progressBarRect = null;
+
+        const updateLoopFromPosition = (clientX) => {
+            if (!progressBarRect || !this.originalDuration) return;
+
+            // Calculate percentage based on mouse position
+            const relativeX = clientX - progressBarRect.left;
+            const percent = Math.max(0, Math.min(100, (relativeX / progressBarRect.width) * 100));
+            const time = (percent / 100) * this.originalDuration;
+
+            if (isStart) {
+                // Don't let start go past end
+                this.loopStart = Math.min(time, this.loopEnd);
+                // If moved ahead of current time, jump to it
+                if (this.loopStart > this.currentTime) {
+                    this.seekTo(this.loopStart);
+                }
+            } else {
+                // Don't let end go before start
+                this.loopEnd = Math.max(time, this.loopStart);
+                // If moved before current time, jump back to loop start
+                if (this.loopEnd < this.currentTime) {
+                    this.seekTo(this.loopStart);
+                }
+            }
+
+            this.updateLoopDisplay();
+        };
+
+        let wasPlayingBeforeMarkerDrag = false;
+
+        const startDrag = (e) => {
+            isDragging = true;
+            // Capture playing state and pause if needed
+            wasPlayingBeforeMarkerDrag = this.isPlaying;
+            if (this.isPlaying) {
+                this.pause();
+            }
+            marker.classList.add('dragging');
+            progressBarRect = this.progressBar.getBoundingClientRect();
+            e.preventDefault();
+        };
+
+        const drag = (e) => {
+            if (!isDragging) return;
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            updateLoopFromPosition(clientX);
+        };
+
+        const endDrag = () => {
+            if (isDragging) {
+                isDragging = false;
+                marker.classList.remove('dragging');
+                // Resume playback if it was playing before
+                if (wasPlayingBeforeMarkerDrag) {
+                    setTimeout(() => this.play(), 50);
+                }
+                wasPlayingBeforeMarkerDrag = false;
+            }
+        };
+
+        // Mouse events
+        marker.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+
+        // Touch events
+        marker.addEventListener('touchstart', startDrag);
+        document.addEventListener('touchmove', drag, { passive: false });
+        document.addEventListener('touchend', endDrag);
+        document.addEventListener('touchcancel', endDrag);
     }
 
     updateChannelsList() {
@@ -1627,13 +1757,11 @@ class MIDIPlayer {
             this.switchTab('play-music');
             this.updateWorkDisplay();
 
-            // Auto-select first movement in the dropdown
+            // Auto-select and auto-load first movement in the dropdown
             if (movements.length > 0) {
                 this.movementSelect.selectedIndex = 1; // Select the first movement (index 1 after the placeholder)
-            }
 
-            // If only one movement, auto-load it
-            if (movements.length === 1) {
+                // Auto-load the first movement
                 const movementData = movements[0];
                 const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
                 this.loadMIDIFromURL(absoluteUrl, movementData.name);
@@ -1810,18 +1938,14 @@ class MIDIPlayer {
             this.originalDuration = this.midi.duration - this.skipToTime;
             this.duration = this.originalDuration;
 
+            // Store the current movement name (needed for localStorage keys)
+            this.currentMovement = title;
+
             // Setup the MIDI playback
             await this.setupPlayback();
 
             // Update UI
             this.updateMIDIInfo();
-
-            // Initialize loop to full duration
-            this.loopStart = 0;
-            this.loopEnd = this.originalDuration;
-            if (this.loopStartSlider) this.loopStartSlider.value = 0;
-            if (this.loopEndSlider) this.loopEndSlider.value = 100;
-            this.updateLoopDisplay();
 
             // Update channels list based on voice part
             this.updateChannelsList();
@@ -1835,6 +1959,11 @@ class MIDIPlayer {
             // Populate time signature settings UI
             this.populateTimeSignatureSettings();
 
+            // Initialize loop to full duration (AFTER bars are calculated)
+            this.loopStart = 0;
+            this.loopEnd = this.originalDuration;
+            this.updateLoopDisplay();
+
             // Update the current movement name display with composer, work, and movement
             if (title && this.selectedComposer && this.selectedWork) {
                 this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
@@ -1844,10 +1973,9 @@ class MIDIPlayer {
                 this.currentMovementName.textContent = title;
             }
 
-            this.showStatus('MIDI file loaded successfully!', 'success');
+            this.showStatus('MIDI file loaded successfully. Click Play when ready.', 'success');
 
-            // Auto-play after loading
-            setTimeout(() => this.play(), 500);
+            // Don't auto-play - let user click play when ready
 
         } catch (error) {
             console.error('Error loading MIDI:', error);

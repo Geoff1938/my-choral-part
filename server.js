@@ -9,7 +9,7 @@ const proxyRouter = require('./routes/proxy');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const scraper = new ChoralMusicScraper();
 
 // Enable gzip compression for all responses
