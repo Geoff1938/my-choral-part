@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: choral-practice
+    name: my-choral-part
     env: node
     buildCommand: npm install
     startCommand: npm start
