@@ -58,6 +58,7 @@ class MIDIPlayer {
         this.selectedChannelIndex = null; // Specific channel index when multiple exist
         this.loopStart = 0;
         this.loopEnd = 0;
+        this.repeatMode = false; // If true, repeat current movement; if false, auto-advance to next
 
         // Bar/measure tracking
         this.bars = []; // Array of bar positions in seconds
@@ -67,7 +68,9 @@ class MIDIPlayer {
 
         // Instrument cache for reusing loaded Soundfont instruments
         // This significantly speeds up loading when switching between movements
-        this.instrumentCache = new Map(); // Map<instrumentName, instrument>
+        // We cache the instrument's internal buffers (decoded audio) so we can reuse them
+        // without re-decoding when switching movements or works
+        this.instrumentCache = new Map(); // Map<instrumentName, { buffers, instrument }>
         this.maxCacheSize = 30; // Keep up to 30 instruments cached
 
         // Mapping of voice parts to MIDI instrument names
@@ -173,6 +176,7 @@ class MIDIPlayer {
         this.helpModalTitle = document.getElementById('help-modal-title');
         this.helpModalText = document.getElementById('help-modal-text');
         this.helpModalClose = document.getElementById('help-modal-close');
+        this.headerHelpBtn = document.getElementById('header-help-btn');
 
         // Settings tab elements
         this.voicePartSelect = document.getElementById('voice-part-settings');
@@ -200,6 +204,7 @@ class MIDIPlayer {
         this.forwardBtn = document.getElementById('forward-btn');
         this.prevMovementBtn = document.getElementById('prev-movement-btn');
         this.nextMovementBtn = document.getElementById('next-movement-btn');
+        this.repeatBtn = document.getElementById('repeat-btn');
 
         // Progress bar
         this.progressBar = document.getElementById('progress-bar');
@@ -688,10 +693,14 @@ class MIDIPlayer {
         });
     }
 
-    showHelpModal(title, text) {
+    showHelpModal(title, text, useHtml = false) {
         if (this.helpModal && this.helpModalTitle && this.helpModalText) {
             this.helpModalTitle.textContent = title || 'Help';
-            this.helpModalText.textContent = text || 'No help available';
+            if (useHtml) {
+                this.helpModalText.innerHTML = text || 'No help available';
+            } else {
+                this.helpModalText.textContent = text || 'No help available';
+            }
             this.helpModal.style.display = 'flex';
         }
     }
@@ -700,6 +709,69 @@ class MIDIPlayer {
         if (this.helpModal) {
             this.helpModal.style.display = 'none';
         }
+    }
+
+    showContextualHelp() {
+        // Determine which tab is active
+        const activeTab = document.querySelector('.tab-content.active');
+        const activeTabId = activeTab ? activeTab.id : '';
+
+        const tooltipHelp = '<strong>Tip:</strong> On desktop, hover over controls for tooltips. On phone/tablet, press and hold.';
+
+        let title = 'Help';
+        let content = '';
+
+        if (activeTabId === 'find-music-tab') {
+            title = 'Find Music - Help';
+            content =
+                '<strong>Search for music:</strong><br>' +
+                '• Type in the search box to find composers, works, or movements<br>' +
+                '• Use the checkboxes to filter what you search for<br>' +
+                '• Click on a composer to see their works<br>' +
+                '• Click on a work to select it for playback<br><br>' +
+                '<strong>Search tips:</strong><br>' +
+                '• Search matches the beginning of words (e.g., "bach" finds "Bach" and "Pachelbel")<br>' +
+                '• You can search by composer name, work title, or movement name<br><br>' +
+                tooltipHelp;
+        } else if (activeTabId === 'play-music-tab') {
+            title = 'Play Music - Help';
+            content =
+                '<strong>Playback controls:</strong><br>' +
+                '• <strong>Stop</strong> - Stop and return to beginning<br>' +
+                '• <strong>Play/Pause</strong> - Start or pause playback<br>' +
+                '• <strong>Backward/Forward</strong> - Skip 10 seconds<br>' +
+                '• <strong>Previous/Next</strong> - Change movement<br>' +
+                '• <strong>Repeat</strong> - Loop current movement (highlighted) or auto-advance<br><br>' +
+                '<strong>Progress bar:</strong><br>' +
+                '• Drag the slider to jump to any point<br>' +
+                '• Drag the triangles to set a loop range for practice<br><br>' +
+                '<strong>Tempo &amp; Balance:</strong><br>' +
+                '• Slow down the tempo for learning difficult passages<br>' +
+                '• Adjust balance to hear your part more or less prominently<br><br>' +
+                tooltipHelp;
+        } else if (activeTabId === 'settings-tab') {
+            title = 'Settings - Help';
+            content =
+                '<strong>Your voice part:</strong><br>' +
+                '• Select your voice part (Soprano, Alto, Tenor, Bass)<br>' +
+                '• This affects which part is highlighted by the Balance control<br><br>' +
+                '<strong>Channel overrides:</strong><br>' +
+                '• Some MIDI files may not correctly identify voice parts<br>' +
+                '• Use this to manually assign which channel is your part<br><br>' +
+                '<strong>Time signatures:</strong><br>' +
+                '• Adjust bar numbering if your score starts at a different bar<br>' +
+                '• Override time signatures if they are incorrectly detected<br><br>' +
+                '<strong>Share:</strong><br>' +
+                '• Copy the shareable URL to send to others<br><br>' +
+                tooltipHelp;
+        } else {
+            title = 'Help';
+            content =
+                'Select a tab to see context-specific help.<br><br>' +
+                tooltipHelp;
+        }
+
+        this.showHelpModal(title, content, true);
     }
 
     attachDoubleClickHelp() {
@@ -733,6 +805,80 @@ class MIDIPlayer {
                 const title = element.getAttribute('aria-label') || element.textContent.trim().substring(0, 30) || 'Control';
                 const helpText = element.getAttribute('title');
                 this.showHelpModal(title, helpText);
+            });
+        });
+    }
+
+    attachLongPressTooltips() {
+        // Get all elements with title attributes
+        const elementsWithHelp = document.querySelectorAll('[title]');
+        let longPressTimer = null;
+        let currentTooltip = null;
+
+        const showTooltip = (element, x, y) => {
+            // Remove any existing tooltip
+            hideTooltip();
+
+            const title = element.getAttribute('title');
+            if (!title) return;
+
+            // Create tooltip element
+            currentTooltip = document.createElement('div');
+            currentTooltip.className = 'touch-tooltip';
+            currentTooltip.textContent = title;
+            document.body.appendChild(currentTooltip);
+
+            // Position tooltip above the touch point
+            const tooltipRect = currentTooltip.getBoundingClientRect();
+            let left = x - tooltipRect.width / 2;
+            let top = y - tooltipRect.height - 20;
+
+            // Keep within screen bounds
+            if (left < 10) left = 10;
+            if (left + tooltipRect.width > window.innerWidth - 10) {
+                left = window.innerWidth - tooltipRect.width - 10;
+            }
+            if (top < 10) {
+                top = y + 30; // Show below if not enough space above
+            }
+
+            currentTooltip.style.left = `${left}px`;
+            currentTooltip.style.top = `${top}px`;
+        };
+
+        const hideTooltip = () => {
+            if (currentTooltip) {
+                currentTooltip.remove();
+                currentTooltip = null;
+            }
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        };
+
+        elementsWithHelp.forEach(element => {
+            // Skip if already has long-press listener
+            if (element.dataset.hasLongPressHelp) return;
+            element.dataset.hasLongPressHelp = 'true';
+
+            element.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                longPressTimer = setTimeout(() => {
+                    showTooltip(element, touch.clientX, touch.clientY);
+                }, 500); // 500ms for long press
+            }, { passive: true });
+
+            element.addEventListener('touchend', () => {
+                hideTooltip();
+            });
+
+            element.addEventListener('touchmove', () => {
+                hideTooltip();
+            });
+
+            element.addEventListener('touchcancel', () => {
+                hideTooltip();
             });
         });
     }
@@ -1022,6 +1168,16 @@ class MIDIPlayer {
         // Attach double-click/tap help to all elements with title attributes
         this.attachDoubleClickHelp();
 
+        // Attach long-press tooltips for touch devices
+        this.attachLongPressTooltips();
+
+        // Header help button
+        if (this.headerHelpBtn) {
+            this.headerHelpBtn.addEventListener('click', () => {
+                this.showContextualHelp();
+            });
+        }
+
         // Recent works dropdown
         this.recentWorksSelect.addEventListener('change', (e) => {
             if (e.target.value) {
@@ -1136,6 +1292,15 @@ class MIDIPlayer {
 
         this.nextMovementBtn.addEventListener('click', () => this.skipToNextMovement());
 
+        // Repeat button toggle
+        this.repeatBtn.addEventListener('click', () => {
+            this.repeatMode = !this.repeatMode;
+            this.repeatBtn.classList.toggle('active', this.repeatMode);
+            this.repeatBtn.title = this.repeatMode
+                ? 'Repeat current movement (on)'
+                : 'Repeat current movement (off: auto-advance to next movement)';
+        });
+
         // Progress bar with pause/resume on interaction
         let isSeeking = false;
 
@@ -1204,6 +1369,19 @@ class MIDIPlayer {
             this.setTempo(parseInt(e.target.value));
         });
 
+        // Click-to-jump for tempo slider (snaps to step of 5)
+        this.tempoSlider.addEventListener('click', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const min = parseInt(e.target.min);
+            const max = parseInt(e.target.max);
+            const step = parseInt(e.target.step) || 5;
+            const rawValue = min + percent * (max - min);
+            const value = Math.round(rawValue / step) * step;
+            e.target.value = value;
+            this.setTempo(value);
+        });
+
         // Volume controls - master volume fixed at 100%
         this.masterVolume = 1.0;
 
@@ -1212,6 +1390,22 @@ class MIDIPlayer {
             this.balanceValue.textContent = e.target.value;
             this.applyBalance();
             this.savePreferences(); // Save balance whenever it changes
+        });
+
+        // Click-to-jump for balance slider (snaps to step of 5)
+        this.balanceSlider.addEventListener('click', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const min = parseInt(e.target.min);
+            const max = parseInt(e.target.max);
+            const step = parseInt(e.target.step) || 5;
+            const rawValue = min + percent * (max - min);
+            const value = Math.round(rawValue / step) * step;
+            e.target.value = value;
+            this.balance = value;
+            this.balanceValue.textContent = value;
+            this.applyBalance();
+            this.savePreferences();
         });
 
         // Add spacebar toggle for play/pause
@@ -1288,6 +1482,62 @@ class MIDIPlayer {
         return 1 + this.startingBarOffset;
     }
 
+    // Snap a time to the start of the nearest bar (for loop start marker)
+    snapToBarStart(time) {
+        if (!this.bars || this.bars.length === 0) {
+            return time;
+        }
+
+        // Find the bar that contains this time, then return its start time
+        for (let i = this.bars.length - 1; i >= 0; i--) {
+            if (time >= this.bars[i].time) {
+                // Check if we're closer to this bar's start or the next bar's start
+                const currentBarStart = this.bars[i].time;
+                const nextBarStart = (i < this.bars.length - 1) ? this.bars[i + 1].time : this.originalDuration;
+                const midpoint = (currentBarStart + nextBarStart) / 2;
+
+                // Snap to whichever bar start is closer
+                if (time < midpoint) {
+                    return currentBarStart;
+                } else {
+                    return nextBarStart;
+                }
+            }
+        }
+
+        return 0; // Default to beginning
+    }
+
+    // Snap a time to the end of the nearest bar (for loop end marker)
+    snapToBarEnd(time) {
+        if (!this.bars || this.bars.length === 0) {
+            return time;
+        }
+
+        // Find the bar that contains this time, then return the end of that bar
+        // (which is the start of the next bar, or originalDuration if last bar)
+        for (let i = this.bars.length - 1; i >= 0; i--) {
+            if (time >= this.bars[i].time) {
+                const currentBarStart = this.bars[i].time;
+                const currentBarEnd = (i < this.bars.length - 1) ? this.bars[i + 1].time : this.originalDuration;
+                const prevBarEnd = currentBarStart; // End of previous bar = start of current
+
+                // Check if we're closer to the end of the previous bar or end of current bar
+                const midpoint = (currentBarStart + currentBarEnd) / 2;
+
+                if (time < midpoint) {
+                    // Closer to end of previous bar (which is start of current bar)
+                    return currentBarStart;
+                } else {
+                    // Closer to end of current bar
+                    return currentBarEnd;
+                }
+            }
+        }
+
+        return this.originalDuration; // Default to end
+    }
+
     initializeLoopMarkerDrag(marker, isStart) {
         if (!marker) return;
 
@@ -1300,7 +1550,18 @@ class MIDIPlayer {
             // Calculate percentage based on mouse position
             const relativeX = clientX - progressBarRect.left;
             const percent = Math.max(0, Math.min(100, (relativeX / progressBarRect.width) * 100));
-            const time = (percent / 100) * this.originalDuration;
+            let time = (percent / 100) * this.originalDuration;
+
+            // Snap to bar boundaries
+            if (this.bars && this.bars.length > 0) {
+                if (isStart) {
+                    // Snap start marker to beginning of nearest bar
+                    time = this.snapToBarStart(time);
+                } else {
+                    // Snap end marker to end of nearest bar (start of next bar)
+                    time = this.snapToBarEnd(time);
+                }
+            }
 
             if (isStart) {
                 // Don't let start go past end
@@ -2022,6 +2283,25 @@ class MIDIPlayer {
 
         this.showStatus('Loading required musical instruments...', 'info');
 
+        // Check if audio context is available (may be suspended until user interaction)
+        // Try to start it - if it's suspended due to autoplay policy, this will fail quickly
+        try {
+            if (Tone.context.state !== 'running') {
+                // Try to start audio context with a short timeout
+                const startPromise = Tone.start();
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Audio context start timeout')), 500)
+                );
+                await Promise.race([startPromise, timeoutPromise]);
+            }
+        } catch (e) {
+            console.log('[Audio] Context cannot start yet - will load instruments when user interacts');
+            this.showStatus('Click Play to load and play (browser requires interaction first)', 'info');
+            // Store track data for later loading
+            this.pendingTrackData = trackData;
+            return;
+        }
+
         try {
             // Load all instruments in parallel (with caching)
             const instrumentPromises = trackData.map(async ({ track, trackIndex }) => {
@@ -2034,37 +2314,49 @@ class MIDIPlayer {
 
                 try {
                     let instrument;
+                    let fromCache = false;
 
-                    // Check cache first
-                    if (this.instrumentCache.has(instrumentName)) {
-                        // Get cached instrument and connect to new gain node
-                        const cachedInstrument = this.instrumentCache.get(instrumentName);
-                        // Note: Soundfont instruments need to be reloaded with new destination
-                        // But we can still benefit from browser HTTP cache
-                        instrument = await Soundfont.instrument(audioContext, instrumentName, {
-                            soundfont: 'FluidR3_GM',
-                            destination: gainNode,
-                            nameToUrl: (name, soundfont, format) => {
-                                format = format === 'ogg' ? format : 'mp3';
-                                return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
-                            }
-                        });
+                    // Check cache first - we cache the entire instrument object
+                    // The instrument contains decoded AudioBuffers for each note
+                    const cached = this.instrumentCache.get(instrumentName);
+                    if (cached && cached.instrument) {
+                        // Reuse the cached instrument directly - this is MUCH faster
+                        // since we skip the audio decoding step entirely
+                        console.log(`[Instrument Cache] ✓ Reusing cached instrument for ${instrumentName}`);
+                        instrument = cached.instrument;
+                        fromCache = true;
+
+                        // Note: Cached instruments output to audioContext.destination directly
+                        // Volume control is handled via the gain parameter in instrument.play()
                     } else {
                         // Load the SoundFont instrument (using FluidR3_GM for faster loading)
-                        instrument = await Soundfont.instrument(audioContext, instrumentName, {
+                        // Connect directly to audioContext.destination for caching
+                        console.log(`[Instrument Cache] ✗ Loading new instrument: ${instrumentName}`);
+
+                        // Add timeout to prevent hanging on suspended audio context
+                        const loadPromise = Soundfont.instrument(audioContext, instrumentName, {
                             soundfont: 'FluidR3_GM',
-                            destination: gainNode,
+                            // Connect to destination directly - volume controlled via gain param
+                            destination: audioContext.destination,
                             nameToUrl: (name, soundfont, format) => {
                                 format = format === 'ogg' ? format : 'mp3';
                                 return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
                             }
                         });
 
-                        // Add to cache
+                        const timeoutPromise = new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error(`Timeout loading ${instrumentName}`)), 30000)
+                        );
+
+                        instrument = await Promise.race([loadPromise, timeoutPromise]);
+
+                        // Cache the instrument for reuse across movements and works
                         this.addToInstrumentCache(instrumentName, instrument);
                     }
 
-                    return { instrument, trackIndex, instrumentName, gainNode, success: true };
+                    // We don't use gainNode for routing anymore, but keep it for compatibility
+                    // Volume control is done via the gain parameter in instrument.play()
+                    return { instrument, trackIndex, instrumentName, gainNode, success: true, fromCache };
 
                 } catch (error) {
                     console.error(`Failed to load ${instrumentName}, falling back to piano:`, error);
@@ -2094,22 +2386,33 @@ class MIDIPlayer {
             // Create gain nodes and parts for each loaded instrument
             let successCount = 0;
             let fallbackCount = 0;
+            let cacheHitCount = 0;
 
             for (let i = 0; i < loadedInstruments.length; i++) {
                 const result = loadedInstruments[i];
                 if (!result) continue;
 
-                const { instrument, trackIndex, instrumentName, gainNode, success } = result;
+                const { instrument, trackIndex, instrumentName, gainNode, success, fromCache } = result;
                 const track = this.midi.tracks[trackIndex];
 
                 if (success) {
                     successCount++;
+                    if (fromCache) {
+                        cacheHitCount++;
+                    }
                 } else {
                     fallbackCount++;
                 }
 
-                // Use the gain node that was created during instrument loading
-                this.instruments.push({ instrument, gainNode, trackIndex });
+                // Store instrument with volume multiplier for balance control
+                // Volume is controlled via gain parameter in play() since instruments
+                // are connected directly to audioContext.destination for caching
+                this.instruments.push({
+                    instrument,
+                    gainNode, // Keep for compatibility but not used for audio routing
+                    trackIndex,
+                    volumeMultiplier: 1.0 // Adjusted by applyBalance()
+                });
                 this.channelVolumes[trackIndex] = 100;
 
                 // Create a Tone.Part for this track with tempo scaling
@@ -2125,13 +2428,15 @@ class MIDIPlayer {
                 const instrumentIndex = this.instruments.length - 1;
                 const part = new Tone.Part((time, value) => {
                     // Schedule the note with SoundFont instrument
-                    const { instrument } = this.instruments[instrumentIndex];
-                    instrument.play(
+                    // Apply volume multiplier for balance control
+                    const instrumentData = this.instruments[instrumentIndex];
+                    const effectiveGain = value.velocity * instrumentData.volumeMultiplier * this.masterVolume;
+                    instrumentData.instrument.play(
                         value.note,
                         time,
                         {
                             duration: value.duration,
-                            gain: value.velocity
+                            gain: effectiveGain
                         }
                     );
                 }, notes);
@@ -2147,11 +2452,20 @@ class MIDIPlayer {
                 await Tone.context.resume();
             }
 
-            let statusMsg = `All instruments loaded! (${successCount} loaded`;
-            if (fallbackCount > 0) {
-                statusMsg += `, ${fallbackCount} using piano fallback`;
+            let statusMsg = 'Ready to play';
+            const details = [];
+            if (cacheHitCount > 0) {
+                details.push(`${cacheHitCount} from cache`);
             }
-            statusMsg += ')';
+            if (successCount - cacheHitCount > 0) {
+                details.push(`${successCount - cacheHitCount} loaded`);
+            }
+            if (fallbackCount > 0) {
+                details.push(`${fallbackCount} using fallback`);
+            }
+            if (details.length > 0) {
+                statusMsg += ` (${details.join(', ')})`;
+            }
             this.showStatus(statusMsg, 'success');
 
         } catch (error) {
@@ -2185,11 +2499,12 @@ class MIDIPlayer {
     }
 
     applyBalance() {
-        // Apply master volume and balance to all instruments
+        // Apply balance to all instruments by updating their volumeMultiplier
+        // Volume is applied via the gain parameter in instrument.play()
         if (!this.instruments || this.instruments.length === 0) return;
 
         for (let i = 0; i < this.instruments.length; i++) {
-            const { instrument, gainNode, trackIndex } = this.instruments[i];
+            const instrumentData = this.instruments[i];
 
             let volumeMultiplier = 1.0;
 
@@ -2209,8 +2524,8 @@ class MIDIPlayer {
             // Ensure volume doesn't go negative
             volumeMultiplier = Math.max(0, volumeMultiplier);
 
-            // Apply master volume and balance
-            gainNode.gain.value = this.masterVolume * volumeMultiplier;
+            // Store the volume multiplier - it's applied in the Part callback
+            instrumentData.volumeMultiplier = volumeMultiplier;
         }
     }
 
@@ -2234,6 +2549,19 @@ class MIDIPlayer {
         }
 
         if (this.isPlaying) return;
+
+        // Start audio context if it hasn't been started yet (requires user interaction)
+        if (Tone.context.state === 'suspended') {
+            await Tone.start();
+        }
+
+        // Check if instruments need to be loaded (deferred from initial page load)
+        if (this.pendingTrackData && this.instruments.length === 0) {
+            this.showStatus('Loading required musical instruments...', 'info');
+            // Re-run setupPlayback now that audio context is active
+            await this.setupPlayback();
+            this.pendingTrackData = null;
+        }
 
         // Ensure currentTime is within valid range
         if (this.currentTime < 0 || this.currentTime >= this.originalDuration) {
@@ -2474,16 +2802,26 @@ class MIDIPlayer {
                     setTimeout(() => this.play(), 50);
                     return;
                 } else if (!loopRangeSet && this.currentTime >= this.originalDuration) {
-                    // End of movement reached without loop set - advance to next movement
-                    const currentIndex = this.movementSelect.selectedIndex;
-                    const totalMovements = this.movementSelect.options.length;
-
-                    if (currentIndex < totalMovements - 1 && currentIndex > 0) {
-                        // Auto-advance to next movement
-                        this.skipToNextMovement();
+                    // End of movement reached without loop set
+                    if (this.repeatMode) {
+                        // Repeat mode: loop back to start of current movement
+                        this.pause();
+                        this.seekTo(0, false);
+                        setTimeout(() => this.play(), 50);
                     } else {
-                        // Last movement - loop back to start of current movement
-                        this.seekTo(0);
+                        // Auto-advance mode: move to next movement after 1.5s pause
+                        const currentIndex = this.movementSelect.selectedIndex;
+                        const totalMovements = this.movementSelect.options.length;
+
+                        if (currentIndex < totalMovements - 1 && currentIndex > 0) {
+                            // Auto-advance to next movement after pause
+                            this.pause();
+                            this.seekTo(0, false);
+                            setTimeout(() => this.skipToNextMovement(), 1500);
+                        } else {
+                            // Last movement - stop playback
+                            this.stop();
+                        }
                     }
                     return;
                 }
@@ -2558,15 +2896,21 @@ class MIDIPlayer {
     }
 
     // Add instrument to cache with LRU eviction
+    // The cached instrument contains decoded AudioBuffers and can be reused directly
     addToInstrumentCache(instrumentName, instrument) {
         // Delegate to InstrumentLoader
         this.instrumentLoader.addToCache(instrumentName, instrument);
-        // Also keep local cache for compatibility
+
+        // Store in local cache with LRU eviction
         if (this.instrumentCache.size >= this.maxCacheSize) {
             const firstKey = this.instrumentCache.keys().next().value;
+            console.log(`[Instrument Cache] Evicting ${firstKey} to make room`);
             this.instrumentCache.delete(firstKey);
         }
-        this.instrumentCache.set(instrumentName, instrument);
+
+        // Store the instrument directly - it contains the decoded AudioBuffers
+        this.instrumentCache.set(instrumentName, { instrument });
+        console.log(`[Instrument Cache] Cached ${instrumentName}`);
     }
 
     // Pre-load common instruments in the background to speed up playback

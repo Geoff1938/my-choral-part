@@ -14,8 +14,23 @@
 <body>
     <div class="container">
         <header>
-            <img src="/branding/logo-horizontal.svg" alt="My Choral Part" class="header-logo">
-            <p class="tagline">Find music and rehearse your part on any device</p>
+            <div class="header-content">
+                <div class="header-left">
+                    <img src="/branding/logo-icon-only.svg" alt="My Choral Part" class="header-logo">
+                </div>
+                <div class="header-center">
+                    <h1 class="header-title">My Choral Part</h1>
+                    <p class="header-tagline">Find music and rehearse your part on any device</p>
+                </div>
+                <div class="header-right">
+                    <button id="header-help-btn" class="help-link" title="Help" aria-label="Help">
+                        <i class="fa-solid fa-circle-question"></i>
+                    </button>
+                    <a href="https://mychoralpart.com/" class="home-link" title="Go to landing page">
+                        <i class="fa-solid fa-house"></i>
+                    </a>
+                </div>
+            </div>
         </header>
 
         <!-- Tab Navigation -->
@@ -171,6 +186,9 @@
                         <button id="next-movement-btn" class="btn-transport" aria-label="Skip to next movement" title="Skip to start of next movement">
                             <i class="fa-solid fa-forward-step"></i>
                         </button>
+                        <button id="repeat-btn" class="btn-transport" aria-label="Toggle repeat movement" title="Repeat current movement (off: auto-advance to next movement)">
+                            <i class="fa-solid fa-repeat"></i>
+                        </button>
                     </div>
 
                     <!-- Tempo Control -->
@@ -189,6 +207,7 @@
                                 title="Adjust playback speed (60%=very slow for learning, 100%=original tempo, 140%=faster)"
                             >
                             <div class="slider-track"></div>
+                            <div class="slider-center-marker" style="left: 50%;"></div>
                         </div>
                     </div>
 
@@ -213,6 +232,7 @@
                                 title="Balance your part vs. others - left=hear others better, center=equal, right=hear your part better. Change your voice part via Settings."
                             >
                             <div class="slider-track"></div>
+                            <div class="slider-center-marker" style="left: 50%;"></div>
                         </div>
                     </div>
                 </section>

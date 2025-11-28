@@ -43,3 +43,8 @@ instrument-statistics*.csv
 coverage/
 .nyc_output/
 *.lcov
+
+# Local development files
+*.jpg
+*.bat
+nul
