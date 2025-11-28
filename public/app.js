@@ -2039,8 +2039,8 @@ class MIDIPlayer {
 
     async loadRecentWorks() {
         try {
-            // Load recent works using RecentWorksManager
-            const recentWorks = await this.recentWorksManager.loadFromServer();
+            // Load recent works from localStorage (private to this user/device)
+            const recentWorks = await this.recentWorksManager.load();
 
             if (recentWorks.length === 0) {
                 this.recentWorksDropdown.style.display = 'none';
@@ -2067,8 +2067,8 @@ class MIDIPlayer {
 
     async saveRecentWork(composer, work, movement = null) {
         try {
-            // Save recent work using RecentWorksManager
-            await this.recentWorksManager.saveToServer(composer, work, movement);
+            // Save recent work to localStorage (private to this user/device)
+            await this.recentWorksManager.save(composer, work, movement);
             // Reload recent works list
             await this.loadRecentWorks();
         } catch (error) {
