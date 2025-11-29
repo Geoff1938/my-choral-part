@@ -1408,10 +1408,16 @@ class MIDIPlayer {
             this.savePreferences();
         });
 
-        // Add spacebar toggle for play/pause
+        // Add spacebar toggle for play/pause (only when Play Music tab is active)
         document.addEventListener('keydown', (e) => {
             // Only trigger if not typing in an input field
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+
+            // Only trigger if Play Music tab is active
+            const activeTab = document.querySelector('.tab-content.active');
+            if (!activeTab || activeTab.id !== 'play-music-tab') {
                 return;
             }
 
@@ -2393,6 +2399,13 @@ class MIDIPlayer {
                 if (!result) continue;
 
                 const { instrument, trackIndex, instrumentName, gainNode, success, fromCache } = result;
+
+                // Defensive check: ensure midi and track still exist
+                // (user may have switched movements while loading)
+                if (!this.midi || !this.midi.tracks || !this.midi.tracks[trackIndex]) {
+                    console.warn(`[Setup] Track ${trackIndex} no longer available (movement may have changed)`);
+                    continue;
+                }
                 const track = this.midi.tracks[trackIndex];
 
                 if (success) {

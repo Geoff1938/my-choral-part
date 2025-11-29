@@ -1,0 +1,1864 @@
+{
+  "duplicateWorks": [],
+  "unavailableWorks": [
+    {
+      "composer": "Alfven",
+      "work": "Julsang",
+      "section": "Julsang",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Archer",
+      "work": "Requiem",
+      "section": "1: Introit & Kyrie",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Archer",
+      "work": "Requiem",
+      "section": "2: Offertory",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Archer",
+      "work": "Requiem",
+      "section": "3: Sanctus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Archer",
+      "work": "Requiem",
+      "section": "4: Pie Jesu",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Archer",
+      "work": "Requiem",
+      "section": "5: Agnus Dei",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Archer",
+      "work": "Requiem",
+      "section": "6: Libera me, Domine",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Archer",
+      "work": "Requiem",
+      "section": "7: In Paradisum",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Arnesen",
+      "work": "Christmas Night",
+      "section": "Christmas Night",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Bennett    - not publicly             available",
+      "work": "A Farewell to Arms",
+      "section": "I: The helmet now an hive ...",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Bennett    - not publicly             available",
+      "work": "A Farewell to Arms",
+      "section": "II: His golden locks time hath ...",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Bernstein",
+      "work": "Missa Brevis",
+      "section": "1: Kyrie",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Bernstein",
+      "work": "Missa Brevis",
+      "section": "2: Gloria",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Bernstein",
+      "work": "Missa Brevis",
+      "section": "3: Sanctus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Bernstein",
+      "work": "Missa Brevis",
+      "section": "3A: Benedictus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Bernstein",
+      "work": "Missa Brevis",
+      "section": "4: Agnus Dei",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Bernstein",
+      "work": "Missa Brevis",
+      "section": "4A: Dona Nobis Pacem",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 1 to 16 1: Requiem Te decet hymnus Requiem aeternam What the passing bells Kyrie eleison",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 17 to 27 2a: Dies Irae Tuba mirum Bugles sang softly",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 28 to 32 2b: Liber scriptum proferetur Rex tremendae Salva me",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 32 to 38 2c: Out there",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 39 to 53 2d: Recordare Jesu pie Confutatis maledictis Be slowly lifted up Dies irae",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 54 to 60 2e: Lacrimosa Move him into the sun Lacrimosa Think how it wakes Qua resurget Pie Jesu",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 60/61 to 78 3a: Offertorium Domine Jesu Christe Sed signifer sanctus Quam olim Abrahae So Abraham rose Then Abraham bound the youth When lo! an angel And half the seed of Europe",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 79 to 83 3b: Quam olim Abrahae",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 83/84 to 86 4a: Sanctus Pleni sunt caeli",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 87 to 92 4b: Hosanna in excelsis Benedictus qui venit Hosanna in excelsis",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 93 to 96 4c: After the blast",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 96/97 to 100 5: Agnus Dei",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 100 to 117 6a: Libera me Dum veneris Tremens factus Dies illa Libera me",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 118 to 126 6b: It seemed",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Britten",
+      "work": "War Requiem",
+      "section": "Sections 128 to end 6c: Let us sleep now In paradisum Requiescant in pace",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "1: O all ye works of the Lord",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "2: Green Things",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "3: Sun and Moon",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "4: Badgers and Hedgehogs",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "5: Ice and Snow",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "6: Whales and Waters",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "7: Butterflies and Moths",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "8: Thunder and Lightning",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "9: Spirits and Souls",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "10: Grannies and Grandads",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Carter   - not publicly             available",
+      "work": "Benedicite",
+      "section": "11: O let the earth bless the Lord",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Castagnet",
+      "work": "Invitation",
+      "section": "L'Invitation au voyage",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Gloria",
+      "section": "1: Gloria in excelsis Deo",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Gloria",
+      "section": "2: Domine Deus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Gloria",
+      "section": "3: Qui tollis pecata mundi",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Gloria",
+      "section": "4: Quoniam tu solus sanctus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "I share Creation",
+      "section": "1. When the sun rises",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "I share Creation",
+      "section": "2. The Earth 3. The Innermost House",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "I share Creation",
+      "section": "4. Come to the great world",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Little Jazz Mass",
+      "section": "1: Kyrie",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Little Jazz Mass",
+      "section": "2: Gloria",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Little Jazz Mass",
+      "section": "3: Sanctus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Little Jazz Mass",
+      "section": "4: Benedictus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Little Jazz Mass",
+      "section": "5: Agnus Dei",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Nova! nova!",
+      "section": "Nova! nova!",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Remember, O Thou Man",
+      "section": "Remember, O thou Man",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Requiem",
+      "section": "1: Introit & Kyrie",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Requiem",
+      "section": "2: Offertorio",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Requiem",
+      "section": "3: Pie Jesu",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Requiem",
+      "section": "4: Sanctus & Benedictus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Requiem",
+      "section": "5: Agnus Dei",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Requiem",
+      "section": "6: Thou knowest, Lord",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Requiem",
+      "section": "7: Lux aeterna",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "Shenandoah",
+      "section": "Shenandoah",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "The Gift to be Simple (SSAA version)",
+      "section": "The Gift to be Simple",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "The Rose in the Middle of Winter",
+      "section": "The Rose in the Middle of Winter",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Chilcott   -  not publicly             available",
+      "work": "The twelve days of Christmas",
+      "section": "The twelve days of Christmas",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Drayton",
+      "work": "For Remembrance",
+      "section": "For Remembrance",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Agincourt",
+      "section": "1: O for a muse of fire",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Agincourt",
+      "section": "2: Now all the youth of England",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Agincourt",
+      "section": "3: Suppose that you have seen",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Agincourt",
+      "section": "5: Who will behold the captain of this band",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Agincourt",
+      "section": "4: Now creeping murmur",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Agincourt",
+      "section": "6: Hymn after Agincourt",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "I-1+2 - Prologue",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "I-3+4+5: When that April with his showers sweet",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "I-6-9-Befell that in a season on a day",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "II: The Knight",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "III: The Squire",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "IV: The Nun",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "V: The Monk",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "VI: The Clerk of Oxenford",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "VII: The Haberdasher and his fraternity",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "VII: The Merchant",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "VIII: The Sergeant of the Law",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "VIII: The Franklin",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "IX: The Shipman",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "X: The Doctor of Physic",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "X: The Wife of Bath",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "XII: The poor Parson of a town",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Canterbury Pilgrims",
+      "section": "XIII: L'Envoi",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Evening Canticles in D Major",
+      "section": "Magnificat",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Evening Canticles in D Major",
+      "section": "Nunc Dimittis",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Magnificat in D minor",
+      "section": "Magnificat in D minor",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Dyson",
+      "work": "Magnificat in D minor",
+      "section": "Nunc dimittis in D minor",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Eriksson",
+      "work": "Gjendines badnlat",
+      "section": "Gjendines badnlat",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Across the vast eternal sky",
+      "section": "Across the Vast Eternal Sky",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Away in a manger",
+      "section": "Away in a manger",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "First Nowell",
+      "section": "The First Nowell",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Sunrise Mass",
+      "section": "1: Spheres-Kyrie",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Sunrise Mass",
+      "section": "2: Sunrise Gloriae",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Sunrise Mass",
+      "section": "3: Sunrise Qui tollis",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Sunrise Mass",
+      "section": "4: The City Credo",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Sunrise Mass",
+      "section": "5: The City Crucifixus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Sunrise Mass",
+      "section": "6: The City Credo",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Sunrise Mass",
+      "section": "7: Identity Sanctus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "Sunrise Mass",
+      "section": "8: Identity Pleni sunt",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Gjeilo -  not publicly available",
+      "work": "The Rose",
+      "section": "The Rose",
+      "url": "not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Goodall",
+      "work": "Psalm 23 (The Lord is my shepherd)",
+      "section": "Psalm 23 (The Lord is my shepherd)",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Handel",
+      "work": "Israel in Egypt",
+      "section": "All Files(inc Part 2)",
+      "url": "Unemph.zip",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Handel",
+      "work": "Jephtha",
+      "section": "All Files (inc. Parts 2 & 3)",
+      "url": "Unemph.zip",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Handel",
+      "work": "\"Utrecht\" Te Deum",
+      "section": "All Files",
+      "url": "unemph.zip",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Harris (Matthew)",
+      "work": "Full Fathom Five",
+      "section": "Full Fathom Five",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Harris (Matthew)",
+      "work": "Hark the Lark",
+      "section": "Hark the Lark",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Haydn",
+      "work": "The Creation",
+      "section": "All Files",
+      "url": "Unemph.zip",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Howells",
+      "work": "Like as the hart",
+      "section": "Like as the hart",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Lambert",
+      "work": "The Rio Grande",
+      "section": "The Rio Grande",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Leontovych & Wilhousky",
+      "work": "Carol of the Bells",
+      "section": "Carol of the Bells",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "L'Estrange",
+      "work": "Advent 'O' Carol",
+      "section": "Advent 'O' Carol",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "L'Estrange",
+      "work": "I will hold Him",
+      "section": "I will hold Him",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Lloyd",
+      "work": "Love came down at Christmas",
+      "section": "Love came down at Christmas",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Lundmark",
+      "work": "Till Betlehem",
+      "section": "Till betlehem mitt hjarta",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "MacMillan",
+      "work": "Seven last Words from the Cross",
+      "section": "1: Father, forgive them for they know not what they do",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "MacMillan",
+      "work": "Seven last Words from the Cross",
+      "section": "2: Woman, behold thy son",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "MacMillan",
+      "work": "Seven last Words from the Cross",
+      "section": "3: Verily, I say unto you, today thou shalt be with me in paradise",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "MacMillan",
+      "work": "Seven last Words from the Cross",
+      "section": "4: Eli, eli, lama sabachtani?",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "MacMillan",
+      "work": "Seven last Words from the Cross",
+      "section": "5: I thirst",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "MacMillan",
+      "work": "Seven last Words from the Cross",
+      "section": "6: It is finished",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "MacMillan",
+      "work": "Seven last Words from the Cross",
+      "section": "7: Father, into Thy hands I commend my spirit",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "MacMillan",
+      "work": "The Lamb has come to save us ...",
+      "section": "The Lamb",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Marquez",
+      "work": "Alas",
+      "section": "Alas",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "McDowall",
+      "work": "Bless to me this day",
+      "section": "Bless to me this day",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "McDowall",
+      "work": "The Lord is Good",
+      "section": "Bless to me this day",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mealor",
+      "work": "Crucifixus",
+      "section": "I: Introit - How beautiful on the mountains",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mealor",
+      "work": "Crucifixus",
+      "section": "II: Your silence is stillness",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mealor",
+      "work": "Crucifixus",
+      "section": "III: O sweetest Jesus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mealor",
+      "work": "Crucifixus",
+      "section": "IV: Drop, drop, slow tears",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mealor",
+      "work": "Crucifixus",
+      "section": "V: The tree takes living flame",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mealor",
+      "work": "Crucifixus",
+      "section": "VI: Finale - I tend you in paradise",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mechem",
+      "work": "Seven Joys of Christmas",
+      "section": "1: The Joy of Love: This is the Truth",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mechem",
+      "work": "Seven Joys of Christmas",
+      "section": "2: The Joy of Bells: Din don! merrily on high",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mechem",
+      "work": "Seven Joys of Christmas",
+      "section": "3: The Joy of Mary: Joseph dearest, Joseph mine",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mechem",
+      "work": "Seven Joys of Christmas",
+      "section": "4: The Joy of Children: Patapan",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mechem",
+      "work": "Seven Joys of Christmas",
+      "section": "5: The Joy of the New Year: New Year song",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mechem",
+      "work": "Seven Joys of Christmas",
+      "section": "6: The Joy of Dance: Fum, fum, fum!",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mechem",
+      "work": "Seven Joys of Christmas",
+      "section": "7: The Joy of Song: God bless the master of this house",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Mendelssohn",
+      "work": "St. Paul",
+      "section": "All Files",
+      "url": "Unemph.zip",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Moeran",
+      "work": "Magnificat and Nunc Dimittis in D",
+      "section": "Magnificat",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Moeran",
+      "work": "Magnificat and Nunc Dimittis in D",
+      "section": "Nunc Dimittis",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Moore",
+      "work": "All wisdom cometh from the Lord",
+      "section": "All wisdom cometh from the Lord",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Moore",
+      "work": "Magnificat in Bb",
+      "section": "Magnificat in Bb",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Opera Choruses (with CMT)",
+      "work": "Various Opera Choruses",
+      "section": "Roman Carnival chorus (slower version)",
+      "url": "http://learnchoralmusic.co.uk/Berlioz/Choruses/SROMCAR.MID\"",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Parry",
+      "work": "Invocation to Music",
+      "section": "3: The monstrous sea with melancholy war",
+      "url": "03-Chor",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Poston",
+      "work": "Sing unto the Lord",
+      "section": "Sing unto the Lord",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Purcell",
+      "work": "The Masque in Dioclesian",
+      "section": "Country Dance (mp3)",
+      "url": "00-Country-dance.mp3",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "A Ukrainian Prayer",
+      "section": "A Ukrainian Prayer.mid",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Birthday Madrigals",
+      "section": "1: It was a lover and his lass",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Birthday Madrigals",
+      "section": "2: Draw on, sweet night",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Birthday Madrigals",
+      "section": ": Come live with me",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Birthday Madrigals",
+      "section": "4: My true love hath my heart",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Birthday Madrigals",
+      "section": "5: When daisies pied",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Gloria",
+      "section": "1: Gloria",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Gloria",
+      "section": "2: Domine",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Gloria",
+      "section": "3: Quoniam",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Magnificat",
+      "section": "1: Magnificat anima mea",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Magnificat",
+      "section": "2: Of a Rose, a lovely Rose",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Magnificat",
+      "section": "3: Quia fecit mihi magna",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Magnificat",
+      "section": "4: Et misericordia",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Magnificat",
+      "section": "5: Fecit potentiam",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Magnificat",
+      "section": "6: Esurientes",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Magnificat",
+      "section": "7: Gloria Patri",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "1: O be joyful in the Lord",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "2: I will lift up mine eyes",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "3: Praise the Lord, O my soul",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "4: The Lord is my shepherd",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "5: Cantate Dominum",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "6: The Lord is my light and salvation",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "7: O clap your hands",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "8: O how amiable are thy dwellings",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "Psalmfest",
+      "section": "9: O praise the Lord of heaven",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Reluctant Dragon",
+      "section": "1: Prologue (Once upon a time)",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Reluctant Dragon",
+      "section": "3: Chorus (Out through the cottage door)",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Reluctant Dragon",
+      "section": "4: Boy, St George, Dragon - Good evening",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Reluctant Dragon",
+      "section": "5: Trio - St George etc - I say, old boy",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Reluctant Dragon",
+      "section": "6: Trio and Chorus (With a one, and a two, ...)",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Reluctant Dragon",
+      "section": "7: Tournament (We want the dragon)",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Reluctant Dragon",
+      "section": "8: Banquet Fugue",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Reluctant Dragon",
+      "section": "9: Finale",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Rutter Collection",
+      "section": "All bells in paradise",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter   -  not publicly             available",
+      "work": "The Sprig of Thyme",
+      "section": "All Files",
+      "url": "Unemph.zip",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shearing",
+      "work": "Songs & Sonnets",
+      "section": "1: Live with me and be my love",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shearing",
+      "work": "Songs & Sonnets",
+      "section": "2: When daffodils begin to peer",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shearing",
+      "work": "Songs & Sonnets",
+      "section": "3: It was a lover and his lass",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shearing",
+      "work": "Songs & Sonnets",
+      "section": "4: Spring",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shearing",
+      "work": "Songs & Sonnets",
+      "section": "5: Sylvia",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shearing",
+      "work": "Songs & Sonnets",
+      "section": "6: Fie on sinful fantasy",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shearing",
+      "work": "Songs & Sonnets",
+      "section": "7: Hey, ho, the wind and the rain",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shephard   -  not publicly             available",
+      "work": "Communion Service (Rite A)",
+      "section": "1: Kyrie",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shephard   -  not publicly             available",
+      "work": "Communion Service (Rite A)",
+      "section": "2: Gloria",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shephard   -  not publicly             available",
+      "work": "Communion Service (Rite A)",
+      "section": "3: Sanctus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shephard   -  not publicly             available",
+      "work": "Communion Service (Rite A)",
+      "section": "4: Benedictus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shephard   -  not publicly             available",
+      "work": "Communion Service (Rite A)",
+      "section": "5: Agnus Dei",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Shephard   -  not publicly             available",
+      "work": "The Easter Song of Praise (Exultet)",
+      "section": "The Easter Song",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Stainer",
+      "work": "The Crucifixion",
+      "section": "All Files",
+      "url": "Unemph.zip",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Blessed are the peacemakers",
+      "section": "Blessed are the peacemakers (constant dynamics)",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Blessed are the peacemakers",
+      "section": "Blessed are the peacemakers (varying dynamics)",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Christus est stella",
+      "section": "Christus est stella",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Mass in Blue (Version 2)",
+      "section": "1: Kyrie",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Mass in Blue (Version 2)",
+      "section": "2: Gloria",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Mass in Blue (Version 2)",
+      "section": "3: Credo",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Mass in Blue (Version 2)",
+      "section": "4: Sanctus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Mass in Blue (Version 2)",
+      "section": "5: Benedictus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Todd",
+      "work": "Mass in Blue (Version 2)",
+      "section": "6: Agnus Dei",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Travers",
+      "work": "Ascribe unto the Lord",
+      "section": "Ascribe unto the Lord",
+      "url": "Ascribe.mp3",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "1: Musica animam tangens",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "2: Alas",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "3: Let the river run",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "4: The Lily and the Rose",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "5: Moonlight Sound Design",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "6: Ndikhokhele Bawo",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "7: Hutia te Rito",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "8: Tábortuznél",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "9: Hanacpachap-Cussicuinin",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "10: Now is the month of maying",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "11: Pastyme with good company",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "12: Un Canadien Errant",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "13: Lamma Bada yatathanna",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "14: Arirang",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "15: Healing Light",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "16: Adiemus",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "17: Song of the Plains",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Various - a Collection",
+      "work": "A Collection of short Works by various Composers",
+      "section": "18: I love you/What a wonderful world",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "Benedicite",
+      "section": "Benedicite",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "Dona nobis pacem",
+      "section": "I: Agnus Dei",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "Dona nobis pacem",
+      "section": "II: Beat! Beat! Drums!",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "Dona nobis pacem",
+      "section": "III: Reconciliation",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "Dona nobis pacem",
+      "section": "IV: Dirge for two veterans",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "Dona nobis pacem",
+      "section": "V: The Angel of Death",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "Dona nobis pacem",
+      "section": "VI: O man greatly beloved",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "O taste and see",
+      "section": "O taste and see",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Vaughan Williams",
+      "work": "Serenade to Music",
+      "section": "Serenade to Music",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "A Litany (Drop, drop, slow tears)",
+      "section": "A Litany",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "1-7: Thus spake Isaiah",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "7-14: If I forget Thee",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "14: Babylon was a great city",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "15-25: In Babylon Belshazzar the king",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "26-40: Praise ye, praise ye",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "41-51: Thus in Babylon the mighty city",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "51+ - 53: And in that same hour",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "54-66: Then sing aloud to God",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Belshazzar's Feast",
+      "section": "67-end: Then sing aloud",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Coronation Te Deum",
+      "section": "Coronation Te Deum",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Jubilate Deo",
+      "section": "Jubilate Deo",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Magnificat & Nunc dimittis (The Chichester Service)",
+      "section": "Magnificat",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Magnificat & Nunc dimittis (The Chichester Service)",
+      "section": "Nunc dimittis",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "Set me as a seal upon thine heart",
+      "section": "Set me as a seal upon thine heart",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Walton   -  not publicly             available",
+      "work": "The Twelve",
+      "section": "The Twelve",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Wilberg   -  not publicly             available",
+      "work": "Down to the River to Pray",
+      "section": "Down to the River to Pray",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Willcocks (Jonathan)",
+      "work": "In Praise of Singing",
+      "section": "1: The Singers",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Willcocks (Jonathan)",
+      "work": "In Praise of Singing",
+      "section": "2: That music always around me",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Willcocks (Jonathan)",
+      "work": "In Praise of Singing",
+      "section": "3: Let us sing to the Lord",
+      "url": "../../not-public.html",
+      "reason": "Link points to HTML page, not MIDI file"
+    }
+  ],
+  "skippedWorks": [
+    {
+      "composer": "Verdi",
+      "workName": "Requiem",
+      "url": "/Verdi/AltRequiem/requiem.html",
+      "reason": "Hardcoded skip rule"
+    }
+  ],
+  "unavailableSongs": [
+    {
+      "composer": "Byrd (William)",
+      "song": "Mass for Three Voices",
+      "url": "http://www.learnchoralmusic.co.uk/Byrd/Mass-3-voices/mass-3-voices.html",
+      "category": "madrigals",
+      "reason": "Link points to non-MIDI file"
+    }
+  ],
+  "timestamp": "2025-11-29T11:44:24.232Z"
+}
