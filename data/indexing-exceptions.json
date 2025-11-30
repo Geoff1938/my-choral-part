@@ -787,6 +787,13 @@
     },
     {
       "composer": "Handel",
+      "work": "Israel in Egypt",
+      "section": "All Files(inc Part 1)",
+      "url": "Unemph.zip",
+      "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Handel",
       "work": "Jephtha",
       "section": "All Files (inc. Parts 2 & 3)",
       "url": "Unemph.zip",
@@ -1860,5 +1867,5 @@
       "reason": "Link points to non-MIDI file"
     }
   ],
-  "timestamp": "2025-11-30T11:21:51.142Z"
+  "timestamp": "2025-11-30T15:34:55.376Z"
 }
