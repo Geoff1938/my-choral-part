@@ -113,15 +113,28 @@ router.get('/', async (req, res) => {
         const redirectUrl = midiRes.headers.location;
         if (redirectUrl) {
           // Handle relative redirects
-          const absoluteRedirectUrl = redirectUrl.startsWith('http')
-            ? redirectUrl
-            : new URL(redirectUrl, url).href;
-          return fetchWithRedirects(absoluteRedirectUrl, redirectCount + 1);
+          let absoluteRedirectUrl;
+          try {
+            if (redirectUrl.startsWith('http')) {
+              absoluteRedirectUrl = redirectUrl;
+            } else {
+              absoluteRedirectUrl = new URL(redirectUrl, url).href;
+            }
+            console.log(`Following redirect from ${url} to ${absoluteRedirectUrl}`);
+            return fetchWithRedirects(absoluteRedirectUrl, redirectCount + 1);
+          } catch (urlError) {
+            console.error(`Failed to parse redirect URL: ${redirectUrl}`, urlError);
+            if (!res.headersSent) {
+              return res.status(500).json({ error: 'Invalid redirect URL from server' });
+            }
+            return;
+          }
         }
       }
 
       if (midiRes.statusCode !== 200) {
         console.error(`MIDI fetch failed: ${midiRes.statusCode} ${midiRes.statusMessage} for ${url}`);
+        console.error(`Response headers:`, JSON.stringify(midiRes.headers, null, 2));
         let errorMsg = `Failed to fetch MIDI file: ${midiRes.statusCode} ${midiRes.statusMessage}`;
 
         // Special handling for rate limiting
