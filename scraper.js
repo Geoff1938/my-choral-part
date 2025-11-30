@@ -129,12 +129,16 @@ class ChoralMusicScraper {
     this.axiosConfig = {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
         'Accept-Encoding': 'gzip, deflate, br',
         'Referer': 'https://www.learnchoralmusic.co.uk/',
         'Connection': 'keep-alive',
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'max-age=0',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Upgrade-Insecure-Requests': '1'
       }
     };
   }
@@ -444,26 +448,35 @@ class ChoralMusicScraper {
         }
       });
 
-      // Look for links to additional parts (Part 2, Part 3, etc.)
+      // Look for links to additional parts (Part 2, Part 3, next page, etc.)
       const additionalPartLinks = [];
       $('a').each((index, link) => {
         const $link = $(link);
-        const linkText = $link.text().trim();
+        const linkText = $link.text().trim().toLowerCase();
         const linkHref = $link.attr('href');
 
         if (linkHref && linkHref !== '#') {
-          // Look for patterns like "Part 2", "Part II", "Part 3", etc.
+          // Look for patterns like "Part 2", "Part II", "Part 3", "next page", etc.
           const partPattern = /part\s*(\d+|[ivxIVX]+)/i;
-          const match = linkText.match(partPattern);
+          const nextPagePattern = /next\s*page/i;
+          const isPartLink = partPattern.test(linkText);
+          const isNextPageLink = nextPagePattern.test(linkText);
 
-          if (match) {
+          // Also check if href contains part2, part3, etc. pattern (e.g., messiah2.html)
+          const hrefPartPattern = /\d+\.html?$/i;
+          const isHrefPartLink = hrefPartPattern.test(linkHref);
+
+          if (isPartLink || isNextPageLink || (isHrefPartLink && linkText.includes('page'))) {
             // Convert relative URL to absolute
             let fullUrl = linkHref.startsWith('http') ? linkHref :
               linkHref.startsWith('/') ? `${this.baseUrl}${linkHref}` :
               `${workUrl.substring(0, workUrl.lastIndexOf('/'))}/${linkHref}`;
 
-            console.log(`Found link to additional part: "${linkText}" -> ${fullUrl}`);
-            additionalPartLinks.push({ text: linkText, url: fullUrl });
+            // Avoid duplicates
+            if (!additionalPartLinks.some(p => p.url === fullUrl)) {
+              console.log(`Found link to additional part: "${linkText}" -> ${fullUrl}`);
+              additionalPartLinks.push({ text: linkText, url: fullUrl });
+            }
           }
         }
       });

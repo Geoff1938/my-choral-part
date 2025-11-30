@@ -7,6 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "build-index": "node build-index.js",
+    "analyze-midi": "node scripts/analyze-midi-files.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

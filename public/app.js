@@ -2287,9 +2287,25 @@ class MIDIPlayer {
             if (this.playBtn) {
                 this.playBtn.disabled = true;
             }
-            // Update movement name to show loading
+            // Disable movement dropdown while loading
+            if (this.movementSelect) {
+                this.movementSelect.disabled = true;
+            }
+            // Show the movement/channels section so user can see loading status
+            if (this.movementChannelsSection) {
+                this.movementChannelsSection.style.display = 'block';
+            }
+            // Update movement name to show loading (in Settings pane)
             if (this.currentMovementName && movementTitle) {
                 this.currentMovementName.textContent = buildDisplayText(' - loading...');
+            }
+            // Update movement dropdown to show loading (in Play Music pane)
+            if (this.movementSelect && this.movementSelect.selectedIndex > 0) {
+                const selectedOption = this.movementSelect.options[this.movementSelect.selectedIndex];
+                if (selectedOption && !selectedOption.text.includes(' - loading...')) {
+                    selectedOption.dataset.originalText = selectedOption.text;
+                    selectedOption.text = selectedOption.text + ' - loading...';
+                }
             }
             // Hide any previous status messages (but keep the status element for errors)
             this.statusManager.hide();
@@ -2298,9 +2314,21 @@ class MIDIPlayer {
             if (this.playBtn) {
                 this.playBtn.disabled = false;
             }
-            // Update movement name to remove loading indicator
+            // Re-enable movement dropdown
+            if (this.movementSelect) {
+                this.movementSelect.disabled = false;
+            }
+            // Update movement name to remove loading indicator (in Settings pane)
             if (this.currentMovementName && movementTitle) {
                 this.currentMovementName.textContent = buildDisplayText();
+            }
+            // Restore movement dropdown text (in Play Music pane)
+            if (this.movementSelect && this.movementSelect.selectedIndex > 0) {
+                const selectedOption = this.movementSelect.options[this.movementSelect.selectedIndex];
+                if (selectedOption && selectedOption.dataset.originalText) {
+                    selectedOption.text = selectedOption.dataset.originalText;
+                    delete selectedOption.dataset.originalText;
+                }
             }
         }
     }
