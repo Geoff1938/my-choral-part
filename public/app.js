@@ -31,24 +31,16 @@ import {
     volumePercentToDb
 } from './utils/formatters.js';
 
+import {
+    escapeHtml,
+    escapeHtmlAttribute,
+    sanitizeDisplayString
+} from './utils/validation.js';
+
 // Import helper modules
 import { InstrumentLoader } from './player/InstrumentLoader.js';
 import { StatusManager } from './ui/StatusManager.js';
 import { RecentWorksManager } from './api/RecentWorksManager.js';
-
-/**
- * Escape a string for safe use in HTML attributes
- * @param {string} str - String to escape
- * @returns {string} HTML-escaped string
- */
-function escapeHtmlAttribute(str) {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-}
 
 class MIDIPlayer {
     constructor() {
@@ -1204,7 +1196,8 @@ class MIDIPlayer {
             this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
                 movements.map(movement => {
                     const jsonValue = JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl });
-                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movement.name}</option>`;
+                    const movementDisplay = escapeHtml(movement.name);
+                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movementDisplay}</option>`;
                 }).join('');
 
             // Auto-select the recent movement or first movement in the dropdown
@@ -1258,7 +1251,8 @@ class MIDIPlayer {
             this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
                 fallbackMovements.map(movement => {
                     const jsonValue = JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl });
-                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movement.name}</option>`;
+                    const movementDisplay = escapeHtml(movement.name);
+                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movementDisplay}</option>`;
                 }).join('');
 
             this.movementSelect.selectedIndex = 1;
@@ -1824,13 +1818,17 @@ class MIDIPlayer {
             // Determine if this channel should be checked
             const isChecked = (this.selectedChannelIndex !== null ? this.selectedChannelIndex === i : isMatching);
 
+            // Escape channel name and instrument for safe HTML display
+            const channelNameDisplay = escapeHtml(channelName);
+            const instrumentDisplay = escapeHtml(instrumentName.replace(/_/g, ' '));
+
             html += `
                 <tr>
                     <td style="text-align: center;">
                         <input type="radio" name="channel-selection" value="${i}" ${isChecked ? 'checked' : ''} />
                     </td>
-                    <td>${channelName}</td>
-                    <td>${instrumentName.replace(/_/g, ' ')}</td>
+                    <td>${channelNameDisplay}</td>
+                    <td>${instrumentDisplay}</td>
                 </tr>
             `;
         }
@@ -1993,8 +1991,9 @@ class MIDIPlayer {
             html += '<div class="result-category"><strong>Composers:</strong></div>';
             const sortedComposers = results.composers.sort((a, b) => a.name.localeCompare(b.name));
             sortedComposers.forEach(composer => {
-                const composerJson = JSON.stringify(composer.name).replace(/"/g, '&quot;');
-                html += `<div class="composer-item" data-type="composer" data-composer="${composerJson}" title="Click to see works by ${composer.name}">${composer.name}</div>`;
+                const composerJson = escapeHtmlAttribute(JSON.stringify(composer.name));
+                const composerDisplay = escapeHtml(composer.name);
+                html += `<div class="composer-item" data-type="composer" data-composer="${composerJson}" title="Click to see works by ${composerDisplay}">${composerDisplay}</div>`;
             });
         }
 
@@ -2003,12 +2002,14 @@ class MIDIPlayer {
             html += '<div class="result-category"><strong>Works:</strong></div>';
             const sortedWorks = results.works.sort((a, b) => a.work.localeCompare(b.work));
             sortedWorks.forEach(work => {
-                // Escape JSON for HTML attributes by replacing quotes
-                const composerJson = JSON.stringify(work.composer).replace(/"/g, '&quot;');
-                const workJson = JSON.stringify(work.work).replace(/"/g, '&quot;');
-                html += `<div class="work-item result-item" data-type="work" data-composer="${composerJson}" data-work="${workJson}" title="Click to play ${work.work} by ${work.composer}">
-                    <div class="result-main">${work.work}</div>
-                    <div class="result-sub">${work.composer}</div>
+                // Escape JSON for HTML attributes and display text
+                const composerJson = escapeHtmlAttribute(JSON.stringify(work.composer));
+                const workJson = escapeHtmlAttribute(JSON.stringify(work.work));
+                const workDisplay = escapeHtml(work.work);
+                const composerDisplay = escapeHtml(work.composer);
+                html += `<div class="work-item result-item" data-type="work" data-composer="${composerJson}" data-work="${workJson}" title="Click to play ${workDisplay} by ${composerDisplay}">
+                    <div class="result-main">${workDisplay}</div>
+                    <div class="result-sub">${composerDisplay}</div>
                 </div>`;
             });
         }
@@ -2018,19 +2019,22 @@ class MIDIPlayer {
             html += '<div class="result-category"><strong>Movements/songs:</strong></div>';
             const sortedMovements = results.movements.sort((a, b) => a.movement.localeCompare(b.movement));
             sortedMovements.forEach(movement => {
-                // Escape JSON for HTML attributes
-                const composerJson = JSON.stringify(movement.composer).replace(/"/g, '&quot;');
-                const workJson = JSON.stringify(movement.work).replace(/"/g, '&quot;');
-                const movementJson = JSON.stringify(movement.movement).replace(/"/g, '&quot;');
-                const midiUrlJson = JSON.stringify(movement.midiUrl).replace(/"/g, '&quot;');
+                // Escape JSON for HTML attributes and display text
+                const composerJson = escapeHtmlAttribute(JSON.stringify(movement.composer));
+                const workJson = escapeHtmlAttribute(JSON.stringify(movement.work));
+                const movementJson = escapeHtmlAttribute(JSON.stringify(movement.movement));
+                const midiUrlJson = escapeHtmlAttribute(JSON.stringify(movement.midiUrl));
+                const movementDisplay = escapeHtml(movement.movement);
+                const composerDisplay = escapeHtml(movement.composer);
+                const workDisplay = escapeHtml(movement.work);
                 html += `<div class="movement-item result-item" data-type="movement"
                     data-composer="${composerJson}"
                     data-work="${workJson}"
                     data-movement="${movementJson}"
                     data-midi-url="${midiUrlJson}"
-                    title="Click to play ${movement.movement}">
-                    <div class="result-main">${movement.movement}</div>
-                    <div class="result-sub">${movement.composer}, ${movement.work}</div>
+                    title="Click to play ${movementDisplay}">
+                    <div class="result-main">${movementDisplay}</div>
+                    <div class="result-sub">${composerDisplay}, ${workDisplay}</div>
                 </div>`;
             });
         }
@@ -2125,8 +2129,9 @@ class MIDIPlayer {
             }
 
             this.worksList.innerHTML = works.map(work => {
-                const workJson = JSON.stringify(work.name).replace(/"/g, '&quot;');
-                return `<div class="work-item" data-work="${workJson}">${work.name}</div>`;
+                const workJson = escapeHtmlAttribute(JSON.stringify(work.name));
+                const workDisplay = escapeHtml(work.name);
+                return `<div class="work-item" data-work="${workJson}">${workDisplay}</div>`;
             }).join('');
 
             // Only show works container if requested (for direct composer selection)
@@ -2184,7 +2189,8 @@ class MIDIPlayer {
             this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
                 movements.map(movement => {
                     const jsonValue = JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl });
-                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movement.name}</option>`;
+                    const movementDisplay = escapeHtml(movement.name);
+                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movementDisplay}</option>`;
                 }).join('');
 
             // Switch to Play tab and update display
@@ -2227,9 +2233,12 @@ class MIDIPlayer {
 
             this.recentWorksSelect.innerHTML = '<option value="">Choose a recent work...</option>' +
                 recentToShow.map(item => {
+                    const composerDisplay = escapeHtml(item.composer);
+                    const workDisplay = escapeHtml(item.work);
+                    const movementDisplay = item.movement ? escapeHtml(item.movement) : '';
                     const displayText = item.movement
-                        ? `${item.composer}, ${item.work} - ${item.movement}`
-                        : `${item.composer}, ${item.work}`;
+                        ? `${composerDisplay}, ${workDisplay} - ${movementDisplay}`
+                        : `${composerDisplay}, ${workDisplay}`;
                     const jsonValue = JSON.stringify({ composer: item.composer, work: item.work });
                     return `<option value="${escapeHtmlAttribute(jsonValue)}">${displayText}</option>`;
                 }).join('');

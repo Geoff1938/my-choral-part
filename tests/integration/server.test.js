@@ -146,7 +146,36 @@ describe('API Integration Tests', () => {
       expect(response.body.error).toContain('Invalid URL');
     });
 
-    // Note: Full proxy testing would require mocking external HTTP requests
+    test('rejects non-allowed domains', async () => {
+      const response = await request(app)
+        .get('/proxy')
+        .query({ url: 'https://evil-site.com/malware.mid' });
+
+      expect(response.status).toBe(403);
+      expect(response.body.error).toContain('Domain not allowed');
+    });
+
+    test('rejects non-HTTP protocols', async () => {
+      const response = await request(app)
+        .get('/proxy')
+        .query({ url: 'ftp://www.learnchoralmusic.co.uk/file.mid' });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error).toContain('HTTP');
+    });
+
+    test('allows learnchoralmusic.co.uk domain', async () => {
+      // Note: This test only validates URL acceptance, not actual fetching
+      // The actual fetch will fail since we're not mocking the HTTP request
+      const response = await request(app)
+        .get('/proxy')
+        .query({ url: 'https://www.learnchoralmusic.co.uk/test.mid' });
+
+      // Should not be 400 (bad URL) or 403 (forbidden domain)
+      // It will likely be 500 or timeout since the file doesn't exist
+      expect(response.status).not.toBe(400);
+      expect(response.status).not.toBe(403);
+    });
   });
 
   describe('Error Handling', () => {

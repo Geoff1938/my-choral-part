@@ -7,6 +7,7 @@ const ChoralMusicScraper = require('./scraper');
 const createApiRoutes = require('./routes/api');
 const proxyRouter = require('./routes/proxy');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+const { apiLimiter, proxyLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -18,14 +19,31 @@ app.use(compression());
 // Middleware to parse JSON
 app.use(express.json());
 
-// Serve static files from the public directory
-app.use(express.static('public'));
+// Serve static files from the public directory with caching headers
+// JavaScript and CSS files are cached for 1 day, other assets for 1 week
+app.use(express.static('public', {
+  maxAge: '1d',
+  setHeaders: (res, filepath) => {
+    // Shorter cache for HTML (no cache - always get latest)
+    if (filepath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
+    // Longer cache for images and fonts
+    else if (filepath.match(/\.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800'); // 1 week
+    }
+    // Standard cache for JS/CSS
+    else if (filepath.match(/\.(js|css)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
+    }
+  }
+}));
 
-// Mount API routes
-app.use('/api', createApiRoutes(scraper));
+// Apply rate limiting to API routes
+app.use('/api', apiLimiter, createApiRoutes(scraper));
 
-// Mount proxy route
-app.use('/proxy', proxyRouter);
+// Apply stricter rate limiting to proxy route
+app.use('/proxy', proxyLimiter, proxyRouter);
 
 // Catch-all route for composer/work URLs (e.g., /domenico-scarlatti/magnificat)
 // This allows sharing direct links to works

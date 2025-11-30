@@ -1,6 +1,7 @@
 /**
  * CORS Proxy Route
  * Handles proxying MIDI file requests to avoid CORS issues
+ * SECURITY: Only allows requests to whitelisted domains
  */
 
 const express = require('express');
@@ -8,6 +9,24 @@ const https = require('https');
 const http = require('http');
 const router = express.Router();
 
+// Whitelist of allowed domains for the proxy
+// This prevents the proxy from being abused as an open relay
+const ALLOWED_DOMAINS = [
+  'www.learnchoralmusic.co.uk',
+  'learnchoralmusic.co.uk'
+];
+
+/**
+ * Check if a URL's domain is in the allowed list
+ * @param {URL} parsedUrl - Parsed URL object
+ * @returns {boolean} True if domain is allowed
+ */
+function isDomainAllowed(parsedUrl) {
+  const hostname = parsedUrl.hostname.toLowerCase();
+  return ALLOWED_DOMAINS.some(domain =>
+    hostname === domain || hostname.endsWith('.' + domain)
+  );
+}
 
 // CORS proxy endpoint for fetching MIDI files
 router.get('/', async (req, res) => {
@@ -26,6 +45,18 @@ router.get('/', async (req, res) => {
     parsedUrl = new URL(midiUrl);
   } catch (error) {
     return res.status(400).json({ error: 'Invalid URL' });
+  }
+
+  // SECURITY: Only allow requests to whitelisted domains
+  if (!isDomainAllowed(parsedUrl)) {
+    return res.status(403).json({
+      error: 'Domain not allowed. Proxy only supports learnchoralmusic.co.uk'
+    });
+  }
+
+  // Only allow http/https protocols
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    return res.status(400).json({ error: 'Only HTTP and HTTPS protocols are allowed' });
   }
 
   // Choose http or https based on protocol
@@ -62,6 +93,14 @@ router.get('/', async (req, res) => {
     } catch (error) {
       if (!res.headersSent) {
         res.status(400).json({ error: 'Invalid redirect URL' });
+      }
+      return;
+    }
+
+    // SECURITY: Validate domain for each redirect to prevent open redirect attacks
+    if (!isDomainAllowed(currentUrl)) {
+      if (!res.headersSent) {
+        res.status(403).json({ error: 'Redirect to non-allowed domain blocked' });
       }
       return;
     }
