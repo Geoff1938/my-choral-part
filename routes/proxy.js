@@ -8,8 +8,12 @@ const https = require('https');
 const http = require('http');
 const router = express.Router();
 
+
 // CORS proxy endpoint for fetching MIDI files
 router.get('/', async (req, res) => {
+  // Prevent browser from caching error responses
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+
   const midiUrl = req.query.url;
 
   if (!midiUrl) {
@@ -41,44 +45,81 @@ router.get('/', async (req, res) => {
     }
   };
 
-  // Fetch the MIDI file with browser-like headers
-  const request = protocol.get(midiUrl, requestOptions, (midiRes) => {
-    if (midiRes.statusCode !== 200) {
-      console.error(`MIDI fetch failed: ${midiRes.statusCode} ${midiRes.statusMessage} for ${midiUrl}`);
-      let errorMsg = `Failed to fetch MIDI file: ${midiRes.statusCode} ${midiRes.statusMessage}`;
+  // Fetch the MIDI file with browser-like headers (with redirect following)
+  const fetchWithRedirects = (url, redirectCount = 0) => {
+    const maxRedirects = 5;
 
-      // Special handling for rate limiting
-      if (midiRes.statusCode === 429) {
-        errorMsg = 'The source server is temporarily rate limiting requests. Please try again in a few moments.';
-      }
-
-      // Only send error if headers haven't been sent yet
+    if (redirectCount > maxRedirects) {
       if (!res.headersSent) {
-        return res.status(midiRes.statusCode).json({ error: errorMsg });
+        res.status(500).json({ error: 'Too many redirects' });
       }
       return;
     }
 
-    // Set appropriate headers
-    res.setHeader('Content-Type', 'audio/midi');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    let currentUrl;
+    try {
+      currentUrl = new URL(url);
+    } catch (error) {
+      if (!res.headersSent) {
+        res.status(400).json({ error: 'Invalid redirect URL' });
+      }
+      return;
+    }
 
-    // Pipe the response
-    midiRes.pipe(res);
-  }).on('error', (error) => {
-    console.error(`Error fetching MIDI from ${midiUrl}:`, error);
-    // Only send error if headers haven't been sent yet
-    if (!res.headersSent) {
-      res.status(500).json({ error: `Failed to fetch MIDI file: ${error.message}` });
-    }
-  }).on('timeout', () => {
-    request.destroy();
-    console.error(`Timeout fetching MIDI from ${midiUrl}`);
-    // Only send error if headers haven't been sent yet
-    if (!res.headersSent) {
-      res.status(504).json({ error: 'Request timeout fetching MIDI file' });
-    }
-  });
+    const currentProtocol = currentUrl.protocol === 'https:' ? https : http;
+
+    const request = currentProtocol.get(url, requestOptions, (midiRes) => {
+      // Handle redirects (301, 302, 303, 307, 308)
+      if ([301, 302, 303, 307, 308].includes(midiRes.statusCode)) {
+        const redirectUrl = midiRes.headers.location;
+        if (redirectUrl) {
+          // Handle relative redirects
+          const absoluteRedirectUrl = redirectUrl.startsWith('http')
+            ? redirectUrl
+            : new URL(redirectUrl, url).href;
+          return fetchWithRedirects(absoluteRedirectUrl, redirectCount + 1);
+        }
+      }
+
+      if (midiRes.statusCode !== 200) {
+        console.error(`MIDI fetch failed: ${midiRes.statusCode} ${midiRes.statusMessage} for ${url}`);
+        let errorMsg = `Failed to fetch MIDI file: ${midiRes.statusCode} ${midiRes.statusMessage}`;
+
+        // Special handling for rate limiting
+        if (midiRes.statusCode === 429) {
+          errorMsg = 'The source server is temporarily rate limiting requests. Please try again in a few moments.';
+        }
+
+        // Only send error if headers haven't been sent yet
+        if (!res.headersSent) {
+          return res.status(midiRes.statusCode).json({ error: errorMsg });
+        }
+        return;
+      }
+
+      // Set appropriate headers
+      res.setHeader('Content-Type', 'audio/midi');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+
+      // Pipe the response
+      midiRes.pipe(res);
+    }).on('error', (error) => {
+      console.error(`Error fetching MIDI from ${url}:`, error);
+      // Only send error if headers haven't been sent yet
+      if (!res.headersSent) {
+        res.status(500).json({ error: `Failed to fetch MIDI file: ${error.message}` });
+      }
+    }).on('timeout', () => {
+      request.destroy();
+      console.error(`Timeout fetching MIDI from ${url}`);
+      // Only send error if headers haven't been sent yet
+      if (!res.headersSent) {
+        res.status(504).json({ error: 'Request timeout fetching MIDI file' });
+      }
+    });
+  };
+
+  fetchWithRedirects(midiUrl);
 });
 
 module.exports = router;

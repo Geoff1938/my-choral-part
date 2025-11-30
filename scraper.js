@@ -51,6 +51,80 @@ class ChoralMusicScraper {
       '/Verdi/Requiem/ingemisco.mid': 'Ingemisco, Confutatis, Lacrymosa'
     };
 
+    // Composer name normalization rules
+    // Maps variant names to canonical names
+    this.composerNameMap = {
+      // Bach family - standardize JS Bach format
+      'Bach (J S)': 'Bach, JS',
+      // Bare surnames to full names (same person confirmed)
+      'Archer': 'Archer (Malcolm)',
+      'Bainton': 'Bainton (F)',
+      'Batten': 'Batten (Adrian)',
+      'Berlioz': 'Berlioz (Hector)',
+      'Blow': 'Blow (John)',
+      'Brahms': 'Brahms (Johannes)',
+      'Britten': 'Britten (Benjamin)',
+      'Bruckner': 'Bruckner (Anton)',
+      'Byrd': 'Byrd (William)',
+      'Charpentier': 'Charpentier (M A)',
+      'Cooke': 'Cooke (Arnold)',
+      'Croft': 'Croft (William)',
+      'Darke': 'Darke (Harold)',
+      'Debussy': 'Debussy (Claude)',
+      'Delius': 'Delius (Frederick)',
+      'Dering': 'Dering (Richard)',
+      'Elgar': 'Elgar (Edward)',
+      'Farmer': 'Farmer (John)',
+      'Farrant': 'Farrant (Richard)',
+      'Finzi': 'Finzi (Gerald)',
+      'Franck': 'Franck (Cesar)',
+      'Gibbons': 'Gibbons (Orlando)',
+      'Goss': 'Goss (John)',
+      'Hadley': 'Hadley (Patrick)',
+      'Hassler': 'Hassler (Hans Leo)',
+      'Haydn': 'Haydn (Joseph)',
+      'Holst': 'Holst (Gustav)',
+      'Howells': 'Howells (Herbert)',
+      'Ives': 'Ives (Charles)',
+      'Kodaly': 'Kodaly (Zoltan)',
+      'Lassus': 'Lassus (Orlande de)',
+      'Leighton': 'Leighton (Kenneth)',
+      'Mathias': 'Mathias (William)',
+      'Mendelssohn': 'Mendelssohn (Felix)',
+      'Mendelssohn (Franz )': 'Mendelssohn (Felix)',
+      'Monteverdi': 'Monteverdi (Claudio)',
+      'Morley': 'Morley (Thomas)',
+      'Mudd': 'Mudd (Thomas)',
+      'Parry': 'Parry (C Hubert H)',
+      'Parsons': 'Parsons (Robert)',
+      'Pearsall': 'Pearsall (Robert)',
+      'Philips': 'Philips (Peter)',
+      'Porter': 'Porter (Walter)',
+      'Purcell': 'Purcell (Henry)',
+      'Purcell (Edward C)': 'Purcell (Henry)',
+      'Rachmaninoff': 'Rachmaninoff (Sergei)',
+      'Scheidt': 'Scheidt (Samuel)',
+      'Stainer': 'Stainer (John)',
+      'Stanford': 'Stanford (C V)',
+      'Sullivan': 'Sullivan (Arthur)',
+      'Tallis': 'Tallis (Thomas)',
+      'Tavener': 'Tavener (John)',
+      'Tchaikovsky': 'Tchaikovsky (P I)',
+      'Tomkins': 'Tomkins (Thomas)',
+      'Trad': 'Trad (arr. ??)',
+      'Tye': 'Tye (Christopher)',
+      'Vaughan Williams': 'Vaughan Williams (Ralph)',
+      'Vaughan Williams (R)': 'Vaughan Williams (Ralph)',
+      'Warlock': 'Warlock (Peter)',
+      'Wishart': 'Wishart (Peter)',
+      'Wood': 'Wood (Charles)',
+      // Junk entries to clean up
+      'Rutter   -  not publicly             available': 'Rutter (John)',
+      'Weelkes - See also  the List for Partworks  and Madrigals': 'Weelkes (Thomas)',
+      // Bennett - standardize format (keeping separate people separate)
+      'Bennett W S': 'Bennett (W S)'
+    };
+
     // Configure axios with browser-like headers to avoid blocking
     this.axiosConfig = {
       headers: {
@@ -77,6 +151,13 @@ class ChoralMusicScraper {
   cleanWhitespace(text) {
     if (!text) return text;
     return text.replace(/[\t\n\r]+/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  // Helper function to normalize composer names to canonical form
+  normalizeComposerName(name) {
+    if (!name) return name;
+    const cleaned = this.cleanWhitespace(name);
+    return this.composerNameMap[cleaned] || cleaned;
   }
 
   // Helper function to check if a section name is a continuation (starts with dashes)
@@ -173,8 +254,9 @@ class ChoralMusicScraper {
           const composerCell = cells.eq(0);
           const worksCell = cells.eq(1);
           
-          const composerName = composerCell.text().trim();
-          
+          const rawComposerName = composerCell.text().trim();
+          const composerName = this.normalizeComposerName(rawComposerName);
+
           if (composerName && worksCell.length > 0) {
             const works = [];
             
@@ -428,16 +510,30 @@ class ChoralMusicScraper {
     }
 
     const completeIndex = [];
+    const composerMap = new Map(); // Map composer name (lowercase) to index entry for merging
+
+    // Helper to find or create a composer entry in the index
+    const getOrCreateComposer = (composerName) => {
+      const key = composerName.toLowerCase();
+      if (composerMap.has(key)) {
+        return composerMap.get(key);
+      }
+      const newComposer = {
+        name: composerName,
+        works: [],
+        seenWorkNames: new Map() // Track work names to detect duplicates
+      };
+      completeIndex.push(newComposer);
+      composerMap.set(key, newComposer);
+      return newComposer;
+    };
 
     for (const composer of filteredComposers) {
       console.log(`Processing composer: ${composer.name}`);
-      const composerData = {
-        name: composer.name,
-        works: []
-      };
+      const composerData = getOrCreateComposer(composer.name);
 
       // Track work names to detect duplicates within this composer
-      const seenWorkNames = new Map(); // Map<workName, firstUrl>
+      const seenWorkNames = composerData.seenWorkNames;
 
       for (const work of composer.works) {
         console.log(`  Processing work: ${work.name}`);
@@ -489,15 +585,25 @@ class ChoralMusicScraper {
         // Add a delay to be respectful to the server and avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, this.requestDelay));
       }
+    }
 
-      if (composerData.works.length > 0) {
-        completeIndex.push(composerData);
-      }
+    // Clean up temporary seenWorkNames property before saving
+    for (const composer of completeIndex) {
+      delete composer.seenWorkNames;
     }
 
     // Now scrape and merge madrigals and carols (single songs)
+    // Note: mergeSongsIntoIndex may add new composers, so we pass completeIndex
     console.log('\n--- Scraping madrigals and carols ---');
     await this.mergeSongsIntoIndex(completeIndex, exceptions, testMode);
+
+    // Clean up seenWorkNames again (in case mergeSongsIntoIndex added new composers)
+    for (const composer of completeIndex) {
+      delete composer.seenWorkNames;
+    }
+
+    // Remove composers with no works
+    const filteredIndex = completeIndex.filter(c => c.works.length > 0);
 
     // Save the exception report if there are any exceptions
     const hasExceptions = exceptions.duplicateWorks.length > 0 ||
@@ -522,11 +628,11 @@ class ChoralMusicScraper {
     }
 
     // Save the index to file
-    await fs.writeJSON(this.dataFile, completeIndex, { spaces: 2 });
+    await fs.writeJSON(this.dataFile, filteredIndex, { spaces: 2 });
     console.log(`Index saved to ${this.dataFile}`);
-    console.log(`Total composers with works: ${completeIndex.length}`);
+    console.log(`Total composers with works: ${filteredIndex.length}`);
 
-    return completeIndex;
+    return filteredIndex;
   }
 
   async buildIndexInBackground(testMode = false) {
@@ -749,15 +855,32 @@ class ChoralMusicScraper {
     const terms = searchTerms.trim().toLowerCase().split(/\s+/).filter(t => t.length > 0);
     if (terms.length === 0) return results;
 
-    // Helper function to check if any word in text starts with the search term
-    const matchesWordStart = (text, term) => {
-      const words = text.toLowerCase().split(/\s+/);
-      return words.some(word => word.startsWith(term));
+    // Helper function to normalize text: lowercase, remove punctuation, collapse whitespace
+    const normalizeText = (text) => {
+      return text.toLowerCase()
+        .replace(/[^\w\s]/g, ' ')  // Replace punctuation with spaces
+        .replace(/\s+/g, ' ')       // Collapse multiple spaces
+        .trim();
     };
 
-    // Helper function to check if all terms match (in any combination)
-    const matchesAllTerms = (text) => {
-      return terms.every(term => matchesWordStart(text, term));
+    // Helper function to check if search phrase appears in text (words in order)
+    // Each search term must match the start of a word, and terms must appear in sequence
+    const matchesPhrase = (text) => {
+      const normalizedText = normalizeText(text);
+      const words = normalizedText.split(' ');
+
+      // Find the first word that starts with the first search term
+      for (let startIdx = 0; startIdx <= words.length - terms.length; startIdx++) {
+        let matches = true;
+        for (let termIdx = 0; termIdx < terms.length; termIdx++) {
+          if (!words[startIdx + termIdx].startsWith(terms[termIdx])) {
+            matches = false;
+            break;
+          }
+        }
+        if (matches) return true;
+      }
+      return false;
     };
 
     // Search through the index
@@ -765,7 +888,7 @@ class ChoralMusicScraper {
       let composerMatches = false;
 
       // Check composer name
-      if (options.composers && matchesAllTerms(composer.name)) {
+      if (options.composers && matchesPhrase(composer.name)) {
         results.composers.push({
           name: composer.name
         });
@@ -776,9 +899,11 @@ class ChoralMusicScraper {
       if (options.works || options.movements) {
         for (const work of composer.works) {
           let workMatches = false;
+          const isSingleSectionWork = work.sections && work.sections.length === 1 &&
+                                       work.sections[0].name === work.name;
 
-          // Check work name
-          if (options.works && matchesAllTerms(work.name)) {
+          // Check work name - but skip if it's a single-section work (to avoid duplicates with movements)
+          if (options.works && !isSingleSectionWork && matchesPhrase(work.name)) {
             results.works.push({
               composer: composer.name,
               work: work.name
@@ -786,10 +911,11 @@ class ChoralMusicScraper {
             workMatches = true;
           }
 
-          // Check if all terms match across composer + work combination
-          if (options.works && !workMatches && !composerMatches) {
+          // Check if phrase matches across composer + work combination
+          // Skip for single-section works to avoid duplicates
+          if (options.works && !isSingleSectionWork && !workMatches && !composerMatches) {
             const combinedText = `${composer.name} ${work.name}`;
-            if (matchesAllTerms(combinedText)) {
+            if (matchesPhrase(combinedText)) {
               results.works.push({
                 composer: composer.name,
                 work: work.name
@@ -798,10 +924,10 @@ class ChoralMusicScraper {
             }
           }
 
-          // Check movements/sections - only match if search term is in the section name itself
+          // Check movements/sections - only match if search phrase is in the section name itself
           if (options.movements && work.sections) {
             for (const section of work.sections) {
-              const sectionMatches = matchesAllTerms(section.name);
+              const sectionMatches = matchesPhrase(section.name);
 
               if (sectionMatches) {
                 results.movements.push({
@@ -830,14 +956,53 @@ class ChoralMusicScraper {
    */
   async getComposerWorks(composerName) {
     const index = await this.loadIndex();
-    const composer = index.find(c => c.name === composerName);
+    // Support both exact match and slug-style lookup (case-insensitive, hyphens = spaces)
+    const composer = index.find(c =>
+      c.name === composerName ||
+      this.nameToSlug(c.name) === composerName.toLowerCase()
+    );
     return composer ? composer.works : [];
   }
 
   /**
+   * Convert a name to a URL-safe slug
+   * @param {string} name - Name to convert
+   * @returns {string} Slug version
+   */
+  nameToSlug(name) {
+    return name.toLowerCase().replace(/\s+/g, '-');
+  }
+
+  /**
+   * Resolve slugs to actual composer and work names
+   * @param {string} composerSlug - Composer slug (lowercase, hyphenated)
+   * @param {string} workSlug - Work slug (lowercase, hyphenated)
+   * @returns {Promise<Object|null>} Object with composer and work names, or null if not found
+   */
+  async resolveSlug(composerSlug, workSlug) {
+    const index = await this.loadIndex();
+    const composer = index.find(c =>
+      c.name === composerSlug ||
+      this.nameToSlug(c.name) === composerSlug.toLowerCase()
+    );
+    if (!composer) return null;
+
+    const work = composer.works.find(w =>
+      w.name === workSlug ||
+      this.nameToSlug(w.name) === workSlug.toLowerCase()
+    );
+    if (!work) return null;
+
+    return {
+      composer: composer.name,
+      work: work.name
+    };
+  }
+
+  /**
    * Get all sections/movements for a specific work
-   * @param {string} composerName - Exact composer name
-   * @param {string} workName - Exact work name
+   * @param {string} composerName - Exact composer name or slug
+   * @param {string} workName - Exact work name or slug
    * @returns {Promise<Array>} Array of sections with MIDI URLs
    * @example
    * const sections = await scraper.getWorkSections('Bach', 'Mass in B Minor');
@@ -845,10 +1010,17 @@ class ChoralMusicScraper {
    */
   async getWorkSections(composerName, workName) {
     const index = await this.loadIndex();
-    const composer = index.find(c => c.name === composerName);
+    // Support both exact match and slug-style lookup
+    const composer = index.find(c =>
+      c.name === composerName ||
+      this.nameToSlug(c.name) === composerName.toLowerCase()
+    );
     if (!composer) return [];
 
-    const work = composer.works.find(w => w.name === workName);
+    const work = composer.works.find(w =>
+      w.name === workName ||
+      this.nameToSlug(w.name) === workName.toLowerCase()
+    );
     return work ? work.sections : [];
   }
 
@@ -952,7 +1124,8 @@ class ChoralMusicScraper {
               return; // continue to next row
             }
 
-            const composerName = this.cleanWhitespace(firstCell.text());
+            const rawComposerName = this.cleanWhitespace(firstCell.text());
+            const composerName = this.normalizeComposerName(rawComposerName);
 
             if (composerName) {
               const composerData = {

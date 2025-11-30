@@ -70,4 +70,12 @@ export class StatusManager {
         this.statusElement.textContent = '';
         this.statusElement.className = 'status';
     }
+
+    /**
+     * Hide the status message (keeps the element but removes visibility)
+     */
+    hide() {
+        if (!this.statusElement) return;
+        this.statusElement.classList.remove('show');
+    }
 }

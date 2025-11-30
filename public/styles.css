@@ -1171,7 +1171,8 @@ section:last-child {
 
 .search-results {
     display: none;
-    max-height: 300px;
+    /* Use a reasonable max-height that fits most screens without causing page scroll */
+    max-height: min(50vh, 400px);
     overflow-y: auto;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -1344,9 +1345,33 @@ section:last-child {
     font-size: 1.1rem;
 }
 
+/* Settings section background color to match Play Music tab */
+.settings-voice-part,
+.settings-share,
+.settings-channels,
+.settings-time-sig,
+.settings-contact {
+    background: var(--color-background-alt); /* Light blue-gray #F5F7FA */
+}
+
 .copyright-section {
     background: #f8f9fa;
     border-left: 4px solid var(--primary-color);
+}
+
+/* Contact section */
+.settings-contact a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.settings-contact a:hover {
+    text-decoration: underline;
+}
+
+/* Larger font for shareable URL in Settings */
+#shareable-url-settings {
+    font-size: 1.05rem;
 }
 
 .copyright-section p {

@@ -442,7 +442,7 @@
     ]
   },
   {
-    "name": "Archer",
+    "name": "Archer (Malcolm)",
     "works": [
       {
         "name": "Ave Maria",
@@ -450,7 +450,7 @@
         "sections": [
           {
             "name": "Ave Maria",
-            "midiUrl": "/Carols & Anthems/Archer/Ave-Maria.mid"
+            "midiUrl": "/Madrigals-etc/Archer/Ave-Maria.mid"
           }
         ]
       },
@@ -501,21 +501,6 @@
           {
             "name": "The Linden Tree Carol",
             "midiUrl": "/Carols & Anthems/Archer/LindenTree.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Archer (Malcolm)",
-    "works": [
-      {
-        "name": "Ave Maria",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ave Maria",
-            "midiUrl": "/Madrigals-etc/Archer/Ave-Maria.mid"
           }
         ]
       }
@@ -790,71 +775,6 @@
     ]
   },
   {
-    "name": "Bach (J S)",
-    "works": [
-      {
-        "name": "Ah! Dearest Jesu",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ah! Dearest Jesu",
-            "midiUrl": "/Carols & Anthems/Bach/Ah-Jesu.mid"
-          }
-        ]
-      },
-      {
-        "name": "And there were shepherds",
-        "url": null,
-        "sections": [
-          {
-            "name": "And there were shepherds",
-            "midiUrl": "/Carols & Anthems/Bach/shepherds.mid"
-          }
-        ]
-      },
-      {
-        "name": "Nun komm' der heiden Heiland",
-        "url": null,
-        "sections": [
-          {
-            "name": "Nun komm' der heiden Heiland",
-            "midiUrl": "/Carols & Anthems/Bach/Nun-komm.mid"
-          }
-        ]
-      },
-      {
-        "name": "O little one sweet",
-        "url": null,
-        "sections": [
-          {
-            "name": "O little one sweet",
-            "midiUrl": "/Carols & Anthems/Bach/O-little-one.mid"
-          }
-        ]
-      },
-      {
-        "name": "With all Thy hosts",
-        "url": null,
-        "sections": [
-          {
-            "name": "With all Thy hosts",
-            "midiUrl": "/Carols & Anthems/Bach/With-hosts.mid"
-          }
-        ]
-      },
-      {
-        "name": "Zion hears the watchmen's voices",
-        "url": null,
-        "sections": [
-          {
-            "name": "Zion hears the watchmen's voices",
-            "midiUrl": "/Carols & Anthems/Bach/Zion-hears.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Bach, CPE",
     "works": [
       {
@@ -938,6 +858,26 @@
   {
     "name": "Bach, JS",
     "works": [
+      {
+        "name": "Ah! Dearest Jesu",
+        "url": null,
+        "sections": [
+          {
+            "name": "Ah! Dearest Jesu",
+            "midiUrl": "/Carols & Anthems/Bach/Ah-Jesu.mid"
+          }
+        ]
+      },
+      {
+        "name": "And there were shepherds",
+        "url": null,
+        "sections": [
+          {
+            "name": "And there were shepherds",
+            "midiUrl": "/Carols & Anthems/Bach/shepherds.mid"
+          }
+        ]
+      },
       {
         "name": "Ascension Oratorio (Cantata 11)",
         "url": "/Bach/BWV11 Ascension Oratorio/ascension-oratorio.html",
@@ -1913,6 +1853,26 @@
         ]
       },
       {
+        "name": "Nun komm' der heiden Heiland",
+        "url": null,
+        "sections": [
+          {
+            "name": "Nun komm' der heiden Heiland",
+            "midiUrl": "/Carols & Anthems/Bach/Nun-komm.mid"
+          }
+        ]
+      },
+      {
+        "name": "O little one sweet",
+        "url": null,
+        "sections": [
+          {
+            "name": "O little one sweet",
+            "midiUrl": "/Carols & Anthems/Bach/O-little-one.mid"
+          }
+        ]
+      },
+      {
         "name": "Sanctus - BWV 237",
         "url": "/Bach/Sanctus - BWV237/Sanctus - BWV237.html",
         "sections": [
@@ -2291,6 +2251,16 @@
         ]
       },
       {
+        "name": "With all Thy hosts",
+        "url": null,
+        "sections": [
+          {
+            "name": "With all Thy hosts",
+            "midiUrl": "/Carols & Anthems/Bach/With-hosts.mid"
+          }
+        ]
+      },
+      {
         "name": "Zion hears her watchman calling (parts 4 & 7 of Cantata 140)",
         "url": "/Bach/Cantata.140/cant140.html",
         "sections": [
@@ -2299,19 +2269,14 @@
             "midiUrl": "/Bach/Cantata.140/ZionHear.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Bainton",
-    "works": [
+      },
       {
-        "name": "And I saw a new heaven",
-        "url": "/Bainton/And-I-saw/and-i-saw.html",
+        "name": "Zion hears the watchmen's voices",
+        "url": null,
         "sections": [
           {
-            "name": "And I saw a new heaven",
-            "midiUrl": "/Bainton/And-I-saw/AndIsaw.mid"
+            "name": "Zion hears the watchmen's voices",
+            "midiUrl": "/Carols & Anthems/Bach/Zion-hears.mid"
           }
         ]
       }
@@ -2327,6 +2292,16 @@
           {
             "name": "A babe is born I wys",
             "midiUrl": "/Carols & Anthems/Bainton/A-babe.mid"
+          }
+        ]
+      },
+      {
+        "name": "And I saw a new heaven",
+        "url": "/Bainton/And-I-saw/and-i-saw.html",
+        "sections": [
+          {
+            "name": "And I saw a new heaven",
+            "midiUrl": "/Bainton/And-I-saw/AndIsaw.mid"
           }
         ]
       }
@@ -2508,21 +2483,6 @@
     ]
   },
   {
-    "name": "Batten",
-    "works": [
-      {
-        "name": "O praise the Lord, all ye heathen III",
-        "url": "/Batten/O-praise-the-Lord/o-praise.html",
-        "sections": [
-          {
-            "name": "O praise the Lord. all ye heathen",
-            "midiUrl": "/Batten/O-praise-the-Lord/O-praise-the-Lord.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Batten (Adrian)",
     "works": [
       {
@@ -2532,6 +2492,16 @@
           {
             "name": "O praise the Lord",
             "midiUrl": "/Madrigals-etc/Batten/O-praise-Lord.mid"
+          }
+        ]
+      },
+      {
+        "name": "O praise the Lord, all ye heathen III",
+        "url": "/Batten/O-praise-the-Lord/o-praise.html",
+        "sections": [
+          {
+            "name": "O praise the Lord. all ye heathen",
+            "midiUrl": "/Batten/O-praise-the-Lord/O-praise-the-Lord.mid"
           }
         ]
       }
@@ -2920,7 +2890,7 @@
     ]
   },
   {
-    "name": "Bennett W S",
+    "name": "Bennett (W S)",
     "works": [
       {
         "name": "God is a spirit",
@@ -2950,7 +2920,7 @@
     ]
   },
   {
-    "name": "Berlioz",
+    "name": "Berlioz (Hector)",
     "works": [
       {
         "name": "Choruses from Berlioz's Operas",
@@ -3089,6 +3059,16 @@
         ]
       },
       {
+        "name": "The shepherds' farewell",
+        "url": null,
+        "sections": [
+          {
+            "name": "The shepherds' farewell",
+            "midiUrl": "/Carols & Anthems/Berlioz/shep-farewell-3.mid"
+          }
+        ]
+      },
+      {
         "name": "Tristia",
         "url": "/Berlioz/Tristia/tristia.html",
         "sections": [
@@ -3103,21 +3083,6 @@
           {
             "name": "Trauermarsch fur die letze Scene des \"Hamlet\" (Marche funebre pour la derniere scene d' \"Hamlet\" Funeral March for the last scene of \"Hamlet\")",
             "midiUrl": "/Berlioz/Tristia/3-Hamlet.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Berlioz (Hector)",
-    "works": [
-      {
-        "name": "The shepherds' farewell",
-        "url": null,
-        "sections": [
-          {
-            "name": "The shepherds' farewell",
-            "midiUrl": "/Carols & Anthems/Berlioz/shep-farewell-3.mid"
           }
         ]
       }
@@ -3517,7 +3482,7 @@
     ]
   },
   {
-    "name": "Blow",
+    "name": "Blow (John)",
     "works": [
       {
         "name": ". . . . . . . . . . . . . . . . . . . . . - Five part",
@@ -3612,21 +3577,6 @@
           {
             "name": "Salvator Mundi",
             "midiUrl": "/Blow/Salvator Mundi/SalMundi.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Blow (John)",
-    "works": [
-      {
-        "name": "Salvator Mundi",
-        "url": null,
-        "sections": [
-          {
-            "name": "Salvator Mundi",
-            "midiUrl": "/Madrigals-etc/Blow/Salmundi.mid"
           }
         ]
       }
@@ -3728,7 +3678,7 @@
     ]
   },
   {
-    "name": "Brahms",
+    "name": "Brahms (Johannes)",
     "works": [
       {
         "name": "11 Gipsy Songs",
@@ -3935,6 +3885,16 @@
         ]
       },
       {
+        "name": "Nachtwache No 1",
+        "url": null,
+        "sections": [
+          {
+            "name": "Nachtwache No 1",
+            "midiUrl": "/Madrigals-etc/Brahms/Nachtwache-1.mid"
+          }
+        ]
+      },
+      {
         "name": "Neue Liebeslieder Op65",
         "url": "/Brahms/Neue Liebeslieder Op65/neue-liebeslieder.html",
         "sections": [
@@ -3997,21 +3957,6 @@
           {
             "name": "15: Zum Schluß: Nun, ihr Musen, genug!",
             "midiUrl": "/Brahms/Neue Liebeslieder Op65/15-Zum-Schluss.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Brahms (Johannes)",
-    "works": [
-      {
-        "name": "Nachtwache No 1",
-        "url": null,
-        "sections": [
-          {
-            "name": "Nachtwache No 1",
-            "midiUrl": "/Madrigals-etc/Brahms/Nachtwache-1.mid"
           }
         ]
       }
@@ -4122,7 +4067,7 @@
     ]
   },
   {
-    "name": "Britten",
+    "name": "Britten (Benjamin)",
     "works": [
       {
         "name": ". . . . . . . . . . . . . (OUP version)",
@@ -4155,6 +4100,16 @@
           {
             "name": "7: Noel!",
             "midiUrl": "/Britten/A-Boy-was-born-Oxford/7-Noel.mid"
+          }
+        ]
+      },
+      {
+        "name": "A boy was born",
+        "url": null,
+        "sections": [
+          {
+            "name": "A boy was born",
+            "midiUrl": "/Carols & Anthems/Britten/boy-born.mid"
           }
         ]
       },
@@ -4257,6 +4212,26 @@
         ]
       },
       {
+        "name": "A New Year carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "A New Year carol",
+            "midiUrl": "/Carols & Anthems/Britten/new-year-carol.mid"
+          }
+        ]
+      },
+      {
+        "name": "Ballad of the Green Broom",
+        "url": null,
+        "sections": [
+          {
+            "name": "Ballad of the Green Broom",
+            "midiUrl": "/Madrigals-etc/Britten/5-broom.mid"
+          }
+        ]
+      },
+      {
         "name": "Festival Te Deum",
         "url": "/Britten/Festival-Te-Deum/festival-te-deum.html",
         "sections": [
@@ -4319,6 +4294,16 @@
           {
             "name": "3a: Blessed Cecilia",
             "midiUrl": "/Britten/Hymn to Cecilia/3a.mid"
+          }
+        ]
+      },
+      {
+        "name": "Marsh Flowers",
+        "url": null,
+        "sections": [
+          {
+            "name": "Marsh Flowers",
+            "midiUrl": "/Madrigals-etc/Britten/3-marsh.mid"
           }
         ]
       },
@@ -4399,71 +4384,6 @@
         ]
       },
       {
-        "name": "The Sycamore Tree",
-        "url": "/Britten/The-Sycamore-Tree/sycamore-tree.html",
-        "sections": [
-          {
-            "name": "The Sycamore Tree",
-            "midiUrl": "/Britten/The-Sycamore-Tree/Sycamore-tree.mid"
-          }
-        ]
-      },
-      {
-        "name": "Welcome Ode - Canon",
-        "url": "/Britten/Welcome Ode - Canon/welcome-ode-canon.html",
-        "sections": [
-          {
-            "name": "Canon",
-            "midiUrl": "/Britten/Welcome Ode - Canon/Canon.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Britten (Benjamin)",
-    "works": [
-      {
-        "name": "A boy was born",
-        "url": null,
-        "sections": [
-          {
-            "name": "A boy was born",
-            "midiUrl": "/Carols & Anthems/Britten/boy-born.mid"
-          }
-        ]
-      },
-      {
-        "name": "A New Year carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "A New Year carol",
-            "midiUrl": "/Carols & Anthems/Britten/new-year-carol.mid"
-          }
-        ]
-      },
-      {
-        "name": "Ballad of the Green Broom",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ballad of the Green Broom",
-            "midiUrl": "/Madrigals-etc/Britten/5-broom.mid"
-          }
-        ]
-      },
-      {
-        "name": "Marsh Flowers",
-        "url": null,
-        "sections": [
-          {
-            "name": "Marsh Flowers",
-            "midiUrl": "/Madrigals-etc/Britten/3-marsh.mid"
-          }
-        ]
-      },
-      {
         "name": "The Evening Primrose",
         "url": null,
         "sections": [
@@ -4484,6 +4404,16 @@
         ]
       },
       {
+        "name": "The Sycamore Tree",
+        "url": "/Britten/The-Sycamore-Tree/sycamore-tree.html",
+        "sections": [
+          {
+            "name": "The Sycamore Tree",
+            "midiUrl": "/Britten/The-Sycamore-Tree/Sycamore-tree.mid"
+          }
+        ]
+      },
+      {
         "name": "There is no rose",
         "url": null,
         "sections": [
@@ -4500,6 +4430,16 @@
           {
             "name": "To Daffodils",
             "midiUrl": "/Madrigals-etc/Britten/1-daffs.mid"
+          }
+        ]
+      },
+      {
+        "name": "Welcome Ode - Canon",
+        "url": "/Britten/Welcome Ode - Canon/welcome-ode-canon.html",
+        "sections": [
+          {
+            "name": "Canon",
+            "midiUrl": "/Britten/Welcome Ode - Canon/Canon.mid"
           }
         ]
       }
@@ -4536,7 +4476,7 @@
     ]
   },
   {
-    "name": "Bruckner",
+    "name": "Bruckner (Anton)",
     "works": [
       {
         "name": "Ave Maria",
@@ -4747,21 +4687,6 @@
     ]
   },
   {
-    "name": "Bruckner (Anton)",
-    "works": [
-      {
-        "name": "Locus iste",
-        "url": null,
-        "sections": [
-          {
-            "name": "Locus iste",
-            "midiUrl": "/Carols & Anthems/Bruckner/Locus-iste.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Bull",
     "works": [
       {
@@ -4873,7 +4798,7 @@
     ]
   },
   {
-    "name": "Byrd",
+    "name": "Byrd (William)",
     "works": [
       {
         "name": "Ave Maria",
@@ -4892,6 +4817,26 @@
           {
             "name": "Ave verum corpus",
             "midiUrl": "/Byrd/Ave verum corpus/AveVerum.mid"
+          }
+        ]
+      },
+      {
+        "name": "Benedictus",
+        "url": null,
+        "sections": [
+          {
+            "name": "Benedictus",
+            "midiUrl": "/Madrigals-etc/Byrd/Bened.mid"
+          }
+        ]
+      },
+      {
+        "name": "Deo gratias",
+        "url": null,
+        "sections": [
+          {
+            "name": "Deo gratias",
+            "midiUrl": "/Madrigals-etc/Byrd/deo-grat.mid"
           }
         ]
       },
@@ -4944,12 +4889,32 @@
         ]
       },
       {
+        "name": "Laetentur coeli",
+        "url": null,
+        "sections": [
+          {
+            "name": "Laetentur coeli",
+            "midiUrl": "/Madrigals-etc/Byrd/Laetentur Coeli.mid"
+          }
+        ]
+      },
+      {
         "name": "Laetentur Coeli (Let the heavens be glad)",
         "url": "/Byrd/Laetentur Coeli/Laetentur Coeli.html",
         "sections": [
           {
             "name": "Laetentur Coeli (Let the heavens be glad)",
             "midiUrl": "/Byrd/Laetentur Coeli/Laetent.mid"
+          }
+        ]
+      },
+      {
+        "name": "Lullaby, my sweet little baby",
+        "url": null,
+        "sections": [
+          {
+            "name": "Lullaby, my sweet little baby",
+            "midiUrl": "/Madrigals-etc/Byrd/Lullaby-my-sweet.mid"
           }
         ]
       },
@@ -5044,12 +5009,32 @@
         ]
       },
       {
+        "name": "Miserere mei",
+        "url": null,
+        "sections": [
+          {
+            "name": "Miserere mei",
+            "midiUrl": "/Madrigals-etc/Byrd/Miserere mei.mid"
+          }
+        ]
+      },
+      {
         "name": "Ne irascaris Domine; Civitas sancti Tui",
         "url": "/Byrd/Ne-ira+Civit/ne-ira+civit.html",
         "sections": [
           {
             "name": "Ne irascaris Domine; Civitas sancti Tui",
             "midiUrl": "/Byrd/Ne-ira+Civit/Ne-isc.mid"
+          }
+        ]
+      },
+      {
+        "name": "Non nobis Domine",
+        "url": null,
+        "sections": [
+          {
+            "name": "Non nobis Domine",
+            "midiUrl": "/Madrigals-etc/Byrd/Non nobis Domine.mid"
           }
         ]
       },
@@ -5070,6 +5055,16 @@
           {
             "name": "O Magnum Mysterium - Beata Virgo",
             "midiUrl": "/Byrd/O Magnum Mysterium/O-magnum.mid"
+          }
+        ]
+      },
+      {
+        "name": "O quam glorioso",
+        "url": null,
+        "sections": [
+          {
+            "name": "O quam glorioso",
+            "midiUrl": "/Madrigals-etc/Byrd/O-quam-gloriosum.mid"
           }
         ]
       },
@@ -5176,131 +5171,6 @@
           {
             "name": "Teach me, O Lord",
             "midiUrl": "/Byrd/Teach me, O Lord/Teach-me.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Byrd (William)",
-    "works": [
-      {
-        "name": "Ave verum corpus",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ave verum corpus",
-            "midiUrl": "/Madrigals-etc/Byrd/aveverum.mid"
-          }
-        ]
-      },
-      {
-        "name": "Benedictus",
-        "url": null,
-        "sections": [
-          {
-            "name": "Benedictus",
-            "midiUrl": "/Madrigals-etc/Byrd/Bened.mid"
-          }
-        ]
-      },
-      {
-        "name": "Deo gratias",
-        "url": null,
-        "sections": [
-          {
-            "name": "Deo gratias",
-            "midiUrl": "/Madrigals-etc/Byrd/deo-grat.mid"
-          }
-        ]
-      },
-      {
-        "name": "Haec Dies",
-        "url": null,
-        "sections": [
-          {
-            "name": "Haec Dies",
-            "midiUrl": "/Madrigals-etc/Byrd/Haec-dies.mid"
-          }
-        ]
-      },
-      {
-        "name": "Justorum Animae (The souls of the righteous)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Justorum Animae (The souls of the righteous)",
-            "midiUrl": "/Madrigals-etc/Byrd/Justorum Animae.mid"
-          }
-        ]
-      },
-      {
-        "name": "Laetentur coeli",
-        "url": null,
-        "sections": [
-          {
-            "name": "Laetentur coeli",
-            "midiUrl": "/Madrigals-etc/Byrd/Laetentur Coeli.mid"
-          }
-        ]
-      },
-      {
-        "name": "Lullaby, my sweet little baby",
-        "url": null,
-        "sections": [
-          {
-            "name": "Lullaby, my sweet little baby",
-            "midiUrl": "/Madrigals-etc/Byrd/Lullaby-my-sweet.mid"
-          }
-        ]
-      },
-      {
-        "name": "Miserere mei",
-        "url": null,
-        "sections": [
-          {
-            "name": "Miserere mei",
-            "midiUrl": "/Madrigals-etc/Byrd/Miserere mei.mid"
-          }
-        ]
-      },
-      {
-        "name": "Non nobis Domine",
-        "url": null,
-        "sections": [
-          {
-            "name": "Non nobis Domine",
-            "midiUrl": "/Madrigals-etc/Byrd/Non nobis Domine.mid"
-          }
-        ]
-      },
-      {
-        "name": "O quam glorioso",
-        "url": null,
-        "sections": [
-          {
-            "name": "O quam glorioso",
-            "midiUrl": "/Madrigals-etc/Byrd/O-quam-gloriosum.mid"
-          }
-        ]
-      },
-      {
-        "name": "Sing joyfully",
-        "url": null,
-        "sections": [
-          {
-            "name": "Sing joyfully",
-            "midiUrl": "/Madrigals-etc/Byrd/sing-joy.mid"
-          }
-        ]
-      },
-      {
-        "name": "Teach me, O Lord",
-        "url": null,
-        "sections": [
-          {
-            "name": "Teach me, O Lord",
-            "midiUrl": "/Madrigals-etc/Byrd/Teach-me.mid"
           }
         ]
       },
@@ -5807,7 +5677,7 @@
     ]
   },
   {
-    "name": "Charpentier",
+    "name": "Charpentier (M A)",
     "works": [
       {
         "name": "In nativitatem Domini canticum",
@@ -6078,6 +5948,16 @@
         ]
       },
       {
+        "name": "Salve puerule",
+        "url": null,
+        "sections": [
+          {
+            "name": "Salve puerule",
+            "midiUrl": "/Carols & Anthems/Charpentier/Salve-puerule.mid"
+          }
+        ]
+      },
+      {
         "name": "Te Deum",
         "url": "/Charpentier/Te-Deum/te-deum.html",
         "sections": [
@@ -6120,21 +6000,6 @@
           {
             "name": "9: In te, Domine, speravi",
             "midiUrl": "/Charpentier/Te-Deum/09-spera.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Charpentier (M A)",
-    "works": [
-      {
-        "name": "Salve puerule",
-        "url": null,
-        "sections": [
-          {
-            "name": "Salve puerule",
-            "midiUrl": "/Carols & Anthems/Charpentier/Salve-puerule.mid"
           }
         ]
       }
@@ -6388,7 +6253,7 @@
     ]
   },
   {
-    "name": "Cooke",
+    "name": "Cooke (Arnold)",
     "works": [
       {
         "name": "Evening Canticles in G",
@@ -6403,12 +6268,7 @@
             "midiUrl": "/Cooke/Evening-Cant-in-G/NuncDim.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Cooke (Arnold)",
-    "works": [
+      },
       {
         "name": "O men from the fields",
         "url": null,
@@ -6512,7 +6372,7 @@
     ]
   },
   {
-    "name": "Croft",
+    "name": "Croft (William)",
     "works": [
       {
         "name": "God is gone up",
@@ -6531,21 +6391,6 @@
           {
             "name": "O Lord, rebuke me not",
             "midiUrl": "/Croft/O-Lord-rebuke-me-not/O-Lord-rebuke.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Croft (William)",
-    "works": [
-      {
-        "name": "God is gone up",
-        "url": null,
-        "sections": [
-          {
-            "name": "God is gone up",
-            "midiUrl": "/Madrigals-etc/Croft/God-is-gone-up.mid"
           }
         ]
       }
@@ -6582,7 +6427,7 @@
     ]
   },
   {
-    "name": "Darke",
+    "name": "Darke (Harold)",
     "works": [
       {
         "name": "Communion Service in A minor",
@@ -6659,12 +6504,7 @@
             "midiUrl": "/Darke/ComServ-in-F/9-Amen.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Darke (Harold)",
-    "works": [
+      },
       {
         "name": "In the bleak midwinter",
         "url": null,
@@ -6747,39 +6587,6 @@
     ]
   },
   {
-    "name": "Debussy",
-    "works": [
-      {
-        "name": "Beau soir",
-        "url": "/Debussy/Beau soir/beau-soir.html",
-        "sections": [
-          {
-            "name": "Beau soir",
-            "midiUrl": "/Debussy/Beau soir/Beau-soir.mid"
-          }
-        ]
-      },
-      {
-        "name": "Trois Chansons",
-        "url": "/Debussy/Trois Chansons/trois-chansons.html",
-        "sections": [
-          {
-            "name": "I: Dieu! qu'il la fait bon regarder",
-            "midiUrl": "/Debussy/Trois Chansons/1-Dieu.mid"
-          },
-          {
-            "name": "II: Quant j'ai ouy le tabourin",
-            "midiUrl": "/Debussy/Trois Chansons/2-Quant.mid"
-          },
-          {
-            "name": "III. Yver, vous n'estes qu'un villain;",
-            "midiUrl": "/Debussy/Trois Chansons/3-Yver.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Debussy (Claude)",
     "works": [
       {
@@ -6811,11 +6618,39 @@
             "midiUrl": "/Madrigals-etc/Debussy/Yver-villain.mid"
           }
         ]
+      },
+      {
+        "name": "Beau soir",
+        "url": "/Debussy/Beau soir/beau-soir.html",
+        "sections": [
+          {
+            "name": "Beau soir",
+            "midiUrl": "/Debussy/Beau soir/Beau-soir.mid"
+          }
+        ]
+      },
+      {
+        "name": "Trois Chansons",
+        "url": "/Debussy/Trois Chansons/trois-chansons.html",
+        "sections": [
+          {
+            "name": "I: Dieu! qu'il la fait bon regarder",
+            "midiUrl": "/Debussy/Trois Chansons/1-Dieu.mid"
+          },
+          {
+            "name": "II: Quant j'ai ouy le tabourin",
+            "midiUrl": "/Debussy/Trois Chansons/2-Quant.mid"
+          },
+          {
+            "name": "III. Yver, vous n'estes qu'un villain;",
+            "midiUrl": "/Debussy/Trois Chansons/3-Yver.mid"
+          }
+        ]
       }
     ]
   },
   {
-    "name": "Delius",
+    "name": "Delius (Frederick)",
     "works": [
       {
         "name": "Sea Drift",
@@ -6826,12 +6661,7 @@
             "midiUrl": "/Delius/Sea Drift/SeaDrift.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Delius (Frederick)",
-    "works": [
+      },
       {
         "name": "To be sung of a summer night on the water - 1",
         "url": null,
@@ -6870,21 +6700,6 @@
     ]
   },
   {
-    "name": "Dering",
-    "works": [
-      {
-        "name": "Factum est silentium",
-        "url": "/Dering/Factum-est-silentium/factum-est.html",
-        "sections": [
-          {
-            "name": "Factum est silentium",
-            "midiUrl": "/Dering/Factum-est-silentium/Factum-est.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Dering (Richard)",
     "works": [
       {
@@ -6899,11 +6714,11 @@
       },
       {
         "name": "Factum est silentium",
-        "url": null,
+        "url": "/Dering/Factum-est-silentium/factum-est.html",
         "sections": [
           {
             "name": "Factum est silentium",
-            "midiUrl": "/Madrigals-etc/Dering/Factum est.mid"
+            "midiUrl": "/Dering/Factum-est-silentium/Factum-est.mid"
           }
         ]
       },
@@ -7682,8 +7497,18 @@
     ]
   },
   {
-    "name": "Elgar",
+    "name": "Elgar (Edward)",
     "works": [
+      {
+        "name": "As torrents in summer",
+        "url": null,
+        "sections": [
+          {
+            "name": "As torrents in summer",
+            "midiUrl": "/Madrigals-etc/Elgar/torrents.mid"
+          }
+        ]
+      },
       {
         "name": "Ave Maria",
         "url": "/Elgar/AveMaria/avemaria.html",
@@ -8343,41 +8168,6 @@
     ]
   },
   {
-    "name": "Elgar (Edward)",
-    "works": [
-      {
-        "name": "As torrents in summer",
-        "url": null,
-        "sections": [
-          {
-            "name": "As torrents in summer",
-            "midiUrl": "/Madrigals-etc/Elgar/torrents.mid"
-          }
-        ]
-      },
-      {
-        "name": "My love dwelt in a Northern land",
-        "url": null,
-        "sections": [
-          {
-            "name": "My love dwelt in a Northern land",
-            "midiUrl": "/Madrigals-etc/Elgar/My-love-dwelt.mid"
-          }
-        ]
-      },
-      {
-        "name": "There is sweet music",
-        "url": null,
-        "sections": [
-          {
-            "name": "There is sweet music",
-            "midiUrl": "/Madrigals-etc/Elgar/There-is-music.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Encina (Juan del)",
     "works": [
       {
@@ -8387,21 +8177,6 @@
           {
             "name": "Mas vale trocar",
             "midiUrl": "/Madrigals-etc/Encina/mas-vale.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Farmer",
-    "works": [
-      {
-        "name": "Lord's Prayer",
-        "url": "/Farmer/Lord's-Prayer/lord's-prayer.html",
-        "sections": [
-          {
-            "name": "Lord's Prayer",
-            "midiUrl": "/Farmer/Lord's-Prayer/Lord's-Prayer.mid"
           }
         ]
       }
@@ -8447,6 +8222,16 @@
           {
             "name": "Fair Phyllis I saw",
             "midiUrl": "/Madrigals-etc/Farmer/fairphyl.mid"
+          }
+        ]
+      },
+      {
+        "name": "Lord's Prayer",
+        "url": "/Farmer/Lord's-Prayer/lord's-prayer.html",
+        "sections": [
+          {
+            "name": "Lord's Prayer",
+            "midiUrl": "/Farmer/Lord's-Prayer/Lord's-Prayer.mid"
           }
         ]
       },
@@ -8498,8 +8283,18 @@
     ]
   },
   {
-    "name": "Farrant",
+    "name": "Farrant (Richard)",
     "works": [
+      {
+        "name": "Call to Remembrance",
+        "url": null,
+        "sections": [
+          {
+            "name": "Call to Remembrance",
+            "midiUrl": "/Madrigals-etc/Farrant/Remembrance.mid"
+          }
+        ]
+      },
       {
         "name": "Call to remembrance, O Lord",
         "url": "/Farrant/Call-remembrance/call-remembrance.html",
@@ -8521,31 +8316,6 @@
         ]
       },
       {
-        "name": "Lord, for thy tender mercy's sake",
-        "url": "/Farrant/Lord-for-thy/lord-for.html",
-        "sections": [
-          {
-            "name": "Lord, for thy tender mercy's sake",
-            "midiUrl": "/Farrant/Lord-for-thy/Lord, for.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Farrant (Richard)",
-    "works": [
-      {
-        "name": "Call to Remembrance",
-        "url": null,
-        "sections": [
-          {
-            "name": "Call to Remembrance",
-            "midiUrl": "/Madrigals-etc/Farrant/Remembrance.mid"
-          }
-        ]
-      },
-      {
         "name": "Hide not thy face",
         "url": null,
         "sections": [
@@ -8556,12 +8326,12 @@
         ]
       },
       {
-        "name": "Lord, for Thy tender mercy's sake",
-        "url": null,
+        "name": "Lord, for thy tender mercy's sake",
+        "url": "/Farrant/Lord-for-thy/lord-for.html",
         "sections": [
           {
-            "name": "Lord, for Thy tender mercy's sake",
-            "midiUrl": "/Madrigals-etc/Farrant/Tender-mercy.mid"
+            "name": "Lord, for thy tender mercy's sake",
+            "midiUrl": "/Farrant/Lord-for-thy/Lord, for.mid"
           }
         ]
       }
@@ -8760,7 +8530,7 @@
     ]
   },
   {
-    "name": "Finzi",
+    "name": "Finzi (Gerald)",
     "works": [
       {
         "name": "In Terra Pax",
@@ -8803,12 +8573,7 @@
             "midiUrl": "/finzi/Full-Final-Sacrifice/Lo-Full.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Finzi (Gerald)",
-    "works": [
+      },
       {
         "name": "My spirit sang all day",
         "url": null,
@@ -8862,7 +8627,7 @@
     ]
   },
   {
-    "name": "Franck",
+    "name": "Franck (Cesar)",
     "works": [
       {
         "name": "Mass in A major",
@@ -8903,12 +8668,7 @@
             "midiUrl": "/Franck/Panis Angelicus/PanAngel.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Franck (Cesar)",
-    "works": [
+      },
       {
         "name": "Panis Angelis",
         "url": null,
@@ -9140,8 +8900,28 @@
     ]
   },
   {
-    "name": "Gibbons",
+    "name": "Gibbons (Orlando)",
     "works": [
+      {
+        "name": "Ah, dear heart",
+        "url": null,
+        "sections": [
+          {
+            "name": "Ah, dear heart",
+            "midiUrl": "/Madrigals-etc/Gibbons/Ah-dear.mid"
+          }
+        ]
+      },
+      {
+        "name": "Almight and everlasting God",
+        "url": null,
+        "sections": [
+          {
+            "name": "Almight and everlasting God",
+            "midiUrl": "/Madrigals-etc/Gibbons/Almighty&everGod.mid"
+          }
+        ]
+      },
       {
         "name": "Almighty and everlasting God",
         "url": "/Gibbons/Almighty&everlastingGod/Almighty.html",
@@ -9159,6 +8939,26 @@
           {
             "name": "Benedictus",
             "midiUrl": "/Gibbons/Benedictus/Benedictus.mid"
+          }
+        ]
+      },
+      {
+        "name": "Dainty fine bird",
+        "url": null,
+        "sections": [
+          {
+            "name": "Dainty fine bird",
+            "midiUrl": "/Madrigals-etc/Gibbons/dainty-fine.mid"
+          }
+        ]
+      },
+      {
+        "name": "Drop, drop, slow tears",
+        "url": null,
+        "sections": [
+          {
+            "name": "Drop, drop, slow tears",
+            "midiUrl": "/Madrigals-etc/Gibbons/Drop drop.mid"
           }
         ]
       },
@@ -9201,6 +9001,16 @@
         ]
       },
       {
+        "name": "O clap your hands",
+        "url": null,
+        "sections": [
+          {
+            "name": "O clap your hands",
+            "midiUrl": "/Madrigals-etc/Gibbons/O-clap-hands.mid"
+          }
+        ]
+      },
+      {
         "name": "O clap your hands together",
         "url": "/Gibbons/O-clap-hands/o-clap-hands.html",
         "sections": [
@@ -9217,6 +9027,16 @@
           {
             "name": "O Lord, in thy wrath",
             "midiUrl": "/Gibbons/O Lord, wrath/O Lord.mid"
+          }
+        ]
+      },
+      {
+        "name": "O that the learned poets",
+        "url": null,
+        "sections": [
+          {
+            "name": "O that the learned poets",
+            "midiUrl": "/Madrigals-etc/Gibbons/O-that-poets.mid"
           }
         ]
       },
@@ -9241,101 +9061,6 @@
           {
             "name": "Te Deum (from Short Service)",
             "midiUrl": "/Gibbons/Te Deum (Short)/TEDEUM2.MID"
-          }
-        ]
-      },
-      {
-        "name": "Venite Exultemus",
-        "url": "/Gibbons/Venite/venite.html",
-        "sections": [
-          {
-            "name": "Venite Exultemus",
-            "midiUrl": "/Gibbons/Venite/Venite.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Gibbons (Orlando)",
-    "works": [
-      {
-        "name": "Ah, dear heart",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ah, dear heart",
-            "midiUrl": "/Madrigals-etc/Gibbons/Ah-dear.mid"
-          }
-        ]
-      },
-      {
-        "name": "Almight and everlasting God",
-        "url": null,
-        "sections": [
-          {
-            "name": "Almight and everlasting God",
-            "midiUrl": "/Madrigals-etc/Gibbons/Almighty&everGod.mid"
-          }
-        ]
-      },
-      {
-        "name": "Dainty fine bird",
-        "url": null,
-        "sections": [
-          {
-            "name": "Dainty fine bird",
-            "midiUrl": "/Madrigals-etc/Gibbons/dainty-fine.mid"
-          }
-        ]
-      },
-      {
-        "name": "Drop, drop, slow tears",
-        "url": null,
-        "sections": [
-          {
-            "name": "Drop, drop, slow tears",
-            "midiUrl": "/Madrigals-etc/Gibbons/Drop drop.mid"
-          }
-        ]
-      },
-      {
-        "name": "Hosanna to the Son of David",
-        "url": null,
-        "sections": [
-          {
-            "name": "Hosanna to the Son of David",
-            "midiUrl": "/Madrigals-etc/Gibbons/Hosanna.mid"
-          }
-        ]
-      },
-      {
-        "name": "O clap your hands",
-        "url": null,
-        "sections": [
-          {
-            "name": "O clap your hands",
-            "midiUrl": "/Madrigals-etc/Gibbons/O-clap-hands.mid"
-          }
-        ]
-      },
-      {
-        "name": "O Lord, in Thy wrath",
-        "url": null,
-        "sections": [
-          {
-            "name": "O Lord, in Thy wrath",
-            "midiUrl": "/Madrigals-etc/Gibbons/O-Lord-in-Thy-wrath.mid"
-          }
-        ]
-      },
-      {
-        "name": "O that the learned poets",
-        "url": null,
-        "sections": [
-          {
-            "name": "O that the learned poets",
-            "midiUrl": "/Madrigals-etc/Gibbons/O-that-poets.mid"
           }
         ]
       },
@@ -9366,6 +9091,16 @@
           {
             "name": "Trust not too much, fair youth",
             "midiUrl": "/Madrigals-etc/Gibbons/Trust-not-youth.mid"
+          }
+        ]
+      },
+      {
+        "name": "Venite Exultemus",
+        "url": "/Gibbons/Venite/venite.html",
+        "sections": [
+          {
+            "name": "Venite Exultemus",
+            "midiUrl": "/Gibbons/Venite/Venite.mid"
           }
         ]
       },
@@ -9956,7 +9691,7 @@
     ]
   },
   {
-    "name": "Goss",
+    "name": "Goss (John)",
     "works": [
       {
         "name": "If we believe that Jesus died",
@@ -9979,27 +9714,22 @@
         ]
       },
       {
-        "name": "These are they which follow the Lamb",
-        "url": "/Goss/These-Lamb/these-lamb.html",
-        "sections": [
-          {
-            "name": "These are they which follow the Lamb",
-            "midiUrl": "/Goss/These-Lamb/These-Lamb.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Goss (John)",
-    "works": [
-      {
         "name": "See amid the winter's snow (arr. Willcocks)",
         "url": null,
         "sections": [
           {
             "name": "See amid the winter's snow (arr. Willcocks)",
             "midiUrl": "/Carols & Anthems/Goss/See-amid.mid"
+          }
+        ]
+      },
+      {
+        "name": "These are they which follow the Lamb",
+        "url": "/Goss/These-Lamb/these-lamb.html",
+        "sections": [
+          {
+            "name": "These are they which follow the Lamb",
+            "midiUrl": "/Goss/These-Lamb/These-Lamb.mid"
           }
         ]
       }
@@ -10386,21 +10116,6 @@
     ]
   },
   {
-    "name": "Hadley",
-    "works": [
-      {
-        "name": "My beloved spake",
-        "url": "/Hadley/My beloved spake/my-beloved.html",
-        "sections": [
-          {
-            "name": "My beloved spake",
-            "midiUrl": "/Hadley/My beloved spake/My beloved.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Hadley (Patrick)",
     "works": [
       {
@@ -10415,11 +10130,11 @@
       },
       {
         "name": "My beloved spake",
-        "url": null,
+        "url": "/Hadley/My beloved spake/my-beloved.html",
         "sections": [
           {
             "name": "My beloved spake",
-            "midiUrl": "/Madrigals-etc/Hadley/My-beloved-spake.mid"
+            "midiUrl": "/Hadley/My beloved spake/My beloved.mid"
           }
         ]
       }
@@ -14233,8 +13948,18 @@
     ]
   },
   {
-    "name": "Hassler",
+    "name": "Hassler (Hans Leo)",
     "works": [
+      {
+        "name": "Ach, Weh des Leiden",
+        "url": null,
+        "sections": [
+          {
+            "name": "Ach, Weh des Leiden",
+            "midiUrl": "/Madrigals-etc/Hassler/Ach-Leiden.mid"
+          }
+        ]
+      },
       {
         "name": "Dixit Maria",
         "url": "/Hassler/Dixit Maria/dixit-maria.html",
@@ -14270,21 +13995,6 @@
             "midiUrl": "/Hassler/Missa VIII Octo Vocum/5-AgnusDei.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Hassler (Hans Leo)",
-    "works": [
-      {
-        "name": "Ach, Weh des Leiden",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ach, Weh des Leiden",
-            "midiUrl": "/Madrigals-etc/Hassler/Ach-Leiden.mid"
-          }
-        ]
       },
       {
         "name": "Tanzen und springen",
@@ -14299,7 +14009,7 @@
     ]
   },
   {
-    "name": "Haydn",
+    "name": "Haydn (Joseph)",
     "works": [
       {
         "name": ". . . . . . . . . \n. - Autumn",
@@ -14946,6 +14656,16 @@
         ]
       },
       {
+        "name": "Die Harmonie in der Ehe",
+        "url": null,
+        "sections": [
+          {
+            "name": "Die Harmonie in der Ehe",
+            "midiUrl": "/Madrigals-etc/Haydn/dieharmn.mid"
+          }
+        ]
+      },
+      {
         "name": "Insanae at vanae curae",
         "url": "/Haydn/Insanae/insanae.html",
         "sections": [
@@ -15292,21 +15012,6 @@
           {
             "name": "Il Terremoto",
             "midiUrl": "/Haydn/Seven-Last-Words/8-Earth.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Haydn (Joseph)",
-    "works": [
-      {
-        "name": "Die Harmonie in der Ehe",
-        "url": null,
-        "sections": [
-          {
-            "name": "Die Harmonie in der Ehe",
-            "midiUrl": "/Madrigals-etc/Haydn/dieharmn.mid"
           }
         ]
       }
@@ -15662,7 +15367,7 @@
     ]
   },
   {
-    "name": "Holst",
+    "name": "Holst (Gustav)",
     "works": [
       {
         "name": "1: I sowed the seeds of love",
@@ -15735,6 +15440,26 @@
         ]
       },
       {
+        "name": "In the bleak midwinter",
+        "url": null,
+        "sections": [
+          {
+            "name": "In the bleak midwinter",
+            "midiUrl": "/Carols & Anthems/Holst/mid-wint.mid"
+          }
+        ]
+      },
+      {
+        "name": "Lullay my liking",
+        "url": null,
+        "sections": [
+          {
+            "name": "Lullay my liking",
+            "midiUrl": "/Carols & Anthems/Holst/lullay.mid"
+          }
+        ]
+      },
+      {
         "name": "Neptune - Mystic - Chorus",
         "url": "/Holst/Neptune - Mystic - Chorus/mystic-chorus.html",
         "sections": [
@@ -15763,31 +15488,6 @@
             "midiUrl": "/Holst/Ode-to-Death/OdeDeath.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Holst (Gustav)",
-    "works": [
-      {
-        "name": "In the bleak midwinter",
-        "url": null,
-        "sections": [
-          {
-            "name": "In the bleak midwinter",
-            "midiUrl": "/Carols & Anthems/Holst/mid-wint.mid"
-          }
-        ]
-      },
-      {
-        "name": "Lullay my liking",
-        "url": null,
-        "sections": [
-          {
-            "name": "Lullay my liking",
-            "midiUrl": "/Carols & Anthems/Holst/lullay.mid"
-          }
-        ]
       },
       {
         "name": "Personent Hodie",
@@ -15796,6 +15496,16 @@
           {
             "name": "Personent Hodie",
             "midiUrl": "/Carols & Anthems/Holst/Personent-Hodie.mid"
+          }
+        ]
+      },
+      {
+        "name": "This Have I Done for My True Love",
+        "url": "/Holst/This have I done/this-have-i-done.html",
+        "sections": [
+          {
+            "name": "This have I done",
+            "midiUrl": "/Holst/This have I done/This have I done.mid"
           }
         ]
       },
@@ -15930,8 +15640,18 @@
     ]
   },
   {
-    "name": "Howells",
+    "name": "Howells (Herbert)",
     "works": [
+      {
+        "name": "A spotless Rose",
+        "url": null,
+        "sections": [
+          {
+            "name": "A spotless Rose",
+            "midiUrl": "/Madrigals-etc/Howells/rose.mid"
+          }
+        ]
+      },
       {
         "name": "Behold, O God our defender",
         "url": "/Howells/Behold-O-God/behold-god.html",
@@ -16027,21 +15747,6 @@
           {
             "name": "Jubilate",
             "midiUrl": "/Howells/TeDeum&Jubiliate/Jubilate.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Howells (Herbert)",
-    "works": [
-      {
-        "name": "A spotless Rose",
-        "url": null,
-        "sections": [
-          {
-            "name": "A spotless Rose",
-            "midiUrl": "/Madrigals-etc/Howells/rose.mid"
           }
         ]
       },
@@ -16271,7 +15976,7 @@
     ]
   },
   {
-    "name": "Ives",
+    "name": "Ives (Charles)",
     "works": [
       {
         "name": "A Christmas Carol - Little Star of Bethlehem",
@@ -16280,21 +15985,6 @@
           {
             "name": "A Christmas Carol - Little Star of Bethlehem",
             "midiUrl": "/Ives/Little Star/LitlStar.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Ives (Charles)",
-    "works": [
-      {
-        "name": "A Christmas Carol - Little Star of Bethlehem",
-        "url": null,
-        "sections": [
-          {
-            "name": "A Christmas Carol - Little Star of Bethlehem",
-            "midiUrl": "/Carols & Anthems/Ives/LitlStar.mid"
           }
         ]
       }
@@ -16980,8 +16670,18 @@
     ]
   },
   {
-    "name": "Kodaly",
+    "name": "Kodaly (Zoltan)",
     "works": [
+      {
+        "name": "A Christmas carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "A Christmas carol",
+            "midiUrl": "/Carols & Anthems/Kodaly/A-Christ-carol.mid"
+          }
+        ]
+      },
       {
         "name": "Missa Brevis",
         "url": "/Kodaly/Missa Brevis/missa-brevis.html",
@@ -17017,21 +16717,6 @@
           {
             "name": "Ite, missa est",
             "midiUrl": "/Kodaly/Missa Brevis/8-Ite.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Kodaly (Zoltan)",
-    "works": [
-      {
-        "name": "A Christmas carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "A Christmas carol",
-            "midiUrl": "/Carols & Anthems/Kodaly/A-Christ-carol.mid"
           }
         ]
       }
@@ -17153,7 +16838,7 @@
     ]
   },
   {
-    "name": "Lassus",
+    "name": "Lassus (Orlande de)",
     "works": [
       {
         "name": "Adoramus te, Christe",
@@ -17176,6 +16861,26 @@
         ]
       },
       {
+        "name": "Bonjour mon coeur",
+        "url": null,
+        "sections": [
+          {
+            "name": "Bonjour mon coeur",
+            "midiUrl": "/Madrigals-etc/Lassus/Bonjour-coeur.mid"
+          }
+        ]
+      },
+      {
+        "name": "Chi chi li chi",
+        "url": null,
+        "sections": [
+          {
+            "name": "Chi chi li chi",
+            "midiUrl": "/Madrigals-etc/Lassus/Chi-chi-li-chi.mid"
+          }
+        ]
+      },
+      {
         "name": "Iustorum animae",
         "url": "/Lassus/Iustorum animae/iustorum-animae.html",
         "sections": [
@@ -17186,12 +16891,32 @@
         ]
       },
       {
+        "name": "La nuit froide et sombre",
+        "url": null,
+        "sections": [
+          {
+            "name": "La nuit froide et sombre",
+            "midiUrl": "/Madrigals-etc/Lassus/Nuit-froide.mid"
+          }
+        ]
+      },
+      {
         "name": "Libera me, Domine",
         "url": "/Lassus/Libera me, Domine/libera-me.html",
         "sections": [
           {
             "name": "Libera me, Domine",
             "midiUrl": "/Lassus/Libera me, Domine/Libera-me.mid"
+          }
+        ]
+      },
+      {
+        "name": "Matona, mia cara",
+        "url": null,
+        "sections": [
+          {
+            "name": "Matona, mia cara",
+            "midiUrl": "/Madrigals-etc/Lassus/matona.mid"
           }
         ]
       },
@@ -17228,51 +16953,6 @@
           {
             "name": "Timor et tremor",
             "midiUrl": "/Lassus/Timor et tremor/timor-et.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Lassus (Orlande de)",
-    "works": [
-      {
-        "name": "Bonjour mon coeur",
-        "url": null,
-        "sections": [
-          {
-            "name": "Bonjour mon coeur",
-            "midiUrl": "/Madrigals-etc/Lassus/Bonjour-coeur.mid"
-          }
-        ]
-      },
-      {
-        "name": "Chi chi li chi",
-        "url": null,
-        "sections": [
-          {
-            "name": "Chi chi li chi",
-            "midiUrl": "/Madrigals-etc/Lassus/Chi-chi-li-chi.mid"
-          }
-        ]
-      },
-      {
-        "name": "La nuit froide et sombre",
-        "url": null,
-        "sections": [
-          {
-            "name": "La nuit froide et sombre",
-            "midiUrl": "/Madrigals-etc/Lassus/Nuit-froide.mid"
-          }
-        ]
-      },
-      {
-        "name": "Matona, mia cara",
-        "url": null,
-        "sections": [
-          {
-            "name": "Matona, mia cara",
-            "midiUrl": "/Madrigals-etc/Lassus/matona.mid"
           }
         ]
       }
@@ -17422,7 +17102,7 @@
     ]
   },
   {
-    "name": "Leighton",
+    "name": "Leighton (Kenneth)",
     "works": [
       {
         "name": "Columba Mea",
@@ -17449,12 +17129,7 @@
             "midiUrl": "/Leighton/Columba Mea/5-6-Mine.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Leighton (Kenneth)",
-    "works": [
+      },
       {
         "name": "Coventry Carol (Lully, lulla, thou little tiny child)",
         "url": null,
@@ -18088,8 +17763,18 @@
     ]
   },
   {
-    "name": "Mathias",
+    "name": "Mathias (William)",
     "works": [
+      {
+        "name": "A babe is born",
+        "url": null,
+        "sections": [
+          {
+            "name": "A babe is born",
+            "midiUrl": "/Carols & Anthems/Mathias/babe-is-born.mid"
+          }
+        ]
+      },
       {
         "name": "Ave verum corpus",
         "url": "/Mathias/Ave verum corpus/ave-verum-corpus.html",
@@ -18117,21 +17802,6 @@
           {
             "name": "Full Fathom Five",
             "midiUrl": "/Mathias/Full Fathom Five/Full-fathom.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Mathias (William)",
-    "works": [
-      {
-        "name": "A babe is born",
-        "url": null,
-        "sections": [
-          {
-            "name": "A babe is born",
-            "midiUrl": "/Carols & Anthems/Mathias/babe-is-born.mid"
           }
         ]
       },
@@ -18296,7 +17966,7 @@
     ]
   },
   {
-    "name": "Mendelssohn",
+    "name": "Mendelssohn (Felix)",
     "works": [
       {
         "name": "Chorale: Wer nur lieben Gott lasst walten  NEED",
@@ -18453,6 +18123,36 @@
           {
             "name": "19: O man of God, help thy people . . . O Lord, Thou hast overthrown Thy enemies 20: Thanks be to God",
             "midiUrl": "/Mendelssohn/Elijah/1920help.mid"
+          }
+        ]
+      },
+      {
+        "name": "Hark! The herald angels sing (arr. Cummings)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Hark! The herald angels sing (arr. Cummings)",
+            "midiUrl": "/Carols & Anthems/Mendelssohn/HarkHerald-Cummings.mid"
+          }
+        ]
+      },
+      {
+        "name": "Hark! The herald angels sing (arr. Llewellyn)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Hark! The herald angels sing (arr. Llewellyn)",
+            "midiUrl": "/Carols & Anthems/Llewellyn/Harkhrld.mid"
+          }
+        ]
+      },
+      {
+        "name": "Hark! The herald angels sing (with Willocks descant)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Hark! The herald angels sing (with Willocks descant)",
+            "midiUrl": "/Carols & Anthems/Willcocks/Harkhrld-Wlcox.mid"
           }
         ]
       },
@@ -18825,41 +18525,6 @@
     ]
   },
   {
-    "name": "Mendelssohn (Franz )",
-    "works": [
-      {
-        "name": "Hark! The herald angels sing (arr. Cummings)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Hark! The herald angels sing (arr. Cummings)",
-            "midiUrl": "/Carols & Anthems/Mendelssohn/HarkHerald-Cummings.mid"
-          }
-        ]
-      },
-      {
-        "name": "Hark! The herald angels sing (arr. Llewellyn)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Hark! The herald angels sing (arr. Llewellyn)",
-            "midiUrl": "/Carols & Anthems/Llewellyn/Harkhrld.mid"
-          }
-        ]
-      },
-      {
-        "name": "Hark! The herald angels sing (with Willocks descant)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Hark! The herald angels sing (with Willocks descant)",
-            "midiUrl": "/Carols & Anthems/Willcocks/Harkhrld-Wlcox.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Menotti",
     "works": [
       {
@@ -19000,8 +18665,38 @@
     ]
   },
   {
-    "name": "Monteverdi",
+    "name": "Monteverdi (Claudio)",
     "works": [
+      {
+        "name": "- 2: O Teseo, Teseo mio",
+        "url": null,
+        "sections": [
+          {
+            "name": "- 2: O Teseo, Teseo mio",
+            "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/2-Teseo.mid"
+          }
+        ]
+      },
+      {
+        "name": "- 3: Dove, dove e la fede",
+        "url": null,
+        "sections": [
+          {
+            "name": "- 3: Dove, dove e la fede",
+            "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/3-Dove.mid"
+          }
+        ]
+      },
+      {
+        "name": "- 4: Ahi, che non pur risponde!",
+        "url": null,
+        "sections": [
+          {
+            "name": "- 4: Ahi, che non pur risponde!",
+            "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/4-risponde.mid"
+          }
+        ]
+      },
       {
         "name": "Beatus Vir (Chappell SSATB)",
         "url": "/Monteverdi/Beatus Vir - SSATB/BeatusVir.html",
@@ -19053,6 +18748,16 @@
         ]
       },
       {
+        "name": "Christe, Redemptor omnium",
+        "url": null,
+        "sections": [
+          {
+            "name": "Christe, Redemptor omnium",
+            "midiUrl": "/Carols & Anthems/Monteverdi/Christe-redemptor.mid"
+          }
+        ]
+      },
+      {
         "name": "Christmas Vespers",
         "url": "/Monteverdi/Xmas-Vespers/xmas-vespers.html",
         "sections": [
@@ -19083,6 +18788,36 @@
           {
             "name": "7: Magnificat (from 1610 Vespers)",
             "midiUrl": "/Monteverdi/Xmas-Vespers/7-Magnif.mid"
+          }
+        ]
+      },
+      {
+        "name": "Lamento d'Arianna - 1: Lasciatemi morire",
+        "url": null,
+        "sections": [
+          {
+            "name": "Lamento d'Arianna - 1: Lasciatemi morire",
+            "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/1-morire.mid"
+          }
+        ]
+      },
+      {
+        "name": "O Mirtillo, Mirtillo, anima mia",
+        "url": null,
+        "sections": [
+          {
+            "name": "O Mirtillo, Mirtillo, anima mia",
+            "midiUrl": "/Madrigals-etc/Monteverdi/Mirtillo.mid"
+          }
+        ]
+      },
+      {
+        "name": "Ohime se tanto amate",
+        "url": null,
+        "sections": [
+          {
+            "name": "Ohime se tanto amate",
+            "midiUrl": "/Madrigals-etc/Monteverdi/Ohime.mid"
           }
         ]
       },
@@ -19125,81 +18860,6 @@
           {
             "name": "8: Magnificat",
             "midiUrl": "/Monteverdi/Vespers-1610/8-Magnif.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Monteverdi (Claudio)",
-    "works": [
-      {
-        "name": "- 2: O Teseo, Teseo mio",
-        "url": null,
-        "sections": [
-          {
-            "name": "- 2: O Teseo, Teseo mio",
-            "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/2-Teseo.mid"
-          }
-        ]
-      },
-      {
-        "name": "- 3: Dove, dove e la fede",
-        "url": null,
-        "sections": [
-          {
-            "name": "- 3: Dove, dove e la fede",
-            "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/3-Dove.mid"
-          }
-        ]
-      },
-      {
-        "name": "- 4: Ahi, che non pur risponde!",
-        "url": null,
-        "sections": [
-          {
-            "name": "- 4: Ahi, che non pur risponde!",
-            "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/4-risponde.mid"
-          }
-        ]
-      },
-      {
-        "name": "Christe, Redemptor omnium",
-        "url": null,
-        "sections": [
-          {
-            "name": "Christe, Redemptor omnium",
-            "midiUrl": "/Carols & Anthems/Monteverdi/Christe-redemptor.mid"
-          }
-        ]
-      },
-      {
-        "name": "Lamento d'Arianna - 1: Lasciatemi morire",
-        "url": null,
-        "sections": [
-          {
-            "name": "Lamento d'Arianna - 1: Lasciatemi morire",
-            "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/1-morire.mid"
-          }
-        ]
-      },
-      {
-        "name": "O Mirtillo, Mirtillo, anima mia",
-        "url": null,
-        "sections": [
-          {
-            "name": "O Mirtillo, Mirtillo, anima mia",
-            "midiUrl": "/Madrigals-etc/Monteverdi/Mirtillo.mid"
-          }
-        ]
-      },
-      {
-        "name": "Ohime se tanto amate",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ohime se tanto amate",
-            "midiUrl": "/Madrigals-etc/Monteverdi/Ohime.mid"
           }
         ]
       }
@@ -19266,41 +18926,6 @@
     ]
   },
   {
-    "name": "Morley",
-    "works": [
-      {
-        "name": "Eheu, sustulerunt Dominum",
-        "url": "/Morley/Eheu-sustulerunt/eheu-sustulerunt.html",
-        "sections": [
-          {
-            "name": "Eheu, sustulerunt Dominum",
-            "midiUrl": "/Morley/Eheu-sustulerunt/Eheu-sust.mid"
-          }
-        ]
-      },
-      {
-        "name": "Nolo mortem peccatoris",
-        "url": "/Morley/Nolo mortem/nolo-mortem.html",
-        "sections": [
-          {
-            "name": "Nolo mortem peccatoris",
-            "midiUrl": "/Morley/Nolo mortem/Nolo.mid"
-          }
-        ]
-      },
-      {
-        "name": "Out of the deep",
-        "url": "/Morley/Out-deep/out-deep.html",
-        "sections": [
-          {
-            "name": "Out of the deep",
-            "midiUrl": "/Morley/Out-deep/Out-deep.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Morley (Thomas)",
     "works": [
       {
@@ -19320,6 +18945,16 @@
           {
             "name": "Do you not know?",
             "midiUrl": "/Madrigals-etc/Morley/Do-you-not.mid"
+          }
+        ]
+      },
+      {
+        "name": "Eheu, sustulerunt Dominum",
+        "url": "/Morley/Eheu-sustulerunt/eheu-sustulerunt.html",
+        "sections": [
+          {
+            "name": "Eheu, sustulerunt Dominum",
+            "midiUrl": "/Morley/Eheu-sustulerunt/Eheu-sust.mid"
           }
         ]
       },
@@ -19404,6 +19039,16 @@
         ]
       },
       {
+        "name": "Nolo mortem peccatoris",
+        "url": "/Morley/Nolo mortem/nolo-mortem.html",
+        "sections": [
+          {
+            "name": "Nolo mortem peccatoris",
+            "midiUrl": "/Morley/Nolo mortem/Nolo.mid"
+          }
+        ]
+      },
+      {
         "name": "Now is the month of Maying",
         "url": null,
         "sections": [
@@ -19430,6 +19075,16 @@
           {
             "name": "O sleep, fond fancy",
             "midiUrl": "/Madrigals-etc/Morley/O-sleep.mid"
+          }
+        ]
+      },
+      {
+        "name": "Out of the deep",
+        "url": "/Morley/Out-deep/out-deep.html",
+        "sections": [
+          {
+            "name": "Out of the deep",
+            "midiUrl": "/Morley/Out-deep/Out-deep.mid"
           }
         ]
       },
@@ -20437,21 +20092,6 @@
     ]
   },
   {
-    "name": "Mudd",
-    "works": [
-      {
-        "name": "Let Thy merciful ears, O Lord",
-        "url": "/Mudd/Let-thy-ears/let-thy-ears.html",
-        "sections": [
-          {
-            "name": "Let Thy merciful ears, O Lord",
-            "midiUrl": "/Mudd/Let-thy-ears/Let-ears.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Mudd (Thomas)",
     "works": [
       {
@@ -20461,6 +20101,16 @@
           {
             "name": "Let Thy merciful ears",
             "midiUrl": "/Madrigals-etc/Mudd-Weelkes/Let-thy-ears.mid"
+          }
+        ]
+      },
+      {
+        "name": "Let Thy merciful ears, O Lord",
+        "url": "/Mudd/Let-thy-ears/let-thy-ears.html",
+        "sections": [
+          {
+            "name": "Let Thy merciful ears, O Lord",
+            "midiUrl": "/Mudd/Let-thy-ears/Let-ears.mid"
           }
         ]
       }
@@ -21299,7 +20949,7 @@
     ]
   },
   {
-    "name": "Parry",
+    "name": "Parry (C Hubert H)",
     "works": [
       {
         "name": "Blest pair of Sirens (4-part)",
@@ -21376,6 +21026,16 @@
         ]
       },
       {
+        "name": "Music, when soft voices die",
+        "url": null,
+        "sections": [
+          {
+            "name": "Music, when soft voices die",
+            "midiUrl": "/Madrigals-etc/Parry/Music-when.mid"
+          }
+        ]
+      },
+      {
         "name": "No. 1: My soul, there is a country",
         "url": "/Parry/My soul, there is a country/my-soul-there-is-a-country.html",
         "sections": [
@@ -21448,22 +21108,7 @@
     ]
   },
   {
-    "name": "Parry (C Hubert H)",
-    "works": [
-      {
-        "name": "Music, when soft voices die",
-        "url": null,
-        "sections": [
-          {
-            "name": "Music, when soft voices die",
-            "midiUrl": "/Madrigals-etc/Parry/Music-when.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Parsons",
+    "name": "Parsons (Robert)",
     "works": [
       {
         "name": "Ave Maria",
@@ -21472,21 +21117,6 @@
           {
             "name": "Ave Maria",
             "midiUrl": "/Parsons/Ave Maria/AveMaria.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Parsons (Robert)",
-    "works": [
-      {
-        "name": "Ave Maria",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ave Maria",
-            "midiUrl": "/Madrigals-etc/Parsons/Ave Maria.mid"
           }
         ]
       }
@@ -21523,8 +21153,28 @@
     ]
   },
   {
-    "name": "Pearsall",
+    "name": "Pearsall (Robert)",
     "works": [
+      {
+        "name": "In dulci jubilo (SATB: edit. Westbrook)",
+        "url": null,
+        "sections": [
+          {
+            "name": "In dulci jubilo (SATB: edit. Westbrook)",
+            "midiUrl": "/Carols & Anthems/Pearsall/In-dulci.mid"
+          }
+        ]
+      },
+      {
+        "name": "In dulci jubilo (SATB/SATB; Jacques?)",
+        "url": null,
+        "sections": [
+          {
+            "name": "In dulci jubilo (SATB/SATB; Jacques?)",
+            "midiUrl": "/Carols & Anthems/Pearsall/In-dulci-8.mid"
+          }
+        ]
+      },
       {
         "name": "Lay a garland",
         "url": null,
@@ -21552,31 +21202,6 @@
           {
             "name": "Who shall have my lady fair",
             "midiUrl": "/Madrigals-etc/Pearsall/ladyfair.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Pearsall (Robert)",
-    "works": [
-      {
-        "name": "In dulci jubilo (SATB: edit. Westbrook)",
-        "url": null,
-        "sections": [
-          {
-            "name": "In dulci jubilo (SATB: edit. Westbrook)",
-            "midiUrl": "/Carols & Anthems/Pearsall/In-dulci.mid"
-          }
-        ]
-      },
-      {
-        "name": "In dulci jubilo (SATB/SATB; Jacques?)",
-        "url": null,
-        "sections": [
-          {
-            "name": "In dulci jubilo (SATB/SATB; Jacques?)",
-            "midiUrl": "/Carols & Anthems/Pearsall/In-dulci-8.mid"
           }
         ]
       }
@@ -21859,7 +21484,7 @@
     ]
   },
   {
-    "name": "Philips",
+    "name": "Philips (Peter)",
     "works": [
       {
         "name": "Ascendit Deus",
@@ -21878,21 +21503,6 @@
           {
             "name": "Surgens Jesus",
             "midiUrl": "/Philips/Surgens Jesus/Surgens.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Philips (Peter)",
-    "works": [
-      {
-        "name": "Ascendit Deus",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ascendit Deus",
-            "midiUrl": "/Madrigals-etc/Philips/Ascendit.mid"
           }
         ]
       },
@@ -21964,7 +21574,7 @@
     ]
   },
   {
-    "name": "Porter",
+    "name": "Porter (Walter)",
     "works": [
       {
         "name": "Praise the Lord",
@@ -21975,12 +21585,7 @@
             "midiUrl": "/Porter/Praise-the-Lord/Praise-the-Lord.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Porter (Walter)",
-    "works": [
+      },
       {
         "name": "When first I saw thee",
         "url": null,
@@ -22327,7 +21932,7 @@
     ]
   },
   {
-    "name": "Purcell",
+    "name": "Purcell (Henry)",
     "works": [
       {
         "name": "A Purcell Anthology - Twelve Anthems",
@@ -22868,6 +22473,16 @@
         ]
       },
       {
+        "name": "Passing by",
+        "url": null,
+        "sections": [
+          {
+            "name": "Passing by",
+            "midiUrl": "/Madrigals-etc/Purcell-E/passingby.mid"
+          }
+        ]
+      },
+      {
         "name": "Te Deum & Jubilate Deo",
         "url": "/purcell/TeDeum-JubilateDeo/tedeum-jubilatedeo.html",
         "sections": [
@@ -23022,22 +22637,7 @@
     ]
   },
   {
-    "name": "Purcell (Edward C)",
-    "works": [
-      {
-        "name": "Passing by",
-        "url": null,
-        "sections": [
-          {
-            "name": "Passing by",
-            "midiUrl": "/Madrigals-etc/Purcell-E/passingby.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Rachmaninoff",
+    "name": "Rachmaninoff (Sergei)",
     "works": [
       {
         "name": "Ave Maria",
@@ -23048,12 +22648,7 @@
             "midiUrl": "/Madrigals-etc/Rachman.off/avemaria.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Rachmaninoff (Sergei)",
-    "works": [
+      },
       {
         "name": "Slava",
         "url": null,
@@ -23722,7 +23317,7 @@
     ]
   },
   {
-    "name": "Rutter   -  not publicly             available",
+    "name": "Rutter - not publicly available",
     "works": [
       {
         "name": "Christiana Canticles",
@@ -24756,21 +24351,6 @@
     ]
   },
   {
-    "name": "Scheidt",
-    "works": [
-      {
-        "name": "In dulci jubilo",
-        "url": "/Scheidt/In-dulci-jubilo/in-dulci-jubilo.html",
-        "sections": [
-          {
-            "name": "In dulci jubilo",
-            "midiUrl": "/Scheidt/In-dulci-jubilo/In-dulci-jubilo.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Scheidt (Samuel)",
     "works": [
       {
@@ -24780,6 +24360,16 @@
           {
             "name": "A child is born in Bethlehem (ed. Willcocks)",
             "midiUrl": "/Carols & Anthems/Scheidt/childbrn.mid"
+          }
+        ]
+      },
+      {
+        "name": "In dulci jubilo",
+        "url": "/Scheidt/In-dulci-jubilo/in-dulci-jubilo.html",
+        "sections": [
+          {
+            "name": "In dulci jubilo",
+            "midiUrl": "/Scheidt/In-dulci-jubilo/In-dulci-jubilo.mid"
           }
         ]
       }
@@ -25728,7 +25318,7 @@
     ]
   },
   {
-    "name": "Stainer",
+    "name": "Stainer (John)",
     "works": [
       {
         "name": "How beautiful upon the mountain",
@@ -25747,6 +25337,16 @@
           {
             "name": "I saw the Lord",
             "midiUrl": "/Stainer/I saw Lord/I-saw-Ld.mid"
+          }
+        ]
+      },
+      {
+        "name": "Nowell, nowell (The first Nowell) (last verse Llewellyn)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Nowell, nowell (The first Nowell) (last verse Llewellyn)",
+            "midiUrl": "/Carols & Anthems/Stainer/Nowell.mid"
           }
         ]
       },
@@ -25839,22 +25439,7 @@
     ]
   },
   {
-    "name": "Stainer (John)",
-    "works": [
-      {
-        "name": "Nowell, nowell (The first Nowell) (last verse Llewellyn)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Nowell, nowell (The first Nowell) (last verse Llewellyn)",
-            "midiUrl": "/Carols & Anthems/Stainer/Nowell.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Stanford",
+    "name": "Stanford (C V)",
     "works": [
       {
         "name": "Benedictus in C",
@@ -25873,6 +25458,16 @@
           {
             "name": "For lo, I raise up",
             "midiUrl": "/Stanford/For lo, I raise up/For-lo-I-raise-up.mid"
+          }
+        ]
+      },
+      {
+        "name": "Heraclitus",
+        "url": null,
+        "sections": [
+          {
+            "name": "Heraclitus",
+            "midiUrl": "/Madrigals-etc/Stanford/Heraclitus.mid"
           }
         ]
       },
@@ -26115,31 +25710,6 @@
     ]
   },
   {
-    "name": "Stanford (C V)",
-    "works": [
-      {
-        "name": "Heraclitus",
-        "url": null,
-        "sections": [
-          {
-            "name": "Heraclitus",
-            "midiUrl": "/Madrigals-etc/Stanford/Heraclitus.mid"
-          }
-        ]
-      },
-      {
-        "name": "The blue bird",
-        "url": null,
-        "sections": [
-          {
-            "name": "The blue bird",
-            "midiUrl": "/Madrigals-etc/Stanford/Bluebird.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Steggall",
     "works": [
       {
@@ -26218,8 +25788,18 @@
     ]
   },
   {
-    "name": "Sullivan",
+    "name": "Sullivan (Arthur)",
     "works": [
+      {
+        "name": "It came upon the midnight clear",
+        "url": null,
+        "sections": [
+          {
+            "name": "It came upon the midnight clear",
+            "midiUrl": "/Carols & Anthems/Sullivan/It-came.mid"
+          }
+        ]
+      },
       {
         "name": "The long day closes",
         "url": "/Sullivan/Long-day-closes/Long-day-closes.html",
@@ -26311,31 +25891,6 @@
           {
             "name": "Yea, though I walk",
             "midiUrl": "/Sullivan/Yea, though I walk/Yea-though.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Sullivan (Arthur)",
-    "works": [
-      {
-        "name": "It came upon the midnight clear",
-        "url": null,
-        "sections": [
-          {
-            "name": "It came upon the midnight clear",
-            "midiUrl": "/Carols & Anthems/Sullivan/It-came.mid"
-          }
-        ]
-      },
-      {
-        "name": "The long day closes",
-        "url": null,
-        "sections": [
-          {
-            "name": "The long day closes",
-            "midiUrl": "/Madrigals-etc/Sullivan/LONG-DAY.mid"
           }
         ]
       }
@@ -26583,7 +26138,7 @@
     ]
   },
   {
-    "name": "Tallis",
+    "name": "Tallis (Thomas)",
     "works": [
       {
         "name": "Evening Service (Short; Dorian Mode)",
@@ -26694,41 +26249,6 @@
     ]
   },
   {
-    "name": "Tallis (Thomas)",
-    "works": [
-      {
-        "name": "If ye love me",
-        "url": null,
-        "sections": [
-          {
-            "name": "If ye love me",
-            "midiUrl": "/Madrigals-etc/Tallis/if-yeluv.mid"
-          }
-        ]
-      },
-      {
-        "name": "O nata lux",
-        "url": null,
-        "sections": [
-          {
-            "name": "O nata lux",
-            "midiUrl": "/Madrigals-etc/Tallis/O-nata-lux.mid"
-          }
-        ]
-      },
-      {
-        "name": "Salvator Mundi",
-        "url": null,
-        "sections": [
-          {
-            "name": "Salvator Mundi",
-            "midiUrl": "/Madrigals-etc/Tallis/Salvator-Mundi.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Tankersley",
     "works": [
       {
@@ -26759,7 +26279,7 @@
     ]
   },
   {
-    "name": "Tavener",
+    "name": "Tavener (John)",
     "works": [
       {
         "name": "A Hymn to the Mother of God",
@@ -26770,12 +26290,7 @@
             "midiUrl": "/Tavener/Hymn-to-Mother/Hymn-Mum.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Tavener (John)",
-    "works": [
+      },
       {
         "name": "The Lamb",
         "url": null,
@@ -26804,7 +26319,7 @@
     ]
   },
   {
-    "name": "Tchaikovsky",
+    "name": "Tchaikovsky (P I)",
     "works": [
       {
         "name": "Choruses from Tchaikovsky's Operas",
@@ -26819,12 +26334,7 @@
             "midiUrl": "/Tchaikovsky/Choruses/Waltz.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Tchaikovsky (P I)",
-    "works": [
+      },
       {
         "name": "The crown of roses",
         "url": null,
@@ -27029,69 +26539,6 @@
     ]
   },
   {
-    "name": "Tomkins",
-    "works": [
-      {
-        "name": "Arise, O Lord, into thy resting place",
-        "url": "/Tomkins/Arise-O-Lord/arise-o-Lord.html",
-        "sections": [
-          {
-            "name": "Arise, O Lord, into thy resting place",
-            "midiUrl": "/Tomkins/Arise-O-Lord/Arise-o-Lord.mid"
-          }
-        ]
-      },
-      {
-        "name": "I heard a voice from heaven",
-        "url": "/Tomkins/I-heard-voice/i-heard-voice.html",
-        "sections": [
-          {
-            "name": "I heard a voice from heaven",
-            "midiUrl": "/Tomkins/I-heard-voice/I-heard-voice.mid"
-          }
-        ]
-      },
-      {
-        "name": "Nunc dimittis - from the 4th service",
-        "url": "/Tomkins/Nunc-dim/nunc-dim.html",
-        "sections": [
-          {
-            "name": "Nunc dimittis",
-            "midiUrl": "/Tomkins/Nunc-dim/Nunc-dim.mid"
-          }
-        ]
-      },
-      {
-        "name": "Preces & Responses",
-        "url": "/Tomkins/Preces+Responses/preces+responses.html",
-        "sections": [
-          {
-            "name": "O Lord, open thou our lips O God, make speed to save us",
-            "midiUrl": "/Tomkins/Preces+Responses/1-lips.mid"
-          },
-          {
-            "name": "The Lord be with you Let us pray For Farmer's \"Lord's Prayer\", see Farmer",
-            "midiUrl": "/Tomkins/Preces+Responses/5-Lord.mid"
-          },
-          {
-            "name": "O Lord, shew thy mercy upon us O Lord, save the Queen Endue thy ministers with righteousness O Lord, save thy people Give peace in our time, O Lord O God, make clean our hearts within us Collects (I: Amen, II: Amen, III: Amen)",
-            "midiUrl": "/Tomkins/Preces+Responses/7-mer.mid"
-          }
-        ]
-      },
-      {
-        "name": "When David heard",
-        "url": "/Tomkins/When-David-heard/when-david-heard.html",
-        "sections": [
-          {
-            "name": "When David heard",
-            "midiUrl": "/Tomkins/When-David-heard/When-Dav.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Tomkins (Thomas)",
     "works": [
       {
@@ -27101,6 +26548,16 @@
           {
             "name": "Adieu, ye city-prisoning towers",
             "midiUrl": "/Madrigals-etc/Tomkins/Adieu-ye-city.mid"
+          }
+        ]
+      },
+      {
+        "name": "Arise, O Lord, into thy resting place",
+        "url": "/Tomkins/Arise-O-Lord/arise-o-Lord.html",
+        "sections": [
+          {
+            "name": "Arise, O Lord, into thy resting place",
+            "midiUrl": "/Tomkins/Arise-O-Lord/Arise-o-Lord.mid"
           }
         ]
       },
@@ -27115,12 +26572,32 @@
         ]
       },
       {
+        "name": "I heard a voice from heaven",
+        "url": "/Tomkins/I-heard-voice/i-heard-voice.html",
+        "sections": [
+          {
+            "name": "I heard a voice from heaven",
+            "midiUrl": "/Tomkins/I-heard-voice/I-heard-voice.mid"
+          }
+        ]
+      },
+      {
         "name": "Music divine",
         "url": null,
         "sections": [
           {
             "name": "Music divine",
             "midiUrl": "/Madrigals-etc/Tomkins/Music-divine.mid"
+          }
+        ]
+      },
+      {
+        "name": "Nunc dimittis - from the 4th service",
+        "url": "/Tomkins/Nunc-dim/nunc-dim.html",
+        "sections": [
+          {
+            "name": "Nunc dimittis",
+            "midiUrl": "/Tomkins/Nunc-dim/Nunc-dim.mid"
           }
         ]
       },
@@ -27141,6 +26618,24 @@
           {
             "name": "O yes! has any found a lad?",
             "midiUrl": "/Madrigals-etc/Tomkins/O-yes-lad.mid"
+          }
+        ]
+      },
+      {
+        "name": "Preces & Responses",
+        "url": "/Tomkins/Preces+Responses/preces+responses.html",
+        "sections": [
+          {
+            "name": "O Lord, open thou our lips O God, make speed to save us",
+            "midiUrl": "/Tomkins/Preces+Responses/1-lips.mid"
+          },
+          {
+            "name": "The Lord be with you Let us pray For Farmer's \"Lord's Prayer\", see Farmer",
+            "midiUrl": "/Tomkins/Preces+Responses/5-Lord.mid"
+          },
+          {
+            "name": "O Lord, shew thy mercy upon us O Lord, save the Queen Endue thy ministers with righteousness O Lord, save thy people Give peace in our time, O Lord O God, make clean our hearts within us Collects (I: Amen, II: Amen, III: Amen)",
+            "midiUrl": "/Tomkins/Preces+Responses/7-mer.mid"
           }
         ]
       },
@@ -27176,19 +26671,29 @@
       },
       {
         "name": "When David heard",
-        "url": null,
+        "url": "/Tomkins/When-David-heard/when-david-heard.html",
         "sections": [
           {
             "name": "When David heard",
-            "midiUrl": "/Madrigals-etc/Tomkins/When-David-heard.mid"
+            "midiUrl": "/Tomkins/When-David-heard/When-Dav.mid"
           }
         ]
       }
     ]
   },
   {
-    "name": "Trad",
+    "name": "Trad (arr. ??)",
     "works": [
+      {
+        "name": "Coventry Carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "Coventry Carol",
+            "midiUrl": "/Carols & Anthems/Traditional/Coventry.mid"
+          }
+        ]
+      },
       {
         "name": "Jasmin-flower (Moo-Lee-Hwa)",
         "url": "/Trad/Jasmin-flower/jasmin-flower.html",
@@ -27206,21 +26711,6 @@
           {
             "name": "Siyahamba",
             "midiUrl": "/Trad/Siyahamba/Siyahamb.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Trad (arr. ??)",
-    "works": [
-      {
-        "name": "Coventry Carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "Coventry Carol",
-            "midiUrl": "/Carols & Anthems/Traditional/Coventry.mid"
           }
         ]
       },
@@ -27419,8 +26909,18 @@
     ]
   },
   {
-    "name": "Tye",
+    "name": "Tye (Christopher)",
     "works": [
+      {
+        "name": "Give almes of thy goods",
+        "url": null,
+        "sections": [
+          {
+            "name": "Give almes of thy goods",
+            "midiUrl": "/Madrigals-etc/Tye/Give almes.mid"
+          }
+        ]
+      },
       {
         "name": "Nunc dimittis",
         "url": "/Tye/Nunc-dimittis/nunc-dim.html",
@@ -27438,21 +26938,6 @@
           {
             "name": "O come, ye servants of the Lord",
             "midiUrl": "/Tye/O come, ye servants of the Lord/O-come.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Tye (Christopher)",
-    "works": [
-      {
-        "name": "Give almes of thy goods",
-        "url": null,
-        "sections": [
-          {
-            "name": "Give almes of thy goods",
-            "midiUrl": "/Madrigals-etc/Tye/Give almes.mid"
           }
         ]
       }
@@ -27504,8 +26989,68 @@
     ]
   },
   {
-    "name": "Vaughan Williams",
+    "name": "Vaughan Williams (Ralph)",
     "works": [
+      {
+        "name": "1: Full Fathom Five",
+        "url": null,
+        "sections": [
+          {
+            "name": "1: Full Fathom Five",
+            "midiUrl": "/Madrigals-etc/Vaughan Williams/1-FullFathom5.mid"
+          }
+        ]
+      },
+      {
+        "name": "1: Sweet Day",
+        "url": null,
+        "sections": [
+          {
+            "name": "1: Sweet Day",
+            "midiUrl": "/Madrigals-etc/Vaughan Williams/1-Sweet.mid"
+          }
+        ]
+      },
+      {
+        "name": "2: The Cloud-capp'd Towers",
+        "url": null,
+        "sections": [
+          {
+            "name": "2: The Cloud-capp'd Towers",
+            "midiUrl": "/Madrigals-etc/Vaughan Williams/2-Towers.mid"
+          }
+        ]
+      },
+      {
+        "name": "2: The Willow Song",
+        "url": null,
+        "sections": [
+          {
+            "name": "2: The Willow Song",
+            "midiUrl": "/Madrigals-etc/Vaughan Williams/2-Willow.mid"
+          }
+        ]
+      },
+      {
+        "name": "3: Over Hill, over Dale",
+        "url": null,
+        "sections": [
+          {
+            "name": "3: Over Hill, over Dale",
+            "midiUrl": "/Madrigals-etc/Vaughan Williams/overhill.mid"
+          }
+        ]
+      },
+      {
+        "name": "3. O mistress mine",
+        "url": null,
+        "sections": [
+          {
+            "name": "3. O mistress mine",
+            "midiUrl": "/Madrigals-etc/Vaughan Williams/3-O Mistress Mine.mid"
+          }
+        ]
+      },
       {
         "name": "A sea symphony",
         "url": "/Vaughan-Williams/Sea-symphony/seasymph.html",
@@ -27525,6 +27070,16 @@
           {
             "name": "IV: The Explorers",
             "midiUrl": "/Vaughan-Williams/Sea-symphony/4-explor.mid"
+          }
+        ]
+      },
+      {
+        "name": "All in the morning",
+        "url": null,
+        "sections": [
+          {
+            "name": "All in the morning",
+            "midiUrl": "/Carols & Anthems/Vaughan Williams/all-morning.mid"
           }
         ]
       },
@@ -27587,6 +27142,16 @@
           {
             "name": "5: Antiphon . . (Let all the world)",
             "midiUrl": "/Vaughan-Williams/5-Mystical-Songs/5-antiph.mid"
+          }
+        ]
+      },
+      {
+        "name": "Gloucestershire wassail (Wassail all over the town)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Gloucestershire wassail (Wassail all over the town)",
+            "midiUrl": "/Carols & Anthems/Vaughan Williams/wassail.mid"
           }
         ]
       },
@@ -27687,6 +27252,16 @@
         ]
       },
       {
+        "name": "Linden Lea",
+        "url": null,
+        "sections": [
+          {
+            "name": "Linden Lea",
+            "midiUrl": "/Madrigals-etc/Vaughan Williams/Linden-L.mid"
+          }
+        ]
+      },
+      {
         "name": "Linden Lea (1st & 2nd Treble)",
         "url": "/Vaughan-Williams/Linden Lea SS/linden-lea-ss.html",
         "sections": [
@@ -27751,6 +27326,16 @@
         ]
       },
       {
+        "name": "No sad thought His soul affright",
+        "url": null,
+        "sections": [
+          {
+            "name": "No sad thought His soul affright",
+            "midiUrl": "/Carols & Anthems/Vaughan Williams/No-sad.mid"
+          }
+        ]
+      },
+      {
         "name": "O be joyful in the Lord (The Hundredth Psalm)",
         "url": "/Vaughan-Williams/O be joyful/o-be-joyful.html",
         "sections": [
@@ -27781,6 +27366,16 @@
         ]
       },
       {
+        "name": "O little town of Bethlehem",
+        "url": null,
+        "sections": [
+          {
+            "name": "O little town of Bethlehem",
+            "midiUrl": "/Carols & Anthems/V.Williams-Armstrong/O-little-town.mid"
+          }
+        ]
+      },
+      {
         "name": "Old Hundreth",
         "url": "/Vaughan-Williams/Old-100th/old-100th.html",
         "sections": [
@@ -27801,6 +27396,16 @@
         ]
       },
       {
+        "name": "The blessed son of God",
+        "url": null,
+        "sections": [
+          {
+            "name": "The blessed son of God",
+            "midiUrl": "/Carols & Anthems/Vaughan Williams/The-blessed.mid"
+          }
+        ]
+      },
+      {
         "name": "The New Commonwealth",
         "url": "/Vaughan-Williams/The Commonwealth/newcommonwealth.html",
         "sections": [
@@ -27811,6 +27416,16 @@
           {
             "name": "The New Commonwealth (with piano backing)",
             "midiUrl": "/Vaughan-Williams/The Commonwealth/NewComwealth+piano.mid"
+          }
+        ]
+      },
+      {
+        "name": "The truth from above",
+        "url": null,
+        "sections": [
+          {
+            "name": "The truth from above",
+            "midiUrl": "/Carols & Anthems/Vaughan Williams/truth-above.mid"
           }
         ]
       },
@@ -27839,146 +27454,6 @@
           {
             "name": "Toward the Unknown Region",
             "midiUrl": "/Vaughan-Williams/Unknown/unknown.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Vaughan Williams (R)",
-    "works": [
-      {
-        "name": "1: Full Fathom Five",
-        "url": null,
-        "sections": [
-          {
-            "name": "1: Full Fathom Five",
-            "midiUrl": "/Madrigals-etc/Vaughan Williams/1-FullFathom5.mid"
-          }
-        ]
-      },
-      {
-        "name": "1: Sweet Day",
-        "url": null,
-        "sections": [
-          {
-            "name": "1: Sweet Day",
-            "midiUrl": "/Madrigals-etc/Vaughan Williams/1-Sweet.mid"
-          }
-        ]
-      },
-      {
-        "name": "2: The Cloud-capp'd Towers",
-        "url": null,
-        "sections": [
-          {
-            "name": "2: The Cloud-capp'd Towers",
-            "midiUrl": "/Madrigals-etc/Vaughan Williams/2-Towers.mid"
-          }
-        ]
-      },
-      {
-        "name": "2: The Willow Song",
-        "url": null,
-        "sections": [
-          {
-            "name": "2: The Willow Song",
-            "midiUrl": "/Madrigals-etc/Vaughan Williams/2-Willow.mid"
-          }
-        ]
-      },
-      {
-        "name": "3: Over Hill, over Dale",
-        "url": null,
-        "sections": [
-          {
-            "name": "3: Over Hill, over Dale",
-            "midiUrl": "/Madrigals-etc/Vaughan Williams/overhill.mid"
-          }
-        ]
-      },
-      {
-        "name": "3. O mistress mine",
-        "url": null,
-        "sections": [
-          {
-            "name": "3. O mistress mine",
-            "midiUrl": "/Madrigals-etc/Vaughan Williams/3-O Mistress Mine.mid"
-          }
-        ]
-      },
-      {
-        "name": "Linden Lea",
-        "url": null,
-        "sections": [
-          {
-            "name": "Linden Lea",
-            "midiUrl": "/Madrigals-etc/Vaughan Williams/Linden-L.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Vaughan Williams (Ralph)",
-    "works": [
-      {
-        "name": "All in the morning",
-        "url": null,
-        "sections": [
-          {
-            "name": "All in the morning",
-            "midiUrl": "/Carols & Anthems/Vaughan Williams/all-morning.mid"
-          }
-        ]
-      },
-      {
-        "name": "Gloucestershire wassail (Wassail all over the town)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Gloucestershire wassail (Wassail all over the town)",
-            "midiUrl": "/Carols & Anthems/Vaughan Williams/wassail.mid"
-          }
-        ]
-      },
-      {
-        "name": "No sad thought His soul affright",
-        "url": null,
-        "sections": [
-          {
-            "name": "No sad thought His soul affright",
-            "midiUrl": "/Carols & Anthems/Vaughan Williams/No-sad.mid"
-          }
-        ]
-      },
-      {
-        "name": "O little town of Bethlehem",
-        "url": null,
-        "sections": [
-          {
-            "name": "O little town of Bethlehem",
-            "midiUrl": "/Carols & Anthems/V.Williams-Armstrong/O-little-town.mid"
-          }
-        ]
-      },
-      {
-        "name": "The blessed son of God",
-        "url": null,
-        "sections": [
-          {
-            "name": "The blessed son of God",
-            "midiUrl": "/Carols & Anthems/Vaughan Williams/The-blessed.mid"
-          }
-        ]
-      },
-      {
-        "name": "The truth from above",
-        "url": null,
-        "sections": [
-          {
-            "name": "The truth from above",
-            "midiUrl": "/Carols & Anthems/Vaughan Williams/truth-above.mid"
           }
         ]
       },
@@ -28966,21 +28441,6 @@
     ]
   },
   {
-    "name": "Warlock",
-    "works": [
-      {
-        "name": "Yarmouth Fair",
-        "url": "/Warlock/Yarmouth Fair/yarmouth-fair.html",
-        "sections": [
-          {
-            "name": "Yarmouth Fair",
-            "midiUrl": "/Warlock/Yarmouth Fair/Yarmouth.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "name": "Warlock (Peter)",
     "works": [
       {
@@ -28990,6 +28450,16 @@
           {
             "name": "Adam lay ybounden",
             "midiUrl": "/Carols & Anthems/Warlock/Adam-lay.mid"
+          }
+        ]
+      },
+      {
+        "name": "Yarmouth Fair",
+        "url": "/Warlock/Yarmouth Fair/yarmouth-fair.html",
+        "sections": [
+          {
+            "name": "Yarmouth Fair",
+            "midiUrl": "/Warlock/Yarmouth Fair/Yarmouth.mid"
           }
         ]
       }
@@ -29030,7 +28500,7 @@
     ]
   },
   {
-    "name": "Weelkes - See also  the List for Partworks  and Madrigals",
+    "name": "Weelkes - See also the List for Partworks and Madrigals",
     "works": [
       {
         "name": "Alleluia, I heard a voice",
@@ -30247,8 +29717,18 @@
     ]
   },
   {
-    "name": "Wishart",
+    "name": "Wishart (Peter)",
     "works": [
+      {
+        "name": "Alleluya, a new work is come on hand",
+        "url": null,
+        "sections": [
+          {
+            "name": "Alleluya, a new work is come on hand",
+            "midiUrl": "/Carols & Anthems/Wishart/Alleluya.mid"
+          }
+        ]
+      },
       {
         "name": "Go in peace",
         "url": "/Wishart/Go in peace/go-in-peace.html",
@@ -30262,23 +29742,28 @@
     ]
   },
   {
-    "name": "Wishart (Peter)",
+    "name": "Wood (Charles)",
     "works": [
       {
-        "name": "Alleluya, a new work is come on hand",
+        "name": "A virgin most pure",
         "url": null,
         "sections": [
           {
-            "name": "Alleluya, a new work is come on hand",
-            "midiUrl": "/Carols & Anthems/Wishart/Alleluya.mid"
+            "name": "A virgin most pure",
+            "midiUrl": "/Carols & Anthems/Wood/virgin.mid"
           }
         ]
-      }
-    ]
-  },
-  {
-    "name": "Wood",
-    "works": [
+      },
+      {
+        "name": "Ding dong! Merrily on high",
+        "url": null,
+        "sections": [
+          {
+            "name": "Ding dong! Merrily on high",
+            "midiUrl": "/Carols & Anthems/Wood/DingDong.mid"
+          }
+        ]
+      },
       {
         "name": "Hail gladdening light",
         "url": "/Wood/Hail gladdening light/hail-glad-light.html",
@@ -30286,6 +29771,26 @@
           {
             "name": "Hail, gladdening light",
             "midiUrl": "/Wood/Hail gladdening light/HailGlad.mid"
+          }
+        ]
+      },
+      {
+        "name": "Hail! Blessed Virgin Mary",
+        "url": null,
+        "sections": [
+          {
+            "name": "Hail! Blessed Virgin Mary",
+            "midiUrl": "/Carols & Anthems/Wood/hail-Mary.mid"
+          }
+        ]
+      },
+      {
+        "name": "King Jesus hath a garden",
+        "url": null,
+        "sections": [
+          {
+            "name": "King Jesus hath a garden",
+            "midiUrl": "/Carols & Anthems/Wood/King-Jesus.mid"
           }
         ]
       },
@@ -30320,51 +29825,6 @@
           {
             "name": "O Thou, the Central Orb",
             "midiUrl": "/Wood/Thou-Orb/Thou-Orb.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Wood (Charles)",
-    "works": [
-      {
-        "name": "A virgin most pure",
-        "url": null,
-        "sections": [
-          {
-            "name": "A virgin most pure",
-            "midiUrl": "/Carols & Anthems/Wood/virgin.mid"
-          }
-        ]
-      },
-      {
-        "name": "Ding dong! Merrily on high",
-        "url": null,
-        "sections": [
-          {
-            "name": "Ding dong! Merrily on high",
-            "midiUrl": "/Carols & Anthems/Wood/DingDong.mid"
-          }
-        ]
-      },
-      {
-        "name": "Hail! Blessed Virgin Mary",
-        "url": null,
-        "sections": [
-          {
-            "name": "Hail! Blessed Virgin Mary",
-            "midiUrl": "/Carols & Anthems/Wood/hail-Mary.mid"
-          }
-        ]
-      },
-      {
-        "name": "King Jesus hath a garden",
-        "url": null,
-        "sections": [
-          {
-            "name": "King Jesus hath a garden",
-            "midiUrl": "/Carols & Anthems/Wood/King-Jesus.mid"
           }
         ]
       },

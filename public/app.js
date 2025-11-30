@@ -255,10 +255,128 @@ class MIDIPlayer {
     }
 
     updateBalanceLabel() {
-        // Update the balance label to show the current voice part
+        // Update the balance label and dropdown to show voice part with current instrument
+        // Format: "Tenor (french horn)" or "Tenor (clarinet)" if overridden
         const voicePartName = this.voicePart.charAt(0).toUpperCase() + this.voicePart.slice(1);
+        const instrumentName = this.getCurrentInstrumentForVoicePart();
+        const formattedInstrument = instrumentName.replace(/_/g, ' ');
+        const displayText = `${voicePartName} (${formattedInstrument})`;
+
+        // Update balance label in Play tab
         if (this.balanceVoicePartSpan) {
-            this.balanceVoicePartSpan.textContent = voicePartName;
+            this.balanceVoicePartSpan.textContent = displayText;
+        }
+
+        // Update the selected option text in the voice part dropdown in Settings
+        if (this.voicePartSelect) {
+            const selectedOption = this.voicePartSelect.querySelector(`option[value="${this.voicePart}"]`);
+            if (selectedOption) {
+                selectedOption.textContent = displayText;
+            }
+        }
+    }
+
+    getTracksWithNotes() {
+        // Helper to get tracks with notes (same logic as updateChannelsList)
+        if (!this.midi || !this.midi.tracks) return [];
+        const tracks = [];
+        for (let i = 0; i < this.midi.tracks.length; i++) {
+            const track = this.midi.tracks[i];
+            if (track.notes && track.notes.length > 0) {
+                tracks.push({ track, trackIndex: i });
+            }
+        }
+        return tracks;
+    }
+
+    getCurrentInstrumentForVoicePart() {
+        // Returns the current instrument for the voice part
+        // Either from manual channel override or from default mapping
+        if (this.selectedChannelIndex !== null && this.midi) {
+            const tracksWithNotes = this.getTracksWithNotes();
+            if (this.selectedChannelIndex < tracksWithNotes.length) {
+                const { track } = tracksWithNotes[this.selectedChannelIndex];
+                return this.getInstrumentName(track);
+            }
+        }
+        // Return default instrument for voice part
+        return this.voicePartInstruments[this.voicePart];
+    }
+
+    getSelectedChannelInstrumentName() {
+        // Returns the instrument name if a manual channel override is in effect
+        // (different from default voice part instrument)
+        if (this.selectedChannelIndex === null || !this.midi) {
+            return null;
+        }
+
+        const tracksWithNotes = this.getTracksWithNotes();
+        if (this.selectedChannelIndex >= tracksWithNotes.length) {
+            return null;
+        }
+
+        const { track } = tracksWithNotes[this.selectedChannelIndex];
+        const instrumentName = this.getInstrumentName(track);
+
+        // Check if this is different from the default voice part instrument
+        const defaultInstrument = this.voicePartInstruments[this.voicePart];
+        if (instrumentName !== defaultInstrument) {
+            return instrumentName;
+        }
+        return null;
+    }
+
+    normalizeChannelName(name) {
+        // Normalize voice part synonyms in channel names
+        if (!name) return name;
+
+        // Case-insensitive replacements
+        let normalized = name;
+
+        // Treble -> Soprano
+        normalized = normalized.replace(/\bTreble\b/gi, 'Soprano');
+
+        // Counter-tenor / Countertenor / Counter tenor -> Alto
+        normalized = normalized.replace(/\bCounter[-\s]?tenor\b/gi, 'Alto');
+
+        return normalized;
+    }
+
+    getChannelOverrideKey() {
+        // Generate a unique key for storing channel override per movement
+        // Uses composer + work + movement to create unique key
+        if (!this.selectedComposer || !this.selectedWork || !this.currentMovement) {
+            return null;
+        }
+        return `channelOverride_${this.selectedComposer}_${this.selectedWork}_${this.currentMovement}_${this.voicePart}`;
+    }
+
+    saveChannelOverride() {
+        // Save the current channel selection for this movement
+        const key = this.getChannelOverrideKey();
+        if (!key) return;
+
+        if (this.selectedChannelIndex !== null) {
+            // Store the channel index
+            localStorage.setItem(key, this.selectedChannelIndex.toString());
+        } else {
+            // Remove the override if reset to auto
+            localStorage.removeItem(key);
+        }
+    }
+
+    loadChannelOverride() {
+        // Load saved channel override for this movement
+        const key = this.getChannelOverrideKey();
+        if (!key) return;
+
+        const savedIndex = localStorage.getItem(key);
+        if (savedIndex !== null) {
+            const index = parseInt(savedIndex);
+            // Validate that the saved index is still valid for this MIDI file
+            if (this.instruments && index >= 0 && index < this.instruments.length) {
+                this.selectedChannelIndex = index;
+            }
         }
     }
 
@@ -619,12 +737,6 @@ class MIDIPlayer {
             const sigCell = document.createElement('td');
             const sigText = `${numerator}/${denominator}`;
             sigCell.textContent = sigText;
-            if (isAmbiguous) {
-                const warning = document.createElement('div');
-                warning.className = 'ambiguous-warning';
-                warning.textContent = '(may be Alla Breve)';
-                sigCell.appendChild(warning);
-            }
             row.appendChild(sigCell);
 
             // Override cell
@@ -724,6 +836,7 @@ class MIDIPlayer {
         if (activeTabId === 'find-music-tab') {
             title = 'Find Music - Help';
             content =
+                tooltipHelp + '<br><br>' +
                 '<strong>Search for music:</strong><br>' +
                 '• Type in the search box to find composers, works, or movements<br>' +
                 '• Use the checkboxes to filter what you search for<br>' +
@@ -731,27 +844,27 @@ class MIDIPlayer {
                 '• Click on a work to select it for playback<br><br>' +
                 '<strong>Search tips:</strong><br>' +
                 '• Search matches the beginning of words (e.g., "bach" finds "Bach" and "Pachelbel")<br>' +
-                '• You can search by composer name, work title, or movement name<br><br>' +
-                tooltipHelp;
+                '• You can search by composer name, work title, or movement name';
         } else if (activeTabId === 'play-music-tab') {
             title = 'Play Music - Help';
             content =
+                tooltipHelp + '<br><br>' +
                 '<strong>Playback controls:</strong><br>' +
                 '• <strong>Stop</strong> - Stop and return to beginning<br>' +
                 '• <strong>Play/Pause</strong> - Start or pause playback<br>' +
                 '• <strong>Backward/Forward</strong> - Skip 10 seconds<br>' +
                 '• <strong>Previous/Next</strong> - Change movement<br>' +
-                '• <strong>Repeat</strong> - Loop current movement (highlighted) or auto-advance<br><br>' +
+                '• <strong>Repeat</strong> - Loop current movement (highlighted) or auto-advance to next movement<br><br>' +
                 '<strong>Progress bar:</strong><br>' +
                 '• Drag the slider to jump to any point<br>' +
                 '• Drag the triangles to set a loop range for practice<br><br>' +
                 '<strong>Tempo &amp; Balance:</strong><br>' +
                 '• Slow down the tempo for learning difficult passages<br>' +
-                '• Adjust balance to hear your part more or less prominently<br><br>' +
-                tooltipHelp;
+                '• Adjust balance to hear your part more or less prominently';
         } else if (activeTabId === 'settings-tab') {
             title = 'Settings - Help';
             content =
+                tooltipHelp + '<br><br>' +
                 '<strong>Your voice part:</strong><br>' +
                 '• Select your voice part (Soprano, Alto, Tenor, Bass)<br>' +
                 '• This affects which part is highlighted by the Balance control<br><br>' +
@@ -762,13 +875,12 @@ class MIDIPlayer {
                 '• Adjust bar numbering if your score starts at a different bar<br>' +
                 '• Override time signatures if they are incorrectly detected<br><br>' +
                 '<strong>Share:</strong><br>' +
-                '• Copy the shareable URL to send to others<br><br>' +
-                tooltipHelp;
+                '• Copy the shareable URL to send to others';
         } else {
             title = 'Help';
             content =
-                'Select a tab to see context-specific help.<br><br>' +
-                tooltipHelp;
+                tooltipHelp + '<br><br>' +
+                'Select a tab to see context-specific help.';
         }
 
         this.showHelpModal(title, content, true);
@@ -1081,7 +1193,12 @@ class MIDIPlayer {
             // Update the currently selected movement display on Settings tab
             if (this.currentMovementName) {
                 const firstMovementName = movements[0].name;
-                this.currentMovementName.textContent = `${composer}, ${work} - ${firstMovementName}`;
+                // For single-movement works where work name equals movement name, don't repeat it
+                if (work === firstMovementName) {
+                    this.currentMovementName.textContent = `${composer}, ${work}`;
+                } else {
+                    this.currentMovementName.textContent = `${composer}, ${work} - ${firstMovementName}`;
+                }
             }
             if (this.movementChannelsSection) {
                 this.movementChannelsSection.style.display = 'block';
@@ -1254,6 +1371,7 @@ class MIDIPlayer {
         // Voice part selection
         this.voicePartSelect.addEventListener('change', (e) => {
             this.voicePart = e.target.value;
+            this.selectedChannelIndex = null; // Reset channel selection to allow auto-selection
             this.savePreferences();
             this.updateBalanceLabel(); // Update the balance label to show new voice part
             this.updateChannelsList(); // Update the channels list with new selection
@@ -1634,8 +1752,11 @@ class MIDIPlayer {
 
     updateChannelsList() {
         // Show/populate the channels list section
-        if (!this.instruments || this.instruments.length === 0) {
-            // MIDI file not loaded yet - show message, hide channels table
+        // Check if MIDI is loaded (not just instruments, as orchestral pieces may have no voice parts)
+        const tracksWithNotes = this.getTracksWithNotes();
+
+        if (tracksWithNotes.length === 0) {
+            // No tracks with notes - show message
             if (this.channelsNotLoadedMsg) {
                 this.channelsNotLoadedMsg.style.display = 'block';
             }
@@ -1659,13 +1780,13 @@ class MIDIPlayer {
         const selectedInstrument = this.voicePartInstruments[this.voicePart];
         let autoSelectedIndex = null;
 
-        // Build the channels table
+        // Build the channels table from tracks with notes
         let html = '';
-        for (let i = 0; i < this.instruments.length; i++) {
-            const { trackIndex } = this.instruments[i];
-            const track = this.midi.tracks[trackIndex];
+        for (let i = 0; i < tracksWithNotes.length; i++) {
+            const { track, trackIndex } = tracksWithNotes[i];
             const instrumentName = this.getInstrumentName(track);
-            const channelName = track.name || `Channel ${trackIndex + 1}`;
+            const rawChannelName = track.name || `Channel ${trackIndex + 1}`;
+            const channelName = this.normalizeChannelName(rawChannelName);
 
             // Check if this channel matches the voice part instrument
             const isMatching = (instrumentName === selectedInstrument);
@@ -1699,6 +1820,8 @@ class MIDIPlayer {
         radioButtons.forEach(radio => {
             radio.addEventListener('change', (e) => {
                 this.selectedChannelIndex = parseInt(e.target.value);
+                this.saveChannelOverride(); // Save override for this movement
+                this.updateBalanceLabel(); // Update label to show instrument
                 this.applyBalance(); // Reapply balance with new selection
             });
         });
@@ -1724,19 +1847,30 @@ class MIDIPlayer {
         });
     }
 
-    checkURLRoute() {
-        // Check if URL contains composer/work path (e.g., /domenico-scarlatti/magnificat)
+    async checkURLRoute() {
+        // Check if URL contains composer/work path (e.g., /handel/nabal)
         const path = window.location.pathname;
         if (path && path !== '/') {
             const parts = path.split('/').filter(p => p);
             if (parts.length >= 2) {
-                const composer = decodeURIComponent(parts[0]);
-                const work = decodeURIComponent(parts[1]);
+                const composerSlug = decodeURIComponent(parts[0]);
+                const workSlug = decodeURIComponent(parts[1]);
 
-                // Load the composer and work
-                this.selectComposer(composer).then(() => {
-                    this.selectWork(work);
-                });
+                try {
+                    // Resolve slugs to actual names
+                    const response = await fetch(`/api/resolve/${encodeURIComponent(composerSlug)}/${encodeURIComponent(workSlug)}`);
+                    if (response.ok) {
+                        const { composer, work } = await response.json();
+                        // Load using the actual names
+                        await this.selectComposer(composer);
+                        await this.selectWork(work);
+                    } else {
+                        console.error('Could not resolve URL to composer/work');
+                        this.showStatus('Could not find the requested work', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error resolving URL route:', error);
+                }
             }
         }
     }
@@ -1830,7 +1964,7 @@ class MIDIPlayer {
             const sortedComposers = results.composers.sort((a, b) => a.name.localeCompare(b.name));
             sortedComposers.forEach(composer => {
                 const composerJson = JSON.stringify(composer.name).replace(/"/g, '&quot;');
-                html += `<div class="composer-item" data-type="composer" data-composer="${composerJson}">${composer.name}</div>`;
+                html += `<div class="composer-item" data-type="composer" data-composer="${composerJson}" title="Click to see works by ${composer.name}">${composer.name}</div>`;
             });
         }
 
@@ -1842,7 +1976,7 @@ class MIDIPlayer {
                 // Escape JSON for HTML attributes by replacing quotes
                 const composerJson = JSON.stringify(work.composer).replace(/"/g, '&quot;');
                 const workJson = JSON.stringify(work.work).replace(/"/g, '&quot;');
-                html += `<div class="work-item result-item" data-type="work" data-composer="${composerJson}" data-work="${workJson}">
+                html += `<div class="work-item result-item" data-type="work" data-composer="${composerJson}" data-work="${workJson}" title="Click to play ${work.work} by ${work.composer}">
                     <div class="result-main">${work.work}</div>
                     <div class="result-sub">${work.composer}</div>
                 </div>`;
@@ -1863,7 +1997,8 @@ class MIDIPlayer {
                     data-composer="${composerJson}"
                     data-work="${workJson}"
                     data-movement="${movementJson}"
-                    data-midi-url="${midiUrlJson}">
+                    data-midi-url="${midiUrlJson}"
+                    title="Click to play ${movement.movement}">
                     <div class="result-main">${movement.movement}</div>
                     <div class="result-sub">${movement.composer}, ${movement.work}</div>
                 </div>`;
@@ -1911,8 +2046,9 @@ class MIDIPlayer {
 
                 // Select the composer and work first, then load the movement
                 // Pass false to prevent showing the works list and updating search box
+                // Pass false to selectWork to skip auto-loading first movement
                 await this.selectComposer(composerName, false, false);
-                await this.selectWork(workName);
+                await this.selectWork(workName, false);
 
                 // Find and select the matching movement in the dropdown
                 for (let i = 0; i < this.movementSelect.options.length; i++) {
@@ -1981,7 +2117,7 @@ class MIDIPlayer {
         }
     }
 
-    async selectWork(workName) {
+    async selectWork(workName, autoLoadFirstMovement = true) {
         this.selectedWork = workName;
 
         // Clear any previous status messages
@@ -2028,10 +2164,12 @@ class MIDIPlayer {
             if (movements.length > 0) {
                 this.movementSelect.selectedIndex = 1; // Select the first movement (index 1 after the placeholder)
 
-                // Auto-load the first movement
-                const movementData = movements[0];
-                const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
-                this.loadMIDIFromURL(absoluteUrl, movementData.name);
+                // Auto-load the first movement (unless disabled)
+                if (autoLoadFirstMovement) {
+                    const movementData = movements[0];
+                    const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
+                    this.loadMIDIFromURL(absoluteUrl, movementData.name);
+                }
             }
 
             // Pre-load common instruments in the background to speed up playback
@@ -2085,6 +2223,47 @@ class MIDIPlayer {
     showStatus(message, type = 'info') {
         // Delegate to StatusManager
         this.statusManager.show(message, type);
+    }
+
+    /**
+     * Set the loading state - disables/enables play button and shows loading indicator in movement name
+     * @param {boolean} isLoading - true to show loading state, false to clear it
+     * @param {string} movementTitle - optional movement title to display
+     */
+    setLoadingState(isLoading, movementTitle = null) {
+        // Helper to build display text (avoiding duplicate names for single-movement works)
+        const buildDisplayText = (suffix = '') => {
+            if (this.selectedComposer && this.selectedWork) {
+                // For single-movement works where work name equals movement name, don't repeat it
+                if (this.selectedWork === movementTitle) {
+                    return `${this.selectedComposer}, ${this.selectedWork}${suffix}`;
+                }
+                return `${this.selectedComposer}, ${this.selectedWork} - ${movementTitle}${suffix}`;
+            }
+            return `${movementTitle}${suffix}`;
+        };
+
+        if (isLoading) {
+            // Disable play button
+            if (this.playBtn) {
+                this.playBtn.disabled = true;
+            }
+            // Update movement name to show loading
+            if (this.currentMovementName && movementTitle) {
+                this.currentMovementName.textContent = buildDisplayText(' - loading...');
+            }
+            // Hide any previous status messages (but keep the status element for errors)
+            this.statusManager.hide();
+        } else {
+            // Re-enable play button
+            if (this.playBtn) {
+                this.playBtn.disabled = false;
+            }
+            // Update movement name to remove loading indicator
+            if (this.currentMovementName && movementTitle) {
+                this.currentMovementName.textContent = buildDisplayText();
+            }
+        }
     }
 
     async fetchWithRetry(url, maxRetries = 3, timeoutMs = TIMEOUTS.MIDI_FETCH) {
@@ -2156,7 +2335,8 @@ class MIDIPlayer {
         }
 
         try {
-            this.showStatus('Loading MIDI file...', 'info');
+            // Disable play button and show loading indicator in movement name
+            this.setLoadingState(true, title);
 
             // Stop any currently playing MIDI
             this.stop();
@@ -2176,14 +2356,14 @@ class MIDIPlayer {
                 } catch (e) {
                     // Ignore JSON parse errors
                 }
-                throw new MIDILoadError(errorMsg, absoluteMidiUrl);
+                throw new MIDILoadError(errorMsg, url);
             }
 
             const arrayBuffer = await response.arrayBuffer();
             this.midi = new Midi(arrayBuffer);
 
             if (!this.midi || !this.midi.tracks || this.midi.tracks.length === 0) {
-                throw new MIDILoadError('Invalid MIDI file or no tracks found', absoluteMidiUrl);
+                throw new MIDILoadError('Invalid MIDI file or no tracks found', url);
             }
 
             // Find the earliest note time to skip leading silence
@@ -2211,11 +2391,17 @@ class MIDIPlayer {
             // Setup the MIDI playback
             await this.setupPlayback();
 
+            // Load saved channel override for this movement (before updating channels list)
+            this.loadChannelOverride();
+
             // Update UI
             this.updateMIDIInfo();
 
             // Update channels list based on voice part
             this.updateChannelsList();
+
+            // Update balance label to show instrument if override exists
+            this.updateBalanceLabel();
 
             // Load time signature overrides from localStorage
             this.loadTimeSignatureOverrides();
@@ -2233,19 +2419,28 @@ class MIDIPlayer {
 
             // Update the current movement name display with composer, work, and movement
             if (title && this.selectedComposer && this.selectedWork) {
-                this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
+                // For single-movement works where work name equals movement name, don't repeat it
+                if (this.selectedWork === title) {
+                    this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork}`;
+                } else {
+                    this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
+                }
                 // Save recent work with movement
                 await this.saveRecentWork(this.selectedComposer, this.selectedWork, title);
             } else if (title) {
                 this.currentMovementName.textContent = title;
             }
 
-            this.showStatus('MIDI file loaded successfully. Click Play when ready.', 'success');
+            // Re-enable play button and clear loading indicator
+            this.setLoadingState(false, title);
 
             // Don't auto-play - let user click play when ready
 
         } catch (error) {
             console.error('Error loading MIDI:', error);
+
+            // Re-enable play button on error
+            this.setLoadingState(false);
 
             // Provide specific error messages for common issues
             let errorMessage = error.message;
@@ -2287,8 +2482,6 @@ class MIDIPlayer {
             }
         }
 
-        this.showStatus('Loading required musical instruments...', 'info');
-
         // Check if audio context is available (may be suspended until user interaction)
         // Try to start it - if it's suspended due to autoplay policy, this will fail quickly
         try {
@@ -2302,7 +2495,10 @@ class MIDIPlayer {
             }
         } catch (e) {
             console.log('[Audio] Context cannot start yet - will load instruments when user interacts');
-            this.showStatus('Click Play to load and play (browser requires interaction first)', 'info');
+            // Enable play button but keep "loading..." indicator until user clicks play
+            if (this.playBtn) {
+                this.playBtn.disabled = false;
+            }
             // Store track data for later loading
             this.pendingTrackData = trackData;
             return;
@@ -2465,7 +2661,7 @@ class MIDIPlayer {
                 await Tone.context.resume();
             }
 
-            let statusMsg = 'Ready to play';
+            // Log instrument loading stats to console only (no status message)
             const details = [];
             if (cacheHitCount > 0) {
                 details.push(`${cacheHitCount} from cache`);
@@ -2477,9 +2673,8 @@ class MIDIPlayer {
                 details.push(`${fallbackCount} using fallback`);
             }
             if (details.length > 0) {
-                statusMsg += ` (${details.join(', ')})`;
+                console.log(`[Instruments] Ready: ${details.join(', ')}`);
             }
-            this.showStatus(statusMsg, 'success');
 
         } catch (error) {
             console.error('Error during setup:', error);
@@ -2570,10 +2765,13 @@ class MIDIPlayer {
 
         // Check if instruments need to be loaded (deferred from initial page load)
         if (this.pendingTrackData && this.instruments.length === 0) {
-            this.showStatus('Loading required musical instruments...', 'info');
             // Re-run setupPlayback now that audio context is active
             await this.setupPlayback();
             this.pendingTrackData = null;
+            // Clear the " - loading..." suffix from movement name
+            if (this.currentMovementName) {
+                this.currentMovementName.textContent = this.currentMovementName.textContent.replace(' - loading...', '');
+            }
         }
 
         // Ensure currentTime is within valid range

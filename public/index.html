@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/branding/logo-icon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/branding/logo-icon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/branding/logo-icon-256.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -243,10 +243,10 @@
                 <h2>Settings</h2>
 
                 <!-- Voice Part Selection -->
-                <div class="settings-section">
+                <div class="settings-section settings-voice-part">
                     <h3>Your voice part</h3>
                     <div class="control-group">
-                        <select id="voice-part-settings" aria-label="Select your voice part" title="Select your voice part to adjust the balance - your part will be highlighted">
+                        <select id="voice-part-settings" aria-label="Select your voice part" title="Select your voice part (Soprano/Alto/Tenor/Bass) - this determines which instrument channel is highlighted as 'your part' and affects the balance control">
                             <option value="soprano">Soprano (piccolo)</option>
                             <option value="alto">Alto (clarinet)</option>
                             <option value="tenor">Tenor (french horn)</option>
@@ -255,20 +255,33 @@
                     </div>
                 </div>
 
+                <!-- Shareable URL Section -->
+                <div class="settings-section settings-share">
+                    <h3>Share This Work</h3>
+                    <div class="shareable-url-section" id="shareable-url-section-settings" style="display: none;">
+                        <p>Share this URL with others to let them practice the same piece:</p>
+                        <div class="url-copy-container">
+                            <input type="text" id="shareable-url-settings" readonly aria-label="Shareable URL" title="Copy this URL to share the currently selected work with others">
+                            <button id="copy-url-btn-settings" class="btn btn-small btn-icon" title="Copy URL to clipboard">📋</button>
+                        </div>
+                    </div>
+                    <p id="no-work-selected-msg" style="color: #666;">No work currently selected</p>
+                </div>
+
                 <!-- Currently Selected Movement and Channel Selection -->
-                <div class="settings-section" id="movement-channels-section" style="display: none;">
+                <div class="settings-section settings-channels" id="movement-channels-section" style="display: none;">
                     <h3>Currently selected midi file – <span id="current-movement-name">-</span></h3>
 
                     <p id="channels-not-loaded-msg" style="color: #666; margin-top: 10px;">Click Play to load the MIDI file and see available channels</p>
 
                     <div class="channels-list" id="channels-list-container" style="display: none;">
-                        <p style="margin-bottom: 10px;">Override which channel represents your part in this midi file:</p>
-                        <table class="channels-table">
+                        <p style="margin-bottom: 10px;" title="If the automatic voice part detection is wrong, you can manually select which channel represents your part">Override which channel represents your part in this midi file:</p>
+                        <table class="channels-table" title="Select the radio button next to the channel that represents your voice part">
                             <thead>
                                 <tr>
-                                    <th>Your Part</th>
-                                    <th>Channel name</th>
-                                    <th>Instrument</th>
+                                    <th title="Select this to mark the channel as your voice part">Your Part</th>
+                                    <th title="The name of the channel as defined in the MIDI file">Channel name</th>
+                                    <th title="The instrument used to play this channel">Instrument</th>
                                 </tr>
                             </thead>
                             <tbody id="channels-tbody">
@@ -279,7 +292,7 @@
                 </div>
 
                 <!-- Time Signature Settings -->
-                <div class="settings-section" id="time-signature-section">
+                <div class="settings-section settings-time-sig" id="time-signature-section">
                     <h3>Time Signatures and Bar Numbering</h3>
                     <p id="ts-movement-name-display" style="color: #666; margin-bottom: 10px;"><strong>Movement:</strong> <span id="ts-movement-name">No movement loaded</span></p>
 
@@ -288,9 +301,9 @@
                     <div id="ts-settings-container" style="display: none;">
                         <!-- Starting Bar Number -->
                         <div class="control-group" style="margin-bottom: 20px;">
-                            <label for="starting-bar-number">Starting bar number in your score:</label>
-                            <input type="number" id="starting-bar-number" min="1" value="1" style="width: 80px;">
-                            <button id="apply-starting-bar-btn" class="btn btn-small">Apply</button>
+                            <label for="starting-bar-number" title="If your printed score shows a different starting bar number than 1, enter it here to sync the bar display">Starting bar number in your score:</label>
+                            <input type="number" id="starting-bar-number" min="1" value="1" style="width: 80px;" title="Enter the bar number shown at the start of this movement in your printed score">
+                            <button id="apply-starting-bar-btn" class="btn btn-small" title="Click to apply the starting bar number offset">Apply</button>
                             <p style="font-size: 0.9em; color: #666; margin-top: 5px;">
                                 If your score starts this movement at a different bar number (e.g., bar 262), enter it here.
                             </p>
@@ -298,13 +311,13 @@
 
                         <!-- Time Signature List -->
                         <div>
-                            <p style="margin-bottom: 10px;">Time signature changes in this movement:</p>
-                            <table class="time-sig-table">
+                            <p style="margin-bottom: 10px;" title="Some MIDI files have incorrect time signatures - you can override them here">Time signature changes in this movement:</p>
+                            <table class="time-sig-table" title="Override incorrect time signatures detected in the MIDI file">
                                 <thead>
                                     <tr>
-                                        <th>Bar</th>
-                                        <th>Time Signature</th>
-                                        <th>Override</th>
+                                        <th title="The bar number where this time signature starts">Bar</th>
+                                        <th title="The time signature detected in the MIDI file">Time Signature</th>
+                                        <th title="Select an alternative if the detected signature is incorrect">Override</th>
                                     </tr>
                                 </thead>
                                 <tbody id="time-sig-tbody">
@@ -315,17 +328,10 @@
                     </div>
                 </div>
 
-                <!-- Shareable URL Section -->
-                <div class="settings-section">
-                    <h3>Share This Work</h3>
-                    <div class="shareable-url-section" id="shareable-url-section-settings" style="display: none;">
-                        <p>Share this URL with others to let them practice the same piece:</p>
-                        <div class="url-copy-container">
-                            <input type="text" id="shareable-url-settings" readonly aria-label="Shareable URL" title="Share this URL with others">
-                            <button id="copy-url-btn-settings" class="btn btn-small btn-icon" title="Copy URL to clipboard">📋</button>
-                        </div>
-                    </div>
-                    <p id="no-work-selected-msg" style="color: #666;">No work currently selected</p>
+                <!-- Contact Us -->
+                <div class="settings-section settings-contact">
+                    <h3>Contact Us</h3>
+                    <p>If you would like to report a problem with a specific midi file, or give any other feedback please contact us at <a href="mailto:hello@mychoralpart.com">hello@mychoralpart.com</a></p>
                 </div>
 
                 <!-- Copyright Notice -->
@@ -359,6 +365,6 @@
     <!-- Load SoundFont player for realistic instruments -->
     <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
     <!-- Our app logic -->
-    <script type="module" src="app.js"></script>
+    <script type="module" src="/app.js"></script>
 </body>
 </html>

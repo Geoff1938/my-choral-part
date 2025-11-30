@@ -149,3 +149,4 @@ MIDI files must be served with CORS headers. If users report loading errors:
 - express v4.18.2 - Static file server
 
 No build process required; libraries loaded via CDN for simplicity.
+- ask me if you want the server stopped and restarted

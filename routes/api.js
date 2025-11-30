@@ -76,6 +76,23 @@ function createApiRoutes(scraper) {
     }
   });
 
+  // Resolve slug to actual composer/work names
+  router.get('/resolve/:composerSlug/:workSlug', async (req, res, next) => {
+    try {
+      const result = await scraper.resolveSlug(
+        req.params.composerSlug,
+        req.params.workSlug
+      );
+      if (result) {
+        res.json(result);
+      } else {
+        res.status(404).json({ error: 'Composer or work not found' });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Get recent works
   router.get('/recent-works', async (req, res, next) => {
     try {
