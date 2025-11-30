@@ -1372,6 +1372,7 @@ section:last-child {
 /* Larger font for shareable URL in Settings */
 #shareable-url-settings {
     font-size: 1.05rem;
+    background-color: white;
 }
 
 .copyright-section p {

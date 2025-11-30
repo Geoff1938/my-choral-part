@@ -36,6 +36,20 @@ import { InstrumentLoader } from './player/InstrumentLoader.js';
 import { StatusManager } from './ui/StatusManager.js';
 import { RecentWorksManager } from './api/RecentWorksManager.js';
 
+/**
+ * Escape a string for safe use in HTML attributes
+ * @param {string} str - String to escape
+ * @returns {string} HTML-escaped string
+ */
+function escapeHtmlAttribute(str) {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
 class MIDIPlayer {
     constructor() {
         // Base URL for all MIDI files (stored separately to reduce JSON size)
@@ -88,9 +102,18 @@ class MIDIPlayer {
         this.populateTimeSignatureSettings(); // Initialize time signature section (will show "not loaded" initially)
         this.initializeAudioContext(); // Initialize audio context on first user interaction
         this.checkDeviceCapabilities(); // Check device memory and show warning if limited
-        this.loadDefaultWork(); // Load most recent work or Alessandro Scarlatti - Magnificat by default
         this.loadRecentWorks();
-        this.checkURLRoute();
+        this.initializeWork(); // Check URL route first, then load default if needed
+    }
+
+    async initializeWork() {
+        // Check URL route first - if URL specifies a work, use that
+        const hasURLRoute = await this.checkURLRoute();
+
+        // Only load default/recent work if URL didn't specify one
+        if (!hasURLRoute) {
+            this.loadDefaultWork();
+        }
     }
 
     async initializeAudioContext() {
@@ -374,7 +397,8 @@ class MIDIPlayer {
         if (savedIndex !== null) {
             const index = parseInt(savedIndex);
             // Validate that the saved index is still valid for this MIDI file
-            if (this.instruments && index >= 0 && index < this.instruments.length) {
+            const tracksWithNotes = this.getTracksWithNotes();
+            if (index >= 0 && index < tracksWithNotes.length) {
                 this.selectedChannelIndex = index;
             }
         }
@@ -1176,10 +1200,12 @@ class MIDIPlayer {
             this.selectedWork = work;
 
             // Populate movement dropdown with all movements
+            // Use HTML entity encoding for the JSON value to handle movement names with apostrophes/quotes
             this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
-                movements.map(movement =>
-                    `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
-                ).join('');
+                movements.map(movement => {
+                    const jsonValue = JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl });
+                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movement.name}</option>`;
+                }).join('');
 
             // Auto-select the recent movement or first movement in the dropdown
             if (this.recentMovementIndex && this.recentMovementIndex < this.movementSelect.options.length) {
@@ -1230,9 +1256,10 @@ class MIDIPlayer {
             ];
 
             this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
-                fallbackMovements.map(movement =>
-                    `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
-                ).join('');
+                fallbackMovements.map(movement => {
+                    const jsonValue = JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl });
+                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movement.name}</option>`;
+                }).join('');
 
             this.movementSelect.selectedIndex = 1;
             this.updateWorkDisplay();
@@ -1849,6 +1876,7 @@ class MIDIPlayer {
 
     async checkURLRoute() {
         // Check if URL contains composer/work path (e.g., /handel/nabal)
+        // Returns true if URL specified a work, false otherwise
         const path = window.location.pathname;
         if (path && path !== '/') {
             const parts = path.split('/').filter(p => p);
@@ -1864,6 +1892,7 @@ class MIDIPlayer {
                         // Load using the actual names
                         await this.selectComposer(composer);
                         await this.selectWork(work);
+                        return true; // URL route was found and loaded
                     } else {
                         console.error('Could not resolve URL to composer/work');
                         this.showStatus('Could not find the requested work', 'error');
@@ -1873,6 +1902,7 @@ class MIDIPlayer {
                 }
             }
         }
+        return false; // No URL route found
     }
 
     updateWorkDisplay() {
@@ -2152,9 +2182,10 @@ class MIDIPlayer {
             }
 
             this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
-                movements.map(movement =>
-                    `<option value='${JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl })}'>${movement.name}</option>`
-                ).join('');
+                movements.map(movement => {
+                    const jsonValue = JSON.stringify({ name: movement.name, midiUrl: movement.midiUrl });
+                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${movement.name}</option>`;
+                }).join('');
 
             // Switch to Play tab and update display
             this.switchTab('play-music');
@@ -2199,9 +2230,8 @@ class MIDIPlayer {
                     const displayText = item.movement
                         ? `${item.composer}, ${item.work} - ${item.movement}`
                         : `${item.composer}, ${item.work}`;
-                    return `<option value='${JSON.stringify({ composer: item.composer, work: item.work })}'>
-                        ${displayText}
-                    </option>`;
+                    const jsonValue = JSON.stringify({ composer: item.composer, work: item.work });
+                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${displayText}</option>`;
                 }).join('');
             this.recentWorksDropdown.style.display = 'block';
         } catch (error) {
@@ -2390,6 +2420,9 @@ class MIDIPlayer {
 
             // Setup the MIDI playback
             await this.setupPlayback();
+
+            // Reset channel selection before loading override - allows auto-selection by instrument
+            this.selectedChannelIndex = null;
 
             // Load saved channel override for this movement (before updating channels list)
             this.loadChannelOverride();
