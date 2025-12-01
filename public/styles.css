@@ -633,6 +633,14 @@ section:last-child {
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
+.movement-loading-status {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 1rem;
+    color: var(--primary-color);
+    font-style: italic;
+}
+
 .midi-title-display {
     font-size: 1rem;
     font-weight: 600;

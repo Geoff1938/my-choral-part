@@ -156,6 +156,7 @@ class MIDIPlayer {
         this.worksContainer = document.getElementById('works-container');
         this.worksList = document.getElementById('works-list');
         this.movementSelect = document.getElementById('movement-select');
+        this.movementLoadingStatus = document.getElementById('movement-loading-status');
         this.loadingStatus = document.getElementById('loading-status');
         this.findMusicStatus = document.getElementById('find-music-status');
 
@@ -1130,7 +1131,7 @@ class MIDIPlayer {
     }
 
     async loadDefaultWork() {
-        // Try to load the most recent work first, otherwise load Alessandro Scarlatti - Magnificat
+        // Try to load the most recent work first, otherwise load Mozart - Requiem
         // This provides immediate usability when the app loads
         try {
             // Check if there are recent works
@@ -1159,16 +1160,16 @@ class MIDIPlayer {
                     }
                 }
             } else {
-                // No recent works - load Alessandro Scarlatti - Magnificat as default
-                composer = 'Alessandro Scarlatti';
-                work = 'Magnificat';
+                // No recent works - load Mozart - Requiem as default
+                composer = 'Mozart (Wolfgang Amadeus)';
+                work = 'Requiem (Sussmayr completion)';
 
-                // Hardcoded movements for Alessandro Scarlatti - Magnificat (all use cached instruments)
+                // Hardcoded first few movements for Mozart Requiem
                 movements = [
-                    { name: '1: Magnificat', midiUrl: '/Scarlatti/Magnificat/1-Magnificat.mid' },
-                    { name: '2: Fecit potentiam', midiUrl: '/Scarlatti/Magnificat/2-Fecit.mid' },
-                    { name: '3: Esurientes implevit bonis', midiUrl: '/Scarlatti/Magnificat/3-Esurientes.mid' },
-                    { name: '4: Gloria Patri et Filio', midiUrl: '/Scarlatti/Magnificat/4-Gloria.mid' }
+                    { name: 'I INTROITUS: REQUIEM', midiUrl: '/Mozart/Requiem/01-intrt.mid' },
+                    { name: 'II KYRIE', midiUrl: '/Mozart/Requiem/02-kyrie.mid' },
+                    { name: 'III SEQUENZ - No 2 - Dies Irae', midiUrl: '/Mozart/Requiem/02s-dies.mid' },
+                    { name: '. . . . . . . . . . . .- No 3 - Tuba Mirum', midiUrl: '/Mozart/Requiem/03-tuba.mid' }
                 ];
             }
 
@@ -1176,14 +1177,14 @@ class MIDIPlayer {
             if (movements.length > 0) {
                 const firstMovementUrl = movements[0].midiUrl;
                 if (firstMovementUrl.endsWith('.html') || firstMovementUrl.endsWith('.htm')) {
-                    // This work is copyright-protected, fall back to Scarlatti
-                    composer = 'Alessandro Scarlatti';
-                    work = 'Magnificat';
+                    // This work is copyright-protected, fall back to Mozart Requiem
+                    composer = 'Mozart (Wolfgang Amadeus)';
+                    work = 'Requiem (Sussmayr completion)';
                     movements = [
-                        { name: '1: Magnificat', midiUrl: '/Scarlatti/Magnificat/1-Magnificat.mid' },
-                        { name: '2: Fecit potentiam', midiUrl: '/Scarlatti/Magnificat/2-Fecit.mid' },
-                        { name: '3: Esurientes implevit bonis', midiUrl: '/Scarlatti/Magnificat/3-Esurientes.mid' },
-                        { name: '4: Gloria Patri et Filio', midiUrl: '/Scarlatti/Magnificat/4-Gloria.mid' }
+                        { name: 'I INTROITUS: REQUIEM', midiUrl: '/Mozart/Requiem/01-intrt.mid' },
+                        { name: 'II KYRIE', midiUrl: '/Mozart/Requiem/02-kyrie.mid' },
+                        { name: 'III SEQUENZ - No 2 - Dies Irae', midiUrl: '/Mozart/Requiem/02s-dies.mid' },
+                        { name: '. . . . . . . . . . . .- No 3 - Tuba Mirum', midiUrl: '/Mozart/Requiem/03-tuba.mid' }
                     ];
                 }
             }
@@ -1237,15 +1238,15 @@ class MIDIPlayer {
             }
         } catch (error) {
             console.error('Error loading default work:', error);
-            // Fall back to hardcoded Scarlatti if API fails
-            this.selectedComposer = 'Alessandro Scarlatti';
-            this.selectedWork = 'Magnificat';
+            // Fall back to hardcoded Mozart Requiem if API fails
+            this.selectedComposer = 'Mozart (Wolfgang Amadeus)';
+            this.selectedWork = 'Requiem (Sussmayr completion)';
 
             const fallbackMovements = [
-                { name: '1: Magnificat', midiUrl: '/Scarlatti/Magnificat/1-Magnificat.mid' },
-                { name: '2: Fecit potentiam', midiUrl: '/Scarlatti/Magnificat/2-Fecit.mid' },
-                { name: '3: Esurientes implevit bonis', midiUrl: '/Scarlatti/Magnificat/3-Esurientes.mid' },
-                { name: '4: Gloria Patri et Filio', midiUrl: '/Scarlatti/Magnificat/4-Gloria.mid' }
+                { name: 'I INTROITUS: REQUIEM', midiUrl: '/Mozart/Requiem/01-intrt.mid' },
+                { name: 'II KYRIE', midiUrl: '/Mozart/Requiem/02-kyrie.mid' },
+                { name: 'III SEQUENZ - No 2 - Dies Irae', midiUrl: '/Mozart/Requiem/02s-dies.mid' },
+                { name: '. . . . . . . . . . . .- No 3 - Tuba Mirum', midiUrl: '/Mozart/Requiem/03-tuba.mid' }
             ];
 
             this.movementSelect.innerHTML = '<option value="">Choose a movement...</option>' +
@@ -2291,6 +2292,10 @@ class MIDIPlayer {
             if (this.movementSelect) {
                 this.movementSelect.disabled = true;
             }
+            // Show loading status next to movement dropdown (in Play Music pane)
+            if (this.movementLoadingStatus) {
+                this.movementLoadingStatus.textContent = '- loading...';
+            }
             // Show the movement/channels section so user can see loading status
             if (this.movementChannelsSection) {
                 this.movementChannelsSection.style.display = 'block';
@@ -2298,14 +2303,6 @@ class MIDIPlayer {
             // Update movement name to show loading (in Settings pane)
             if (this.currentMovementName && movementTitle) {
                 this.currentMovementName.textContent = buildDisplayText(' - loading...');
-            }
-            // Update movement dropdown to show loading (in Play Music pane)
-            if (this.movementSelect && this.movementSelect.selectedIndex > 0) {
-                const selectedOption = this.movementSelect.options[this.movementSelect.selectedIndex];
-                if (selectedOption && !selectedOption.text.includes(' - loading...')) {
-                    selectedOption.dataset.originalText = selectedOption.text;
-                    selectedOption.text = selectedOption.text + ' - loading...';
-                }
             }
             // Hide any previous status messages (but keep the status element for errors)
             this.statusManager.hide();
@@ -2318,17 +2315,13 @@ class MIDIPlayer {
             if (this.movementSelect) {
                 this.movementSelect.disabled = false;
             }
+            // Clear loading status next to movement dropdown (in Play Music pane)
+            if (this.movementLoadingStatus) {
+                this.movementLoadingStatus.textContent = '';
+            }
             // Update movement name to remove loading indicator (in Settings pane)
             if (this.currentMovementName && movementTitle) {
                 this.currentMovementName.textContent = buildDisplayText();
-            }
-            // Restore movement dropdown text (in Play Music pane)
-            if (this.movementSelect && this.movementSelect.selectedIndex > 0) {
-                const selectedOption = this.movementSelect.options[this.movementSelect.selectedIndex];
-                if (selectedOption && selectedOption.dataset.originalText) {
-                    selectedOption.text = selectedOption.dataset.originalText;
-                    delete selectedOption.dataset.originalText;
-                }
             }
         }
     }
