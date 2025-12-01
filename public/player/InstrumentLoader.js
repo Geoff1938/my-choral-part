@@ -9,7 +9,7 @@ export class InstrumentLoader {
     /**
      * @param {number} maxCacheSize - Maximum number of instruments to cache
      */
-    constructor(maxCacheSize = 20) {
+    constructor(maxCacheSize = 15) {
         this.instrumentCache = new Map();
         this.maxCacheSize = maxCacheSize;
     }

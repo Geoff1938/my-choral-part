@@ -77,7 +77,7 @@ class MIDIPlayer {
         // We cache the instrument's internal buffers (decoded audio) so we can reuse them
         // without re-decoding when switching movements or works
         this.instrumentCache = new Map(); // Map<instrumentName, { buffers, instrument }>
-        this.maxCacheSize = 30; // Keep up to 30 instruments cached
+        this.maxCacheSize = 15; // Keep up to 15 instruments cached (each ~30-50MB decoded)
 
         // Mapping of voice parts to MIDI instrument names
         this.voicePartInstruments = VOICE_TO_INSTRUMENT;
@@ -1134,9 +1134,8 @@ class MIDIPlayer {
         // Try to load the most recent work first, otherwise load Mozart - Requiem
         // This provides immediate usability when the app loads
         try {
-            // Check if there are recent works
-            const response = await fetch('/api/recent-works');
-            const recentWorks = await response.json();
+            // Check if there are recent works in localStorage
+            const recentWorks = await this.recentWorksManager.load();
 
             let composer, work, movements;
 

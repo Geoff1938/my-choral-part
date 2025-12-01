@@ -16,7 +16,6 @@ class ChoralMusicScraper {
     this.composerListUrl = `${this.baseUrl}/complist.html#list`;
     this.dataFile = path.join(__dirname, 'data', 'midi-index-full.json'); // Full index (all composers)
     this.initialIndexFile = path.join(__dirname, 'data', 'initial-index.json'); // Initial index (A composers only)
-    this.recentWorksFile = path.join(__dirname, 'data', 'recent-works.json');
     this.exceptionsFile = path.join(__dirname, 'data', 'indexing-exceptions.json'); // Exception report
 
     // Songs URLs (madrigals and carols - single songs merged into main index)
@@ -25,6 +24,9 @@ class ChoralMusicScraper {
 
     // Delay between HTTP requests (ms) - be respectful to the server
     this.requestDelay = 200;
+
+    // Cache for loaded index (avoid reloading from disk on every request)
+    this.indexCache = null;
 
     // Hard-coded rules for handling special cases
     // Work name transformations: Map URL patterns to renamed work names
@@ -801,13 +803,19 @@ class ChoralMusicScraper {
    * // Returns: [{ name: "Bach", works: [...] }, ...]
    */
   async loadIndex() {
+    // Return cached index if available
+    if (this.indexCache) {
+      return this.indexCache;
+    }
+
     try {
       // Try loading the full index first
       if (await fs.pathExists(this.dataFile)) {
         console.log('Loading full MIDI index...');
         const fullIndex = await fs.readJSON(this.dataFile);
-        // If full index has data, return it
+        // If full index has data, cache and return it
         if (fullIndex && fullIndex.length > 0) {
+          this.indexCache = fullIndex;
           return fullIndex;
         }
         console.log('Full index is empty, falling back to initial index...');
@@ -816,7 +824,9 @@ class ChoralMusicScraper {
       // Fallback to initial index (A composers only)
       if (await fs.pathExists(this.initialIndexFile)) {
         console.log('Loading initial MIDI index (A composers only)...');
-        return await fs.readJSON(this.initialIndexFile);
+        const initialIndex = await fs.readJSON(this.initialIndexFile);
+        this.indexCache = initialIndex;
+        return initialIndex;
       }
 
       console.log('No index file found');
@@ -1035,66 +1045,6 @@ class ChoralMusicScraper {
       this.nameToSlug(w.name) === workName.toLowerCase()
     );
     return work ? work.sections : [];
-  }
-
-  /**
-   * Save a work to recent works list (max 5, most recent first)
-   * @param {string} composerName - Composer name
-   * @param {string} workName - Work name
-   * @param {string} movementName - Movement name (optional)
-   * @returns {Promise<Array>} Updated recent works array
-   */
-  async saveRecentWork(composerName, workName, movementName = null) {
-    await this.initializeDataDirectory();
-
-    let recentWorks = [];
-    if (await fs.pathExists(this.recentWorksFile)) {
-      try {
-        recentWorks = await fs.readJSON(this.recentWorksFile);
-      } catch (error) {
-        console.error('Error loading recent works:', error.message);
-      }
-    }
-
-    // Remove if already exists
-    recentWorks = recentWorks.filter(item =>
-      !(item.composer === composerName && item.work === workName)
-    );
-
-    // Add to beginning
-    const entry = {
-      composer: composerName,
-      work: workName,
-      timestamp: new Date().toISOString()
-    };
-    if (movementName) {
-      entry.movement = movementName;
-    }
-    recentWorks.unshift(entry);
-
-    // Keep only last 5
-    recentWorks = recentWorks.slice(0, 5);
-
-    await fs.writeJSON(this.recentWorksFile, recentWorks, { spaces: 2 });
-    return recentWorks;
-  }
-
-  /**
-   * Get recent works list
-   * @returns {Promise<Array>} Array of recent works (max 5, most recent first)
-   * @example
-   * const recent = await scraper.getRecentWorks();
-   * // Returns: [{ composer: "Bach", work: "...", timestamp: "..." }, ...]
-   */
-  async getRecentWorks() {
-    if (await fs.pathExists(this.recentWorksFile)) {
-      try {
-        return await fs.readJSON(this.recentWorksFile);
-      } catch (error) {
-        console.error('Error loading recent works:', error.message);
-      }
-    }
-    return [];
   }
 
   /**
