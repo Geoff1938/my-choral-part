@@ -172,9 +172,43 @@ class ChoralMusicScraper {
     return /^[\s-]*-[\s-]+-/.test(name);
   }
 
+  // Helper function to extract the parent section prefix for continuation sections
+  // e.g., "2: Dies Irae - Tuba Mirum" -> "2: Dies Irae" (used when sub-sections follow)
+  // e.g., "7: Libera Me (1)" -> "7: Libera Me" (strips trailing part numbers)
+  // This extracts just the numbered section header without the first sub-section name
+  extractParentSectionPrefix(name) {
+    // First, strip trailing part numbers like "(1)" or "(2)"
+    // e.g., "7: Libera Me (1)" -> "7: Libera Me"
+    let cleaned = name.replace(/\s*\(\d+\)\s*$/, '').trim();
+
+    // Match pattern like "N: Section Name" where N is a number (possibly with letters like "3a")
+    // If followed by " - SubSection", extract just the "N: Section Name" part
+    const match = cleaned.match(/^(\d+[a-z]?:\s*[^-]+?)\s+-\s+/i);
+    if (match) {
+      return match[1].trim();
+    }
+
+    // No " - " pattern found, return the cleaned name
+    return cleaned;
+  }
+
   // Helper function to extract the actual name from a continuation section
+  // Handles multiple sub-movements that were on separate lines (separated by <br>)
+  // e.g. "- - - - - - - - - Ingemisco, - - - - - - - - - Confutatis, - - - - - - - - - Lacrymosa"
+  // becomes "Ingemisco, Confutatis, Lacrymosa"
   extractContinuationName(name) {
-    // Remove leading dashes and spaces, clean up whitespace
+    // Split by the dash pattern (which appears before each sub-movement)
+    // The pattern "- - - - - - - - -" or similar variations
+    const parts = name.split(/\s*-\s+-\s+-\s+-\s+-\s+-\s+-\s+-\s+-\s*/)
+      .map(part => part.trim())
+      .filter(part => part.length > 0);
+
+    if (parts.length > 1) {
+      // Multiple sub-movements - join with comma if not already present
+      return parts.map(p => p.replace(/,\s*$/, '')).join(', ');
+    }
+
+    // Single item - just remove leading dashes and spaces
     return this.cleanWhitespace(name.replace(/^[\s-]+/, ''));
   }
 
@@ -369,7 +403,12 @@ class ChoralMusicScraper {
 
             if (cells.length > unemphasizedColumnIndex) {
               const sectionNameCell = cells.first();
-              let sectionName = this.cleanWhitespace(sectionNameCell.text());
+              // Get section name from the link text if a link exists, otherwise use full cell text
+              // This avoids picking up extra text like "[ Choir 1 ]" that's outside the link
+              const sectionLink = sectionNameCell.find('a').first();
+              let sectionName = sectionLink.length > 0
+                ? this.cleanWhitespace(sectionLink.text())
+                : this.cleanWhitespace(sectionNameCell.text());
 
               if (sectionName && sectionName !== '') {
                 const midiCell = cells.eq(unemphasizedColumnIndex);
@@ -386,7 +425,8 @@ class ChoralMusicScraper {
                   }
                 } else {
                   // This is a parent section - remember it for continuations
-                  lastParentSection = sectionName;
+                  // Extract just the numbered prefix (e.g., "2: Dies Irae" from "2: Dies Irae - Tuba Mirum")
+                  lastParentSection = this.extractParentSectionPrefix(sectionName);
                 }
 
                 console.log(`Section "${sectionName}" - MIDI cell content: "${midiCell.text().trim()}"`);

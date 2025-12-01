@@ -39,6 +39,11 @@ app.use(express.static('public', {
   }
 }));
 
+// Health check endpoint for Render monitoring
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Apply rate limiting to API routes
 app.use('/api', apiLimiter, createApiRoutes(scraper));
 

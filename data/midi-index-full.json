@@ -798,7 +798,7 @@
             "midiUrl": "/Bach-CPE/Magnificat/4-Et-mis.mid"
           },
           {
-            "name": "4A: Et misericordia eius (Alternative version)",
+            "name": "4A: Et misericordia eius",
             "midiUrl": "/Bach-CPE/Magnificat/4a-EtMis.mid"
           },
           {
@@ -991,31 +991,31 @@
         "url": "/Bach/Cantata 140/cantata-140.html",
         "sections": [
           {
-            "name": "1: Wachet auf, ruft uns die Stimme Sleepers wake! loud sounds the warning",
+            "name": "1: Wachet auf, ruft uns die Stimme",
             "midiUrl": "/Bach/Cantata 140/1-Awake.mid"
           },
           {
-            "name": "2: Er kommt, er kommt, der Braut'gam kommt! He comes, he comes, the Bridegroom comes!",
+            "name": "2: Er kommt, er kommt, der Braut'gam kommt!",
             "midiUrl": "/Bach/Cantata 140/2-ErKomt.mid"
           },
           {
-            "name": "3: Wann kommst du, mein Heil? When com'st Thou, my Lord?",
+            "name": "3: Wann kommst du, mein Heil?",
             "midiUrl": "/Bach/Cantata 140/3-WannKommst.mid"
           },
           {
-            "name": "4: Zion hort die Wachter singen Zion hears her watchman crying",
+            "name": "4: Zion hort die Wachter singen",
             "midiUrl": "/Bach/Cantata 140/4-Zion-hears.mid"
           },
           {
-            "name": "5: So geh' herein zu mir Enter these courts with me",
+            "name": "5: So geh' herein zu mir",
             "midiUrl": "/Bach/Cantata 140/5-Enter.mid"
           },
           {
-            "name": "6: Mein Freund ist mein! My love is thine!",
+            "name": "6: Mein Freund ist mein!",
             "midiUrl": "/Bach/Cantata 140/6-Mein-Freund.mid"
           },
           {
-            "name": "7: Gloria sei dir gesungen Gloria hark! Heaven is ringing",
+            "name": "7: Gloria sei dir gesungen",
             "midiUrl": "/Bach/Cantata 140/7-Gloria.mid"
           }
         ]
@@ -1221,7 +1221,7 @@
         "url": "/Bach/Cantata 30/cantata-30.html",
         "sections": [
           {
-            "name": "Part 1 1: Freue dich, erloste Schar",
+            "name": "1: Freue dich, erloste Schar",
             "midiUrl": "/Bach/Cantata 30/01-Freue-dich.mid"
           },
           {
@@ -1245,7 +1245,7 @@
             "midiUrl": "/Bach/Cantata 30/06-Choral.mid"
           },
           {
-            "name": "Part 2 7: So bist du denn",
+            "name": "7: So bist du denn",
             "midiUrl": "/Bach/Cantata 30/07-So-bist.mid"
           },
           {
@@ -1791,99 +1791,99 @@
         "url": "/Bach/B-minor/b-minor.html",
         "sections": [
           {
-            "name": "Kyrie . . . 1: Kyrie eleison",
+            "name": "1: Kyrie eleison",
             "midiUrl": "/Bach/B-minor/01-kyrie.mid"
           },
           {
-            "name": ". . . 2: Christe eleison",
+            "name": "2: Christe eleison",
             "midiUrl": "/Bach/B-minor/02-chrst.mid"
           },
           {
-            "name": ". . . 3: Kyrie eleison",
+            "name": "3: Kyrie eleison",
             "midiUrl": "/Bach/B-minor/03-kyrie.mid"
           },
           {
-            "name": "Gloria . . . 4: Gloria in excelsis . . . . . Et in terra pax",
+            "name": "4: Gloria in excelsis . . . . . Et in terra pax",
             "midiUrl": "/Bach/B-minor/04-glori.mid"
           },
           {
-            "name": ". . . 5: Laudamus Te",
+            "name": "5: Laudamus Te",
             "midiUrl": "/Bach/B-minor/05-lauda.mid"
           },
           {
-            "name": ". . . 6: Gratias agimus",
+            "name": "6: Gratias agimus",
             "midiUrl": "/Bach/B-minor/06-grati.mid"
           },
           {
-            "name": ". . . 7: Dominus Deus",
+            "name": "7: Dominus Deus",
             "midiUrl": "/Bach/B-minor/07-domin.mid"
           },
           {
-            "name": ". . . 8: Qui tollis",
+            "name": "8: Qui tollis",
             "midiUrl": "/Bach/B-minor/08-quitl.mid"
           },
           {
-            "name": ". . . 9: Qui sedes ad dexteram",
+            "name": "9: Qui sedes ad dexteram",
             "midiUrl": "/Bach/B-minor/09-quisd.mid"
           },
           {
-            "name": ". . . 10: Quoniam Tu solus sanctus",
+            "name": "10: Quoniam Tu solus sanctus",
             "midiUrl": "/Bach/B-minor/10-quoni.mid"
           },
           {
-            "name": ". . . 11: Cum sancto spiritu",
+            "name": "11: Cum sancto spiritu",
             "midiUrl": "/Bach/B-minor/11-cum.mid"
           },
           {
-            "name": "Credo . . . 12: Credo in unum Deum",
+            "name": "12: Credo in unum Deum",
             "midiUrl": "/Bach/B-minor/12-credo.mid"
           },
           {
-            "name": ". . . 13: Patrem omnipotem",
+            "name": "13: Patrem omnipotem",
             "midiUrl": "/Bach/B-minor/13-patrm.mid"
           },
           {
-            "name": ". . . 14: Et in unum Dominum",
+            "name": "14: Et in unum Dominum",
             "midiUrl": "/Bach/B-minor/14-unum.mid"
           },
           {
-            "name": ". . . 15: Et incarnatus est",
+            "name": "15: Et incarnatus est",
             "midiUrl": "/Bach/B-minor/15-etinc.mid"
           },
           {
-            "name": ". . . 16: Crucifixus",
+            "name": "16: Crucifixus",
             "midiUrl": "/Bach/B-minor/16-cruci.mid"
           },
           {
-            "name": ". . . 17: Et resurrexit",
+            "name": "17: Et resurrexit",
             "midiUrl": "/Bach/B-minor/17-etres.mid"
           },
           {
-            "name": ". . . 18: Et in Spiritum sanctum",
+            "name": "18: Et in Spiritum sanctum",
             "midiUrl": "/Bach/B-minor/18-et-in.mid"
           },
           {
-            "name": ". . . 19: Confiteor unum baptisma . . . . . . Et expecto resurrectionem",
+            "name": "19: Confiteor unum baptisma . . . . . . Et expecto resurrectionem",
             "midiUrl": "/Bach/B-minor/19-conft.mid"
           },
           {
-            "name": "Sanctus . . . 20: Sanctus",
+            "name": "20: Sanctus",
             "midiUrl": "/Bach/B-minor/20-sanct.mid"
           },
           {
-            "name": "Osanna, Benedictus, Agnus Dei, Dona Nobis . . . 21: Hosanna",
+            "name": "21: Hosanna",
             "midiUrl": "/Bach/B-minor/21-hosan.mid"
           },
           {
-            "name": ". . . 22: Benedictus",
+            "name": "22: Benedictus",
             "midiUrl": "/Bach/B-minor/22-bened.mid"
           },
           {
-            "name": ". . . 23: Agnus Dei",
+            "name": "23: Agnus Dei",
             "midiUrl": "/Bach/B-minor/23-agnus.mid"
           },
           {
-            "name": ". . . 24: Dona nobis pacem",
+            "name": "24: Dona nobis pacem",
             "midiUrl": "/Bach/B-minor/24-pacem.mid"
           }
         ]
@@ -1989,47 +1989,47 @@
         "url": "/Bach/Jesu meine Freude/jesu-meine-freude.html",
         "sections": [
           {
-            "name": "1: Jesu, meine Freude (Jesus, my great pleasure)",
+            "name": "1: Jesu, meine Freude",
             "midiUrl": "/Bach/Jesu meine Freude/01-Jesu.mid"
           },
           {
-            "name": "2: Es ist nun nichtsVerdammliches an denen (There is no condemnation)",
+            "name": "2: Es ist nun nichtsVerdammliches an denen",
             "midiUrl": "/Bach/Jesu meine Freude/02-nicht.mid"
           },
           {
-            "name": "3: Chorale: Unter deinem Schirmen (Jesus, Thou art my refuge)",
+            "name": "3: Chorale: Unter deinem Schirmen",
             "midiUrl": "/Bach/Jesu meine Freude/03-Unter.mid"
           },
           {
-            "name": "4: Trio: Denn das Gesetz des Geistes (For now the law of the Spirit)",
+            "name": "4: Trio: Denn das Gesetz des Geistes",
             "midiUrl": "/Bach/Jesu meine Freude/04-Geset.mid"
           },
           {
-            "name": "5: Trotz dem alten Drachen (Fie, thou roaring lion)",
+            "name": "5: Trotz dem alten Drachen",
             "midiUrl": "/Bach/Jesu meine Freude/05-Trotz.mid"
           },
           {
-            "name": "6: Ihr aber seid nicht fleischlich (Ye are not in the flesh)",
+            "name": "6: Ihr aber seid nicht fleischlich",
             "midiUrl": "/Bach/Jesu meine Freude/06-fleis.mid"
           },
           {
-            "name": "7: Weg mit allen Schatzen (Go way, earthly treasure)",
+            "name": "7: Weg mit allen Schatzen",
             "midiUrl": "/Bach/Jesu meine Freude/07-Weg.mid"
           },
           {
-            "name": "8: Trio - So aber Christus in euch ist (If now Christ Jesus be in you)",
+            "name": "8: Trio - So aber Christus in euch ist",
             "midiUrl": "/Bach/Jesu meine Freude/08-Ifnow.mid"
           },
           {
-            "name": "9: Gute Nacht, o Wesen (Fare ye well, all passions)",
+            "name": "9: Gute Nacht, o Wesen",
             "midiUrl": "/Bach/Jesu meine Freude/09-Gute.mid"
           },
           {
-            "name": "10: So nun der Geist des (If now in you God's spirit dwelleth)",
+            "name": "10: So nun der Geist des",
             "midiUrl": "/Bach/Jesu meine Freude/10-Geist.mid"
           },
           {
-            "name": "11: Weicht, ihr Trauergeister (Hence, all thoughts of sadness!)",
+            "name": "11: Weicht, ihr Trauergeister",
             "midiUrl": "/Bach/Jesu meine Freude/11-Weich.mid"
           }
         ]
@@ -2109,11 +2109,11 @@
         "url": "/Bach/St-John/stjohn.html",
         "sections": [
           {
-            "name": "PROLOGUE 1: Lord and Master",
+            "name": "1: Lord and Master",
             "midiUrl": "/Bach/St-John/01-lord.mid"
           },
           {
-            "name": "CHRIST IS BETRAYED 2: Jesus went forth 3: Jesus of Nazareth 4: Jesus saith unto them 5: Jesus of Nazareth 6: Jesus answered",
+            "name": "2: Jesus went forth 3: Jesus of Nazareth 4: Jesus saith unto them 5: Jesus of Nazareth 6: Jesus answered",
             "midiUrl": "/Bach/St-John/02-6-bet.mid"
           },
           {
@@ -2129,7 +2129,7 @@
             "midiUrl": "/Bach/St-John/09-will.mid"
           },
           {
-            "name": "CHRIST IS BOUND AND LED TO ANNAS 10: Then the band and the chief captain",
+            "name": "10: Then the band and the chief captain",
             "midiUrl": "/Bach/St-John/10-bound.mid"
           },
           {
@@ -2145,7 +2145,7 @@
             "midiUrl": "/Bach/St-John/13-follo.mid"
           },
           {
-            "name": "CHRIST'S EXAMINATION BEFORE ANNAS 14: Now that disciple was known",
+            "name": "14: Now that disciple was known",
             "midiUrl": "/Bach/St-John/14-annas.mid"
           },
           {
@@ -2153,7 +2153,7 @@
             "midiUrl": "/Bach/St-John/15-hatrd.mid"
           },
           {
-            "name": "PETER'S DENIAL 16: Now Annas had sent him bound 17: Art thou not one of his disciples?",
+            "name": "16: Now Annas had sent him bound 17: Art thou not one of his disciples?",
             "midiUrl": "/Bach/St-John/16-17den.mid"
           },
           {
@@ -2169,11 +2169,11 @@
             "midiUrl": "/Bach/St-John/20-peter.mid"
           },
           {
-            "name": "THE SINLESS SUFFERER 21: He, whose life was as the light",
+            "name": "21: He, whose life was as the light",
             "midiUrl": "/Bach/St-John/21-life.mid"
           },
           {
-            "name": "CHRIST IS ARRAIGNED BEFORE PILATE 22: Then led they Jesus 23: If this man were not a malefactor 24: Then said Pilate unto them 25: It is not lawful 26: That the saying of Jesus ...",
+            "name": "22: Then led they Jesus 23: If this man were not a malefactor 24: Then said Pilate unto them 25: It is not lawful 26: That the saying of Jesus ...",
             "midiUrl": "/Bach/St-John/22-26arr.mid"
           },
           {
@@ -2181,7 +2181,7 @@
             "midiUrl": "/Bach/St-John/27-king.mid"
           },
           {
-            "name": "BARABBAS - CHRIST IS SCOURGED 28: Pilate therefore said unto him 29: Not this man 30: Now Barabbas was a robber",
+            "name": "28: Pilate therefore said unto him 29: Not this man 30: Now Barabbas was a robber",
             "midiUrl": "/Bach/St-John/28-30bar.mid"
           },
           {
@@ -2193,7 +2193,7 @@
             "midiUrl": "/Bach/St-John/32-bhold.mid"
           },
           {
-            "name": "CHRIST IS DELIVERED TO THE JEWS 33: And the soldiers plaited a crown 34: Hail, thou King of the Jews 35: And they smote him with their hands 36: Crucify him! 37: Pilate saith unto them 38: We have a law 39: When Pilate therefore heard that saying",
+            "name": "33: And the soldiers plaited a crown 34: Hail, thou King of the Jews 35: And they smote him with their hands 36: Crucify him! 37: Pilate saith unto them 38: We have a law 39: When Pilate therefore heard that saying",
             "midiUrl": "/Bach/St-John/33-39sol.mid"
           },
           {
@@ -2201,7 +2201,7 @@
             "midiUrl": "/Bach/St-John/40-fetrs.mid"
           },
           {
-            "name": "THE KING OF THE JEWS - GOLGOTHA 41: But the Jews cried out 42: If thou let this man go 43: When Pilate therefore heard that saying 44: Away with him! 45: Pilate saith unto them 46: We have no king but Caesar 47: Then delivered he him unto them",
+            "name": "41: But the Jews cried out 42: If thou let this man go 43: When Pilate therefore heard that saying 44: Away with him! 45: Pilate saith unto them 46: We have no king but Caesar 47: Then delivered he him unto them",
             "midiUrl": "/Bach/St-John/41-47kin.mid"
           },
           {
@@ -2209,7 +2209,7 @@
             "midiUrl": "/Bach/St-John/48-haste.mid"
           },
           {
-            "name": "THE CRUCIFIXION 49: And there they crucified him 50: Write thou not the king of the Jews 51: Pilate answered: what I have written I have written",
+            "name": "49: And there they crucified him 50: Write thou not the king of the Jews 51: Pilate answered: what I have written I have written",
             "midiUrl": "/Bach/St-John/49-51cru.mid"
           },
           {
@@ -2225,7 +2225,7 @@
             "midiUrl": "/Bach/St-John/56-right.mid"
           },
           {
-            "name": "IT IS FINISHED 57: And from that hour ...",
+            "name": "57: And from that hour ...",
             "midiUrl": "/Bach/St-John/57-fini.mid"
           },
           {
@@ -2241,7 +2241,7 @@
             "midiUrl": "/Bach/St-John/60-lord.mid"
           },
           {
-            "name": "THE RENDING OF THE VEIL 61: And behold, the veil of the Temple was rent",
+            "name": "61: And behold, the veil of the Temple was rent",
             "midiUrl": "/Bach/St-John/61-behld.mid"
           },
           {
@@ -2253,7 +2253,7 @@
             "midiUrl": "/Bach/St-John/63-heart.mid"
           },
           {
-            "name": "CHRIST'S PIERCED SIDE 64: The Jews therefore",
+            "name": "64: The Jews therefore",
             "midiUrl": "/Bach/St-John/64-jews.mid"
           },
           {
@@ -2261,11 +2261,11 @@
             "midiUrl": "/Bach/St-John/65-help.mid"
           },
           {
-            "name": "THE DESCENT FROM THE CROSS 66: And after this, Joseph of Arimathaea",
+            "name": "66: And after this, Joseph of Arimathaea",
             "midiUrl": "/Bach/St-John/66-after.mid"
           },
           {
-            "name": "AT THE SEPULCHRE 67: Lie still, O sacred limbs",
+            "name": "67: Lie still, O sacred limbs",
             "midiUrl": "/Bach/St-John/67-lie.mid"
           },
           {
@@ -2433,7 +2433,7 @@
             "midiUrl": "/Bach/Matthew/01-prolg.mid"
           },
           {
-            "name": "The Announcement of the Passion 2: When Jesus had finished",
+            "name": "2: When Jesus had finished",
             "midiUrl": "/Bach/Matthew/02-annun.mid"
           },
           {
@@ -2441,7 +2441,7 @@
             "midiUrl": "/Bach/Matthew/03-chorl.mid"
           },
           {
-            "name": "The Rulers conspire against Christ 4: Then assembled the chief priests",
+            "name": "4: Then assembled the chief priests",
             "midiUrl": "/Bach/Matthew/04-consp.mid"
           },
           {
@@ -2449,7 +2449,7 @@
             "midiUrl": "/Bach/Matthew/05-consp.mid"
           },
           {
-            "name": "The Anointing at Bethany 6: Now when Jesus 7: To what purpose",
+            "name": "6: Now when Jesus 7: To what purpose",
             "midiUrl": "/Bach/Matthew/067-beth.mid"
           },
           {
@@ -2465,7 +2465,7 @@
             "midiUrl": "/Bach/Matthew/10-grief.mid"
           },
           {
-            "name": "The treason of Judas 11: Then went one of the 12",
+            "name": "11: Then went one of the 12",
             "midiUrl": "/Bach/Matthew/11-judas.mid"
           },
           {
@@ -2473,7 +2473,7 @@
             "midiUrl": "/Bach/Matthew/12-grief.mid"
           },
           {
-            "name": "The preparation of the Passover 13: Now the first day",
+            "name": "13: Now the first day",
             "midiUrl": "/Bach/Matthew/13-prep.mid"
           },
           {
@@ -2489,7 +2489,7 @@
             "midiUrl": "/Bach/Matthew/16-chorl.mid"
           },
           {
-            "name": "The institution of the Eucharist 17: And he answered and said",
+            "name": "17: And he answered and said",
             "midiUrl": "/Bach/Matthew/17-euchr.mid"
           },
           {
@@ -2501,7 +2501,7 @@
             "midiUrl": "/Bach/Matthew/19-jesus.mid"
           },
           {
-            "name": "The Mount of Olives 20: And when they had sung",
+            "name": "20: And when they had sung",
             "midiUrl": "/Bach/Matthew/20-olive.mid"
           },
           {
@@ -2509,7 +2509,7 @@
             "midiUrl": "/Bach/Matthew/21-chorl.mid"
           },
           {
-            "name": "Peter's denial foretold by Christ 22: Peter answered, and said",
+            "name": "22: Peter answered, and said",
             "midiUrl": "/Bach/Matthew/22-deny.mid"
           },
           {
@@ -2529,7 +2529,7 @@
             "midiUrl": "/Bach/Matthew/26-watch.mid"
           },
           {
-            "name": "Christ's prayer in the Garden 27: And he went farther",
+            "name": "27: And he went farther",
             "midiUrl": "/Bach/Matthew/27-cup.mid"
           },
           {
@@ -2549,27 +2549,27 @@
             "midiUrl": "/Bach/Matthew/31-chorl.mid"
           },
           {
-            "name": "The betrayal and arrest 32: And He came and found them",
+            "name": "32: And He came and found them",
             "midiUrl": "/Bach/Matthew/32-arrst.mid"
           },
           {
-            "name": "Christ is bound and led into the City 33: Behold, my Saviour now is taken",
+            "name": "33: Behold, my Saviour now is taken",
             "midiUrl": "/Bach/Matthew/33-bond.mid"
           },
           {
-            "name": "The Disciples forsake Christ 34: And behold, one of them",
+            "name": "34: And behold, one of them",
             "midiUrl": "/Bach/Matthew/34-forsk.mid"
           },
           {
-            "name": "The Christian soul bewails the frailty of Mankind 35: O Man, thy grievous sin bemoan",
+            "name": "35: O Man, thy grievous sin bemoan",
             "midiUrl": "/Bach/Matthew/35-soul.mid"
           },
           {
-            "name": "The Daughter of Zion seeks the Saviour 36: Ah! now is my Saviour gone",
+            "name": "36: Ah! now is my Saviour gone",
             "midiUrl": "/Bach/Matthew/36-zion.mid"
           },
           {
-            "name": "In the Court of Caiaphas 37: And they that laid hold",
+            "name": "37: And they that laid hold",
             "midiUrl": "/Bach/Matthew/37-court.mid"
           },
           {
@@ -2577,7 +2577,7 @@
             "midiUrl": "/Bach/Matthew/38-chor.mid"
           },
           {
-            "name": "Christ's silence before Caiaphas 39: Yea, tho' many false witnesses",
+            "name": "39: Yea, tho' many false witnesses",
             "midiUrl": "/Bach/Matthew/39-silen.mid"
           },
           {
@@ -2601,7 +2601,7 @@
             "midiUrl": "/Bach/Matthew/44-chorl.mid"
           },
           {
-            "name": "Peter's denial 45:Now Peter was sitting without",
+            "name": "45:Now Peter was sitting without",
             "midiUrl": "/Bach/Matthew/45-deny.mid"
           },
           {
@@ -2617,7 +2617,7 @@
             "midiUrl": "/Bach/Matthew/48-chorl.mid"
           },
           {
-            "name": "The end of Judas 49: Now when the morning came",
+            "name": "49: Now when the morning came",
             "midiUrl": "/Bach/Matthew/49-judas.mid"
           },
           {
@@ -2629,7 +2629,7 @@
             "midiUrl": "/Bach/Matthew/51-give.mid"
           },
           {
-            "name": "Before Pilate 52: And they took counsel together",
+            "name": "52: And they took counsel together",
             "midiUrl": "/Bach/Matthew/52-pilat.mid"
           },
           {
@@ -2637,7 +2637,7 @@
             "midiUrl": "/Bach/Matthew/53-chorl.mid"
           },
           {
-            "name": "Barabbas 54: Now at that feast the governor",
+            "name": "54: Now at that feast the governor",
             "midiUrl": "/Bach/Matthew/54-barab.mid"
           },
           {
@@ -2665,7 +2665,7 @@
             "midiUrl": "/Bach/Matthew/59b-blud.mid"
           },
           {
-            "name": "The scourging \" : Then released he Barabbas",
+            "name": "\" : Then released he Barabbas",
             "midiUrl": "/Bach/Matthew/59c-scrg.mid"
           },
           {
@@ -2677,7 +2677,7 @@
             "midiUrl": "/Bach/Matthew/61-tears.mid"
           },
           {
-            "name": "The crowning with thorns 62: Then the soldiers of the governor",
+            "name": "62: Then the soldiers of the governor",
             "midiUrl": "/Bach/Matthew/62-king.mid"
           },
           {
@@ -2685,7 +2685,7 @@
             "midiUrl": "/Bach/Matthew/63-chorl.mid"
           },
           {
-            "name": "The way of the Cross 64: And after that they had mocked Him",
+            "name": "64: And after that they had mocked Him",
             "midiUrl": "/Bach/Matthew/64-mockd.mid"
           },
           {
@@ -2697,7 +2697,7 @@
             "midiUrl": "/Bach/Matthew/66-heal.mid"
           },
           {
-            "name": "The Crucifixion 67: And when they came unto ... Golgotha",
+            "name": "67: And when they came unto ... Golgotha",
             "midiUrl": "/Bach/Matthew/67-cruci.mid"
           },
           {
@@ -2713,7 +2713,7 @@
             "midiUrl": "/Bach/Matthew/70-hands.mid"
           },
           {
-            "name": "The death of Christ 71: Now from the sixth hour",
+            "name": "71: Now from the sixth hour",
             "midiUrl": "/Bach/Matthew/71-death.mid"
           },
           {
@@ -2721,11 +2721,11 @@
             "midiUrl": "/Bach/Matthew/72-chorl.mid"
           },
           {
-            "name": "After the Crucifixion 73: And behold, the veil of the temple",
+            "name": "73: And behold, the veil of the temple",
             "midiUrl": "/Bach/Matthew/73-aftr2.mid"
           },
           {
-            "name": "The descent from the Cross 74: At evening, hour of calm and rest",
+            "name": "74: At evening, hour of calm and rest",
             "midiUrl": "/Bach/Matthew/74-cross.mid"
           },
           {
@@ -2733,7 +2733,7 @@
             "midiUrl": "/Bach/Matthew/75-heart.mid"
           },
           {
-            "name": "The burial 76: And Joseph took the body",
+            "name": "76: And Joseph took the body",
             "midiUrl": "/Bach/Matthew/76-bury.mid"
           },
           {
@@ -3155,7 +3155,7 @@
         "url": "/Beethoven/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Prisoner's Chorus (From \"Fidelio\")",
+            "name": "Prisoner's Chorus",
             "midiUrl": "/Beethoven/Choruses/Prisoner.mid"
           }
         ]
@@ -3423,11 +3423,11 @@
         "url": "/Berlioz/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Roman Carnival chorus (from \"Benvenuto Cellini\")",
+            "name": "Roman Carnival chorus",
             "midiUrl": "/Berlioz/Choruses/RomCarn.mid"
           },
           {
-            "name": "Roman Carnival chorus (slower version)",
+            "name": "Roman Carnival chorus",
             "midiUrl": "/Berlioz/Choruses/SROMCAR.MID"
           }
         ]
@@ -3517,19 +3517,19 @@
         "url": "/Berlioz/Childhood-Christ/childhood-christ.html",
         "sections": [
           {
-            "name": "Part I: The Dream of Herod 1: When in Judah of old",
+            "name": "1: When in Judah of old",
             "midiUrl": "/Berlioz/Childhood-Christ/01-Judah.mid"
           },
           {
-            "name": "Scene 1. A march by night",
+            "name": "A march by night",
             "midiUrl": "/Berlioz/Childhood-Christ/02-March.mid"
           },
           {
-            "name": "Scenes 2 and 3. The interior of Herod's Palace Again, that vision!",
+            "name": "Again, that vision!",
             "midiUrl": "/Berlioz/Childhood-Christ/03-Again.mid"
           },
           {
-            "name": "Scene 4. The soothsayers of Judah",
+            "name": "The soothsayers of Judah",
             "midiUrl": "/Berlioz/Childhood-Christ/04-sooth.mid"
           },
           {
@@ -3545,15 +3545,15 @@
             "midiUrl": "/Berlioz/Childhood-Christ/07-done.mid"
           },
           {
-            "name": "Scene 5. The stable at Bethlehem See, darling child",
+            "name": "See, darling child",
             "midiUrl": "/Berlioz/Childhood-Christ/08-See.mid"
           },
           {
-            "name": "Scene 6. Chorus of unseen angels Joseph, and Mary!",
+            "name": "Joseph, and Mary!",
             "midiUrl": "/Berlioz/Childhood-Christ/09-Josep.mid"
           },
           {
-            "name": "Part II: The flight into Egypt Overture",
+            "name": "Overture",
             "midiUrl": "/Berlioz/Childhood-Christ/10-Overt.mid"
           },
           {
@@ -3565,11 +3565,11 @@
             "midiUrl": "/Berlioz/Childhood-Christ/12-repos.mid"
           },
           {
-            "name": "Part III: The arrival at Sais Thro' burning sands they took their weary way",
+            "name": "Thro' burning sands they took their weary way",
             "midiUrl": "/Berlioz/Childhood-Christ/13-Sais.mid"
           },
           {
-            "name": "Scene 1. Within the Town of Sais Here in this teeming city",
+            "name": "Here in this teeming city",
             "midiUrl": "/Berlioz/Childhood-Christ/14-Here.mid"
           },
           {
@@ -3605,15 +3605,15 @@
         "url": "/Berlioz/Tristia/tristia.html",
         "sections": [
           {
-            "name": "Tristia - Meditation religieuse",
+            "name": "Tristia",
             "midiUrl": "/Berlioz/Tristia/1-Trist.mid"
           },
           {
-            "name": "La Mort d'Ophelie (the death of Ophelia; Ophelias Tod)",
+            "name": "La Mort d'Ophelie",
             "midiUrl": "/Berlioz/Tristia/2-Ophel.mid"
           },
           {
-            "name": "Trauermarsch fur die letze Scene des \"Hamlet\" (Marche funebre pour la derniere scene d' \"Hamlet\" Funeral March for the last scene of \"Hamlet\")",
+            "name": "Trauermarsch fur die letze Scene des \"Hamlet\"",
             "midiUrl": "/Berlioz/Tristia/3-Hamlet.mid"
           }
         ]
@@ -3829,7 +3829,7 @@
         "url": "/Bizet/Choruses/choruses.html",
         "sections": [
           {
-            "name": "March of the Toreadors (Here they come)",
+            "name": "March of the Toreadors",
             "midiUrl": "/Bizet/Choruses/Toreadiv.mid"
           }
         ]
@@ -4688,7 +4688,7 @@
             "midiUrl": "/Britten/Ceremony of Carols/01-proc.mid"
           },
           {
-            "name": "2: Wolcum Yole! . . slow version",
+            "name": "2: Wolcum Yole!",
             "midiUrl": "/Britten/Ceremony of Carols/02-wolcm.mid"
           },
           {
@@ -4708,7 +4708,7 @@
             "midiUrl": "/Britten/Ceremony of Carols/05-asdew.mid"
           },
           {
-            "name": "6: This little Babe . . slow version . . VERY slow version",
+            "name": "6: This little Babe",
             "midiUrl": "/Britten/Ceremony of Carols/06-babe.mid"
           },
           {
@@ -4724,7 +4724,7 @@
             "midiUrl": "/Britten/Ceremony of Carols/09-sprng.mid"
           },
           {
-            "name": "10: Deo Gracias . . slow version",
+            "name": "10: Deo Gracias",
             "midiUrl": "/Britten/Ceremony of Carols/10-deogr.mid"
           },
           {
@@ -5035,7 +5035,7 @@
         "url": "/Bruckner/Geistliche-Chore/geistliche-chore.html",
         "sections": [
           {
-            "name": "Inhalt 1. Ave Maria",
+            "name": "1. Ave Maria",
             "midiUrl": "/Bruckner/Geistliche-Chore/1-AveMar.mid"
           },
           {
@@ -5075,7 +5075,7 @@
             "midiUrl": "/Bruckner/Geistliche-Chore/10-Vexil.mid"
           },
           {
-            "name": "Anhang Inveni David",
+            "name": "Inveni David",
             "midiUrl": "/Bruckner/Geistliche-Chore/11-Inven.mid"
           }
         ]
@@ -5945,7 +5945,7 @@
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/016-Deck-hall-v2.mid"
           },
           {
-            "name": "016: Deck the hall (the Carols for Choirs 2 version)",
+            "name": "016: Deck the hall",
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/016-Deck-hall.mid"
           },
           {
@@ -6145,7 +6145,7 @@
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/063-Out-sleep.mid"
           },
           {
-            "name": "064a: Personent hodie (and 064b: Sing aloud on this day!)",
+            "name": "064a: Personent hodie",
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/064a-Personent-Hodie.mid"
           },
           {
@@ -6181,7 +6181,7 @@
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/072-Star-carol.mid"
           },
           {
-            "name": "073-Shepherds, in the field abiding (Angels, from the realms of glory)",
+            "name": "073-Shepherds, in the field abiding",
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/073-Shepherds-field.mid"
           },
           {
@@ -6241,11 +6241,11 @@
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/088-Eastertide.mid"
           },
           {
-            "name": "089: The shepherds' farewell - English text (From \"L'enfance du Christ\")",
+            "name": "089: The shepherds' farewell - English text",
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/089-shep-farewell-3.mid"
           },
           {
-            "name": "089: The shepherds' farewell - French text (From \"L'enfance du Christ\")",
+            "name": "089: The shepherds' farewell - French text",
             "midiUrl": "/Carols - 100 for Choirs/100 Carols/089-shep-farewell-FRENCH-3.mid"
           },
           {
@@ -6520,11 +6520,11 @@
             "midiUrl": "/Charpentier/Messe de Minuit/1-kyrie.mid"
           },
           {
-            "name": "2: Gloria (with Cantor)",
+            "name": "2: Gloria",
             "midiUrl": "/Charpentier/Messe de Minuit/2-gloria.mid"
           },
           {
-            "name": "3: Credo (with Cantor)",
+            "name": "3: Credo",
             "midiUrl": "/Charpentier/Messe de Minuit/3-credo.mid"
           },
           {
@@ -6566,11 +6566,11 @@
             "midiUrl": "/Charpentier/Messe de Minuit-Schott/1e-Vierge.mid"
           },
           {
-            "name": "2: Gloria (with Cantor)",
+            "name": "2: Gloria",
             "midiUrl": "/Charpentier/Messe de Minuit-Schott/2-gloria.mid"
           },
           {
-            "name": "3: Credo (with Cantor)",
+            "name": "3: Credo",
             "midiUrl": "/Charpentier/Messe de Minuit-Schott/3a-Credo.mid"
           },
           {
@@ -6638,11 +6638,11 @@
             "midiUrl": "/Charpentier/Miserere des Jesuites/As written/02-Miser.mid"
           },
           {
-            "name": "3: Amplius lava me (9/100) 4: Tibi soli peccavi (11/157) (overlaps with 5)",
+            "name": "3: Amplius lava me (9/100) 4: Tibi soli peccavi (11/157)",
             "midiUrl": "/Charpentier/Miserere des Jesuites/As written/03-04-Amplius.mid"
           },
           {
-            "name": "5: Ecce enim (13/181) (overlaps with 3/4)",
+            "name": "5: Ecce enim (13/181)",
             "midiUrl": "/Charpentier/Miserere des Jesuites/As written/05-Ecce.mid"
           },
           {
@@ -7612,7 +7612,7 @@
         "url": "/Donizetti/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Chorus of wedding guests (from Lucia di Lammermoor)",
+            "name": "Chorus of wedding guests",
             "midiUrl": "/Donizetti/Choruses/Wedding.mid"
           }
         ]
@@ -7971,7 +7971,7 @@
         "url": "/Dvorak/Requiem/requiem.html",
         "sections": [
           {
-            "name": "Part I 1: Requiem Aeternam",
+            "name": "1: Requiem Aeternam",
             "midiUrl": "/Dvorak/Requiem/01-Req.mid"
           },
           {
@@ -8003,11 +8003,11 @@
             "midiUrl": "/Dvorak/Requiem/08-Lacri.mid"
           },
           {
-            "name": "Part II 9: Offertorium",
+            "name": "9: Offertorium",
             "midiUrl": "/Dvorak/Requiem/09-Offer.mid"
           },
           {
-            "name": "10: Hostias (the \"Quam olim\" repeat is undivided)",
+            "name": "10: Hostias",
             "midiUrl": "/Dvorak/Requiem/10-Host.mid"
           },
           {
@@ -8176,15 +8176,15 @@
         "url": "/Ebdon/Preces-Responses/preces-responses.html",
         "sections": [
           {
-            "name": "Preces O Lord, open Thou our Lips. . . . And our mouth shall shew forth thy praise. O God, make speed to save us. . . . O Lord, make haste to help us. Glory be to the Father, ... . . . As it was in the beginning ..... Praise ye the Lord. . . . The Lord's name be praised.",
+            "name": "O Lord, open Thou our Lips. . . . And our mouth shall shew forth thy praise. O God, make speed to save us. . . . O Lord, make haste to help us. Glory be to the Father, ... . . . As it was in the beginning ..... Praise ye the Lord. . . . The Lord's name be praised.",
             "midiUrl": "/Ebdon/Preces-Responses/1-4-lips.mid"
           },
           {
-            "name": "Lesser Litany The Lord be with you. . . . And with thy spirit. Let us pray. Lord, have mercy upon us, . . . Christ, have mercy upon us ... . . . Our Father, which art in Heaven, ... . . . . . . (Robert Stone)",
+            "name": "The Lord be with you. . . . And with thy spirit. Let us pray. Lord, have mercy upon us, . . . Christ, have mercy upon us ... . . . Our Father, which art in Heaven, ...",
             "midiUrl": "/Ebdon/Preces-Responses/5-6-Lord.mid"
           },
           {
-            "name": "Responses O Lord, shew thy mercy upon us. . . . And grant us thy salvation O Lord, save the Queen. . . . And mercifully hear us ... Endue thy Ministers ... . . . And make thy chosen people ... O Lord, save thy people. . . . And bless thine inheritance. Give us peace, ... . . . Because there is none other ... O God, make clean our hearts ... . . . And take not thy Holy Spirit ... . . . I - Amen: II - Amen: III - Amen",
+            "name": "O Lord, shew thy mercy upon us. . . . And grant us thy salvation O Lord, save the Queen. . . . And mercifully hear us ... Endue thy Ministers ... . . . And make thy chosen people ... O Lord, save thy people. . . . And bless thine inheritance. Give us peace, ... . . . Because there is none other ... O God, make clean our hearts ... . . . And take not thy Holy Spirit ... . . . I - Amen: II - Amen: III - Amen",
             "midiUrl": "/Ebdon/Preces-Responses/7-12-mer.mid"
           }
         ]
@@ -8504,7 +8504,7 @@
         "url": "/Elgar/King Olaf/king-olaf.html",
         "sections": [
           {
-            "name": "Introduction There is a wondrous book",
+            "name": "There is a wondrous book",
             "midiUrl": "/Elgar/King Olaf/0-Book.mid"
           },
           {
@@ -8512,23 +8512,23 @@
             "midiUrl": "/Elgar/King Olaf/1-Summon.mid"
           },
           {
-            "name": "The challenge of Thor 2: I am the God Thor",
+            "name": "2: I am the God Thor",
             "midiUrl": "/Elgar/King Olaf/2-Thor.mid"
           },
           {
-            "name": "King Olaf's return 3: And King Olaf heard the cry",
+            "name": "3: And King Olaf heard the cry",
             "midiUrl": "/Elgar/King Olaf/3-Return.mid"
           },
           {
-            "name": "The Conversion 4: Tell how Olaf bore the cross 5: King Olaf's prows at Nidarob",
+            "name": "4: Tell how Olaf bore the cross 5: King Olaf's prows at Nidarob",
             "midiUrl": "/Elgar/King Olaf/4+5-Olaf.mid"
           },
           {
-            "name": "Gudrun 6: Now the child of Ironbeard dead 7: On King Olaf's Bridal Night",
+            "name": "6: Now the child of Ironbeard dead 7: On King Olaf's Bridal Night",
             "midiUrl": "/Elgar/King Olaf/6+7-child.mid"
           },
           {
-            "name": "The Wraith of Odin 8: How the Wraith of Odin",
+            "name": "8: How the Wraith of Odin",
             "midiUrl": "/Elgar/King Olaf/8-wraith.mid"
           },
           {
@@ -8536,11 +8536,11 @@
             "midiUrl": "/Elgar/King Olaf/9-loud.mid"
           },
           {
-            "name": "Sigrid 10: Sisters, sing ye now the song 11: Sigrid sits in her high abode",
+            "name": "10: Sisters, sing ye now the song 11: Sigrid sits in her high abode",
             "midiUrl": "/Elgar/King Olaf/10+11-Sg.mid"
           },
           {
-            "name": "Thyryl 12: Hark! She flies from Westland forth",
+            "name": "12: Hark! She flies from Westland forth",
             "midiUrl": "/Elgar/King Olaf/12-Hark.mid"
           },
           {
@@ -8556,11 +8556,11 @@
             "midiUrl": "/Elgar/King Olaf/15-Death.mid"
           },
           {
-            "name": "The death of Olaf 16: King Olaf's dragons take the sea",
+            "name": "16: King Olaf's dragons take the sea",
             "midiUrl": "/Elgar/King Olaf/16-Olaf.mid"
           },
           {
-            "name": "Epilogue ... In the Convent of Drontheim (includes \"As torrents in summer\")",
+            "name": "... In the Convent of Drontheim",
             "midiUrl": "/Elgar/King Olaf/17-Epil.mid"
           }
         ]
@@ -8584,83 +8584,83 @@
         "url": "/Elgar/The Apostles/the-apostles.html",
         "sections": [
           {
-            "name": "The Spirit of the Lord is upon me (page 1)",
+            "name": "The Spirit of the Lord is upon me",
             "midiUrl": "/Elgar/The Apostles/00-spirt.mid"
           },
           {
-            "name": "And it came to pass in those days ... (page 12)",
+            "name": "And it came to pass in those days ...",
             "midiUrl": "/Elgar/The Apostles/01-Andit.mid"
           },
           {
-            "name": "The voice of thy Watchman (page 13)",
+            "name": "The voice of thy Watchman",
             "midiUrl": "/Elgar/The Apostles/02-voice.mid"
           },
           {
-            "name": "It shines It is a good thing (pages 19, 21)",
+            "name": "It shines It is a good thing",
             "midiUrl": "/Elgar/The Apostles/03-shine.mid"
           },
           {
-            "name": "And when it was day (page 27)",
+            "name": "And when it was day",
             "midiUrl": "/Elgar/The Apostles/04-when.mid"
           },
           {
-            "name": "The Lord hath chosen them (page 29)",
+            "name": "The Lord hath chosen them",
             "midiUrl": "/Elgar/The Apostles/05-Lord.mid"
           },
           {
-            "name": "Blessed are the poor in spirit (page 53)",
+            "name": "Blessed are the poor in spirit",
             "midiUrl": "/Elgar/The Apostles/06-Bless.mid"
           },
           {
-            "name": "And straightway Jesus constrained his disciples ... (page 68)",
+            "name": "And straightway Jesus constrained his disciples ...",
             "midiUrl": "/Elgar/The Apostles/07-Jesus.mid"
           },
           {
-            "name": "O Lord Almighty, God of Israel (page 70)",
+            "name": "O Lord Almighty, God of Israel",
             "midiUrl": "/Elgar/The Apostles/08-OLord.mid"
           },
           {
-            "name": "Whatsoever mine eyes desired (page 74)",
+            "name": "Whatsoever mine eyes desired",
             "midiUrl": "/Elgar/The Apostles/09-What.mid"
           },
           {
-            "name": "This shall ye have of my hand (page 83)",
+            "name": "This shall ye have of my hand",
             "midiUrl": "/Elgar/The Apostles/10-This.mid"
           },
           {
-            "name": "When Jesus came into the parts (page 97)",
+            "name": "When Jesus came into the parts",
             "midiUrl": "/Elgar/The Apostles/11-When.mid"
           },
           {
-            "name": "And I will give unto you the keys (page 102)",
+            "name": "And I will give unto you the keys",
             "midiUrl": "/Elgar/The Apostles/12-keys.mid"
           },
           {
-            "name": "Turn you to the stronghold (page 109)",
+            "name": "Turn you to the stronghold",
             "midiUrl": "/Elgar/The Apostles/13-Turn.mid"
           },
           {
-            "name": "Introduction (page 126)",
+            "name": "Introduction",
             "midiUrl": "/Elgar/The Apostles/14-Intro.mid"
           },
           {
-            "name": "And it came to pass ... (page 128)",
+            "name": "And it came to pass ...",
             "midiUrl": "/Elgar/The Apostles/15-Andit.mid"
           },
           {
-            "name": "Then led they Jesus ... (pages 143, 146, 153)",
+            "name": "Then led they Jesus ...",
             "midiUrl": "/Elgar/The Apostles/16-Jesus.mid"
           },
           {
-            "name": "Truly this was the Son of God (page 166)",
+            "name": "Truly this was the Son of God",
             "midiUrl": "/Elgar/The Apostles/17-Truly.mid"
           },
           {
-            "name": "And very early in the morning ... (page 169)",
+            "name": "And very early in the morning ...",
             "midiUrl": "/Elgar/The Apostles/18-early.mid"
           },
           {
-            "name": "We trusted that it had been He ... (page 176)",
+            "name": "We trusted that it had been He ...",
             "midiUrl": "/Elgar/The Apostles/19-trust.mid"
           }
         ]
@@ -10330,55 +10330,55 @@
         "url": "/Gilbert & Sullivan/TrialbyJury/trial.html",
         "sections": [
           {
-            "name": "No: 1 Hark, the Hour of Ten is Sounding Now, Jurymen, Hear My Advice,... Is this the Court of the Exchequer?",
+            "name": "No: 1",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/01-hark.mid"
           },
           {
-            "name": "Nos: 2 & 3 When First my Old, Old Love I Knew... Oh, I Was Like That When a Lad Silence in Court!... All Hail Great Judge!... For these Kind Words Accept my Thanks",
+            "name": "Nos: 2 & 3",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/023-love.mid"
           },
           {
-            "name": "No: 4 When I, Good Friends, Was Call'd to the Bar",
+            "name": "No: 4",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/04-judge.mid"
           },
           {
-            "name": "No: 5 Swear Thou the Jury Kneel, Jury men, oh, kneel!",
+            "name": "No: 5",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/05-consl.mid"
           },
           {
-            "name": "No: 6 Where is the Plaintiff... Comes the Broken Flower... O'er the Season Vernal",
+            "name": "No: 6",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/06-bride.mid"
           },
           {
-            "name": "No: 7 Oh, Never, Never, Never, Since I Joined the Human Race Monster! Monster! dread our fury!",
+            "name": "No: 7",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/07-never.mid"
           },
           {
-            "name": "No: 8 May it Please You, My Lud With a sense of deep emotion Cheer up, my pretty - Oh, cheer up!",
+            "name": "No: 8",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/08-case.mid"
           },
           {
-            "name": "No: 9 That She is Reeling is plain to me!",
+            "name": "No: 9",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/09-faint.mid"
           },
           {
-            "name": "No: 10 Oh, Gentlemen, Listen, I Pray",
+            "name": "No: 10",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/10-heart.mid"
           },
           {
-            "name": "No: 11 That Seems a Reasonable Proposition",
+            "name": "No: 11",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/11-propn.mid"
           },
           {
-            "name": "No: 12 A Nice Dilemma",
+            "name": "No: 12",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/12-dilem.mid"
           },
           {
-            "name": "No: 13 I love him - I love him - The question, gentlemen - is one of liquor: All the legal furies seize you!",
+            "name": "No: 13",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/13-love.mid"
           },
           {
-            "name": "No: 14 Oh, Joy Unbounded And a good judge too!",
+            "name": "No: 14",
             "midiUrl": "/Gilbert & Sullivan/TrialbyJury/14-final.mid"
           }
         ]
@@ -10559,7 +10559,7 @@
         "url": "/Gounod/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Soldiers' Chorus (from \"Faust\")",
+            "name": "Soldiers' Chorus",
             "midiUrl": "/Gounod/Choruses/Soldiers.mid"
           }
         ]
@@ -10661,7 +10661,7 @@
             "midiUrl": "/Gounod/Requiem/01-INTROIT.MID"
           },
           {
-            "name": "2: Sequence . . Dies irae . . Liber scriptus . . Quid sum miser . . Rex tremendae . . Recordare . . Quaerens me . . Lacrimosa",
+            "name": "2: Sequence",
             "midiUrl": "/Gounod/Requiem/02-SEQUENCE.MID"
           },
           {
@@ -11061,7 +11061,7 @@
             "midiUrl": "/Handel/TeDeum-Dettingen/09&10-Wh.mid"
           },
           {
-            "name": "11: Thou sittest at the right hand of God (by Soloists or Semi-Chorus)",
+            "name": "11: Thou sittest at the right hand of God",
             "midiUrl": "/Handel/TeDeum-Dettingen/11-Thou.mid"
           },
           {
@@ -11183,7 +11183,7 @@
             "midiUrl": "/Handel/Acis&Galatea/01-sinfn.mid"
           },
           {
-            "name": "2: O the pleasure of the plains - Voices 1 . . . . . . . . . . . . . . . . . . . . . . . . - Voices 2",
+            "name": "2: O the pleasure of the plains",
             "midiUrl": "/Handel/Acis&Galatea/02-pleas.mid"
           },
           {
@@ -11295,11 +11295,11 @@
             "midiUrl": "/Handel/Acis&Galatea/29-heart.mid"
           },
           {
-            "name": "30(a): Galatea, dry thy tears (shorter version)",
+            "name": "30(a): Galatea, dry thy tears",
             "midiUrl": "/Handel/Acis&Galatea/30a-gala.mid"
           },
           {
-            "name": "30: Galatea, dry thy tears (longer version)",
+            "name": "30: Galatea, dry thy tears",
             "midiUrl": "/Handel/Acis&Galatea/30-galat.mid"
           }
         ]
@@ -11397,7 +11397,7 @@
             "midiUrl": "/Handel/Alexander-Balus/22-Mighty.mid"
           },
           {
-            "name": "22a: Heroes may vaunt their mighty deeds This Aria is an Appendix in the IMSLP Score mentioned above",
+            "name": "22a: Heroes may vaunt their mighty deeds",
             "midiUrl": "/Handel/Alexander-Balus/22a-Heroes.mid"
           },
           {
@@ -11445,7 +11445,7 @@
             "midiUrl": "/Handel/Alexander-Balus/33-winds.mid"
           },
           {
-            "name": "??? 33a: Give to the winds, fair Princess [Aria] from \"Joseph and his Brethren\": \"Powerful guardians of all nature\"",
+            "name": "33a: Give to the winds, fair Princess [Aria]",
             "midiUrl": "/Handel/Alexander-Balus/33a-winds.mid"
           },
           {
@@ -11497,7 +11497,7 @@
             "midiUrl": "/Handel/Alexander-Balus/46-voice.mid"
           },
           {
-            "name": "47: Mighty guardians of all nature This is more or less the same as \"Powerful guardians of all nature\" from \"Joseph and his Brethren\". I include it unchanged (save for the key).",
+            "name": "47: Mighty guardians of all nature",
             "midiUrl": "/Handel/Alexander-Balus/47-Mighty.mid"
           },
           {
@@ -11619,15 +11619,15 @@
             "midiUrl": "/Handel/Alexander's Feast/11-Sooth.mid"
           },
           {
-            "name": "12: He chose a mournful muse Soprano or Contralto version",
+            "name": "Soprano",
             "midiUrl": "/Handel/Alexander's Feast/12-chose-sop.mid"
           },
           {
-            "name": "13: He sung Darius great and good Soprano or Contralto version",
+            "name": "Soprano",
             "midiUrl": "/Handel/Alexander's Feast/13-Darius-sop.mid"
           },
           {
-            "name": "14: With downcast looks Soprano or Contralto version",
+            "name": "Soprano",
             "midiUrl": "/Handel/Alexander's Feast/14-downcast-sop.mid"
           },
           {
@@ -11635,15 +11635,15 @@
             "midiUrl": "/Handel/Alexander's Feast/15-Behld.mid"
           },
           {
-            "name": "16a: The mighty master smil'd 16b: . . . . . . . . . . . . . . . . . . .",
+            "name": "16a: The mighty master smil'd",
             "midiUrl": "/Handel/Alexander's Feast/16a-master.mid"
           },
           {
-            "name": "17a: Softly sweet, in Lydian measures 17b: . . . . . . . . . . . . . . . . . . . . . . . .",
+            "name": "17a: Softly sweet, in Lydian measures",
             "midiUrl": "/Handel/Alexander's Feast/17a-Lydian.mid"
           },
           {
-            "name": "18: War, he sung, is toil and trouble Soprano or Tenor version",
+            "name": "Soprano",
             "midiUrl": "/Handel/Alexander's Feast/18-War-Sop.mid"
           },
           {
@@ -11659,7 +11659,7 @@
             "midiUrl": "/Handel/Alexander's Feast/21-lyre.mid"
           },
           {
-            "name": "22: Revenge, revenge, Timotheus cries and Behold a ghastly band Bass only or Bass, then Alto version",
+            "name": "Bass only",
             "midiUrl": "/Handel/Alexander's Feast/22-Revenge-B+B.mid"
           },
           {
@@ -12111,7 +12111,7 @@
             "midiUrl": "/Handel/Belshazzar/47-princ.mid"
           },
           {
-            "name": "47b: O glorious prince (the Burrows version)",
+            "name": "47b: O glorious prince",
             "midiUrl": "/Handel/Belshazzar/47B-PRINC.MID"
           },
           {
@@ -12607,7 +12607,7 @@
         "url": "/Handel/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Chorus of enchanted islanders (from \"Alcina\")",
+            "name": "Chorus of enchanted islanders",
             "midiUrl": "/Handel/Choruses/Islander.mid"
           }
         ]
@@ -12705,7 +12705,7 @@
             "midiUrl": "/Handel/Deborah/22-Deeds.mid"
           },
           {
-            "name": "23: My charge is to declare In the recording I've listened to There are several sections between Nos. 22 and 24 that are not in the old Novello Score",
+            "name": "23: My charge is to declare",
             "midiUrl": "/Handel/Deborah/23-Charge.mid"
           },
           {
@@ -12877,7 +12877,7 @@
             "midiUrl": "/Handel/Deborah/65-Feet.mid"
           },
           {
-            "name": "66: O great Jehova! May thy foes In the recording I listened to there is a Symphony after this.",
+            "name": "66: O great Jehova! May thy foes",
             "midiUrl": "/Handel/Deborah/66-O-great.mid"
           },
           {
@@ -12971,7 +12971,7 @@
             "midiUrl": "/Handel/Esther/00-Sinfonia.mid"
           },
           {
-            "name": "Scene 1 1a: 'Tis greater far to spare than to destroy",
+            "name": "1a: 'Tis greater far to spare than to destroy",
             "midiUrl": "/Handel/Esther/01a-spare.mid"
           },
           {
@@ -12987,7 +12987,7 @@
             "midiUrl": "/Handel/Esther/02-fear.mid"
           },
           {
-            "name": "Scene 2 3a: Now persecution shall lay by her iron rod",
+            "name": "3a: Now persecution shall lay by her iron rod",
             "midiUrl": "/Handel/Esther/03a-persecution.mid"
           },
           {
@@ -13011,7 +13011,7 @@
             "midiUrl": "/Handel/Esther/06-singsongs.mid"
           },
           {
-            "name": "Scene 3 7a: How have our sins provok'd the Lord!",
+            "name": "7a: How have our sins provok'd the Lord!",
             "midiUrl": "/Handel/Esther/07a-provok'd.mid"
           },
           {
@@ -13027,7 +13027,7 @@
             "midiUrl": "/Handel/Esther/09-Jordan.mid"
           },
           {
-            "name": "Scene 4 10a: Why sits that sorrow on thy brow?",
+            "name": "10a: Why sits that sorrow on thy brow?",
             "midiUrl": "/Handel/Esther/10a-sorrow.mid"
           },
           {
@@ -13047,7 +13047,7 @@
             "midiUrl": "/Handel/Esther/12-save.mid"
           },
           {
-            "name": "Scene 5 13a: Who dares intrude into our presence?",
+            "name": "13a: Who dares intrude into our presence?",
             "midiUrl": "/Handel/Esther/13a-intrude.mid"
           },
           {
@@ -13083,7 +13083,7 @@
             "midiUrl": "/Handel/Esther/18-Hecom.mid"
           },
           {
-            "name": "Scene 6 19a: Now, O Queen, thy suit declare",
+            "name": "19a: Now, O Queen, thy suit declare",
             "midiUrl": "/Handel/Esther/19a-Queen.mid"
           },
           {
@@ -13121,7 +13121,7 @@
             "midiUrl": "/Handel/Foundling-Hospital-Anthem/2-Blessd.mid"
           },
           {
-            "name": "Alternative 2a: Blessed are they that consider the poor 2b: O God who from the suckling's mouth",
+            "name": "2a: Blessed are they that consider the poor",
             "midiUrl": "/Handel/Foundling-Hospital-Anthem/2a-Blesd.mid"
           },
           {
@@ -13937,7 +13937,7 @@
             "midiUrl": "/Handel/Joseph and his Brethren/11-Joyful.mid"
           },
           {
-            "name": "Part 1 Scene 4 No 1, Recitative: Whence this unwonted ardour in my breast? (Asenath) Part 1 Scene 4 No 2, Air: I feel a spreading flame within my veins (Asenath) Part 1 Scene 4 No 3, Recitative: Fair Asenath (Joseph/Pharaoh/Potiphera/Asenath)) Part 1 Scene 5 No 1, Duet: Celestial virgin! Godlike youth! (Joseph/Asenath)",
+            "name": "Part 1 Scene 4 No 1, Recitative: Whence this unwonted ardour in my breast? (Asenath)",
             "midiUrl": "/Handel/Joseph and his Brethren/11,1-Whence.mid"
           },
           {
@@ -13989,7 +13989,7 @@
             "midiUrl": "/Handel/Joseph and his Brethren/24-Blest.mid"
           },
           {
-            "name": "Part 2 Scene 1 No 6, Recitative: Phanor, we mention not his highest glory! (Asenath/Phanor) Part 2 Scene 1 No 7, Air: Together, lovely innocents, grow up (Asenath) Part 2 Scene 1 No 8, Recitative: He then is silent, then again exclaims (Asenath)",
+            "name": "Part 2 Scene 1 No 6, Recitative: Phanor, we mention not his highest glory! (Asenath/Phanor)",
             "midiUrl": "/Handel/Joseph and his Brethren/24,1-Phanor.mid"
           },
           {
@@ -14001,7 +14001,7 @@
             "midiUrl": "/Handel/Joseph and his Brethren/25b-Remorse.mid"
           },
           {
-            "name": "Part 2 Scene 3 No 1, Recitative: This Hebrew prisoner (Phanor/Joseph) Part 2 Scene 3 No 2, Accompagnato: Ye departed hours (Joseph) Part 2 Scene 3 No 3, Air: The peasant tastes the sweets of life (Joseph) Part 2 Scene 3 No 4, Scene 4 No 1. Recitative: But Simeon comes (Joseph/Simeon)",
+            "name": "Part 2 Scene 3 No 1, Recitative: This Hebrew prisoner (Phanor/Joseph)",
             "midiUrl": "/Handel/Joseph and his Brethren/25,1-Hebrew.mid"
           },
           {
@@ -14013,7 +14013,7 @@
             "midiUrl": "/Handel/Joseph and his Brethren/27-Imposter.mid"
           },
           {
-            "name": "Part 2 Scene 5 No 1, Recitative: Whence, Asenath, this grief that hangs upon thee (Joseph/Asenath) Part 2 Scene 5 No 2, Air: The silver stream, that all its way (Asenath) Part 2 Scene 5 No 3, Scene 6 No 1. Recitative: Tell me, O tell me thy heart's malady (Asenath/Joseph/Phanor/Judah)",
+            "name": "Part 2 Scene 5 No 1, Recitative: Whence, Asenath, this grief that hangs upon thee (Joseph/Asenath)",
             "midiUrl": "/Handel/Joseph and his Brethren/27,1-Whence.mid"
           },
           {
@@ -14029,7 +14029,7 @@
             "midiUrl": "/Handel/Joseph and his Brethren/30-Thus-one.mid"
           },
           {
-            "name": "Part 2 Scene 7 No 1, Accompagnato: Once more, O pious Zaphnath, at thy feet (Reuben/Judah) Part 2 Scene 7 No 2, Recitative: This kiss, my gracious Lord (Benjamin/Joseph/Judah)",
+            "name": "Part 2 Scene 7 No 1, Accompagnato: Once more, O pious Zaphnath, at thy feet (Reuben/Judah)",
             "midiUrl": "/Handel/Joseph and his Brethren/30,1-Once-more.mid"
           },
           {
@@ -14069,7 +14069,7 @@
             "midiUrl": "/Handel/Joseph and his Brethren/38-Jealousy.mid"
           },
           {
-            "name": "Part 3 Scene 2 No 3, Recitative: O wrong me not! thy Zaphnath never harbour'd (Joseph/Asenath) Part 3 Scene 2 No 4, Air: The people's favour, and the smiles of pow'r (Joseph) Part 3 Scene 2 No 5, Recitative: Art thou not Zaphnath? Is not Egypt sav'd (Asenath) Part 3 Scene 2 No 6, Air: Prophetic raptures swell my breast (Asenath) Part 3, Scene 2 No 7/Scene 3/Scene 4 No 1. Recitative: They come .. and indignation in their looks (Joseph/Simeon/Phanor/Benjamin) Part 3 Scene 4 No 2, Accompagnato: What! without me? Ah, how return in peace! (Benjamin) Part 3 Scene 4 No 3, Arioso: O pity! (Benjamin/Joseph) Part 3 Scene 4 No 4, Recitative: To prison with him! (Joseph/Simeon/Reuben)",
+            "name": "Part 3 Scene 2 No 3, Recitative: O wrong me not! thy Zaphnath never harbour'd (Joseph/Asenath)",
             "midiUrl": "/Handel/Joseph and his Brethren/38,1-O-wrong.mid"
           },
           {
@@ -14771,7 +14771,7 @@
             "midiUrl": "/Handel/Messiah/20-lamb.mid"
           },
           {
-            "name": "20: Behold the Lamb of God (Like the New Novello version)",
+            "name": "20: Behold the Lamb of God",
             "midiUrl": "/Handel/Messiah/20-LAMB-NEWNOV.MID"
           },
           {
@@ -14815,7 +14815,7 @@
             "midiUrl": "/Handel/Messiah/31-lift.mid"
           },
           {
-            "name": "31: Lift up your heads, O ye gates (Like the New Novello version)",
+            "name": "31: Lift up your heads, O ye gates",
             "midiUrl": "/Handel/Messiah/31-LIFT-NEWNOV.MID"
           },
           {
@@ -14831,7 +14831,7 @@
             "midiUrl": "/Handel/Messiah/35-prech.mid"
           },
           {
-            "name": "35: The Lord gave the word (Like the New Novello version)",
+            "name": "35: The Lord gave the word",
             "midiUrl": "/Handel/Messiah/35-PRECH-NEWNOV.MID"
           },
           {
@@ -14839,7 +14839,7 @@
             "midiUrl": "/Handel/Messiah/36-feet.mid"
           },
           {
-            "name": "36a: How beautiful are the feet ... Break forth into joy (Alto duet from the Appendix in the \"Peters\" Score)",
+            "name": "36a: How beautiful are the feet ... Break forth into joy",
             "midiUrl": "/Handel/Messiah/36a-FtBr.mid"
           },
           {
@@ -15495,7 +15495,7 @@
             "midiUrl": "/Handel/My-song-shall/4-God-is.mid"
           },
           {
-            "name": "[ 4a: Thou rulest the raging of the sea ]",
+            "name": "4a: Thou rulest the raging of the sea",
             "midiUrl": "/Handel/My-song-shall/4--rulest.mid"
           },
           {
@@ -16115,7 +16115,7 @@
             "midiUrl": "/Handel/Samson/62-proof.mid"
           },
           {
-            "name": "63: Hear, Jacob's God - Voices 1 . . . . . . . . . . . . . . . . - Voices 2",
+            "name": "63: Hear, Jacob's God",
             "midiUrl": "/Handel/Samson/63-jacob.mid"
           },
           {
@@ -16131,7 +16131,7 @@
             "midiUrl": "/Handel/Samson/66-dance.mid"
           },
           {
-            "name": "67: Fixed in His everlasting seat - Voices 1 . . . . . . . . . . . . . . . . . . . . . . . - Voices 2",
+            "name": "67: Fixed in His everlasting seat",
             "midiUrl": "/Handel/Samson/67-fixed.mid"
           },
           {
@@ -17707,11 +17707,11 @@
         "url": "/Handel/Theodora/theodora.html",
         "sections": [
           {
-            "name": "PART ONE 1: Ouverture, . . Trio, . . Courante",
+            "name": "1: Ouverture, . . Trio, . . Courante",
             "midiUrl": "/Handel/Theodora/01-Ouvrt.mid"
           },
           {
-            "name": "Scene 1 2a: 'Tis Diocletion's natal day",
+            "name": "2a: 'Tis Diocletion's natal day",
             "midiUrl": "/Handel/Theodora/02a-Dioc.mid"
           },
           {
@@ -17735,7 +17735,7 @@
             "midiUrl": "/Handel/Theodora/06-doom.mid"
           },
           {
-            "name": "Scene 2 7: Most cruel edict",
+            "name": "7: Most cruel edict",
             "midiUrl": "/Handel/Theodora/07a-edict.mid"
           },
           {
@@ -17751,7 +17751,7 @@
             "midiUrl": "/Handel/Theodora/08b-Pity.mid"
           },
           {
-            "name": "Scene 3 9: Though hard, my friends",
+            "name": "9: Though hard, my friends",
             "midiUrl": "/Handel/Theodora/09a-hard.mid"
           },
           {
@@ -17771,7 +17771,7 @@
             "midiUrl": "/Handel/Theodora/11-Come.mid"
           },
           {
-            "name": "Scene 4 12: Fly. Fly, my brethren",
+            "name": "12: Fly. Fly, my brethren",
             "midiUrl": "/Handel/Theodora/12-Fly.mid"
           },
           {
@@ -17783,7 +17783,7 @@
             "midiUrl": "/Handel/Theodora/14-Heavn.mid"
           },
           {
-            "name": "Scene 5 15: Mistaken wretches",
+            "name": "15: Mistaken wretches",
             "midiUrl": "/Handel/Theodora/15a-Mistk.mid"
           },
           {
@@ -17803,7 +17803,7 @@
             "midiUrl": "/Handel/Theodora/17b-Angel.mid"
           },
           {
-            "name": "Scene 6 18: Unhappy, happy crew",
+            "name": "18: Unhappy, happy crew",
             "midiUrl": "/Handel/Theodora/18a-crew.mid"
           },
           {
@@ -17811,7 +17811,7 @@
             "midiUrl": "/Handel/Theodora/18b-Kind.mid"
           },
           {
-            "name": "Scene 7 19: O Love, how great thy pow'r!",
+            "name": "19: O Love, how great thy pow'r!",
             "midiUrl": "/Handel/Theodora/19-Love.mid"
           },
           {
@@ -17819,7 +17819,7 @@
             "midiUrl": "/Handel/Theodora/20-youth.mid"
           },
           {
-            "name": "PART TWO Scene 1 21: Ye men of Antioch",
+            "name": "21: Ye men of Antioch",
             "midiUrl": "/Handel/Theodora/21-Antio.mid"
           },
           {
@@ -17839,15 +17839,15 @@
             "midiUrl": "/Handel/Theodora/25-Venus.mid"
           },
           {
-            "name": "Scene 2 26: Symphony",
+            "name": "26: Symphony",
             "midiUrl": "/Handel/Theodora/26-Symph.mid"
           },
           {
-            "name": "27: O thou bright sun! 1st Alternative",
+            "name": "27: O thou bright sun!",
             "midiUrl": "/Handel/Theodora/27a-thou-1.mid"
           },
           {
-            "name": "27: O thou bright sun! 2nd Alternative",
+            "name": "27: O thou bright sun!",
             "midiUrl": "/Handel/Theodora/27a-thou-2.mid"
           },
           {
@@ -17855,11 +17855,11 @@
             "midiUrl": "/Handel/Theodora/27b-deep.mid"
           },
           {
-            "name": "28: Symphony of Soft Music A-1st Alternative",
+            "name": "28: Symphony of Soft Music",
             "midiUrl": "/Handel/Theodora/28A-SoftSymph.mid"
           },
           {
-            "name": "28: Symphony of Soft Music B-2nd Alternative",
+            "name": "28: Symphony of Soft Music",
             "midiUrl": "/Handel/Theodora/28B-SoftSymph.mid"
           },
           {
@@ -17871,7 +17871,7 @@
             "midiUrl": "/Handel/Theodora/29b-wing.mid"
           },
           {
-            "name": "Scene 3 30: Long have I known thy friendly social soul",
+            "name": "30: Long have I known thy friendly social soul",
             "midiUrl": "/Handel/Theodora/30-Long.mid"
           },
           {
@@ -17887,7 +17887,7 @@
             "midiUrl": "/Handel/Theodora/32b-Deeds.mid"
           },
           {
-            "name": "Scene 4 33: The clouds begin to veil",
+            "name": "33: The clouds begin to veil",
             "midiUrl": "/Handel/Theodora/33a-clouds.mid"
           },
           {
@@ -17895,7 +17895,7 @@
             "midiUrl": "/Handel/Theodora/33b-Defend.mid"
           },
           {
-            "name": "Scene 5 34: Or lull'd with grief",
+            "name": "34: Or lull'd with grief",
             "midiUrl": "/Handel/Theodora/34a-grief.mid"
           },
           {
@@ -17919,7 +17919,7 @@
             "midiUrl": "/Handel/Theodora/38-worth.mid"
           },
           {
-            "name": "Scene 6 39: 'Tis night",
+            "name": "39: 'Tis night",
             "midiUrl": "/Handel/Theodora/39-night.mid"
           },
           {
@@ -17927,11 +17927,11 @@
             "midiUrl": "/Handel/Theodora/40-youth.mid"
           },
           {
-            "name": "PART THREE Scene 1 41: Lord, to Thee each night and day",
+            "name": "41: Lord, to Thee each night and day",
             "midiUrl": "/Handel/Theodora/41-Lord.mid"
           },
           {
-            "name": "Scene 2 42: But see, the good, the virtuous Didymus",
+            "name": "42: But see, the good, the virtuous Didymus",
             "midiUrl": "/Handel/Theodora/42-good.mid"
           },
           {
@@ -17943,7 +17943,7 @@
             "midiUrl": "/Handel/Theodora/44-Blest.mid"
           },
           {
-            "name": "Scene 3 45: Undaunted in the court",
+            "name": "45: Undaunted in the court",
             "midiUrl": "/Handel/Theodora/45-court.mid"
           },
           {
@@ -17959,7 +17959,7 @@
             "midiUrl": "/Handel/Theodora/47b-joy.mid"
           },
           {
-            "name": "Scenes 4 and 5 48: Is it a Christian virtue, then?",
+            "name": "48: Is it a Christian virtue, then?",
             "midiUrl": "/Handel/Theodora/48-virtu.mid"
           },
           {
@@ -17987,7 +17987,7 @@
             "midiUrl": "/Handel/Theodora/54-justice.mid"
           },
           {
-            "name": "Scene 6 55: And must such beauty suffer?",
+            "name": "55: And must such beauty suffer?",
             "midiUrl": "/Handel/Theodora/55-beauty.mid"
           },
           {
@@ -17995,7 +17995,7 @@
             "midiUrl": "/Handel/Theodora/56-Streams.mid"
           },
           {
-            "name": "Scene 6 57: Ere this, their doom is past.",
+            "name": "57: Ere this, their doom is past.",
             "midiUrl": "/Handel/Theodora/57-doom.mid"
           },
           {
@@ -18866,11 +18866,11 @@
         "url": "/Haydn/Missa in hon BVM in E flat/missa in hon BVM in E flat.html",
         "sections": [
           {
-            "name": "Kyrie 1: Kyrie",
+            "name": "1: Kyrie",
             "midiUrl": "/Haydn/Missa in hon BVM in E flat/1-Kyrie.mid"
           },
           {
-            "name": "Gloria 2: Et in terra pax",
+            "name": "2: Et in terra pax",
             "midiUrl": "/Haydn/Missa in hon BVM in E flat/2-Gloria.mid"
           },
           {
@@ -18882,7 +18882,7 @@
             "midiUrl": "/Haydn/Missa in hon BVM in E flat/4-Quoniam.mid"
           },
           {
-            "name": "Credo 5: Patrem omnipotentem",
+            "name": "5: Patrem omnipotentem",
             "midiUrl": "/Haydn/Missa in hon BVM in E flat/5-Credo.mid"
           },
           {
@@ -18894,15 +18894,15 @@
             "midiUrl": "/Haydn/Missa in hon BVM in E flat/7-8-Et-resurr.mid"
           },
           {
-            "name": "Sanctus 9: Sanctus",
+            "name": "9: Sanctus",
             "midiUrl": "/Haydn/Missa in hon BVM in E flat/9-Sanctus.mid"
           },
           {
-            "name": "Benedictus 10: Benedictus 11: Osanna",
+            "name": "10: Benedictus 11: Osanna",
             "midiUrl": "/Haydn/Missa in hon BVM in E flat/10-11-Benedictus.mid"
           },
           {
-            "name": "Agnus Dei 12: Agnus Dei 13: Dona nobis pacem",
+            "name": "12: Agnus Dei 13: Dona nobis pacem",
             "midiUrl": "/Haydn/Missa in hon BVM in E flat/12-13-AgnusDei.mid"
           }
         ]
@@ -19176,7 +19176,7 @@
         "url": "/Haydn/Te-Deum/te-deum.html",
         "sections": [
           {
-            "name": "Te Deum Laudamus (English)",
+            "name": "Te Deum Laudamus",
             "midiUrl": "/Haydn/Te-Deum/te-deum.mid"
           }
         ]
@@ -20020,15 +20020,15 @@
         "url": "/Horovitz/Samson/samson.html",
         "sections": [
           {
-            "name": "1: In the prison yard Figures [start] to [20]",
+            "name": "1: In the prison yard",
             "midiUrl": "/Horovitz/Samson/1-prison.mid"
           },
           {
-            "name": "2: Judge Samson they call'd me Figures [20] to [27]",
+            "name": "2: Judge Samson they call'd me",
             "midiUrl": "/Horovitz/Samson/2-Judge.mid"
           },
           {
-            "name": "3: In the prison yard Figures [28] to [end]",
+            "name": "3: In the prison yard",
             "midiUrl": "/Horovitz/Samson/3-prison.mid"
           }
         ]
@@ -20075,7 +20075,7 @@
             "midiUrl": "/Howells/Hymnus-Paradisi/3-Shephd.mid"
           },
           {
-            "name": "4: Sanctus - Full Chorus",
+            "name": "4: Sanctus",
             "midiUrl": "/Howells/Hymnus-Paradisi/4-Sanct.mid"
           },
           {
@@ -20394,15 +20394,15 @@
         "url": "/Jackson/Preces+Responses/preces+responses.html",
         "sections": [
           {
-            "name": "Preces O Lord, open Thou our Lips. . . . And our mouth shall shew forth thy praise. O God, make speed to save us. . . . O Lord, make haste to help us. Glory be to the Father, ... . . . As it was in the beginning ..... Praise ye the Lord. . . . The Lord's name be praised.",
+            "name": "O Lord, open Thou our Lips. . . . And our mouth shall shew forth thy praise. O God, make speed to save us. . . . O Lord, make haste to help us. Glory be to the Father, ... . . . As it was in the beginning ..... Praise ye the Lord. . . . The Lord's name be praised.",
             "midiUrl": "/Jackson/Preces+Responses/1-4-lips.mid"
           },
           {
-            "name": "Lesser Litany The Lord be with you. . . . And with thy spirit. Let us pray. . . . Lord, have mercy upon us, . . . Christ, have mercy upon us ... . . . Lord, have mercy upon us, . . . Our Father, which art in Heaven, ... . . . . . . (Robert Stone)",
+            "name": "The Lord be with you. . . . And with thy spirit. Let us pray. . . . Lord, have mercy upon us, . . . Christ, have mercy upon us ... . . . Lord, have mercy upon us, . . . Our Father, which art in Heaven, ...",
             "midiUrl": "/Jackson/Preces+Responses/5-6-Lord.mid"
           },
           {
-            "name": "Responses O Lord, shew thy mercy upon us. . . . And grant us thy salvation O Lord, save the Queen. . . . And mercifully hear us ... Endue thy Ministers ... . . . And make thy chosen people ... O Lord, save thy people. . . . And bless thine inheritance. Give us peace, ... . . . Because there is none other ... O God, make clean our hearts ... . . . And take not thy Holy Spirit ... Collects:- I - Amen: II - Amen: III - Amen... The Dismissal The Lord be with you.... . . . And with thy spirit. ... Let us bless the Lord.... . . . Thanks be to God.",
+            "name": "O Lord, shew thy mercy upon us. . . . And grant us thy salvation O Lord, save the Queen. . . . And mercifully hear us ... Endue thy Ministers ... . . . And make thy chosen people ... O Lord, save thy people. . . . And bless thine inheritance. Give us peace, ... . . . Because there is none other ... O God, make clean our hearts ... . . . And take not thy Holy Spirit ... Collects:- I - Amen: II - Amen: III - Amen... The Dismissal The Lord be with you.... . . . And with thy spirit. ... Let us bless the Lord.... . . . Thanks be to God.",
             "midiUrl": "/Jackson/Preces+Responses/7-15-mer.mid"
           }
         ]
@@ -20412,15 +20412,15 @@
         "url": "/Jackson/Preces+Responses 2/preces+responses.html",
         "sections": [
           {
-            "name": "Preces O Lord, open Thou our Lips. . . . And our mouth shall shew forth thy praise. O God, make speed to save us. . . . O Lord, make haste to help us. Glory be to the Father, ... . . . As it was in the beginning ..... Praise ye the Lord. . . . The Lord's name be praised.",
+            "name": "O Lord, open Thou our Lips. . . . And our mouth shall shew forth thy praise. O God, make speed to save us. . . . O Lord, make haste to help us. Glory be to the Father, ... . . . As it was in the beginning ..... Praise ye the Lord. . . . The Lord's name be praised.",
             "midiUrl": "/Jackson/Preces+Responses 2/1-4-lips.mid"
           },
           {
-            "name": "Lesser Litany The Lord be with you. . . . And with thy spirit. Let us pray. . . . Lord, have mercy upon us, . . . Christ, have mercy upon us ... . . . Lord, have mercy upon us, . . . Our Father, which art in Heaven, ... . . . . . . (Robert Stone)",
+            "name": "The Lord be with you. . . . And with thy spirit. Let us pray. . . . Lord, have mercy upon us, . . . Christ, have mercy upon us ... . . . Lord, have mercy upon us, . . . Our Father, which art in Heaven, ...",
             "midiUrl": "/Jackson/Preces+Responses 2/5-6-Lord.mid"
           },
           {
-            "name": "Responses O Lord, shew thy mercy upon us. . . . And grant us thy salvation O Lord, save the Queen. . . . And mercifully hear us ... Endue thy Ministers ... . . . And make thy chosen people ... O Lord, save thy people. . . . And bless thine inheritance. Give us peace, ... . . . Because there is none other ... O God, make clean our hearts ... . . . And take not thy Holy Spirit ... Collects:- I - Amen: II - Amen: III - Amen... The Dismissal The Lord be with you.... . . . And with thy spirit. ... Let us bless the Lord.... . . . Thanks be to God.",
+            "name": "O Lord, shew thy mercy upon us. . . . And grant us thy salvation O Lord, save the Queen. . . . And mercifully hear us ... Endue thy Ministers ... . . . And make thy chosen people ... O Lord, save thy people. . . . And bless thine inheritance. Give us peace, ... . . . Because there is none other ... O God, make clean our hearts ... . . . And take not thy Holy Spirit ... Collects:- I - Amen: II - Amen: III - Amen... The Dismissal The Lord be with you.... . . . And with thy spirit. ... Let us bless the Lord.... . . . Thanks be to God.",
             "midiUrl": "/Jackson/Preces+Responses 2/7-15-mer.mid"
           }
         ]
@@ -20596,7 +20596,7 @@
             "midiUrl": "/Jenkins/Gloria/3-Psalm.mid"
           },
           {
-            "name": "IV: The Song: I'll make music Male voice - - Female voice",
+            "name": "Male voice",
             "midiUrl": "/Jenkins/Gloria/4-Song (Male).mid"
           },
           {
@@ -21546,7 +21546,7 @@
         "url": "/Leoncavallo/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Bell Chorus (from Pagliacci)",
+            "name": "Bell Chorus",
             "midiUrl": "/Leoncavallo/Choruses/BellChor.mid"
           }
         ]
@@ -22052,7 +22052,7 @@
         "url": "/Mascagni/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Easter Hymn (Regina coeli) (from Cavalleria Rusticana)",
+            "name": "Easter Hymn (Regina coeli)",
             "midiUrl": "/Mascagni/Choruses/Easter.mid"
           }
         ]
@@ -22221,7 +22221,7 @@
         "url": "/Maunder/Bethlehem/bethlehem.html",
         "sections": [
           {
-            "name": "The shepherds' gifts. 01: Quickly the night is falling.",
+            "name": "01: Quickly the night is falling.",
             "midiUrl": "/Maunder/Bethlehem/01-Sheps-gifts.mid"
           },
           {
@@ -22241,11 +22241,11 @@
             "midiUrl": "/Maunder/Bethlehem/05-Let-us-now-go.mid"
           },
           {
-            "name": "Hymn 06: God from on high hath heard",
+            "name": "06: God from on high hath heard",
             "midiUrl": "/Maunder/Bethlehem/06-Hymn-God-from.mid"
           },
           {
-            "name": "The Kings' gifts. 07: The longest journey",
+            "name": "07: The longest journey",
             "midiUrl": "/Maunder/Bethlehem/07-longest-journey.mid"
           },
           {
@@ -22257,11 +22257,11 @@
             "midiUrl": "/Maunder/Bethlehem/09-All-hail.mid"
           },
           {
-            "name": "Hymn 10: As with gladness men of old",
+            "name": "10: As with gladness men of old",
             "midiUrl": "/Maunder/Bethlehem/10-Hymn-As-with-gladness.mid"
           },
           {
-            "name": "Our Gift 11: O softly, softly let us tread",
+            "name": "11: O softly, softly let us tread",
             "midiUrl": "/Maunder/Bethlehem/11-O-softly.mid"
           },
           {
@@ -22273,7 +22273,7 @@
             "midiUrl": "/Maunder/Bethlehem/13-But-can-it-be.mid"
           },
           {
-            "name": "Hymn 14: O come, all ye faithful",
+            "name": "14: O come, all ye faithful",
             "midiUrl": "/Maunder/Bethlehem/14-O-come.mid"
           }
         ]
@@ -22339,7 +22339,7 @@
             "midiUrl": "/Maunder/Olivet/10x-rock.mid"
           },
           {
-            "name": "Hymn: Rock of Ages (alternative version)",
+            "name": "Hymn: Rock of Ages",
             "midiUrl": "/Maunder/Olivet/10y-rock.mid"
           }
         ]
@@ -22497,7 +22497,7 @@
             "midiUrl": "/Mendelssohn/Elijah/13-loudr.mid"
           },
           {
-            "name": "13: Call him louder . . . Baal, hear and answer . . . Shortened version",
+            "name": "13: Call him louder . . . Baal, hear and answer",
             "midiUrl": "/Mendelssohn/Elijah/13-loudr-SHORT.mid"
           },
           {
@@ -22777,19 +22777,19 @@
         "url": "/Mendelssohn/Psalm13 - Lord, how long/psalm13-lord-how-long.html",
         "sections": [
           {
-            "name": "1: Lord, how long wilt Thou forget me? Lass', o Herr, mich Hulfe finden",
+            "name": "1: Lord, how long wilt Thou forget me?",
             "midiUrl": "/Mendelssohn/Psalm13 - Lord, how long/1-Lord.mid"
           },
           {
-            "name": "2: Chorale: Lord, my God, behold and hear me Deines Kinds Gebet erhore",
+            "name": "2: Chorale: Lord, my God, behold and hear me",
             "midiUrl": "/Mendelssohn/Psalm13 - Lord, how long/2-Choral.mid"
           },
           {
-            "name": "3: Lord, Thy truth and loving kindness Herr, wir trau'n auf deine Gute",
+            "name": "3: Lord, Thy truth and loving kindness",
             "midiUrl": "/Mendelssohn/Psalm13 - Lord, how long/3-Lord.mid"
           },
           {
-            "name": "4: Fugue - Lord, in thankful exultation Lasst sein heilig lob uns singen",
+            "name": "4: Fugue - Lord, in thankful exultation",
             "midiUrl": "/Mendelssohn/Psalm13 - Lord, how long/4-Fugue.mid"
           }
         ]
@@ -23322,7 +23322,7 @@
             "midiUrl": "/Monteverdi/Xmas-Vespers/6-Christ.mid"
           },
           {
-            "name": "7: Magnificat (from 1610 Vespers)",
+            "name": "7: Magnificat",
             "midiUrl": "/Monteverdi/Xmas-Vespers/7-Magnif.mid"
           }
         ]
@@ -23742,11 +23742,11 @@
         "url": "/Mozart/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Voyager's chorus (from Idomeneo)",
+            "name": "Voyager's chorus",
             "midiUrl": "/Mozart/Choruses/Voyager.mid"
           },
           {
-            "name": "Priests' chorus (from Die Zauberflote)",
+            "name": "Priests' chorus",
             "midiUrl": "/Mozart/Choruses/Priests'.mid"
           }
         ]
@@ -23974,23 +23974,23 @@
             "midiUrl": "/Mozart/Mass-in-C-minor/10-et-in.mid"
           },
           {
-            "name": "11: Sanctus (Peters version)",
+            "name": "11: Sanctus",
             "midiUrl": "/Mozart/Mass-in-C-minor/11-sanct.mid"
           },
           {
-            "name": "11: Sanctus (Peters Urtext version)",
+            "name": "11: Sanctus",
             "midiUrl": "/Mozart/Mass-in-C-minor/11-SANCT-UR.MID"
           },
           {
-            "name": "11: Sanctus (Barenreiter version)",
+            "name": "11: Sanctus",
             "midiUrl": "/Mozart/Mass-in-C-minor/11-san-B.mid"
           },
           {
-            "name": "12: Benedictus (Peters version)",
+            "name": "12: Benedictus",
             "midiUrl": "/Mozart/Mass-in-C-minor/12-bened.mid"
           },
           {
-            "name": "12: Benedictus (Barenreiter version)",
+            "name": "12: Benedictus",
             "midiUrl": "/Mozart/Mass-in-C-minor/12-ben-B.mid"
           }
         ]
@@ -24392,7 +24392,7 @@
         "url": "/Mozart/Requiem-Levin/requiem.html",
         "sections": [
           {
-            "name": "Introitus 1: Requiem aeternam",
+            "name": "1: Requiem aeternam",
             "midiUrl": "/Mozart/Requiem-Levin/01-Requ.mid"
           },
           {
@@ -24400,7 +24400,7 @@
             "midiUrl": "/Mozart/Requiem-Levin/02-kyrie.mid"
           },
           {
-            "name": "Sequenz 3: Dies irae",
+            "name": "3: Dies irae",
             "midiUrl": "/Mozart/Requiem-Levin/03-Dies.mid"
           },
           {
@@ -24428,7 +24428,7 @@
             "midiUrl": "/Mozart/Requiem-Levin/08b-Amen.mid"
           },
           {
-            "name": "Offertorium 9: Domine Jesu",
+            "name": "9: Domine Jesu",
             "midiUrl": "/Mozart/Requiem-Levin/09-Domin.mid"
           },
           {
@@ -24436,7 +24436,7 @@
             "midiUrl": "/Mozart/Requiem-Levin/10-Host.mid"
           },
           {
-            "name": "Sanctus 11: Sanctus",
+            "name": "11: Sanctus",
             "midiUrl": "/Mozart/Requiem-Levin/11-Sanct.mid"
           },
           {
@@ -24444,11 +24444,11 @@
             "midiUrl": "/Mozart/Requiem-Levin/12-Bened.mid"
           },
           {
-            "name": "Agnus Dei 13: Agnus Dei",
+            "name": "13: Agnus Dei",
             "midiUrl": "/Mozart/Requiem-Levin/13-Agnus.mid"
           },
           {
-            "name": "Communio 14a: Lux aeterna",
+            "name": "14a: Lux aeterna",
             "midiUrl": "/Mozart/Requiem-Levin/14a-Lux.mid"
           },
           {
@@ -24859,15 +24859,15 @@
         "url": "/OperaChoruses/Choruses/choruses-CMT.html",
         "sections": [
           {
-            "name": "Beethoven's \"Prisoner's Chorus\" (From \"Fidelio\")",
+            "name": "Beethoven's \"Prisoner's Chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Beethoven/Choruses/Prisoner.mid"
           },
           {
-            "name": "Berlioz's \"Roman Carnival chorus\" (from \"Benvenuto Cellini\")",
+            "name": "Berlioz's \"Roman Carnival chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Berlioz/Choruses/RomCarn.mid"
           },
           {
-            "name": "Bizet's \"March of the Toreadors\" (Here they come)",
+            "name": "Bizet's \"March of the Toreadors\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Bizet/Choruses/Toreadiv.mid"
           },
           {
@@ -24875,99 +24875,99 @@
             "midiUrl": "http://learnchoralmusic.co.uk/Borodin/Polovtsian%20Dances/Polovtsn.mid"
           },
           {
-            "name": "Donizetti's \"Chorus of wedding guests\" (from Lucia di Lammermoor)",
+            "name": "Donizetti's \"Chorus of wedding guests\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Donizetti/Choruses/Wedding.mid"
           },
           {
-            "name": "Gounod's \"Soldiers' Chorus\" (from \"Faust\")",
+            "name": "Gounod's \"Soldiers' Chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Gounod/Choruses/Soldiers.mid"
           },
           {
-            "name": "Handel's \"Chorus of enchanted islanders\" (from \"Alcina\")",
+            "name": "Handel's \"Chorus of enchanted islanders\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Handel/Choruses/Islander.mid"
           },
           {
-            "name": "Leoncavallo's \"Bell Chorus\" (from Pagliacci)",
+            "name": "Leoncavallo's \"Bell Chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Leoncavallo/Choruses/BellChor.mid"
           },
           {
-            "name": "Mascagni's \"Easter Hymn\" (Regina coeli) (from Cavalleria Rusticana) Choir 1",
+            "name": "Mascagni's \"Easter Hymn\" (Regina coeli)",
             "midiUrl": "http://learnchoralmusic.co.uk/Mascagni/Choruses/Easter.mid"
           },
           {
-            "name": "Mozart's \"Voyager's chorus\" (from Idomeneo)",
+            "name": "Mozart's \"Voyager's chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Mozart/Choruses/Voyager.mid"
           },
           {
-            "name": "Mozart's \"Priests' chorus\" (from Die Zauberflote)",
+            "name": "Mozart's \"Priests' chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Mozart/Choruses/Priests'.mid"
           },
           {
-            "name": "Purcell's \"Dido's lament\" (from Dido and Aeneas)",
+            "name": "Purcell's \"Dido's lament\"",
             "midiUrl": "http://learnchoralmusic.co.uk/purcell/Choruses/38-39a.mid"
           },
           {
-            "name": "Rossini's \"Prayer\" (from Moise - Moses in Egypt)",
+            "name": "Rossini's \"Prayer\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Rossini/Choruses/Prayer.mid"
           },
           {
-            "name": "Rossini's \"Villagers' Chorus\" (from Guillaume Tell)",
+            "name": "Rossini's \"Villagers' Chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Rossini/Choruses/Villages.mid"
           },
           {
-            "name": "Tchaikovsky's \"Chorus of peasant girls\" (from Eugene Onegin)",
+            "name": "Tchaikovsky's \"Chorus of peasant girls\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Tchaikovsky/Choruses/Peasants.mid"
           },
           {
-            "name": "Verdi's \"Anvil chorus\" (from Il trovatore)",
+            "name": "Verdi's \"Anvil chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Verdi/Choruses/Anvil.mid"
           },
           {
-            "name": "Verdi's \"Brindisi\" (from La Traviata)",
+            "name": "Verdi's \"Brindisi\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Verdi/Choruses/Brindisi.mid"
           },
           {
-            "name": "Verdi's \"Chorus of the Hebrew slaves\" (from Nabucco)",
+            "name": "Verdi's \"Chorus of the Hebrew slaves\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Verdi/Choruses/Hebrew.mid"
           },
           {
-            "name": "Verdi's \"Chorus of Scottish Refugees\" (from MacBeth)",
+            "name": "Verdi's \"Chorus of Scottish Refugees\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Verdi/Choruses/ScotRefs.mid"
           },
           {
-            "name": "Verdi's \"Matadors' Chorus\" (from La Traviata)",
+            "name": "Verdi's \"Matadors' Chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Verdi/Choruses/Matadors.mid"
           },
           {
-            "name": "Verdi's \"Soldiers' Chorus\" (from Il trovatore)",
+            "name": "Verdi's \"Soldiers' Chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Verdi/Choruses/Soldiers.mid"
           },
           {
-            "name": "Verdi's \"Triumphal scene\" (from Aida)",
+            "name": "Verdi's \"Triumphal scene\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Verdi/Choruses/Triumph.mid"
           },
           {
-            "name": "Verdi's \"Witches Chorus\" (from MacBeth)",
+            "name": "Verdi's \"Witches Chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Verdi/Choruses/Witches.mid"
           },
           {
-            "name": "Wagner's \"Bridal chorus\" (from Lohengrin)",
+            "name": "Wagner's \"Bridal chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Wagner/Choruses/Bridal.mid"
           },
           {
-            "name": "Wagner's \"Procession and Chorale\" (from Die Meistersinger von Nurnberg)",
+            "name": "Wagner's \"Procession and Chorale\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Wagner/Choruses/Meister.mid"
           },
           {
-            "name": "Wagner's \"Pilgrim's chorus\" (from Tannhauser)",
+            "name": "Wagner's \"Pilgrim's chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Wagner/Choruses/Pilgrim.mid"
           },
           {
-            "name": "Wagner's \"Sailors' Chorus\" (from Der Fliegende Hollander)",
+            "name": "Wagner's \"Sailors' Chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Wagner/Choruses/Sailors'.mid"
           },
           {
-            "name": "Wagner's \"Spinners' chorus\" (from Der fliegender Hollander",
+            "name": "Wagner's \"Spinners' chorus\"",
             "midiUrl": "http://learnchoralmusic.co.uk/Wagner/Choruses/Spinners.mid"
           }
         ]
@@ -24997,107 +24997,107 @@
         "url": "/Orff/Carmina Burana/carmina.html",
         "sections": [
           {
-            "name": "Fortuna Imperatrix Mundi - - 1: O Fortuna",
+            "name": "1: O Fortuna",
             "midiUrl": "/Orff/Carmina Burana/01-fortu.mid"
           },
           {
-            "name": "Fortuna Imperatrix Mundi - - 1: O Fortuna - 2: Fortune plango vulnera",
+            "name": "2: Fortune plango vulnera",
             "midiUrl": "/Orff/Carmina Burana/02-fortu.mid"
           },
           {
-            "name": "I Primo vere - - 3: Veris leta facies",
+            "name": "3: Veris leta facies",
             "midiUrl": "/Orff/Carmina Burana/03-veris.mid"
           },
           {
-            "name": "I Primo vere - - 3: Veris leta facies - 4: Omnia sol temperat",
+            "name": "4: Omnia sol temperat",
             "midiUrl": "/Orff/Carmina Burana/04-omni.mid"
           },
           {
-            "name": "I Primo vere - - 3: Veris leta facies - 5: Ecce gratum",
+            "name": "5: Ecce gratum",
             "midiUrl": "/Orff/Carmina Burana/05-ecce.mid"
           },
           {
-            "name": "Uf dem anger - - 6: Tanz",
+            "name": "6: Tanz",
             "midiUrl": "/Orff/Carmina Burana/06-tanz.mid"
           },
           {
-            "name": "Uf dem anger - - 6: Tanz - 7: Floret silva",
+            "name": "7: Floret silva",
             "midiUrl": "/Orff/Carmina Burana/07-flore.mid"
           },
           {
-            "name": "Uf dem anger - - 6: Tanz - 8: Chramer, gip die varwe mir",
+            "name": "8: Chramer, gip die varwe mir",
             "midiUrl": "/Orff/Carmina Burana/08-chram.mid"
           },
           {
-            "name": "Uf dem anger - - 6: Tanz - 9: Reie",
+            "name": "9: Reie",
             "midiUrl": "/Orff/Carmina Burana/09a-reie.mid"
           },
           {
-            "name": "Uf dem anger - - 6: Tanz - Swaz hie gat umbe",
+            "name": "Swaz hie gat umbe",
             "midiUrl": "/Orff/Carmina Burana/09b-swaz.mid"
           },
           {
-            "name": "Uf dem anger - - 6: Tanz - Chume, chum, geselle min",
+            "name": "Chume, chum, geselle min",
             "midiUrl": "/Orff/Carmina Burana/09c-chum.mid"
           },
           {
-            "name": "Uf dem anger - - 6: Tanz - 10: Were diu werlt alle min",
+            "name": "10: Were diu werlt alle min",
             "midiUrl": "/Orff/Carmina Burana/10-were.mid"
           },
           {
-            "name": "II In Taberna - - 11: Estuans interius",
+            "name": "11: Estuans interius",
             "midiUrl": "/Orff/Carmina Burana/11-estua.mid"
           },
           {
-            "name": "II In Taberna - - 11: Estuans interius - 12; Olim lacus colueram",
+            "name": "12; Olim lacus colueram",
             "midiUrl": "/Orff/Carmina Burana/12-olim.mid"
           },
           {
-            "name": "II In Taberna - - 11: Estuans interius - 13: Ego sum abbas",
+            "name": "13: Ego sum abbas",
             "midiUrl": "/Orff/Carmina Burana/13-ego.mid"
           },
           {
-            "name": "II In Taberna - - 11: Estuans interius - 14: In taberna quando sumus",
+            "name": "14: In taberna quando sumus",
             "midiUrl": "/Orff/Carmina Burana/14-intab.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique",
+            "name": "15: Amor volat undique",
             "midiUrl": "/Orff/Carmina Burana/15-amor.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique - 16: Dies, nox et omnia",
+            "name": "16: Dies, nox et omnia",
             "midiUrl": "/Orff/Carmina Burana/16-dies.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique - 17: Stetit puella",
+            "name": "17: Stetit puella",
             "midiUrl": "/Orff/Carmina Burana/17-stet.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique - 18: Circa mea pectora",
+            "name": "18: Circa mea pectora",
             "midiUrl": "/Orff/Carmina Burana/18-circa.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique - 19: Si puer cum puellula",
+            "name": "19: Si puer cum puellula",
             "midiUrl": "/Orff/Carmina Burana/19-si-pu.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique - 20: Veni, veni, venias Choir 1",
+            "name": "20: Veni, veni, venias",
             "midiUrl": "/Orff/Carmina Burana/20-veni.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique - 21: In trutina",
+            "name": "21: In trutina",
             "midiUrl": "/Orff/Carmina Burana/21-intru.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique - 22: Tempus et iocundum",
+            "name": "22: Tempus et iocundum",
             "midiUrl": "/Orff/Carmina Burana/22-temp.mid"
           },
           {
-            "name": "III Cour d'Amours - - 15: Amor volat undique - 23: Dulcissime",
+            "name": "23: Dulcissime",
             "midiUrl": "/Orff/Carmina Burana/23-dulc.mid"
           },
           {
-            "name": "Banziflor et Helena - - 24: Ave formosissima",
+            "name": "24: Ave formosissima",
             "midiUrl": "/Orff/Carmina Burana/24-ave.mid"
           }
         ]
@@ -25426,7 +25426,7 @@
         "url": "/Parker/The Holy Child/the-holy-child.html",
         "sections": [
           {
-            "name": "Part I 1: The Angel",
+            "name": "1: The Angel",
             "midiUrl": "/Parker/The Holy Child/1-Angel.mid"
           },
           {
@@ -25442,7 +25442,7 @@
             "midiUrl": "/Parker/The Holy Child/4-Manger.mid"
           },
           {
-            "name": "Part II 5: Cradle Hymn",
+            "name": "5: Cradle Hymn",
             "midiUrl": "/Parker/The Holy Child/5-Cradle.mid"
           },
           {
@@ -26499,7 +26499,7 @@
             "midiUrl": "/purcell/Purcell-Anthology-12-Anthems/Jehova.mid"
           },
           {
-            "name": "Funeral Sentences (Funeral Music for Queen Mary) . . . Man that is born of a woman . . . In the midst of life we are in death . . . Thou knowest, Lord, the secrets of our hearts",
+            "name": "Funeral Sentences (Funeral Music for Queen Mary)",
             "midiUrl": "/purcell/Purcell-Anthology-12-Anthems/FunSents.mid"
           },
           {
@@ -26635,7 +26635,7 @@
         "url": "/purcell/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Dido's lament (from Dido and Aeneas)",
+            "name": "Dido's lament",
             "midiUrl": "/purcell/Choruses/38-39a.mid"
           }
         ]
@@ -27125,7 +27125,7 @@
             "midiUrl": "/purcell/Fairy Queen/05-Overture.mid"
           },
           {
-            "name": "Act I 6: Come let us leave the town",
+            "name": "6: Come let us leave the town",
             "midiUrl": "/purcell/Fairy Queen/06-ComeLet.mid"
           },
           {
@@ -27137,11 +27137,11 @@
             "midiUrl": "/purcell/Fairy Queen/08-1stActTune-Jig.mid"
           },
           {
-            "name": "Act II 9: Come all ye songsters",
+            "name": "9: Come all ye songsters",
             "midiUrl": "/purcell/Fairy Queen/09-ComeAll.mid"
           },
           {
-            "name": "Act II 10: 11: May the God of wit inspire 12: Echo",
+            "name": "10: 11: May the God of wit inspire 12: Echo",
             "midiUrl": "/purcell/Fairy Queen/10-11-12.mid"
           },
           {
@@ -27149,7 +27149,7 @@
             "midiUrl": "/purcell/Fairy Queen/13a-b-c.mid"
           },
           {
-            "name": "Entrance of Night, Mystery, Secrecy and Sleep, with Chorus of Attendants 14: See, even Night herself is here",
+            "name": "14: See, even Night herself is here",
             "midiUrl": "/purcell/Fairy Queen/14-See.mid"
           },
           {
@@ -27213,7 +27213,7 @@
             "midiUrl": "/purcell/Fairy Queen/29-3rdAct-Hornpipe.mid"
           },
           {
-            "name": "Act IV 30: Act IV - Symphony",
+            "name": "30: Act IV - Symphony",
             "midiUrl": "/purcell/Fairy Queen/30-ActIV-Symph.mid"
           },
           {
@@ -27401,63 +27401,63 @@
         "url": "/Rachmaninov/Vespers/vespers.html",
         "sections": [
           {
-            "name": "1: Introit - Come, let us worship (Priidite, poklonimsia)",
+            "name": "1: Introit - Come, let us worship",
             "midiUrl": "/Rachmaninov/Vespers/01-Intro.mid"
           },
           {
-            "name": "2: Bless the Lord, O my soul (Blagoslovi, dushe moya, Ghospoda)",
+            "name": "2: Bless the Lord, O my soul",
             "midiUrl": "/Rachmaninov/Vespers/02-Bless.mid"
           },
           {
-            "name": "3: Blessed is the Man (Blazhen muzh)",
+            "name": "3: Blessed is the Man",
             "midiUrl": "/Rachmaninov/Vespers/03-Blesd.mid"
           },
           {
-            "name": "4: Gladsome light (Svete tihiy)",
+            "name": "4: Gladsome light",
             "midiUrl": "/Rachmaninov/Vespers/04-Glad.mid"
           },
           {
-            "name": "5: Lord, now lettest Thou (Nunc dimittis) (Nine otpushchayeshi)",
+            "name": "5: Lord, now lettest Thou",
             "midiUrl": "/Rachmaninov/Vespers/05-Lord.mid"
           },
           {
-            "name": "6: Rejoice, O Virgin (Ave Maria) (Bogoroditse devo)",
+            "name": "6: Rejoice, O Virgin",
             "midiUrl": "/Rachmaninov/Vespers/06-AveMa.mid"
           },
           {
-            "name": "7: The Six Psalms (Glory be to God) (The Lesser Doxology) (Shestopsalmiye)",
+            "name": "7: The Six Psalms (Glory be to God)",
             "midiUrl": "/Rachmaninov/Vespers/07-Psalm.mid"
           },
           {
-            "name": "8: Praise the name of the Lord (Znamenny Chant) (Hvalite imia Ghospodne)",
+            "name": "8: Praise the name of the Lord",
             "midiUrl": "/Rachmaninov/Vespers/08-Prais.mid"
           },
           {
-            "name": "9: Blessed art Thou, O Lord (Znamenny Chant) (Blagosloven yesi, Ghospodi)",
+            "name": "9: Blessed art Thou, O Lord",
             "midiUrl": "/Rachmaninov/Vespers/09-Bless.mid"
           },
           {
-            "name": "10: Having beheld the Resurrection (Voskreseniye Hristovo videvshi)",
+            "name": "10: Having beheld the Resurrection",
             "midiUrl": "/Rachmaninov/Vespers/10-Resur.mid"
           },
           {
-            "name": "11: My Soul magnifies the Lord (Velichit dusha moya Ghospoda)",
+            "name": "11: My Soul magnifies the Lord",
             "midiUrl": "/Rachmaninov/Vespers/11-Soul.mid"
           },
           {
-            "name": "12: The Great Doxology (Znamenny Chant) (Slavosloviye velikoye)",
+            "name": "12: The Great Doxology",
             "midiUrl": "/Rachmaninov/Vespers/12-Great.mid"
           },
           {
-            "name": "13: The Troparian \"Today Salvation has come\" (Znamenny Chant) (Tropar \"Dnes spaseniye\")",
+            "name": "13: The Troparian \"Today Salvation has come\"",
             "midiUrl": "/Rachmaninov/Vespers/13-Trop.mid"
           },
           {
-            "name": "14: The Troparian \"Thou didst rise\" (Znamenny Chant) (Tropar \"Voskres iz groba\")",
+            "name": "14: The Troparian \"Thou didst rise\"",
             "midiUrl": "/Rachmaninov/Vespers/14-Trop2.mid"
           },
           {
-            "name": "15: To Thee, the Victorious Leader (\"Greek\" Chant) (Vzbrannoy voyevode)",
+            "name": "15: To Thee, the Victorious Leader",
             "midiUrl": "/Rachmaninov/Vespers/15-Thee.mid"
           }
         ]
@@ -27877,11 +27877,11 @@
         "url": "/Rossini/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Prayer (from Moise - Moses in Egypt)",
+            "name": "Prayer",
             "midiUrl": "/Rossini/Choruses/Prayer.mid"
           },
           {
-            "name": "Villagers' Chorus (from Guillaume Tell)",
+            "name": "Villagers' Chorus",
             "midiUrl": "/Rossini/Choruses/Villages.mid"
           }
         ]
@@ -28412,7 +28412,7 @@
             "midiUrl": "/Rutter/The Rutter Collection/Wexford/Wexford.mid"
           },
           {
-            "name": "When the Saints go marching in (with Choir1/Choir2 option, . . . Sops/Altos undivided)",
+            "name": "When the Saints go marching in",
             "midiUrl": "/Rutter/The Rutter Collection/SAINTS/SAINTS2.MID"
           }
         ]
@@ -29211,31 +29211,31 @@
             "midiUrl": "/Schubert/Mass-in-Eb-major/1-Kyrie.mid"
           },
           {
-            "name": "2: Gloria - Gloria in excelsis Deo",
+            "name": "Gloria in excelsis Deo",
             "midiUrl": "/Schubert/Mass-in-Eb-major/2-Gloria.mid"
           },
           {
-            "name": ". . . . . . . - Domine Deus",
+            "name": "Domine Deus",
             "midiUrl": "/Schubert/Mass-in-Eb-major/2-Domine.mid"
           },
           {
-            "name": ". . . . . . . - Quoniam tu solus sanctus",
+            "name": "Quoniam tu solus sanctus",
             "midiUrl": "/Schubert/Mass-in-Eb-major/2-Quon.mid"
           },
           {
-            "name": ". . . . . . . - Cum sancto Spiritu",
+            "name": "Cum sancto Spiritu",
             "midiUrl": "/Schubert/Mass-in-Eb-major/2-CumSan.mid"
           },
           {
-            "name": "3: Credo - Credo in unum Deum",
+            "name": "Credo in unum Deum",
             "midiUrl": "/Schubert/Mass-in-Eb-major/3-Credo.mid"
           },
           {
-            "name": ". . . . . . . - Et incarnatus & Crucifixus",
+            "name": "Et incarnatus & Crucifixus",
             "midiUrl": "/Schubert/Mass-in-Eb-major/3-Et-Inc.mid"
           },
           {
-            "name": ". . . . . . . - Et resurexit & Et vitam venturi",
+            "name": "Et resurexit & Et vitam venturi",
             "midiUrl": "/Schubert/Mass-in-Eb-major/3-Et-Res.mid"
           },
           {
@@ -29341,11 +29341,11 @@
             "midiUrl": "/Schubert/Mass in Aflat/6-Agnus.mid"
           },
           {
-            "name": "7: Osanna in excelsis (Variant of the second version)",
+            "name": "7: Osanna in excelsis",
             "midiUrl": "/Schubert/Mass in Aflat/7-Osanna.mid"
           },
           {
-            "name": "8: Cum Sancto Spiritu (Earlier version of the fugue)",
+            "name": "8: Cum Sancto Spiritu",
             "midiUrl": "/Schubert/Mass in Aflat/8-CumSan.mid"
           }
         ]
@@ -29423,7 +29423,7 @@
             "midiUrl": "/Schubert/Stabat Mater/04-engl.mid"
           },
           {
-            "name": "5: Wer wird Zahren sanften - Voices 1 . . . . . . . . . . . . . . . . . . . . . . - Voices 2",
+            "name": "5: Wer wird Zahren sanften",
             "midiUrl": "/Schubert/Stabat Mater/05-werw2.mid"
           },
           {
@@ -29920,7 +29920,7 @@
         "url": "/Smith/Preces-Responses/preces-responses.html",
         "sections": [
           {
-            "name": "Preces O Lord, open Thou our Lips. And our mouth shall shew forth thy praise.",
+            "name": "O Lord, open Thou our Lips. And our mouth shall shew forth thy praise.",
             "midiUrl": "/Smith/Preces-Responses/01-lips.mid"
           },
           {
@@ -29936,7 +29936,7 @@
             "midiUrl": "/Smith/Preces-Responses/04-Prais.mid"
           },
           {
-            "name": "Responses The Lord be with you. And with thy spirit.",
+            "name": "The Lord be with you. And with thy spirit.",
             "midiUrl": "/Smith/Preces-Responses/05-Lord.mid"
           },
           {
@@ -29968,7 +29968,7 @@
             "midiUrl": "/Smith/Preces-Responses/13-heart.mid"
           },
           {
-            "name": "Collects I - Amen",
+            "name": "I - Amen",
             "midiUrl": "/Smith/Preces-Responses/14-Coll.mid"
           },
           {
@@ -30026,7 +30026,7 @@
         "url": "/Spohr/Last-Judgement/last-judgement.html",
         "sections": [
           {
-            "name": "PART THE FIRST 1: Overture",
+            "name": "1: Overture",
             "midiUrl": "/Spohr/Last-Judgement/00-Overture.mid"
           },
           {
@@ -30070,7 +30070,7 @@
             "midiUrl": "/Spohr/Last-Judgement/12-Lord.mid"
           },
           {
-            "name": "PART THE SECOND 13: Symphony",
+            "name": "13: Symphony",
             "midiUrl": "/Spohr/Last-Judgement/13-Symphony.mid"
           },
           {
@@ -30360,11 +30360,11 @@
             "midiUrl": "/Stanford/Via Victorix/3-Credo.mid"
           },
           {
-            "name": "4: Sanctus . . . (. . . . to page 107)",
+            "name": "4: Sanctus . . .",
             "midiUrl": "/Stanford/Via Victorix/4-Sanctus.mid"
           },
           {
-            "name": "5: . . . Benedictus (from page 106 . . . .)",
+            "name": "5: . . . Benedictus",
             "midiUrl": "/Stanford/Via Victorix/5-Benedictus.mid"
           },
           {
@@ -31118,11 +31118,11 @@
         "url": "/Tchaikovsky/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Chorus of peasant girls (from Eugene Onegin)",
+            "name": "Chorus of peasant girls",
             "midiUrl": "/Tchaikovsky/Choruses/Peasants.mid"
           },
           {
-            "name": "Waltz scene (from Eugene Onegin)",
+            "name": "Waltz scene",
             "midiUrl": "/Tchaikovsky/Choruses/Waltz.mid"
           }
         ]
@@ -31422,7 +31422,7 @@
             "midiUrl": "/Tomkins/Preces+Responses/1-lips.mid"
           },
           {
-            "name": "The Lord be with you Let us pray For Farmer's \"Lord's Prayer\", see Farmer",
+            "name": "The Lord be with you Let us pray",
             "midiUrl": "/Tomkins/Preces+Responses/5-Lord.mid"
           },
           {
@@ -31629,7 +31629,7 @@
         "url": "/Turner/Geths-to-Gol/geths-to-gol.html",
         "sections": [
           {
-            "name": "Part I 1: Choral",
+            "name": "1: Choral",
             "midiUrl": "/Turner/Geths-to-Gol/1-01-Choral.mid"
           },
           {
@@ -31657,7 +31657,7 @@
             "midiUrl": "/Turner/Geths-to-Gol/1-07-Hymn.mid"
           },
           {
-            "name": "Part II 8: Choral",
+            "name": "8: Choral",
             "midiUrl": "/Turner/Geths-to-Gol/2-01-Choral.mid"
           },
           {
@@ -31681,7 +31681,7 @@
             "midiUrl": "/Turner/Geths-to-Gol/2-05-HymnB.mid"
           },
           {
-            "name": "Part III 13: Choral",
+            "name": "13: Choral",
             "midiUrl": "/Turner/Geths-to-Gol/3-01-Choral.mid"
           },
           {
@@ -31902,7 +31902,7 @@
             "midiUrl": "/Vaughan-Williams/5-English-Folk-Songs/3-tide.mid"
           },
           {
-            "name": "4: The lover's ghost (Well met, my own true Love)",
+            "name": "4: The lover's ghost",
             "midiUrl": "/Vaughan-Williams/5-English-Folk-Songs/4-ghost.mid"
           },
           {
@@ -31932,7 +31932,7 @@
             "midiUrl": "/Vaughan-Williams/5-Mystical-Songs/4-call.mid"
           },
           {
-            "name": "5: Antiphon . . (Let all the world)",
+            "name": "5: Antiphon",
             "midiUrl": "/Vaughan-Williams/5-Mystical-Songs/5-antiph.mid"
           }
         ]
@@ -32304,35 +32304,35 @@
         "url": "/Verdi/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Anvil chorus (from Il trovatore)",
+            "name": "Anvil chorus",
             "midiUrl": "/Verdi/Choruses/Anvil.mid"
           },
           {
-            "name": "Brindisi (from La Traviata)",
+            "name": "Brindisi",
             "midiUrl": "/Verdi/Choruses/Brindisi.mid"
           },
           {
-            "name": "Chorus of the Hebrew slaves (from Nabucco)",
+            "name": "Chorus of the Hebrew slaves",
             "midiUrl": "/Verdi/Choruses/Hebrew.mid"
           },
           {
-            "name": "Chorus of Scottish Refugees (from MacBeth)",
+            "name": "Chorus of Scottish Refugees",
             "midiUrl": "/Verdi/Choruses/ScotRefs.mid"
           },
           {
-            "name": "Matadors' Chorus (from La Traviata)",
+            "name": "Matadors' Chorus",
             "midiUrl": "/Verdi/Choruses/Matadors.mid"
           },
           {
-            "name": "Soldiers' Chorus (from Il trovatore)",
+            "name": "Soldiers' Chorus",
             "midiUrl": "/Verdi/Choruses/Soldiers.mid"
           },
           {
-            "name": "Triumphal scene (from Aida)",
+            "name": "Triumphal scene",
             "midiUrl": "/Verdi/Choruses/Triumph.mid"
           },
           {
-            "name": "Witches Chorus (from MacBeth)",
+            "name": "Witches Chorus",
             "midiUrl": "/Verdi/Choruses/Witches.mid"
           }
         ]
@@ -32400,19 +32400,19 @@
             "midiUrl": "/Verdi/Requiem/b2di-tub.mid"
           },
           {
-            "name": "2: Dies Irae - Tuba Mirum - Liber Scriptus",
+            "name": "2: Dies Irae - Liber Scriptus",
             "midiUrl": "/Verdi/Requiem/b3liber.mid"
           },
           {
-            "name": "2: Dies Irae - Tuba Mirum - Quid sum Miser",
+            "name": "2: Dies Irae - Quid sum Miser",
             "midiUrl": "/Verdi/Requiem/b4quid.mid"
           },
           {
-            "name": "2: Dies Irae - Tuba Mirum - Rex Tremendae - - - - - - - - - Recordare",
+            "name": "2: Dies Irae - Rex Tremendae, Recordare",
             "midiUrl": "/Verdi/Requiem/b5-6rx-r.mid"
           },
           {
-            "name": "2: Dies Irae - Tuba Mirum - Ingemisco, - - - - - - - - - Confutatis Maledictus, - - - - - - - - - Lacrymosa",
+            "name": "2: Dies Irae - Ingemisco, Confutatis Maledictus, Lacrymosa",
             "midiUrl": "/Verdi/Requiem/b7-8-9.mid"
           },
           {
@@ -32420,7 +32420,7 @@
             "midiUrl": "/Verdi/Requiem/c-offert.mid"
           },
           {
-            "name": "4: Sanctus [ Choir 1 ]",
+            "name": "4: Sanctus",
             "midiUrl": "/Verdi/Requiem/dsanctus.mid"
           },
           {
@@ -32436,11 +32436,11 @@
             "midiUrl": "/Verdi/Requiem/g1-lib.mid"
           },
           {
-            "name": "7: Libera Me (1) - Dies Irae",
+            "name": "7: Libera Me - Dies Irae",
             "midiUrl": "/Verdi/Requiem/g2-dies.mid"
           },
           {
-            "name": "7: Libera Me (1) - Libera Me (2)",
+            "name": "7: Libera Me - Libera Me (2)",
             "midiUrl": "/Verdi/Requiem/g3-lib2.mid"
           }
         ]
@@ -33090,23 +33090,23 @@
         "url": "/Wagner/Choruses/choruses.html",
         "sections": [
           {
-            "name": "Bridal chorus (from Lohengrin)",
+            "name": "Bridal chorus",
             "midiUrl": "/Wagner/Choruses/Bridal.mid"
           },
           {
-            "name": "Procession and Chorale (from Die Meistersinger von Nurnberg)",
+            "name": "Procession and Chorale",
             "midiUrl": "/Wagner/Choruses/Meister.mid"
           },
           {
-            "name": "Pilgrim's chorus (from Tannhauser)",
+            "name": "Pilgrim's chorus",
             "midiUrl": "/Wagner/Choruses/Pilgrim.mid"
           },
           {
-            "name": "Sailors' Chorus (from Der Fliegende Hollander)",
+            "name": "Sailors' Chorus",
             "midiUrl": "/Wagner/Choruses/Sailors'.mid"
           },
           {
-            "name": "Spinners' chorus (from Der fliegender Hollander",
+            "name": "Spinners' chorus",
             "midiUrl": "/Wagner/Choruses/Spinners.mid"
           }
         ]
