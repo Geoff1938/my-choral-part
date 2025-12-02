@@ -7,7 +7,10 @@ import {
     AUDIO,
     MEMORY,
     VOICE_TO_INSTRUMENT,
-    VOICE_PARTS
+    VOICE_PARTS,
+    SOUNDFONT_MODE,
+    SOUNDFONT_URLS,
+    WEBAUDIOFONT_URLS
 } from './constants.js';
 
 import {
@@ -82,12 +85,21 @@ class MIDIPlayer {
         // Mapping of voice parts to MIDI instrument names
         this.voicePartInstruments = VOICE_TO_INSTRUMENT;
 
+        // Soundfont mode - check URL parameters for /nofonts or /smallfonts
+        this.soundfontMode = this.detectSoundfontMode();
+
+        // Loading progress tracking
+        this.loadingProgress = { current: 0, total: 0 };
+
         this.initializeElements();
 
         // Initialize helper modules
         this.instrumentLoader = new InstrumentLoader(this.maxCacheSize);
         this.statusManager = new StatusManager(this.loadingStatus);
         this.recentWorksManager = new RecentWorksManager();
+
+        // Show soundfont mode warning if not in normal mode
+        this.showSoundfontModeWarning();
 
         this.loadPreferences();
         this.attachEventListeners();
@@ -145,6 +157,117 @@ class MIDIPlayer {
         this.deviceInfo = capabilities;
     }
 
+    /**
+     * Detect soundfont mode from URL parameters
+     * Default is LIGHT (WebAudioFont) for low memory usage
+     * Use /fullfonts for high-quality soundfonts (high memory)
+     * @returns {string} Soundfont mode: 'light', 'full', 'ultralight', or 'none'
+     */
+    detectSoundfontMode() {
+        const path = window.location.pathname.toLowerCase();
+        const searchParams = new URLSearchParams(window.location.search);
+
+        // Check URL path for various modes (URL always takes precedence)
+        if (path.includes('/nofonts') || searchParams.has('nofonts')) {
+            console.log('[Soundfont] Mode: NONE (no soundfonts will be loaded)');
+            return SOUNDFONT_MODE.NONE;
+        }
+
+        if (path.includes('/tinysynth') || searchParams.has('tinysynth')) {
+            console.log('[Soundfont] Mode: ULTRALIGHT (using webaudio-tinysynth - minimal memory)');
+            return SOUNDFONT_MODE.ULTRALIGHT;
+        }
+
+        if (path.includes('/fullfonts') || searchParams.has('fullfonts')) {
+            console.log('[Soundfont] Mode: FULL (using FluidR3_GM - high quality, high memory)');
+            return SOUNDFONT_MODE.FULL;
+        }
+
+        if (path.includes('/lightfonts') || searchParams.has('lightfonts')) {
+            console.log('[Soundfont] Mode: LIGHT (WebAudioFont, low memory)');
+            return SOUNDFONT_MODE.LIGHT;
+        }
+
+        // Check localStorage for user preference (only if no URL override)
+        const savedMode = localStorage.getItem('audioQuality');
+        if (savedMode === 'full') {
+            console.log('[Soundfont] Mode: FULL (from user preference)');
+            return SOUNDFONT_MODE.FULL;
+        }
+
+        // Default to LIGHT mode (WebAudioFont) - good quality with low memory (~220MB)
+        console.log('[Soundfont] Mode: LIGHT (default - WebAudioFont, low memory)');
+        return SOUNDFONT_MODE.LIGHT;
+    }
+
+    /**
+     * Show soundfont mode info message
+     * Called after statusManager is initialized
+     */
+    showSoundfontModeWarning() {
+        if (this.soundfontMode === SOUNDFONT_MODE.NONE) {
+            this.showStatus('Audio mode: Simple synth (testing only)', 'warning');
+        } else if (this.soundfontMode === SOUNDFONT_MODE.ULTRALIGHT) {
+            this.showStatus('Audio mode: TinySynth (minimal memory)', 'info');
+        } else if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
+            this.showStatus('Audio mode: Full soundfonts (high quality, high memory)', 'info');
+        }
+        // Don't show message for LIGHT mode - it's the default
+    }
+
+    /**
+     * Get the soundfont URL base for the current mode
+     * @returns {string|null} Soundfont URL base, or null if not using traditional soundfonts
+     */
+    getSoundfontUrl() {
+        if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
+            return SOUNDFONT_URLS.full;
+        }
+        // Other modes (LIGHT, ULTRALIGHT, NONE) don't use traditional soundfont URLs
+        return null;
+    }
+
+    /**
+     * Check if memory is sufficient for loading the required number of instruments
+     * @param {number} instrumentCount - Number of instruments to load
+     * @returns {{canLoad: boolean, message: string, estimatedMB: number}}
+     */
+    checkMemoryForInstruments(instrumentCount) {
+        const estimatedMB = instrumentCount * MEMORY.MB_PER_INSTRUMENT;
+        const deviceMemoryGB = this.deviceInfo?.deviceMemory;
+
+        // If we can't detect device memory, use a conservative limit
+        let maxInstruments = MEMORY.MAX_INSTRUMENTS_DEFAULT;
+
+        if (deviceMemoryGB !== undefined) {
+            if (deviceMemoryGB <= 4) {
+                maxInstruments = MEMORY.MAX_INSTRUMENTS_4GB;
+            } else if (deviceMemoryGB <= 6) {
+                maxInstruments = 12;
+            } else if (deviceMemoryGB <= 8) {
+                maxInstruments = 16;
+            }
+        } else if (this.deviceInfo?.hasLimitedMemory) {
+            // Fallback for when deviceMemory API isn't available but we detected limited memory
+            maxInstruments = MEMORY.MAX_INSTRUMENTS_4GB;
+        }
+
+        const canLoad = instrumentCount <= maxInstruments;
+
+        let message = '';
+        if (!canLoad) {
+            message = `This movement requires ${instrumentCount} instruments (~${estimatedMB}MB). `;
+            if (deviceMemoryGB !== undefined) {
+                message += `Your device has ${deviceMemoryGB}GB RAM and can safely handle ${maxInstruments} instruments. `;
+            } else {
+                message += `Your device can safely handle ${maxInstruments} instruments. `;
+            }
+            message += 'Loading this movement may crash your browser. Try using /smallfonts or /nofonts in the URL, or select a simpler movement.';
+        }
+
+        return { canLoad, message, estimatedMB, maxInstruments, instrumentCount };
+    }
+
     initializeElements() {
         // Tab elements
         this.tabButtons = document.querySelectorAll('.tab-button');
@@ -200,6 +323,13 @@ class MIDIPlayer {
         this.shareableUrlInputSettings = document.getElementById('shareable-url-settings');
         this.copyUrlBtnSettings = document.getElementById('copy-url-btn-settings');
         this.noWorkSelectedMsg = document.getElementById('no-work-selected-msg');
+
+        // Audio quality settings
+        this.audioQualityLight = document.getElementById('audio-quality-light');
+        this.audioQualityFull = document.getElementById('audio-quality-full');
+        this.audioModeDisplay = document.getElementById('audio-mode-display');
+        this.audioQualityNote = document.getElementById('audio-quality-note');
+        this.applyAudioQualityBtn = document.getElementById('apply-audio-quality-btn');
 
         // Balance label elements
         this.balanceVoicePartSpan = document.getElementById('balance-voice-part');
@@ -268,6 +398,42 @@ class MIDIPlayer {
     savePreferences() {
         localStorage.setItem('voicePart', this.voicePart);
         localStorage.setItem('balance', this.balance);
+    }
+
+    /**
+     * Initialize audio quality settings UI based on current mode
+     */
+    initializeAudioQualitySettings() {
+        // Set radio button based on current mode
+        const isFullMode = this.soundfontMode === SOUNDFONT_MODE.FULL;
+
+        if (this.audioQualityLight) {
+            this.audioQualityLight.checked = !isFullMode;
+        }
+        if (this.audioQualityFull) {
+            this.audioQualityFull.checked = isFullMode;
+        }
+
+        // Update display text
+        if (this.audioModeDisplay) {
+            if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
+                this.audioModeDisplay.textContent = 'High quality';
+            } else if (this.soundfontMode === SOUNDFONT_MODE.ULTRALIGHT) {
+                this.audioModeDisplay.textContent = 'TinySynth (minimal)';
+            } else if (this.soundfontMode === SOUNDFONT_MODE.NONE) {
+                this.audioModeDisplay.textContent = 'No soundfonts';
+            } else {
+                this.audioModeDisplay.textContent = 'Standard';
+            }
+        }
+
+        // Hide note and button initially
+        if (this.audioQualityNote) {
+            this.audioQualityNote.style.display = 'none';
+        }
+        if (this.applyAudioQualityBtn) {
+            this.applyAudioQualityBtn.style.display = 'none';
+        }
     }
 
     updateBalanceLabel() {
@@ -1148,17 +1314,28 @@ class MIDIPlayer {
 
                 // Fetch movements for this work
                 const movementsResponse = await fetch(`/api/composer/${encodeURIComponent(composer)}/work/${encodeURIComponent(work)}/sections`);
-                movements = await movementsResponse.json();
+                const movementsData = await movementsResponse.json();
 
-                // If recent movement is available, find and select it
-                if (recentMovement && movements.length > 0) {
-                    const recentMovementIndex = movements.findIndex(m => m.name === recentMovement);
-                    if (recentMovementIndex >= 0) {
-                        // We'll set this after populating the dropdown
-                        this.recentMovementIndex = recentMovementIndex + 1; // +1 for placeholder option
+                // Validate that we got a valid array of movements
+                if (Array.isArray(movementsData) && movementsData.length > 0) {
+                    movements = movementsData;
+
+                    // If recent movement is available, find and select it
+                    if (recentMovement) {
+                        const recentMovementIndex = movements.findIndex(m => m.name === recentMovement);
+                        if (recentMovementIndex >= 0) {
+                            // We'll set this after populating the dropdown
+                            this.recentMovementIndex = recentMovementIndex + 1; // +1 for placeholder option
+                        }
                     }
+                } else {
+                    // API returned invalid data, fall back to Mozart Requiem
+                    console.warn('Invalid movements data for recent work, falling back to default');
+                    composer = null; // Force fallback below
                 }
-            } else {
+            }
+
+            if (!composer) {
                 // No recent works - load Mozart - Requiem as default
                 composer = 'Mozart (Wolfgang Amadeus)';
                 work = 'Requiem (Sussmayr completion)';
@@ -1210,7 +1387,7 @@ class MIDIPlayer {
             this.updateWorkDisplay();
 
             // Update the currently selected movement display on Settings tab
-            if (this.currentMovementName) {
+            if (this.currentMovementName && movements && movements.length > 0) {
                 const firstMovementName = movements[0].name;
                 // For single-movement works where work name equals movement name, don't repeat it
                 if (work === firstMovementName) {
@@ -1399,6 +1576,48 @@ class MIDIPlayer {
             this.applyBalance(); // Reapply balance with new voice part
         });
 
+        // Audio quality setting
+        if (this.audioQualityLight && this.audioQualityFull) {
+            // Initialize radio buttons based on current mode
+            this.initializeAudioQualitySettings();
+
+            // Handle radio button changes
+            const handleAudioQualityChange = (e) => {
+                const selectedValue = e.target.value;
+                const currentMode = this.soundfontMode === SOUNDFONT_MODE.FULL ? 'full' : 'light';
+
+                // Show note and button if selection differs from current mode
+                if (selectedValue !== currentMode) {
+                    if (this.audioQualityNote) {
+                        this.audioQualityNote.style.display = 'block';
+                    }
+                    if (this.applyAudioQualityBtn) {
+                        this.applyAudioQualityBtn.style.display = 'inline-block';
+                    }
+                } else {
+                    if (this.audioQualityNote) {
+                        this.audioQualityNote.style.display = 'none';
+                    }
+                    if (this.applyAudioQualityBtn) {
+                        this.applyAudioQualityBtn.style.display = 'none';
+                    }
+                }
+            };
+
+            this.audioQualityLight.addEventListener('change', handleAudioQualityChange);
+            this.audioQualityFull.addEventListener('change', handleAudioQualityChange);
+
+            // Apply button click - save preference and reload
+            if (this.applyAudioQualityBtn) {
+                this.applyAudioQualityBtn.addEventListener('click', () => {
+                    const selectedValue = this.audioQualityFull.checked ? 'full' : 'light';
+                    localStorage.setItem('audioQuality', selectedValue);
+                    // Reload to base URL (remove any /lightfonts, /fullfonts, etc.)
+                    window.location.href = window.location.origin;
+                });
+            }
+        }
+
         this.playBtn.addEventListener('click', () => this.play());
         this.pauseBtn.addEventListener('click', () => this.pause());
         this.stopBtn.addEventListener('click', () => this.stop());
@@ -1570,6 +1789,154 @@ class MIDIPlayer {
             }
         });
 
+        // Hidden Alt+M keystroke to toggle memory usage display
+        this.memoryDisplayVisible = false;
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey && (e.key === 'm' || e.key === 'M')) {
+                e.preventDefault();
+                this.toggleMemoryDisplay();
+            }
+        });
+
+    }
+
+    /**
+     * Toggle display of memory usage information (hidden feature, Alt+M)
+     */
+    toggleMemoryDisplay() {
+        this.memoryDisplayVisible = !this.memoryDisplayVisible;
+
+        if (this.memoryDisplayVisible) {
+            this.showMemoryInfo();
+        } else {
+            this.statusManager.hide();
+        }
+    }
+
+    /**
+     * Show memory usage information in the status area
+     */
+    showMemoryInfo() {
+        const info = [];
+
+        // Device memory (if available)
+        if (navigator.deviceMemory) {
+            info.push(`Device RAM: ${navigator.deviceMemory}GB`);
+        } else {
+            info.push('Device RAM: unknown');
+        }
+
+        // JS heap memory (Chrome only, non-standard)
+        if (window.performance && window.performance.memory) {
+            const mem = window.performance.memory;
+            const usedMB = Math.round(mem.usedJSHeapSize / 1024 / 1024);
+            const limitGB = Math.round(mem.jsHeapSizeLimit / 1024 / 1024 / 1024);
+            info.push(`JS Heap: ${usedMB}MB (limit ${limitGB}GB)`);
+        }
+
+        // Audio buffer info based on soundfont mode
+        const cachedCount = this.instrumentCache.size;
+        let audioInfo = '';
+
+        if (this.soundfontMode === SOUNDFONT_MODE.NONE) {
+            // Built-in Tone.js synths use minimal memory
+            audioInfo = `${this.instruments.length} instruments, no fonts (~0MB)`;
+        } else if (this.soundfontMode === SOUNDFONT_MODE.ULTRALIGHT) {
+            // TinySynth uses oscillator synthesis (~0MB external data)
+            audioInfo = `TinySynth (built-in GM synth, ~0MB external)`;
+        } else if (this.soundfontMode === SOUNDFONT_MODE.LIGHT) {
+            // WebAudioFont uses zone-based sampling (~5MB per instrument estimate)
+            const instrumentCount = this.instruments.length;
+            const estimatedMB = instrumentCount * 5;
+            audioInfo = `${instrumentCount} instruments, light fonts (~${estimatedMB}MB)`;
+        } else if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
+            // Full fonts (~35MB per instrument)
+            const estimatedMB = cachedCount * MEMORY.MB_PER_INSTRUMENT;
+            audioInfo = `${cachedCount} instruments, full fonts (~${estimatedMB}MB)`;
+        } else {
+            // Unknown mode - show generic info
+            audioInfo = `${this.instruments.length} instruments`;
+        }
+
+        info.push(`Audio buffers: ${audioInfo}`);
+
+        this.showStatus(info.join(' | '), 'info');
+
+        // Log detailed diagnostics to console
+        this.logDetailedMemoryDiagnostics();
+    }
+
+    /**
+     * Log detailed memory diagnostics to console for debugging
+     */
+    logDetailedMemoryDiagnostics() {
+        console.group('[Memory Diagnostics]');
+
+        // Soundfont mode
+        console.log('Soundfont mode:', this.soundfontMode);
+
+        // MIDI data size
+        if (this.midi) {
+            const midiStr = JSON.stringify(this.midi);
+            console.log('MIDI object size:', Math.round(midiStr.length / 1024), 'KB (JSON serialized)');
+            console.log('MIDI tracks:', this.midi.tracks.length);
+
+            let totalNotes = 0;
+            this.midi.tracks.forEach((track, i) => {
+                if (track.notes.length > 0) {
+                    console.log(`  Track ${i}: ${track.notes.length} notes`);
+                    totalNotes += track.notes.length;
+                }
+            });
+            console.log('Total notes:', totalNotes);
+        }
+
+        // Tone.Parts size
+        console.log('Tone.Parts count:', this.parts.length);
+        if (this.parts.length > 0) {
+            let totalEvents = 0;
+            this.parts.forEach((part, i) => {
+                // Tone.Part stores events internally
+                const eventCount = part._events ? part._events.length : 'unknown';
+                console.log(`  Part ${i}: ${eventCount} events`);
+                if (typeof eventCount === 'number') totalEvents += eventCount;
+            });
+            console.log('Total Part events:', totalEvents);
+        }
+
+        // Instruments
+        console.log('Instruments count:', this.instruments.length);
+        console.log('Instrument cache size:', this.instrumentCache.size);
+
+        // WebAudioFont presets (if in light mode)
+        if (this.soundfontMode === SOUNDFONT_MODE.LIGHT) {
+            console.log('WebAudioFont presets loaded:');
+            const loadedPresets = new Set();
+            this.instruments.forEach(inst => {
+                if (inst.preset && inst.preset.zones) {
+                    const presetId = inst.preset.zones.length + ' zones';
+                    if (!loadedPresets.has(presetId)) {
+                        loadedPresets.add(presetId);
+                        console.log(`  Preset with ${inst.preset.zones.length} zones`);
+                    }
+                }
+            });
+        }
+
+        // Check what global objects exist
+        console.log('Global objects check:');
+        console.log('  Tone loaded:', typeof Tone !== 'undefined');
+        console.log('  Soundfont loaded:', typeof Soundfont !== 'undefined');
+        console.log('  WebAudioFontPlayer loaded:', typeof WebAudioFontPlayer !== 'undefined');
+        console.log('  Midi loaded:', typeof Midi !== 'undefined');
+
+        // Audio context state
+        if (Tone && Tone.context) {
+            console.log('Audio context state:', Tone.context.state);
+            console.log('Audio context sample rate:', Tone.context.sampleRate);
+        }
+
+        console.groupEnd();
     }
 
     updateLoopDisplay() {
@@ -2387,6 +2754,9 @@ class MIDIPlayer {
             return;
         }
 
+        // Store URL for TinySynth mode (needs to re-fetch the raw MIDI data)
+        this.lastLoadedUrl = url;
+
         // Check if URL points to an HTML page (copyright-protected works)
         if (url.endsWith('.html') || url.endsWith('.htm')) {
             this.showStatus('Sorry, this work is not publicly available for copyright reasons.', 'error');
@@ -2544,6 +2914,272 @@ class MIDIPlayer {
             }
         }
 
+        // Count unique instruments needed
+        const uniqueInstruments = new Set();
+        for (const { track } of trackData) {
+            uniqueInstruments.add(this.getInstrumentName(track));
+        }
+        const instrumentCount = uniqueInstruments.size;
+
+        // Check memory before loading (only for full soundfont mode)
+        // Light fonts and other modes don't need this check as they use much less memory
+        if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
+            const memoryCheck = this.checkMemoryForInstruments(instrumentCount);
+            if (!memoryCheck.canLoad) {
+                this.showStatus(memoryCheck.message, 'error');
+                throw new MemoryError(memoryCheck.message);
+            }
+            console.log(`[Memory] ${instrumentCount} unique instruments (~${memoryCheck.estimatedMB}MB), limit: ${memoryCheck.maxInstruments}`);
+        }
+
+        // If soundfont mode is 'none', use Tone.js built-in synth (no external soundfonts)
+        if (this.soundfontMode === SOUNDFONT_MODE.NONE) {
+            console.log('[Soundfont] Using built-in Tone.js synth (nofonts mode)');
+
+            // Ensure Tone.js is started
+            await Tone.start();
+
+            // Create a simple synth for each track
+            for (const { track, trackIndex } of trackData) {
+                // Create a PolySynth with simple triangle wave
+                const synth = new Tone.PolySynth(Tone.Synth, {
+                    oscillator: { type: 'triangle' },
+                    envelope: {
+                        attack: 0.02,
+                        decay: 0.1,
+                        sustain: 0.3,
+                        release: 0.8
+                    }
+                }).toDestination();
+
+                // Reduce volume to avoid clipping with many tracks
+                synth.volume.value = -12;
+
+                this.instruments.push({
+                    instrument: synth,
+                    gainNode: null,
+                    trackIndex,
+                    volumeMultiplier: 1.0,
+                    isToneSynth: true  // Flag to indicate this is a Tone.js synth
+                });
+                this.channelVolumes[trackIndex] = 100;
+
+                // Create a Tone.Part for this track
+                const tempoScale = 1 / this.tempoMultiplier;
+                const notes = track.notes.map(note => ({
+                    time: Math.max(0, (note.time - this.skipToTime) * tempoScale),
+                    note: note.name,
+                    duration: note.duration * tempoScale,
+                    velocity: note.velocity
+                }));
+
+                const instrumentIndex = this.instruments.length - 1;
+                const part = new Tone.Part((time, value) => {
+                    const instrumentData = this.instruments[instrumentIndex];
+                    const effectiveVolume = value.velocity * instrumentData.volumeMultiplier * this.masterVolume;
+                    instrumentData.instrument.triggerAttackRelease(
+                        value.note,
+                        value.duration,
+                        time,
+                        effectiveVolume
+                    );
+                }, notes);
+
+                this.parts.push(part);
+            }
+
+            console.log(`[Soundfont] Created ${trackData.length} built-in synths`);
+            return;
+        }
+
+        // If soundfont mode is 'ultralight', use webaudio-tinysynth (built-in GM synth)
+        // TinySynth has its own MIDI sequencer, so we use it differently
+        if (this.soundfontMode === SOUNDFONT_MODE.ULTRALIGHT) {
+            console.log('[Soundfont] Using webaudio-tinysynth (ultralight mode - minimal memory)');
+
+            // Initialize TinySynth if not already done
+            if (!this.tinySynth) {
+                this.tinySynth = new WebAudioTinySynth({
+                    quality: 1,      // 1 = high quality GM sounds
+                    voices: 64,      // max simultaneous notes
+                    useReverb: 1     // enable reverb for better sound
+                });
+                console.log('[TinySynth] Initialized with quality=1, voices=64');
+            }
+
+            // We need the original MIDI ArrayBuffer - re-fetch it
+            // (The Midi parser consumed it, so we need to get it again)
+            const proxyUrl = `/proxy?url=${encodeURIComponent(this.lastLoadedUrl)}`;
+            const response = await fetch(proxyUrl);
+            const arrayBuffer = await response.arrayBuffer();
+
+            // Load MIDI into TinySynth
+            this.tinySynth.loadMIDI(arrayBuffer);
+            console.log('[TinySynth] MIDI loaded');
+
+            // Mark that we're using TinySynth for playback
+            this.usingTinySynth = true;
+
+            // Store a dummy instrument entry for UI compatibility
+            for (const { track, trackIndex } of trackData) {
+                this.instruments.push({
+                    instrument: null,
+                    gainNode: null,
+                    trackIndex,
+                    volumeMultiplier: 1.0,
+                    isTinySynth: true
+                });
+                this.channelVolumes[trackIndex] = 100;
+            }
+
+            // We don't create Tone.Parts - TinySynth handles everything
+            console.log(`[TinySynth] Ready with ${trackData.length} tracks`);
+            return;
+        }
+
+        // If soundfont mode is 'light', use WebAudioFont (zone-based sampling, lower memory)
+        if (this.soundfontMode === SOUNDFONT_MODE.LIGHT) {
+            console.log('[Soundfont] Using WebAudioFont (lightfonts mode - low memory)');
+
+            // Ensure audio context is started
+            await Tone.start();
+            const audioContext = Tone.context.rawContext;
+
+            // Initialize WebAudioFont player
+            if (!this.webAudioFontPlayer) {
+                this.webAudioFontPlayer = new WebAudioFontPlayer();
+            }
+
+            // Collect unique instruments needed
+            const instrumentsNeeded = new Map(); // programNumber -> { tracks: [], preset: null }
+            for (const { track, trackIndex } of trackData) {
+                let programNumber = 0; // Default to piano
+                if (track.instrument && typeof track.instrument.number === 'number') {
+                    programNumber = track.instrument.number;
+                }
+                if (!instrumentsNeeded.has(programNumber)) {
+                    instrumentsNeeded.set(programNumber, { tracks: [], preset: null });
+                }
+                instrumentsNeeded.get(programNumber).tracks.push({ track, trackIndex });
+            }
+
+            // Show loading progress
+            this.showStatus('Loading: 0%', 'info');
+            let loadedCount = 0;
+            const totalInstruments = instrumentsNeeded.size;
+
+            // Load all unique instruments
+            const loadPromises = [];
+            for (const [programNumber, data] of instrumentsNeeded) {
+                const paddedNumber = String(programNumber).padStart(3, '0') + '0';
+                const instrumentFile = `${paddedNumber}_FluidR3_GM_sf2_file`;
+                const instrumentUrl = `${WEBAUDIOFONT_URLS.instrumentBase}${instrumentFile}.js`;
+                const variableName = `_tone_${instrumentFile}`;
+
+                console.log(`[WebAudioFont] Loading instrument: program ${programNumber} -> ${instrumentFile}`);
+
+                const loadPromise = new Promise((resolve, reject) => {
+                    // Check if already loaded
+                    if (window[variableName]) {
+                        console.log(`[WebAudioFont] ✓ Already loaded: ${variableName}`);
+                        data.preset = window[variableName];
+                        loadedCount++;
+                        const percent = Math.round((loadedCount / totalInstruments) * 100);
+                        this.showStatus(`Loading: ${percent}%`, 'info');
+                        resolve();
+                        return;
+                    }
+
+                    // Load the instrument
+                    this.webAudioFontPlayer.loader.startLoad(audioContext, instrumentUrl, variableName);
+                    this.webAudioFontPlayer.loader.waitLoad(() => {
+                        if (window[variableName]) {
+                            console.log(`[WebAudioFont] ✓ Loaded: ${variableName}`);
+                            data.preset = window[variableName];
+                            loadedCount++;
+                            const percent = Math.round((loadedCount / totalInstruments) * 100);
+                            this.showStatus(`Loading: ${percent}%`, 'info');
+                            resolve();
+                        } else {
+                            console.error(`[WebAudioFont] ✗ Failed to load: ${variableName}`);
+                            reject(new Error(`Failed to load ${variableName}`));
+                        }
+                    });
+                });
+
+                loadPromises.push(loadPromise);
+            }
+
+            // Wait for all instruments to load
+            try {
+                await Promise.all(loadPromises);
+            } catch (error) {
+                console.error('[WebAudioFont] Error loading instruments:', error);
+                this.showStatus('Error loading instruments', 'error');
+                throw error;
+            }
+
+            // Clear loading message
+            this.statusManager.hide();
+
+            // Create a gain node for master volume control
+            const masterGain = audioContext.createGain();
+            masterGain.connect(audioContext.destination);
+            masterGain.gain.value = 0.7; // Slightly reduced to avoid clipping
+
+            // Create parts for each track
+            for (const [programNumber, data] of instrumentsNeeded) {
+                for (const { track, trackIndex } of data.tracks) {
+                    // Store instrument info
+                    this.instruments.push({
+                        instrument: null, // Not used for WebAudioFont
+                        preset: data.preset,
+                        gainNode: masterGain,
+                        trackIndex,
+                        volumeMultiplier: 1.0,
+                        isWebAudioFont: true
+                    });
+                    this.channelVolumes[trackIndex] = 100;
+
+                    // Create a Tone.Part for this track
+                    const tempoScale = 1 / this.tempoMultiplier;
+                    const notes = track.notes.map(note => ({
+                        time: Math.max(0, (note.time - this.skipToTime) * tempoScale),
+                        midi: note.midi, // MIDI note number (0-127)
+                        duration: note.duration * tempoScale,
+                        velocity: note.velocity
+                    }));
+
+                    const instrumentIndex = this.instruments.length - 1;
+                    const player = this.webAudioFontPlayer;
+
+                    const part = new Tone.Part((time, value) => {
+                        const instrumentData = this.instruments[instrumentIndex];
+                        const effectiveVolume = value.velocity * instrumentData.volumeMultiplier * this.masterVolume;
+
+                        // Convert Tone.js time to audioContext time
+                        const audioTime = audioContext.currentTime + (time - Tone.now());
+
+                        // Play the note using WebAudioFont
+                        player.queueWaveTable(
+                            audioContext,
+                            instrumentData.gainNode,
+                            instrumentData.preset,
+                            audioTime,
+                            value.midi,
+                            value.duration,
+                            effectiveVolume
+                        );
+                    }, notes);
+
+                    this.parts.push(part);
+                }
+            }
+
+            console.log(`[WebAudioFont] Created ${trackData.length} tracks with ${instrumentsNeeded.size} unique instruments`);
+            return;
+        }
+
         // Check if audio context is available (may be suspended until user interaction)
         // Try to start it - if it's suspended due to autoplay policy, this will fail quickly
         try {
@@ -2566,8 +3202,17 @@ class MIDIPlayer {
             return;
         }
 
+        // Get soundfont URL based on mode (only FULL mode uses traditional soundfonts here)
+        const soundfontUrl = this.getSoundfontUrl();
+        const soundfontName = 'FluidR3_GM';
+
+        // Show loading progress
+        this.showStatus('Loading: 0%', 'info');
+        let loadedCount = 0;
+        const totalCount = trackData.length;
+
         try {
-            // Load all instruments in parallel (with caching)
+            // Load all instruments in parallel (with progress tracking)
             const instrumentPromises = trackData.map(async ({ track, trackIndex }) => {
                 const instrumentName = this.getInstrumentName(track);
 
@@ -2593,18 +3238,18 @@ class MIDIPlayer {
                         // Note: Cached instruments output to audioContext.destination directly
                         // Volume control is handled via the gain parameter in instrument.play()
                     } else {
-                        // Load the SoundFont instrument (using FluidR3_GM for faster loading)
+                        // Load the SoundFont instrument
                         // Connect directly to audioContext.destination for caching
                         console.log(`[Instrument Cache] ✗ Loading new instrument: ${instrumentName}`);
 
                         // Add timeout to prevent hanging on suspended audio context
                         const loadPromise = Soundfont.instrument(audioContext, instrumentName, {
-                            soundfont: 'FluidR3_GM',
+                            soundfont: soundfontName,
                             // Connect to destination directly - volume controlled via gain param
                             destination: audioContext.destination,
-                            nameToUrl: (name, soundfont, format) => {
+                            nameToUrl: (name, sf, format) => {
                                 format = format === 'ogg' ? format : 'mp3';
-                                return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                                return `${soundfontUrl}/${name}-${format}.js`;
                             }
                         });
 
@@ -2618,6 +3263,11 @@ class MIDIPlayer {
                         this.addToInstrumentCache(instrumentName, instrument);
                     }
 
+                    // Update progress
+                    loadedCount++;
+                    const percent = Math.round((loadedCount / totalCount) * 100);
+                    this.showStatus(`Loading: ${percent}%`, 'info');
+
                     // We don't use gainNode for routing anymore, but keep it for compatibility
                     // Volume control is done via the gain parameter in instrument.play()
                     return { instrument, trackIndex, instrumentName, gainNode, success: true, fromCache };
@@ -2628,17 +3278,23 @@ class MIDIPlayer {
                     // Fallback to piano
                     try {
                         const instrument = await Soundfont.instrument(audioContext, 'acoustic_grand_piano', {
-                            soundfont: 'FluidR3_GM',
+                            soundfont: soundfontName,
                             destination: gainNode,
-                            nameToUrl: (name, soundfont, format) => {
+                            nameToUrl: (name, sf, format) => {
                                 format = format === 'ogg' ? format : 'mp3';
-                                return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
+                                return `${soundfontUrl}/${name}-${format}.js`;
                             }
                         });
+
+                        // Update progress even for fallback
+                        loadedCount++;
+                        const percent = Math.round((loadedCount / totalCount) * 100);
+                        this.showStatus(`Loading: ${percent}%`, 'info');
 
                         return { instrument, trackIndex, instrumentName: 'acoustic_grand_piano (fallback)', gainNode, success: false };
                     } catch (fallbackError) {
                         console.error(`Even piano fallback failed:`, fallbackError);
+                        loadedCount++;
                         return null;
                     }
                 }
@@ -2646,6 +3302,9 @@ class MIDIPlayer {
 
             // Wait for all instruments to load
             const loadedInstruments = await Promise.all(instrumentPromises);
+
+            // Clear loading message
+            this.statusManager.hide();
 
             // Create gain nodes and parts for each loaded instrument
             let successCount = 0;
@@ -2841,6 +3500,20 @@ class MIDIPlayer {
             this.currentTime = 0;
         }
 
+        // Handle TinySynth playback separately
+        if (this.usingTinySynth && this.tinySynth) {
+            this.tinySynth.playMIDI();
+            this.isPlaying = true;
+
+            // Update button visibility
+            if (this.playBtn) this.playBtn.style.display = 'none';
+            if (this.pauseBtn) this.pauseBtn.style.display = 'inline-flex';
+
+            // Start progress update for TinySynth
+            this.startProgressUpdate();
+            return;
+        }
+
         // Cancel any previously scheduled events before starting
         this.parts.forEach((part, index) => {
             part.stop(0);  // Pass explicit 0 to avoid floating-point precision issues
@@ -2867,6 +3540,20 @@ class MIDIPlayer {
     pause() {
         if (!this.isPlaying) return;
 
+        // Handle TinySynth pause
+        if (this.usingTinySynth && this.tinySynth) {
+            this.tinySynth.stopMIDI();
+            this.isPlaying = false;
+
+            // Update button visibility
+            this.playBtn.style.display = 'inline-flex';
+            this.pauseBtn.style.display = 'none';
+
+            // Stop progress update
+            this.stopProgressUpdate();
+            return;
+        }
+
         Tone.Transport.pause();
         this.isPlaying = false;
 
@@ -2882,6 +3569,26 @@ class MIDIPlayer {
     }
 
     stop() {
+        // Handle TinySynth stop
+        if (this.usingTinySynth && this.tinySynth) {
+            this.tinySynth.stopMIDI();
+            this.isPlaying = false;
+            this.currentTime = 0;
+
+            // Update button visibility
+            if (this.playBtn) this.playBtn.style.display = 'inline-flex';
+            if (this.pauseBtn) this.pauseBtn.style.display = 'none';
+
+            // Update UI
+            if (this.currentTimeDisplay) this.currentTimeDisplay.textContent = '0:00';
+            if (this.progressBar) this.progressBar.value = 0;
+            if (this.currentBarDisplay) this.currentBarDisplay.textContent = 'Bar: -';
+
+            // Stop progress update
+            this.stopProgressUpdate();
+            return;
+        }
+
         Tone.Transport.stop();
         this.isPlaying = false;
         this.currentTime = 0;
@@ -2915,6 +3622,12 @@ class MIDIPlayer {
 
     stopAllNotes() {
         // Immediately stop all playing notes on all instruments
+
+        // For WebAudioFont (lightfonts mode), use cancelQueue to stop all notes immediately
+        if (this.webAudioFontPlayer && Tone.context && Tone.context.rawContext) {
+            this.webAudioFontPlayer.cancelQueue(Tone.context.rawContext);
+        }
+
         if (this.instruments) {
             this.instruments.forEach(({ instrument }) => {
                 if (instrument) {
@@ -3058,10 +3771,25 @@ class MIDIPlayer {
 
         this.progressInterval = setInterval(() => {
             if (this.isPlaying) {
-                // Transport.seconds is in scaled time (affected by tempo)
-                // Convert back to original time for display and loop logic
-                const transportTime = Tone.Transport.seconds;
-                this.currentTime = transportTime * this.tempoMultiplier;
+                // Handle TinySynth progress separately
+                if (this.usingTinySynth && this.tinySynth) {
+                    const status = this.tinySynth.getPlayStatus();
+                    if (status && status.maxTick > 0) {
+                        // Convert ticks to time (approximate)
+                        this.currentTime = (status.curTick / status.maxTick) * this.originalDuration;
+
+                        // Check if playback ended
+                        if (!status.play || status.curTick >= status.maxTick) {
+                            this.stop();
+                            return;
+                        }
+                    }
+                } else {
+                    // Transport.seconds is in scaled time (affected by tempo)
+                    // Convert back to original time for display and loop logic
+                    const transportTime = Tone.Transport.seconds;
+                    this.currentTime = transportTime * this.tempoMultiplier;
+                }
 
                 // Check loop boundaries (in original time)
                 // If loop range is not full duration, loop within that range (stay in same movement)
@@ -3188,6 +3916,12 @@ class MIDIPlayer {
 
     // Pre-load common instruments in the background to speed up playback
     async preloadCommonInstruments() {
+        // Skip preloading if not using full soundfonts
+        if (this.soundfontMode !== SOUNDFONT_MODE.FULL) {
+            console.log('[Preload] Skipping preload - not using full soundfonts');
+            return;
+        }
+
         // Delegate to InstrumentLoader
         const audioContext = Tone.context.rawContext;
         this.instrumentLoader.preloadCommonInstruments(audioContext);
@@ -3245,6 +3979,9 @@ class MIDIPlayer {
         this.duration = 0;
         this.originalDuration = 0;
         this.isPlaying = false;
+
+        // Reset TinySynth flag (but keep the instance for reuse)
+        this.usingTinySynth = false;
     }
 }
 

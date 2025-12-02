@@ -42,6 +42,30 @@ export const AUDIO = {
 export const MEMORY = {
     LOW_MEMORY_GB: 4,            // Desktop/laptop with ≤4GB considered low
     MOBILE_LOW_MEMORY_GB: 6,     // Mobile device with ≤6GB considered low
+    MB_PER_INSTRUMENT: 35,       // Estimated MB per decoded instrument (~30-50MB typical)
+    MAX_INSTRUMENTS_4GB: 8,      // Max instruments for 4GB device
+    MAX_INSTRUMENTS_DEFAULT: 20, // Max instruments for normal devices
+};
+
+// Soundfont Mode Settings
+export const SOUNDFONT_MODE = {
+    LIGHT: 'light',              // WebAudioFont (default - low memory, zone-based sampling)
+    FULL: 'full',                // FluidR3_GM (high quality, high memory - recommended for powerful devices)
+    ULTRALIGHT: 'ultralight',    // webaudio-tinysynth (minimal memory, built-in GM synth)
+    NONE: 'none',                // No soundfonts (simple synth for testing)
+};
+
+// Soundfont URLs
+export const SOUNDFONT_URLS = {
+    full: 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM',
+};
+
+// WebAudioFont URLs (for LIGHT mode - much lower memory usage)
+export const WEBAUDIOFONT_URLS = {
+    player: 'https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js',
+    instrumentBase: 'https://surikov.github.io/webaudiofontdata/sound/',
+    // Instrument file pattern: {programNumber padded to 4 digits}_FluidR3_GM_sf2_file.js
+    // e.g., piccolo (program 72) = 0720_FluidR3_GM_sf2_file.js
 };
 
 // Network & Retry Configuration

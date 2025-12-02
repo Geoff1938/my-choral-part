@@ -50,6 +50,25 @@ app.use('/api', apiLimiter, createApiRoutes(scraper));
 // Apply stricter rate limiting to proxy route
 app.use('/proxy', proxyLimiter, proxyRouter);
 
+// Soundfont mode routes - serve index.html for different soundfont modes
+// Default mode is 'light' (WebAudioFont) for low memory usage (~220MB)
+// Use /fullfonts for high-quality soundfonts (requires ~1.7GB memory)
+app.get('/nofonts', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/fullfonts', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/lightfonts', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/tinysynth', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // Catch-all route for composer/work URLs (e.g., /domenico-scarlatti/magnificat)
 // This allows sharing direct links to works
 app.get('/:composer/:work', (req, res) => {
