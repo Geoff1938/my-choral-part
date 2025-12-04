@@ -364,9 +364,8 @@ class MIDIPlayer {
             }
         }
 
-        // Load master volume from localStorage (default 80%)
-        const savedMasterVolume = localStorage.getItem('masterVolume');
-        this.masterVolume = savedMasterVolume !== null ? parseInt(savedMasterVolume) : 80;
+        // Always start with volume at 100% (not persisted)
+        this.masterVolume = 100;
         if (this.masterVolumeSlider) {
             this.masterVolumeSlider.value = this.masterVolume;
         }
@@ -378,7 +377,7 @@ class MIDIPlayer {
     savePreferences() {
         localStorage.setItem('voicePart', this.voicePart);
         localStorage.setItem('balance', this.balance);
-        localStorage.setItem('masterVolume', this.masterVolume);
+        // Note: masterVolume is intentionally not persisted - always starts at 100%
     }
 
     updateBalanceLabel() {
