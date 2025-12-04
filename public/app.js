@@ -9,8 +9,7 @@ import {
     VOICE_TO_INSTRUMENT,
     VOICE_PARTS,
     SOUNDFONT_MODE,
-    SOUNDFONT_URLS,
-    WEBAUDIOFONT_URLS
+    SOUNDFONT_URLS
 } from './constants.js';
 
 import {
@@ -159,45 +158,23 @@ class MIDIPlayer {
 
     /**
      * Detect soundfont mode from URL parameters
-     * Default is LIGHT (WebAudioFont) for low memory usage
+     * Default is STANDARD (SpessaSynth) for good quality with low memory
      * Use /fullfonts for high-quality soundfonts (high memory)
-     * @returns {string} Soundfont mode: 'light', 'full', 'ultralight', or 'none'
+     * @returns {string} Soundfont mode: 'standard' or 'highQuality'
      */
     detectSoundfontMode() {
         const path = window.location.pathname.toLowerCase();
         const searchParams = new URLSearchParams(window.location.search);
 
-        // Check URL path for various modes (URL always takes precedence)
-        if (path.includes('/nofonts') || searchParams.has('nofonts')) {
-            console.log('[Soundfont] Mode: NONE (no soundfonts will be loaded)');
-            return SOUNDFONT_MODE.NONE;
-        }
-
-        if (path.includes('/tinysynth') || searchParams.has('tinysynth')) {
-            console.log('[Soundfont] Mode: ULTRALIGHT (using webaudio-tinysynth - minimal memory)');
-            return SOUNDFONT_MODE.ULTRALIGHT;
-        }
-
+        // Check URL path for high-quality mode
         if (path.includes('/fullfonts') || searchParams.has('fullfonts')) {
-            console.log('[Soundfont] Mode: FULL (using FluidR3_GM - high quality, high memory)');
-            return SOUNDFONT_MODE.FULL;
+            console.log('[Soundfont] Mode: highQuality');
+            return SOUNDFONT_MODE.HIGH_QUALITY;
         }
 
-        if (path.includes('/lightfonts') || searchParams.has('lightfonts')) {
-            console.log('[Soundfont] Mode: LIGHT (WebAudioFont, low memory)');
-            return SOUNDFONT_MODE.LIGHT;
-        }
-
-        // Check localStorage for user preference (only if no URL override)
-        const savedMode = localStorage.getItem('audioQuality');
-        if (savedMode === 'full') {
-            console.log('[Soundfont] Mode: FULL (from user preference)');
-            return SOUNDFONT_MODE.FULL;
-        }
-
-        // Default to LIGHT mode (WebAudioFont) - good quality with low memory (~220MB)
-        console.log('[Soundfont] Mode: LIGHT (default - WebAudioFont, low memory)');
-        return SOUNDFONT_MODE.LIGHT;
+        // Default to standard mode (SpessaSynth + GeneralUser GS)
+        console.log('[Soundfont] Mode: standard');
+        return SOUNDFONT_MODE.STANDARD;
     }
 
     /**
@@ -205,14 +182,10 @@ class MIDIPlayer {
      * Called after statusManager is initialized
      */
     showSoundfontModeWarning() {
-        if (this.soundfontMode === SOUNDFONT_MODE.NONE) {
-            this.showStatus('Audio mode: Simple synth (testing only)', 'warning');
-        } else if (this.soundfontMode === SOUNDFONT_MODE.ULTRALIGHT) {
-            this.showStatus('Audio mode: TinySynth (minimal memory)', 'info');
-        } else if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
-            this.showStatus('Audio mode: Full soundfonts (high quality, high memory)', 'info');
+        if (this.soundfontMode === SOUNDFONT_MODE.HIGH_QUALITY) {
+            this.showStatus('Audio mode: High quality (high memory usage)', 'info');
         }
-        // Don't show message for LIGHT mode - it's the default
+        // Don't show message for standard mode - it's the default
     }
 
     /**
@@ -220,10 +193,10 @@ class MIDIPlayer {
      * @returns {string|null} Soundfont URL base, or null if not using traditional soundfonts
      */
     getSoundfontUrl() {
-        if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
+        if (this.soundfontMode === SOUNDFONT_MODE.HIGH_QUALITY) {
             return SOUNDFONT_URLS.full;
         }
-        // Other modes (LIGHT, ULTRALIGHT, NONE) don't use traditional soundfont URLs
+        // Standard mode uses SpessaSynth which loads its own soundfont
         return null;
     }
 
@@ -324,13 +297,6 @@ class MIDIPlayer {
         this.copyUrlBtnSettings = document.getElementById('copy-url-btn-settings');
         this.noWorkSelectedMsg = document.getElementById('no-work-selected-msg');
 
-        // Audio quality settings
-        this.audioQualityLight = document.getElementById('audio-quality-light');
-        this.audioQualityFull = document.getElementById('audio-quality-full');
-        this.audioModeDisplay = document.getElementById('audio-mode-display');
-        this.audioQualityNote = document.getElementById('audio-quality-note');
-        this.applyAudioQualityBtn = document.getElementById('apply-audio-quality-btn');
-
         // Balance label elements
         this.balanceVoicePartSpan = document.getElementById('balance-voice-part');
 
@@ -371,6 +337,10 @@ class MIDIPlayer {
         // Volume controls
         this.balanceSlider = document.getElementById('balance-slider');
         this.balanceValue = document.getElementById('balance-value');
+
+        // Master volume controls
+        this.masterVolumeSlider = document.getElementById('master-volume-slider');
+        this.masterVolumeValue = document.getElementById('master-volume-value');
     }
 
     loadPreferences() {
@@ -393,47 +363,22 @@ class MIDIPlayer {
                 this.balanceValue.textContent = this.balance;
             }
         }
+
+        // Load master volume from localStorage (default 80%)
+        const savedMasterVolume = localStorage.getItem('masterVolume');
+        this.masterVolume = savedMasterVolume !== null ? parseInt(savedMasterVolume) : 80;
+        if (this.masterVolumeSlider) {
+            this.masterVolumeSlider.value = this.masterVolume;
+        }
+        if (this.masterVolumeValue) {
+            this.masterVolumeValue.textContent = this.masterVolume;
+        }
     }
 
     savePreferences() {
         localStorage.setItem('voicePart', this.voicePart);
         localStorage.setItem('balance', this.balance);
-    }
-
-    /**
-     * Initialize audio quality settings UI based on current mode
-     */
-    initializeAudioQualitySettings() {
-        // Set radio button based on current mode
-        const isFullMode = this.soundfontMode === SOUNDFONT_MODE.FULL;
-
-        if (this.audioQualityLight) {
-            this.audioQualityLight.checked = !isFullMode;
-        }
-        if (this.audioQualityFull) {
-            this.audioQualityFull.checked = isFullMode;
-        }
-
-        // Update display text
-        if (this.audioModeDisplay) {
-            if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
-                this.audioModeDisplay.textContent = 'High quality';
-            } else if (this.soundfontMode === SOUNDFONT_MODE.ULTRALIGHT) {
-                this.audioModeDisplay.textContent = 'TinySynth (minimal)';
-            } else if (this.soundfontMode === SOUNDFONT_MODE.NONE) {
-                this.audioModeDisplay.textContent = 'No soundfonts';
-            } else {
-                this.audioModeDisplay.textContent = 'Standard';
-            }
-        }
-
-        // Hide note and button initially
-        if (this.audioQualityNote) {
-            this.audioQualityNote.style.display = 'none';
-        }
-        if (this.applyAudioQualityBtn) {
-            this.applyAudioQualityBtn.style.display = 'none';
-        }
+        localStorage.setItem('masterVolume', this.masterVolume);
     }
 
     updateBalanceLabel() {
@@ -1329,15 +1274,15 @@ class MIDIPlayer {
                         }
                     }
                 } else {
-                    // API returned invalid data, fall back to Mozart Requiem
-                    console.warn('Invalid movements data for recent work, falling back to default');
+                    // API returned invalid data (work may no longer be in index), fall back to Mozart Requiem
+                    console.log('[App] Recent work not found in index, loading default work');
                     composer = null; // Force fallback below
                 }
             }
 
             if (!composer) {
                 // No recent works - load Mozart - Requiem as default
-                composer = 'Mozart (Wolfgang Amadeus)';
+                composer = 'Mozart';
                 work = 'Requiem (Sussmayr completion)';
 
                 // Hardcoded first few movements for Mozart Requiem
@@ -1354,7 +1299,7 @@ class MIDIPlayer {
                 const firstMovementUrl = movements[0].midiUrl;
                 if (firstMovementUrl.endsWith('.html') || firstMovementUrl.endsWith('.htm')) {
                     // This work is copyright-protected, fall back to Mozart Requiem
-                    composer = 'Mozart (Wolfgang Amadeus)';
+                    composer = 'Mozart';
                     work = 'Requiem (Sussmayr completion)';
                     movements = [
                         { name: 'I INTROITUS: REQUIEM', midiUrl: '/Mozart/Requiem/01-intrt.mid' },
@@ -1415,7 +1360,7 @@ class MIDIPlayer {
         } catch (error) {
             console.error('Error loading default work:', error);
             // Fall back to hardcoded Mozart Requiem if API fails
-            this.selectedComposer = 'Mozart (Wolfgang Amadeus)';
+            this.selectedComposer = 'Mozart';
             this.selectedWork = 'Requiem (Sussmayr completion)';
 
             const fallbackMovements = [
@@ -1576,48 +1521,6 @@ class MIDIPlayer {
             this.applyBalance(); // Reapply balance with new voice part
         });
 
-        // Audio quality setting
-        if (this.audioQualityLight && this.audioQualityFull) {
-            // Initialize radio buttons based on current mode
-            this.initializeAudioQualitySettings();
-
-            // Handle radio button changes
-            const handleAudioQualityChange = (e) => {
-                const selectedValue = e.target.value;
-                const currentMode = this.soundfontMode === SOUNDFONT_MODE.FULL ? 'full' : 'light';
-
-                // Show note and button if selection differs from current mode
-                if (selectedValue !== currentMode) {
-                    if (this.audioQualityNote) {
-                        this.audioQualityNote.style.display = 'block';
-                    }
-                    if (this.applyAudioQualityBtn) {
-                        this.applyAudioQualityBtn.style.display = 'inline-block';
-                    }
-                } else {
-                    if (this.audioQualityNote) {
-                        this.audioQualityNote.style.display = 'none';
-                    }
-                    if (this.applyAudioQualityBtn) {
-                        this.applyAudioQualityBtn.style.display = 'none';
-                    }
-                }
-            };
-
-            this.audioQualityLight.addEventListener('change', handleAudioQualityChange);
-            this.audioQualityFull.addEventListener('change', handleAudioQualityChange);
-
-            // Apply button click - save preference and reload
-            if (this.applyAudioQualityBtn) {
-                this.applyAudioQualityBtn.addEventListener('click', () => {
-                    const selectedValue = this.audioQualityFull.checked ? 'full' : 'light';
-                    localStorage.setItem('audioQuality', selectedValue);
-                    // Reload to base URL (remove any /lightfonts, /fullfonts, etc.)
-                    window.location.href = window.location.origin;
-                });
-            }
-        }
-
         this.playBtn.addEventListener('click', () => this.play());
         this.pauseBtn.addEventListener('click', () => this.pause());
         this.stopBtn.addEventListener('click', () => this.stop());
@@ -1740,9 +1643,7 @@ class MIDIPlayer {
             this.setTempo(value);
         });
 
-        // Volume controls - master volume fixed at 100%
-        this.masterVolume = 1.0;
-
+        // Balance control
         this.balanceSlider.addEventListener('input', (e) => {
             this.balance = parseInt(e.target.value);
             this.balanceValue.textContent = e.target.value;
@@ -1763,6 +1664,30 @@ class MIDIPlayer {
             this.balance = value;
             this.balanceValue.textContent = value;
             this.applyBalance();
+            this.savePreferences();
+        });
+
+        // Master volume control
+        this.masterVolumeSlider.addEventListener('input', (e) => {
+            this.masterVolume = parseInt(e.target.value);
+            this.masterVolumeValue.textContent = this.masterVolume;
+            this.applyMasterVolume();
+            this.savePreferences();
+        });
+
+        // Click-to-jump for master volume slider (snaps to step of 5)
+        this.masterVolumeSlider.addEventListener('click', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const min = parseInt(e.target.min);
+            const max = parseInt(e.target.max);
+            const step = parseInt(e.target.step) || 5;
+            const rawValue = min + percent * (max - min);
+            const value = Math.round(rawValue / step) * step;
+            e.target.value = value;
+            this.masterVolume = value;
+            this.masterVolumeValue.textContent = value;
+            this.applyMasterVolume();
             this.savePreferences();
         });
 
@@ -1838,24 +1763,13 @@ class MIDIPlayer {
         const cachedCount = this.instrumentCache.size;
         let audioInfo = '';
 
-        if (this.soundfontMode === SOUNDFONT_MODE.NONE) {
-            // Built-in Tone.js synths use minimal memory
-            audioInfo = `${this.instruments.length} instruments, no fonts (~0MB)`;
-        } else if (this.soundfontMode === SOUNDFONT_MODE.ULTRALIGHT) {
-            // TinySynth uses oscillator synthesis (~0MB external data)
-            audioInfo = `TinySynth (built-in GM synth, ~0MB external)`;
-        } else if (this.soundfontMode === SOUNDFONT_MODE.LIGHT) {
-            // WebAudioFont uses zone-based sampling (~5MB per instrument estimate)
-            const instrumentCount = this.instruments.length;
-            const estimatedMB = instrumentCount * 5;
-            audioInfo = `${instrumentCount} instruments, light fonts (~${estimatedMB}MB)`;
-        } else if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
+        if (this.soundfontMode === SOUNDFONT_MODE.HIGH_QUALITY) {
             // Full fonts (~35MB per instrument)
             const estimatedMB = cachedCount * MEMORY.MB_PER_INSTRUMENT;
-            audioInfo = `${cachedCount} instruments, full fonts (~${estimatedMB}MB)`;
+            audioInfo = `${cachedCount} instruments, highQuality (~${estimatedMB}MB)`;
         } else {
-            // Unknown mode - show generic info
-            audioInfo = `${this.instruments.length} instruments`;
+            // Standard mode (SpessaSynth) - ~31MB total
+            audioInfo = `${this.instruments.length} tracks, standard (~31MB)`;
         }
 
         info.push(`Audio buffers: ${audioInfo}`);
@@ -1908,26 +1822,15 @@ class MIDIPlayer {
         console.log('Instruments count:', this.instruments.length);
         console.log('Instrument cache size:', this.instrumentCache.size);
 
-        // WebAudioFont presets (if in light mode)
-        if (this.soundfontMode === SOUNDFONT_MODE.LIGHT) {
-            console.log('WebAudioFont presets loaded:');
-            const loadedPresets = new Set();
-            this.instruments.forEach(inst => {
-                if (inst.preset && inst.preset.zones) {
-                    const presetId = inst.preset.zones.length + ' zones';
-                    if (!loadedPresets.has(presetId)) {
-                        loadedPresets.add(presetId);
-                        console.log(`  Preset with ${inst.preset.zones.length} zones`);
-                    }
-                }
-            });
+        // SpessaSynth info (if in standard mode)
+        if (this.soundfontMode === SOUNDFONT_MODE.STANDARD) {
+            console.log('SpessaSynth tracks loaded:', this.instruments.length);
         }
 
         // Check what global objects exist
         console.log('Global objects check:');
         console.log('  Tone loaded:', typeof Tone !== 'undefined');
         console.log('  Soundfont loaded:', typeof Soundfont !== 'undefined');
-        console.log('  WebAudioFontPlayer loaded:', typeof WebAudioFontPlayer !== 'undefined');
         console.log('  Midi loaded:', typeof Midi !== 'undefined');
 
         // Audio context state
@@ -2536,8 +2439,10 @@ class MIDIPlayer {
         }
 
         try {
+            console.log(`[selectWork] Loading movements for composer="${this.selectedComposer}" work="${workName}"`);
             const response = await fetch(`/api/composer/${encodeURIComponent(this.selectedComposer)}/work/${encodeURIComponent(workName)}/sections`);
             const movements = await response.json();
+            console.log(`[selectWork] Got ${movements.length} movements:`, movements);
 
             if (movements.length === 0) {
                 this.showStatus('No movements found for this work', 'error');
@@ -2754,7 +2659,7 @@ class MIDIPlayer {
             return;
         }
 
-        // Store URL for TinySynth mode (needs to re-fetch the raw MIDI data)
+        // Store the last loaded URL
         this.lastLoadedUrl = url;
 
         // Check if URL points to an HTML page (copyright-protected works)
@@ -2789,6 +2694,8 @@ class MIDIPlayer {
             }
 
             const arrayBuffer = await response.arrayBuffer();
+            // Store the raw ArrayBuffer for SpessaSynth (it needs raw MIDI data, not parsed)
+            this.lastMidiArrayBuffer = arrayBuffer;
             this.midi = new Midi(arrayBuffer);
 
             if (!this.midi || !this.midi.tracks || this.midi.tracks.length === 0) {
@@ -2921,9 +2828,9 @@ class MIDIPlayer {
         }
         const instrumentCount = uniqueInstruments.size;
 
-        // Check memory before loading (only for full soundfont mode)
-        // Light fonts and other modes don't need this check as they use much less memory
-        if (this.soundfontMode === SOUNDFONT_MODE.FULL) {
+        // Check memory before loading (only for high quality soundfont mode)
+        // Standard mode doesn't need this check as it uses much less memory
+        if (this.soundfontMode === SOUNDFONT_MODE.HIGH_QUALITY) {
             const memoryCheck = this.checkMemoryForInstruments(instrumentCount);
             if (!memoryCheck.canLoad) {
                 this.showStatus(memoryCheck.message, 'error');
@@ -2932,252 +2839,109 @@ class MIDIPlayer {
             console.log(`[Memory] ${instrumentCount} unique instruments (~${memoryCheck.estimatedMB}MB), limit: ${memoryCheck.maxInstruments}`);
         }
 
-        // If soundfont mode is 'none', use Tone.js built-in synth (no external soundfonts)
-        if (this.soundfontMode === SOUNDFONT_MODE.NONE) {
-            console.log('[Soundfont] Using built-in Tone.js synth (nofonts mode)');
+        // Standard mode uses SpessaSynth with GeneralUser GS soundfont
+        if (this.soundfontMode === SOUNDFONT_MODE.STANDARD) {
+            console.log('[Soundfont] Using standard mode');
 
-            // Ensure Tone.js is started
-            await Tone.start();
-
-            // Create a simple synth for each track
-            for (const { track, trackIndex } of trackData) {
-                // Create a PolySynth with simple triangle wave
-                const synth = new Tone.PolySynth(Tone.Synth, {
-                    oscillator: { type: 'triangle' },
-                    envelope: {
-                        attack: 0.02,
-                        decay: 0.1,
-                        sustain: 0.3,
-                        release: 0.8
-                    }
-                }).toDestination();
-
-                // Reduce volume to avoid clipping with many tracks
-                synth.volume.value = -12;
-
-                this.instruments.push({
-                    instrument: synth,
-                    gainNode: null,
-                    trackIndex,
-                    volumeMultiplier: 1.0,
-                    isToneSynth: true  // Flag to indicate this is a Tone.js synth
-                });
-                this.channelVolumes[trackIndex] = 100;
-
-                // Create a Tone.Part for this track
-                const tempoScale = 1 / this.tempoMultiplier;
-                const notes = track.notes.map(note => ({
-                    time: Math.max(0, (note.time - this.skipToTime) * tempoScale),
-                    note: note.name,
-                    duration: note.duration * tempoScale,
-                    velocity: note.velocity
-                }));
-
-                const instrumentIndex = this.instruments.length - 1;
-                const part = new Tone.Part((time, value) => {
-                    const instrumentData = this.instruments[instrumentIndex];
-                    const effectiveVolume = value.velocity * instrumentData.volumeMultiplier * this.masterVolume;
-                    instrumentData.instrument.triggerAttackRelease(
-                        value.note,
-                        value.duration,
-                        time,
-                        effectiveVolume
-                    );
-                }, notes);
-
-                this.parts.push(part);
-            }
-
-            console.log(`[Soundfont] Created ${trackData.length} built-in synths`);
-            return;
-        }
-
-        // If soundfont mode is 'ultralight', use webaudio-tinysynth (built-in GM synth)
-        // TinySynth has its own MIDI sequencer, so we use it differently
-        if (this.soundfontMode === SOUNDFONT_MODE.ULTRALIGHT) {
-            console.log('[Soundfont] Using webaudio-tinysynth (ultralight mode - minimal memory)');
-
-            // Initialize TinySynth if not already done
-            if (!this.tinySynth) {
-                this.tinySynth = new WebAudioTinySynth({
-                    quality: 1,      // 1 = high quality GM sounds
-                    voices: 64,      // max simultaneous notes
-                    useReverb: 1     // enable reverb for better sound
-                });
-                console.log('[TinySynth] Initialized with quality=1, voices=64');
-            }
-
-            // We need the original MIDI ArrayBuffer - re-fetch it
-            // (The Midi parser consumed it, so we need to get it again)
-            const proxyUrl = `/proxy?url=${encodeURIComponent(this.lastLoadedUrl)}`;
-            const response = await fetch(proxyUrl);
-            const arrayBuffer = await response.arrayBuffer();
-
-            // Load MIDI into TinySynth
-            this.tinySynth.loadMIDI(arrayBuffer);
-            console.log('[TinySynth] MIDI loaded');
-
-            // Mark that we're using TinySynth for playback
-            this.usingTinySynth = true;
-
-            // Store a dummy instrument entry for UI compatibility
-            for (const { track, trackIndex } of trackData) {
-                this.instruments.push({
-                    instrument: null,
-                    gainNode: null,
-                    trackIndex,
-                    volumeMultiplier: 1.0,
-                    isTinySynth: true
-                });
-                this.channelVolumes[trackIndex] = 100;
-            }
-
-            // We don't create Tone.Parts - TinySynth handles everything
-            console.log(`[TinySynth] Ready with ${trackData.length} tracks`);
-            return;
-        }
-
-        // If soundfont mode is 'light', use WebAudioFont (zone-based sampling, lower memory)
-        if (this.soundfontMode === SOUNDFONT_MODE.LIGHT) {
-            console.log('[Soundfont] Using WebAudioFont (lightfonts mode - low memory)');
-
-            // Ensure audio context is started
-            await Tone.start();
-            const audioContext = Tone.context.rawContext;
-
-            // Initialize WebAudioFont player
-            if (!this.webAudioFontPlayer) {
-                this.webAudioFontPlayer = new WebAudioFontPlayer();
-            }
-
-            // Collect unique instruments needed
-            const instrumentsNeeded = new Map(); // programNumber -> { tracks: [], preset: null }
-            for (const { track, trackIndex } of trackData) {
-                let programNumber = 0; // Default to piano
-                if (track.instrument && typeof track.instrument.number === 'number') {
-                    programNumber = track.instrument.number;
-                }
-                if (!instrumentsNeeded.has(programNumber)) {
-                    instrumentsNeeded.set(programNumber, { tracks: [], preset: null });
-                }
-                instrumentsNeeded.get(programNumber).tracks.push({ track, trackIndex });
-            }
-
-            // Show loading progress
-            this.showStatus('Loading: 0%', 'info');
-            let loadedCount = 0;
-            const totalInstruments = instrumentsNeeded.size;
-
-            // Load all unique instruments
-            const loadPromises = [];
-            for (const [programNumber, data] of instrumentsNeeded) {
-                const paddedNumber = String(programNumber).padStart(3, '0') + '0';
-                const instrumentFile = `${paddedNumber}_FluidR3_GM_sf2_file`;
-                const instrumentUrl = `${WEBAUDIOFONT_URLS.instrumentBase}${instrumentFile}.js`;
-                const variableName = `_tone_${instrumentFile}`;
-
-                console.log(`[WebAudioFont] Loading instrument: program ${programNumber} -> ${instrumentFile}`);
-
-                const loadPromise = new Promise((resolve, reject) => {
-                    // Check if already loaded
-                    if (window[variableName]) {
-                        console.log(`[WebAudioFont] ✓ Already loaded: ${variableName}`);
-                        data.preset = window[variableName];
-                        loadedCount++;
-                        const percent = Math.round((loadedCount / totalInstruments) * 100);
-                        this.showStatus(`Loading: ${percent}%`, 'info');
-                        resolve();
-                        return;
-                    }
-
-                    // Load the instrument
-                    this.webAudioFontPlayer.loader.startLoad(audioContext, instrumentUrl, variableName);
-                    this.webAudioFontPlayer.loader.waitLoad(() => {
-                        if (window[variableName]) {
-                            console.log(`[WebAudioFont] ✓ Loaded: ${variableName}`);
-                            data.preset = window[variableName];
-                            loadedCount++;
-                            const percent = Math.round((loadedCount / totalInstruments) * 100);
-                            this.showStatus(`Loading: ${percent}%`, 'info');
-                            resolve();
-                        } else {
-                            console.error(`[WebAudioFont] ✗ Failed to load: ${variableName}`);
-                            reject(new Error(`Failed to load ${variableName}`));
-                        }
-                    });
-                });
-
-                loadPromises.push(loadPromise);
-            }
-
-            // Wait for all instruments to load
             try {
-                await Promise.all(loadPromises);
-            } catch (error) {
-                console.error('[WebAudioFont] Error loading instruments:', error);
-                this.showStatus('Error loading instruments', 'error');
-                throw error;
-            }
+                // Dynamically import SpessaSynth libraries
+                // Note: esm.sh properly resolves internal dependencies
+                if (!this.spessaSynthModule) {
+                    this.showStatus('Loading SpessaSynth library...', 'info');
+                    // Import both lib (for Synthesizer/Sequencer) and core (for MIDI parser)
+                    const [libModule, coreModule] = await Promise.all([
+                        import('https://esm.sh/spessasynth_lib@4.0.18'),
+                        import('https://esm.sh/spessasynth_core@4.0.6')
+                    ]);
+                    this.spessaSynthModule = libModule;
+                    this.spessaCoreModule = coreModule;
+                    console.log('[Soundfont] Libraries loaded');
+                }
 
-            // Clear loading message
-            this.statusManager.hide();
+                const { Sequencer } = this.spessaSynthModule;
 
-            // Create a gain node for master volume control
-            const masterGain = audioContext.createGain();
-            masterGain.connect(audioContext.destination);
-            masterGain.gain.value = 0.7; // Slightly reduced to avoid clipping
+                // Initialize SpessaSynth if not already done
+                if (!this.spessaSynth) {
+                    this.showStatus('Loading soundfont (10MB)...', 'info');
 
-            // Create parts for each track
-            for (const [programNumber, data] of instrumentsNeeded) {
-                for (const { track, trackIndex } of data.tracks) {
-                    // Store instrument info
+                    // Create audio context
+                    const audioContext = new AudioContext();
+
+                    // Load the AudioWorklet processor (must be same-origin)
+                    await audioContext.audioWorklet.addModule('/spessasynth_processor.min.js');
+                    console.log('[Soundfont] Worklet processor loaded');
+
+                    // Create the synthesizer
+                    const { WorkletSynthesizer } = this.spessaSynthModule;
+                    this.spessaSynth = new WorkletSynthesizer(audioContext);
+
+                    // Connect synthesizer to audio output
+                    this.spessaSynth.connect(audioContext.destination);
+                    console.log('[Soundfont] Connected to audio destination');
+
+                    // Load the GeneralUser GS soundfont
+                    const sfResponse = await fetch('/soundfonts/GeneralUserGS.sf3');
+                    const sfArrayBuffer = await sfResponse.arrayBuffer();
+                    await this.spessaSynth.soundBankManager.addSoundBank(sfArrayBuffer, 'GeneralUserGS');
+                    console.log('[Soundfont] GeneralUser GS soundfont loaded');
+
+                    // Wait for synth to be ready
+                    await this.spessaSynth.isReady;
+                    console.log('[Soundfont] Synthesizer ready');
+
+                    // Store audio context for later use
+                    this.spessaAudioContext = audioContext;
+                }
+
+                // Use the already-fetched MIDI ArrayBuffer (stored in loadMIDIFromURL)
+                // Make a copy since the original may have been consumed by Midi parser
+                const arrayBuffer = this.lastMidiArrayBuffer.slice(0);
+
+                // Create sequencer if not exists, otherwise reuse
+                if (!this.spessaSequencer) {
+                    // Sequencer constructor: new Sequencer(synth, options)
+                    this.spessaSequencer = new Sequencer(this.spessaSynth, {
+                        skipToFirstNoteOn: true
+                    });
+                } else {
+                    // Stop existing playback
+                    this.spessaSequencer.pause();
+                }
+
+                // Parse MIDI using SpessaSynth's BasicMIDI class and load into sequencer
+                const { BasicMIDI } = this.spessaCoreModule;
+                const parsedMidi = BasicMIDI.fromArrayBuffer(arrayBuffer);
+                await this.spessaSequencer.loadNewSongList([parsedMidi]);
+
+                // Mark that we're using SpessaSynth for playback
+                this.usingSpessaSynth = true;
+
+                // Store track info for UI compatibility
+                for (const { track, trackIndex } of trackData) {
                     this.instruments.push({
-                        instrument: null, // Not used for WebAudioFont
-                        preset: data.preset,
-                        gainNode: masterGain,
+                        instrument: null,
+                        gainNode: null,
                         trackIndex,
                         volumeMultiplier: 1.0,
-                        isWebAudioFont: true
+                        isSpessaSynth: true
                     });
                     this.channelVolumes[trackIndex] = 100;
-
-                    // Create a Tone.Part for this track
-                    const tempoScale = 1 / this.tempoMultiplier;
-                    const notes = track.notes.map(note => ({
-                        time: Math.max(0, (note.time - this.skipToTime) * tempoScale),
-                        midi: note.midi, // MIDI note number (0-127)
-                        duration: note.duration * tempoScale,
-                        velocity: note.velocity
-                    }));
-
-                    const instrumentIndex = this.instruments.length - 1;
-                    const player = this.webAudioFontPlayer;
-
-                    const part = new Tone.Part((time, value) => {
-                        const instrumentData = this.instruments[instrumentIndex];
-                        const effectiveVolume = value.velocity * instrumentData.volumeMultiplier * this.masterVolume;
-
-                        // Convert Tone.js time to audioContext time
-                        const audioTime = audioContext.currentTime + (time - Tone.now());
-
-                        // Play the note using WebAudioFont
-                        player.queueWaveTable(
-                            audioContext,
-                            instrumentData.gainNode,
-                            instrumentData.preset,
-                            audioTime,
-                            value.midi,
-                            value.duration,
-                            effectiveVolume
-                        );
-                    }, notes);
-
-                    this.parts.push(part);
                 }
-            }
 
-            console.log(`[WebAudioFont] Created ${trackData.length} tracks with ${instrumentsNeeded.size} unique instruments`);
-            return;
+                // We don't create Tone.Parts - SpessaSynth handles everything
+                console.log(`[Soundfont] Ready with ${trackData.length} tracks`);
+
+                // Apply initial master volume
+                this.applyMasterVolume();
+
+                this.showStatus('Ready', 'success');
+                return;
+
+            } catch (error) {
+                console.error('[Soundfont] Failed to initialize:', error);
+                this.showStatus('Soundfont initialization failed', 'error');
+                throw error;
+            }
         }
 
         // Check if audio context is available (may be suspended until user interaction)
@@ -3458,6 +3222,30 @@ class MIDIPlayer {
         }
     }
 
+    /**
+     * Apply master volume to all audio output
+     * Works with SpessaSynth (standard) and Soundfont (highQuality) modes
+     */
+    applyMasterVolume() {
+        // Convert percentage to 0-1 range
+        const volumeLevel = this.masterVolume / 100;
+
+        // Apply to SpessaSynth (standard mode)
+        if (this.usingSpessaSynth && this.spessaSynth) {
+            // SpessaSynth uses setMasterParameter("masterGain", value)
+            // Value is a gain multiplier (1.0 = normal, 0.5 = 50%, etc.)
+            if (typeof this.spessaSynth.setMasterParameter === 'function') {
+                this.spessaSynth.setMasterParameter("masterGain", volumeLevel);
+            }
+        }
+
+        // Apply to Tone.js Destination (for highQuality mode)
+        if (Tone && Tone.Destination) {
+            // Convert to dB: 0% = -Infinity, 100% = 0dB
+            const dbValue = volumeLevel > 0 ? 20 * Math.log10(volumeLevel) : -Infinity;
+            Tone.Destination.volume.value = dbValue;
+        }
+    }
 
     async play() {
         if (!this.midi) {
@@ -3500,16 +3288,20 @@ class MIDIPlayer {
             this.currentTime = 0;
         }
 
-        // Handle TinySynth playback separately
-        if (this.usingTinySynth && this.tinySynth) {
-            this.tinySynth.playMIDI();
+        // Handle SpessaSynth playback separately
+        if (this.usingSpessaSynth && this.spessaSequencer) {
+            // Resume SpessaSynth's AudioContext if suspended (required for first user interaction)
+            if (this.spessaAudioContext && this.spessaAudioContext.state === 'suspended') {
+                await this.spessaAudioContext.resume();
+            }
+            this.spessaSequencer.play();
             this.isPlaying = true;
 
             // Update button visibility
             if (this.playBtn) this.playBtn.style.display = 'none';
             if (this.pauseBtn) this.pauseBtn.style.display = 'inline-flex';
 
-            // Start progress update for TinySynth
+            // Start progress update for SpessaSynth
             this.startProgressUpdate();
             return;
         }
@@ -3540,9 +3332,9 @@ class MIDIPlayer {
     pause() {
         if (!this.isPlaying) return;
 
-        // Handle TinySynth pause
-        if (this.usingTinySynth && this.tinySynth) {
-            this.tinySynth.stopMIDI();
+        // Handle SpessaSynth pause
+        if (this.usingSpessaSynth && this.spessaSequencer) {
+            this.spessaSequencer.pause();
             this.isPlaying = false;
 
             // Update button visibility
@@ -3569,9 +3361,10 @@ class MIDIPlayer {
     }
 
     stop() {
-        // Handle TinySynth stop
-        if (this.usingTinySynth && this.tinySynth) {
-            this.tinySynth.stopMIDI();
+        // Handle SpessaSynth stop
+        if (this.usingSpessaSynth && this.spessaSequencer) {
+            this.spessaSequencer.pause();
+            this.spessaSequencer.currentTime = 0;
             this.isPlaying = false;
             this.currentTime = 0;
 
@@ -3622,12 +3415,6 @@ class MIDIPlayer {
 
     stopAllNotes() {
         // Immediately stop all playing notes on all instruments
-
-        // For WebAudioFont (lightfonts mode), use cancelQueue to stop all notes immediately
-        if (this.webAudioFontPlayer && Tone.context && Tone.context.rawContext) {
-            this.webAudioFontPlayer.cancelQueue(Tone.context.rawContext);
-        }
-
         if (this.instruments) {
             this.instruments.forEach(({ instrument }) => {
                 if (instrument) {
@@ -3658,17 +3445,28 @@ class MIDIPlayer {
             this.stopProgressUpdate();
         }
 
-        // Stop and cancel everything completely
-        this.parts.forEach(part => {
-            part.stop(0);  // Pass explicit 0 to avoid floating-point precision issues
-            part.cancel();
-        });
-
-        Tone.Transport.stop();
-        Tone.Transport.cancel();
-
         // time parameter is in original time
         this.currentTime = Math.max(0, Math.min(this.originalDuration, time));
+
+        // Handle SpessaSynth seeking
+        if (this.usingSpessaSynth && this.spessaSequencer) {
+            this.spessaSequencer.pause();
+            this.spessaSequencer.currentTime = this.currentTime;
+        } else {
+            // Standard Tone.js seeking
+            // Stop and cancel everything completely
+            this.parts.forEach(part => {
+                part.stop(0);  // Pass explicit 0 to avoid floating-point precision issues
+                part.cancel();
+            });
+
+            Tone.Transport.stop();
+            Tone.Transport.cancel();
+
+            // Convert original time to scaled time for Transport
+            const scaledTime = this.currentTime / this.tempoMultiplier;
+            Tone.Transport.seconds = scaledTime;
+        }
 
         // Update UI
         this.currentTimeDisplay.textContent = formatTime(this.currentTime);
@@ -3679,10 +3477,6 @@ class MIDIPlayer {
         if (currentBar && this.currentBarDisplay) {
             this.currentBarDisplay.textContent = `Bar: ${currentBar}`;
         }
-
-        // Convert original time to scaled time for Transport
-        const scaledTime = this.currentTime / this.tempoMultiplier;
-        Tone.Transport.seconds = scaledTime;
 
         // Resume playback if it was playing before and autoResume is true
         if (wasPlaying && autoResume) {
@@ -3700,29 +3494,41 @@ class MIDIPlayer {
         }
 
         this.tempoMultiplier = tempoPercent / 100;
-
-        // Update BPM in Transport
-        if (this.midi && this.midi.header.tempos.length > 0) {
-            const originalBPM = this.midi.header.tempos[0].bpm;
-            Tone.Transport.bpm.value = originalBPM * this.tempoMultiplier;
-        }
-
         this.tempoValue.textContent = tempoPercent;
 
         // Update actual duration based on tempo
         // Slower tempo = longer duration
         this.duration = this.originalDuration / this.tempoMultiplier;
 
-        // Recreate parts with new tempo
-        this.recreateParts();
+        // Handle SpessaSynth tempo
+        if (this.usingSpessaSynth && this.spessaSequencer) {
+            // SpessaSynth uses playbackRate for tempo control
+            this.spessaSequencer.playbackRate = this.tempoMultiplier;
 
-        // If was playing, seek to the saved position and restart
-        if (wasPlaying) {
-            this.currentTime = currentTime;
-            // Convert original time to scaled time
-            const scaledTime = currentTime / this.tempoMultiplier;
-            Tone.Transport.seconds = scaledTime;
-            setTimeout(() => this.play(), 100);
+            // If was playing, seek to the saved position and restart
+            if (wasPlaying) {
+                this.currentTime = currentTime;
+                this.spessaSequencer.currentTime = currentTime;
+                setTimeout(() => this.play(), 100);
+            }
+        } else {
+            // Update BPM in Transport
+            if (this.midi && this.midi.header.tempos.length > 0) {
+                const originalBPM = this.midi.header.tempos[0].bpm;
+                Tone.Transport.bpm.value = originalBPM * this.tempoMultiplier;
+            }
+
+            // Recreate parts with new tempo
+            this.recreateParts();
+
+            // If was playing, seek to the saved position and restart
+            if (wasPlaying) {
+                this.currentTime = currentTime;
+                // Convert original time to scaled time
+                const scaledTime = currentTime / this.tempoMultiplier;
+                Tone.Transport.seconds = scaledTime;
+                setTimeout(() => this.play(), 100);
+            }
         }
     }
 
@@ -3771,18 +3577,15 @@ class MIDIPlayer {
 
         this.progressInterval = setInterval(() => {
             if (this.isPlaying) {
-                // Handle TinySynth progress separately
-                if (this.usingTinySynth && this.tinySynth) {
-                    const status = this.tinySynth.getPlayStatus();
-                    if (status && status.maxTick > 0) {
-                        // Convert ticks to time (approximate)
-                        this.currentTime = (status.curTick / status.maxTick) * this.originalDuration;
+                // Handle SpessaSynth progress
+                if (this.usingSpessaSynth && this.spessaSequencer) {
+                    // SpessaSynth has its own currentTime property
+                    this.currentTime = this.spessaSequencer.currentTime;
 
-                        // Check if playback ended
-                        if (!status.play || status.curTick >= status.maxTick) {
-                            this.stop();
-                            return;
-                        }
+                    // Check if playback ended
+                    if (this.spessaSequencer.isFinished || this.currentTime >= this.originalDuration) {
+                        this.stop();
+                        return;
                     }
                 } else {
                     // Transport.seconds is in scaled time (affected by tempo)
@@ -3916,9 +3719,9 @@ class MIDIPlayer {
 
     // Pre-load common instruments in the background to speed up playback
     async preloadCommonInstruments() {
-        // Skip preloading if not using full soundfonts
-        if (this.soundfontMode !== SOUNDFONT_MODE.FULL) {
-            console.log('[Preload] Skipping preload - not using full soundfonts');
+        // Skip preloading if not using highQuality soundfonts
+        if (this.soundfontMode !== SOUNDFONT_MODE.HIGH_QUALITY) {
+            console.log('[Preload] Skipping preload - not using highQuality soundfonts');
             return;
         }
 
@@ -3980,8 +3783,8 @@ class MIDIPlayer {
         this.originalDuration = 0;
         this.isPlaying = false;
 
-        // Reset TinySynth flag (but keep the instance for reuse)
-        this.usingTinySynth = false;
+        // Reset SpessaSynth flag (but keep the synthesizer for reuse)
+        this.usingSpessaSynth = false;
     }
 }
 

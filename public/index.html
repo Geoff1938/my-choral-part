@@ -195,6 +195,11 @@
                     <!-- Tempo Control -->
                     <div class="tempo-control">
                         <label title="Adjust playback speed - slower for learning, faster as you improve">Tempo: <span id="tempo-value">100</span>%</label>
+                        <div class="tempo-labels">
+                            <span>Slower</span>
+                            <span>&nbsp;</span>
+                            <span>Faster</span>
+                        </div>
                         <div class="slider-container">
                             <input
                                 type="range"
@@ -217,7 +222,7 @@
                         <label for="balance-slider" id="balance-label" title="Adjust the balance between your part and the other parts. Change your voice part via Settings.">My Part: <span id="balance-voice-part">Soprano</span>.  Balance: <span id="balance-value">0</span></label>
                         <div class="balance-labels">
                             <span>Others Louder</span>
-                            <span>Equal</span>
+                            <span>&nbsp;</span>
                             <span>My Part Louder</span>
                         </div>
                         <div class="slider-container">
@@ -234,6 +239,30 @@
                             >
                             <div class="slider-track"></div>
                             <div class="slider-center-marker" style="left: 50%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Volume Control -->
+                    <div class="volume-control">
+                        <label for="master-volume-slider" id="volume-label" title="Adjust the master volume">Volume: <span id="master-volume-value">80</span>%</label>
+                        <div class="volume-labels">
+                            <span>Quieter</span>
+                            <span>&nbsp;</span>
+                            <span>Louder</span>
+                        </div>
+                        <div class="slider-container">
+                            <input
+                                type="range"
+                                id="master-volume-slider"
+                                min="0"
+                                max="100"
+                                value="80"
+                                step="5"
+                                class="styled-slider"
+                                aria-label="Master volume"
+                                title="Adjust the overall volume"
+                            >
+                            <div class="slider-track"></div>
                         </div>
                     </div>
                 </section>
@@ -254,26 +283,6 @@
                             <option value="bass">Bass (bassoon)</option>
                         </select>
                     </div>
-                </div>
-
-                <!-- Audio Quality Selection -->
-                <div class="settings-section settings-audio-quality">
-                    <h3>Audio quality</h3>
-                    <p id="current-audio-mode" style="margin-bottom: 10px;">Current mode: <strong id="audio-mode-display">Standard</strong></p>
-                    <div class="control-group">
-                        <label class="radio-label" title="Good sound quality with low memory usage (~220MB). Recommended for most devices.">
-                            <input type="radio" name="audio-quality" value="light" id="audio-quality-light">
-                            Standard (recommended)
-                        </label>
-                        <label class="radio-label" title="Highest sound quality but requires ~1.7GB memory and fast internet. Only for powerful desktop computers.">
-                            <input type="radio" name="audio-quality" value="full" id="audio-quality-full">
-                            High quality (requires good memory and fast connection)
-                        </label>
-                    </div>
-                    <p class="settings-note" id="audio-quality-note" style="margin-top: 10px; color: #666; font-size: 0.9em; display: none;">
-                        Changes will take effect when you reload the page.
-                    </p>
-                    <button id="apply-audio-quality-btn" class="btn btn-small" style="margin-top: 10px; display: none;">Apply and Reload</button>
                 </div>
 
                 <!-- Shareable URL Section -->
@@ -383,12 +392,8 @@
     <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
     <!-- Load MIDI file parser -->
     <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
-    <!-- Load SoundFont player for realistic instruments -->
+    <!-- Load SoundFont player for high-quality mode (FluidR3_GM soundfont) -->
     <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
-    <!-- Load WebAudioFont player for low-memory mode (zone-based sampling) -->
-    <script src="https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js"></script>
-    <!-- Load webaudio-tinysynth for ultra-light mode (built-in GM synth, minimal memory) -->
-    <script src="https://cdn.jsdelivr.net/gh/g200kg/webaudio-tinysynth@master/webaudio-tinysynth.js"></script>
     <!-- Our app logic -->
     <script type="module" src="/app.js"></script>
 </body>
