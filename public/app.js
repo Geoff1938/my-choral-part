@@ -1683,7 +1683,8 @@ class MIDIPlayer {
             const max = parseInt(e.target.max);
             const step = parseInt(e.target.step) || 5;
             const rawValue = min + percent * (max - min);
-            const value = Math.round(rawValue / step) * step;
+            // Clamp value to valid range and snap to step
+            const value = Math.max(min, Math.min(max, Math.round(rawValue / step) * step));
             e.target.value = value;
             this.masterVolume = value;
             this.masterVolumeValue.textContent = value;
