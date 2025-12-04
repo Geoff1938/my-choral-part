@@ -341,6 +341,9 @@ class MIDIPlayer {
         // Master volume controls
         this.masterVolumeSlider = document.getElementById('master-volume-slider');
         this.masterVolumeValue = document.getElementById('master-volume-value');
+
+        // Clear saved data button
+        this.clearSavedDataBtn = document.getElementById('clear-saved-data-btn');
     }
 
     loadPreferences() {
@@ -378,6 +381,24 @@ class MIDIPlayer {
         localStorage.setItem('voicePart', this.voicePart);
         localStorage.setItem('balance', this.balance);
         // Note: masterVolume is intentionally not persisted - always starts at 100%
+    }
+
+    clearAllSavedData() {
+        if (confirm('Are you sure you want to clear all saved data? This will reset your voice part, balance, and recent works list.')) {
+            // Clear all localStorage items used by this app
+            localStorage.removeItem('voicePart');
+            localStorage.removeItem('balance');
+            localStorage.removeItem('recentWorks');
+            localStorage.removeItem('masterVolume'); // In case old value exists
+
+            // Show confirmation
+            this.showStatus('All saved data cleared. Reloading...', 'success');
+
+            // Reload the page to reset everything
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        }
     }
 
     updateBalanceLabel() {
@@ -1722,6 +1743,13 @@ class MIDIPlayer {
                 this.toggleMemoryDisplay();
             }
         });
+
+        // Clear saved data button
+        if (this.clearSavedDataBtn) {
+            this.clearSavedDataBtn.addEventListener('click', () => {
+                this.clearAllSavedData();
+            });
+        }
 
     }
 
