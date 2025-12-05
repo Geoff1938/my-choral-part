@@ -1650,18 +1650,23 @@ class MIDIPlayer {
             this.setTempo(parseInt(e.target.value));
         });
 
-        // Click-to-jump for tempo slider (snaps to step of 5)
-        this.tempoSlider.addEventListener('click', (e) => {
-            const rect = e.target.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            const min = parseInt(e.target.min);
-            const max = parseInt(e.target.max);
-            const step = parseInt(e.target.step) || 5;
-            const rawValue = min + percent * (max - min);
-            const value = Math.round(rawValue / step) * step;
-            e.target.value = value;
-            this.setTempo(value);
-        });
+        // Detect if this is a touch device (tablet/phone) - disable click-to-jump on touch devices
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        // Click-to-jump for tempo slider (snaps to step of 5) - desktop only
+        if (!isTouchDevice) {
+            this.tempoSlider.addEventListener('click', (e) => {
+                const rect = e.target.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                const min = parseInt(e.target.min);
+                const max = parseInt(e.target.max);
+                const step = parseInt(e.target.step) || 5;
+                const rawValue = min + percent * (max - min);
+                const value = Math.round(rawValue / step) * step;
+                e.target.value = value;
+                this.setTempo(value);
+            });
+        }
 
         // Balance control
         this.balanceSlider.addEventListener('input', (e) => {
@@ -1671,21 +1676,23 @@ class MIDIPlayer {
             this.savePreferences(); // Save balance whenever it changes
         });
 
-        // Click-to-jump for balance slider (snaps to step of 5)
-        this.balanceSlider.addEventListener('click', (e) => {
-            const rect = e.target.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            const min = parseInt(e.target.min);
-            const max = parseInt(e.target.max);
-            const step = parseInt(e.target.step) || 5;
-            const rawValue = min + percent * (max - min);
-            const value = Math.round(rawValue / step) * step;
-            e.target.value = value;
-            this.balance = value;
-            this.balanceValue.textContent = value;
-            this.applyBalance();
-            this.savePreferences();
-        });
+        // Click-to-jump for balance slider (snaps to step of 5) - desktop only
+        if (!isTouchDevice) {
+            this.balanceSlider.addEventListener('click', (e) => {
+                const rect = e.target.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                const min = parseInt(e.target.min);
+                const max = parseInt(e.target.max);
+                const step = parseInt(e.target.step) || 5;
+                const rawValue = min + percent * (max - min);
+                const value = Math.round(rawValue / step) * step;
+                e.target.value = value;
+                this.balance = value;
+                this.balanceValue.textContent = value;
+                this.applyBalance();
+                this.savePreferences();
+            });
+        }
 
         // Master volume control
         this.masterVolumeSlider.addEventListener('input', (e) => {
@@ -1695,22 +1702,24 @@ class MIDIPlayer {
             this.savePreferences();
         });
 
-        // Click-to-jump for master volume slider (snaps to step of 5)
-        this.masterVolumeSlider.addEventListener('click', (e) => {
-            const rect = e.target.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            const min = parseInt(e.target.min);
-            const max = parseInt(e.target.max);
-            const step = parseInt(e.target.step) || 5;
-            const rawValue = min + percent * (max - min);
-            // Clamp value to valid range and snap to step
-            const value = Math.max(min, Math.min(max, Math.round(rawValue / step) * step));
-            e.target.value = value;
-            this.masterVolume = value;
-            this.masterVolumeValue.textContent = value;
-            this.applyMasterVolume();
-            this.savePreferences();
-        });
+        // Click-to-jump for master volume slider (snaps to step of 5) - desktop only
+        if (!isTouchDevice) {
+            this.masterVolumeSlider.addEventListener('click', (e) => {
+                const rect = e.target.getBoundingClientRect();
+                const percent = (e.clientX - rect.left) / rect.width;
+                const min = parseInt(e.target.min);
+                const max = parseInt(e.target.max);
+                const step = parseInt(e.target.step) || 5;
+                const rawValue = min + percent * (max - min);
+                // Clamp value to valid range and snap to step
+                const value = Math.max(min, Math.min(max, Math.round(rawValue / step) * step));
+                e.target.value = value;
+                this.masterVolume = value;
+                this.masterVolumeValue.textContent = value;
+                this.applyMasterVolume();
+                this.savePreferences();
+            });
+        }
 
         // Add spacebar toggle for play/pause (only when Play Music tab is active)
         document.addEventListener('keydown', (e) => {
