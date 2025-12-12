@@ -66,6 +66,14 @@ async function initDatabase() {
     db.run(`CREATE INDEX IF NOT EXISTS idx_activities_device ON activities(device_id)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_activities_event ON activities(event_type)`);
 
+    // Create settings table for storing app settings like last rebuild time
+    db.run(`
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        )
+    `);
+
     // Seed admin users if they don't exist
     await seedAdminUsers();
 
@@ -246,6 +254,36 @@ function getDateRanges() {
     };
 }
 
+/**
+ * Store the last index rebuild time and result
+ */
+async function setLastRebuildTime(result) {
+    await initDatabase();
+
+    const value = JSON.stringify(result);
+    db.run(`INSERT OR REPLACE INTO settings (key, value) VALUES ('lastRebuild', ?)`, [value]);
+
+    await saveDatabase();
+}
+
+/**
+ * Get the last index rebuild time and result
+ */
+async function getLastRebuildTime() {
+    await initDatabase();
+
+    const result = db.exec(`SELECT value FROM settings WHERE key = 'lastRebuild'`);
+    if (result.length === 0 || result[0].values.length === 0) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(result[0].values[0][0]);
+    } catch (e) {
+        return null;
+    }
+}
+
 module.exports = {
     initDatabase,
     saveDatabase,
@@ -253,5 +291,7 @@ module.exports = {
     validateAdmin,
     getActivitySummary,
     getActivitiesForExport,
-    getDateRanges
+    getDateRanges,
+    setLastRebuildTime,
+    getLastRebuildTime
 };

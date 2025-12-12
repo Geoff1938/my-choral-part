@@ -320,6 +320,31 @@
                     <button type="submit" class="btn">Download XLSX</button>
                 </form>
             </div>
+
+            <!-- Index Status Section -->
+            <div class="export-section" style="margin-top: 20px;">
+                <h2>MIDI Index Status</h2>
+                <div class="stat-row">
+                    <span class="stat-label">Scheduled Rebuild Time</span>
+                    <span class="stat-value" id="scheduled-time">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Last Rebuild</span>
+                    <span class="stat-value" id="last-rebuild-time">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Status</span>
+                    <span class="stat-value" id="rebuild-status">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Index Contents</span>
+                    <span class="stat-value" id="index-contents">-</span>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn" id="rebuild-btn" onclick="triggerRebuild()">Rebuild Index Now</button>
+                    <span id="rebuild-message" style="margin-left: 10px; color: #666;"></span>
+                </div>
+            </div>
         </div>
 
         <footer>

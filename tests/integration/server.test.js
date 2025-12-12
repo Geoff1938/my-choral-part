@@ -9,8 +9,9 @@ describe('API Integration Tests', () => {
   let app;
 
   beforeAll(() => {
-    // Load the Express app (server.js exports the app)
-    app = require('../../server');
+    // Load the Express app (server.js exports { app, scraper })
+    const server = require('../../server');
+    app = server.app;
   });
 
   describe('GET /api/composer/:composerName/works', () => {

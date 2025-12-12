@@ -436,13 +436,7 @@ class MIDIPlayer {
      */
     async logActivity(eventType) {
         try {
-            console.log('[Activity] Logging:', eventType, {
-                deviceId: this.deviceId,
-                composer: this.selectedComposer,
-                work: this.selectedWork,
-                movement: this.currentMovement
-            });
-            const response = await fetch('/api/activity/log', {
+            await fetch('/api/activity/log', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -453,14 +447,8 @@ class MIDIPlayer {
                     movement: this.currentMovement || null
                 })
             });
-            if (!response.ok) {
-                console.warn('[Activity] Server returned:', response.status, await response.text());
-            } else {
-                console.log('[Activity] Logged successfully');
-            }
         } catch (error) {
             // Silent fail - don't disrupt user experience
-            console.warn('[Activity] Failed to log activity:', error.message);
         }
     }
 
@@ -3498,6 +3486,11 @@ class MIDIPlayer {
             if (this.progressBar) this.progressBar.value = 0;
             if (this.currentBarDisplay) this.currentBarDisplay.textContent = 'Bar: -';
 
+            // Reset loop markers to full duration
+            this.loopStart = 0;
+            this.loopEnd = this.originalDuration;
+            this.updateLoopDisplay();
+
             // Stop progress update
             this.stopProgressUpdate();
             return;
@@ -3529,6 +3522,11 @@ class MIDIPlayer {
         if (this.currentTimeDisplay) this.currentTimeDisplay.textContent = '0:00';
         if (this.progressBar) this.progressBar.value = 0;
         if (this.currentBarDisplay) this.currentBarDisplay.textContent = 'Bar: -';
+
+        // Reset loop markers to full duration
+        this.loopStart = 0;
+        this.loopEnd = this.originalDuration;
+        this.updateLoopDisplay();
 
         // Stop progress update
         this.stopProgressUpdate();
@@ -3702,12 +3700,6 @@ class MIDIPlayer {
                 if (this.usingSpessaSynth && this.spessaSequencer) {
                     // SpessaSynth has its own currentTime property
                     this.currentTime = this.spessaSequencer.currentTime;
-
-                    // Check if playback ended
-                    if (this.spessaSequencer.isFinished || this.currentTime >= this.originalDuration) {
-                        this.stop();
-                        return;
-                    }
                 } else {
                     // Transport.seconds is in scaled time (affected by tempo)
                     // Convert back to original time for display and loop logic
@@ -3719,6 +3711,10 @@ class MIDIPlayer {
                 // If loop range is not full duration, loop within that range (stay in same movement)
                 const loopRangeSet = (this.loopStart > 0 || this.loopEnd < this.originalDuration - 0.5);
 
+                // Check if playback has finished (SpessaSynth may stop before hitting exact duration)
+                const isFinished = (this.usingSpessaSynth && this.spessaSequencer && this.spessaSequencer.isFinished) ||
+                                   (this.currentTime >= this.originalDuration - 0.1);
+
                 if (loopRangeSet && this.currentTime >= this.loopEnd) {
                     // Loop back to loop start within the same movement
                     // Pause briefly then resume
@@ -3726,13 +3722,15 @@ class MIDIPlayer {
                     this.seekTo(this.loopStart, false);
                     setTimeout(() => this.play(), 50);
                     return;
-                } else if (!loopRangeSet && this.currentTime >= this.originalDuration) {
+                } else if (!loopRangeSet && isFinished) {
                     // End of movement reached without loop set
                     if (this.repeatMode) {
                         // Repeat mode: loop back to start of current movement
-                        this.pause();
-                        this.seekTo(0, false);
-                        setTimeout(() => this.play(), 50);
+                        this.stop();
+                        setTimeout(() => {
+                            this.seekTo(0, false);
+                            this.play();
+                        }, 100);
                     } else {
                         // Auto-advance mode: move to next movement after 1.5s pause
                         const currentIndex = this.movementSelect.selectedIndex;
@@ -3740,9 +3738,8 @@ class MIDIPlayer {
 
                         if (currentIndex < totalMovements - 1 && currentIndex > 0) {
                             // Auto-advance to next movement after pause
-                            this.pause();
-                            this.seekTo(0, false);
-                            setTimeout(() => this.skipToNextMovement(), 1500);
+                            this.stop();
+                            setTimeout(() => this.skipToNextMovement(0, true), 1500);
                         } else {
                             // Last movement - stop playback
                             this.stop();
@@ -3787,27 +3784,32 @@ class MIDIPlayer {
         }
     }
 
-    skipToNextMovement(delayMs = 1500) {
+    skipToNextMovement(delayMs = 1500, autoPlay = false) {
         // Get current selected index
         const currentIndex = this.movementSelect.selectedIndex;
         const totalMovements = this.movementSelect.options.length;
 
         // Check if there's a next movement (accounting for placeholder at index 0)
         if (currentIndex < totalMovements - 1 && currentIndex > 0) {
-            // Pause playback
+            // Stop playback
             if (this.isPlaying) {
-                this.pause();
+                this.stop();
             }
 
             // Wait for the specified delay before loading next movement
-            setTimeout(() => {
+            setTimeout(async () => {
                 // Select next movement
                 this.movementSelect.selectedIndex = currentIndex + 1;
 
                 // Load the next movement
                 const movementData = JSON.parse(this.movementSelect.value);
                 const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
-                this.loadMIDIFromURL(absoluteUrl, movementData.name);
+                await this.loadMIDIFromURL(absoluteUrl, movementData.name);
+
+                // Auto-play if requested (e.g., when auto-advancing at end of movement)
+                if (autoPlay) {
+                    setTimeout(() => this.play(), 100);
+                }
             }, delayMs);
         }
     }

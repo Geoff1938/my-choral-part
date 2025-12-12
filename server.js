@@ -12,6 +12,7 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { apiLimiter, proxyLimiter } = require('./middleware/rateLimiter');
 const basicAuthMiddleware = require('./middleware/basicAuth');
 const { initDatabase } = require('./utils/database');
+const { startScheduler } = require('./utils/scheduler');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -118,20 +119,13 @@ if (require.main === module) {
     // - Render uses the pre-built index (no scraping on startup)
     // - Optional: Schedule weekly updates with long delays to stay current
 
-    console.log('Using pre-built index. Background scraping disabled.');
+    console.log('Using pre-built index.');
 
-    // Optional: Uncomment to enable weekly index updates (runs every 7 days)
-    // This is disabled by default to avoid rate limiting
-    /*
-    const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
-    setInterval(() => {
-      console.log('Starting weekly index update...');
-      scraper.buildIndexInBackground(false);
-    }, ONE_WEEK);
-    console.log('Weekly index updates enabled (runs every 7 days).');
-    */
+    // Start the scheduler for nightly index rebuilds
+    // Pass scraper reference so cache can be cleared after rebuild
+    startScheduler(scraper);
   });
 }
 
-// Export app for testing
-module.exports = app;
+// Export app and scraper for testing and scheduler access
+module.exports = { app, scraper };

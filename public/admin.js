@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeDatePickers();
     refreshData();
     setupExportForm();
+    loadIndexStatus();
 });
 
 /**
@@ -152,4 +153,87 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/**
+ * Load and display index status
+ */
+async function loadIndexStatus() {
+    try {
+        const response = await fetch('/admin/api/index-status');
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        displayIndexStatus(data);
+    } catch (error) {
+        console.error('[Admin] Error loading index status:', error);
+        document.getElementById('rebuild-status').textContent = 'Error loading status';
+    }
+}
+
+/**
+ * Display index status in the dashboard
+ */
+function displayIndexStatus(data) {
+    document.getElementById('scheduled-time').textContent = data.scheduledTime || 'Not scheduled';
+
+    if (data.lastRebuild) {
+        const timestamp = new Date(data.lastRebuild.timestamp);
+        document.getElementById('last-rebuild-time').textContent = timestamp.toLocaleString();
+
+        if (data.lastRebuild.success) {
+            document.getElementById('rebuild-status').textContent = 'Success';
+            document.getElementById('rebuild-status').style.color = '#27ae60';
+
+            const contents = `${data.lastRebuild.composers} composers, ${data.lastRebuild.works} works, ${data.lastRebuild.sections} sections`;
+            document.getElementById('index-contents').textContent = contents;
+        } else {
+            document.getElementById('rebuild-status').textContent = `Failed: ${data.lastRebuild.error}`;
+            document.getElementById('rebuild-status').style.color = '#c00';
+            document.getElementById('index-contents').textContent = '-';
+        }
+    } else {
+        document.getElementById('last-rebuild-time').textContent = 'Never';
+        document.getElementById('rebuild-status').textContent = 'No rebuild recorded';
+        document.getElementById('index-contents').textContent = '-';
+    }
+}
+
+/**
+ * Trigger a manual index rebuild
+ */
+async function triggerRebuild() {
+    const btn = document.getElementById('rebuild-btn');
+    const msg = document.getElementById('rebuild-message');
+
+    btn.disabled = true;
+    msg.textContent = 'Starting rebuild...';
+    msg.style.color = '#666';
+
+    try {
+        const response = await fetch('/admin/api/rebuild-index', {
+            method: 'POST'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        msg.textContent = 'Rebuild started. This may take several minutes. Refresh to see results.';
+        msg.style.color = '#27ae60';
+
+        // Re-enable button after a delay
+        setTimeout(() => {
+            btn.disabled = false;
+        }, 5000);
+
+    } catch (error) {
+        console.error('[Admin] Error triggering rebuild:', error);
+        msg.textContent = `Error: ${error.message}`;
+        msg.style.color = '#c00';
+        btn.disabled = false;
+    }
 }

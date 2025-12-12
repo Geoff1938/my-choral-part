@@ -41,16 +41,14 @@ class ChoralMusicScraper {
     };
 
     // Works to skip entirely (URL patterns)
-    this.skippedWorks = [
-      '/Verdi/Requiem/'  // Use AltRequiem instead (different dynamics)
-    ];
+    this.skippedWorks = [];
 
     // Section merges: Map URL patterns to merged section names
     // When multiple section names point to the same MIDI file, use this combined name
     this.sectionMerges = {
-      // Verdi AltRequiem - multiple sections in one MIDI file
-      '/Verdi/AltRequiem/rex.mid': 'Rex Tremendae, Recordare',
-      '/Verdi/AltRequiem/ingemisco.mid': 'Ingemisco, Confutatis, Lacrymosa'
+      // Verdi Requiem - multiple sections in one MIDI file
+      '/Verdi/Requiem/rex.mid': 'Rex Tremendae, Recordare',
+      '/Verdi/Requiem/ingemisco.mid': 'Ingemisco, Confutatis, Lacrymosa'
     };
 
     // Composer name normalization rules
@@ -874,6 +872,15 @@ class ChoralMusicScraper {
       console.error('Error loading index:', error.message);
     }
     return [];
+  }
+
+  /**
+   * Clear the cached index, forcing a reload from disk on next access
+   * Used after index rebuild to hot-reload the new index
+   */
+  clearCache() {
+    this.indexCache = null;
+    console.log('Index cache cleared - will reload from disk on next access');
   }
 
   /**

@@ -12,6 +12,7 @@ const {
     getActivitiesForExport,
     getDateRanges
 } = require('../utils/database');
+const { getLastRebuildStatus, runIndexRebuild } = require('../utils/scheduler');
 
 /**
  * GET /admin
@@ -119,6 +120,47 @@ router.get('/api/export', async (req, res, next) => {
         res.send(buffer);
     } catch (error) {
         console.error('[Admin] Error exporting activities:', error.message);
+        next(error);
+    }
+});
+
+/**
+ * GET /admin/api/index-status
+ * Get the status of the last index rebuild
+ */
+router.get('/api/index-status', async (req, res, next) => {
+    try {
+        const status = await getLastRebuildStatus();
+        res.json({
+            lastRebuild: status,
+            scheduledTime: '02:00 (Europe/London)'
+        });
+    } catch (error) {
+        console.error('[Admin] Error getting index status:', error.message);
+        next(error);
+    }
+});
+
+/**
+ * POST /admin/api/rebuild-index
+ * Manually trigger an index rebuild
+ */
+router.post('/api/rebuild-index', async (req, res, next) => {
+    try {
+        console.log('[Admin] Manual index rebuild requested');
+
+        // Run rebuild in background and respond immediately
+        res.json({
+            message: 'Index rebuild started',
+            startedAt: new Date().toISOString()
+        });
+
+        // Run the rebuild after responding
+        runIndexRebuild().catch(err => {
+            console.error('[Admin] Background rebuild failed:', err.message);
+        });
+    } catch (error) {
+        console.error('[Admin] Error starting rebuild:', error.message);
         next(error);
     }
 });
