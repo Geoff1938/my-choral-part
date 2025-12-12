@@ -18,6 +18,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const scraper = new ChoralMusicScraper();
 
+// Trust first proxy (Render) - required for rate limiting to work correctly
+app.set('trust proxy', 1);
+
 // Enable gzip compression for all responses
 app.use(compression());
 
