@@ -219,7 +219,19 @@
 
                     <!-- Balance Control -->
                     <div class="balance-control">
-                        <label for="balance-slider" id="balance-label" title="Adjust the balance between your part and the other parts. Change your voice part via Settings.">My Part: <span id="balance-voice-part">Soprano</span>.  Balance: <span id="balance-value">0</span></label>
+                        <div class="balance-header">
+                            <label for="balance-slider" id="balance-label" title="Adjust the balance between your part and the other parts">
+                                My Part:
+                                <select id="voice-part-select" aria-label="Select your voice part" title="Select your voice part (Soprano/Alto/Tenor/Bass)">
+                                    <option value="soprano">Soprano</option>
+                                    <option value="alto">Alto</option>
+                                    <option value="tenor">Tenor</option>
+                                    <option value="bass">Bass</option>
+                                </select>
+                                <span id="balance-voice-part-instrument"></span>
+                                Balance: <span id="balance-value">30</span>
+                            </label>
+                        </div>
                         <div class="balance-labels">
                             <span>Others Louder</span>
                             <span>&nbsp;</span>
@@ -231,7 +243,7 @@
                                 id="balance-slider"
                                 min="-100"
                                 max="100"
-                                value="0"
+                                value="30"
                                 step="5"
                                 class="styled-slider"
                                 aria-label="Balance between your part and others"
@@ -244,7 +256,7 @@
 
                     <!-- Volume Control -->
                     <div class="volume-control">
-                        <label for="master-volume-slider" id="volume-label" title="Adjust the master volume. If you can't hear anything, check that sound is not muted on your device and that system volume is set to a reasonable level.">Volume: <span id="master-volume-value">100</span>%</label>
+                        <label for="master-volume-slider" id="volume-label" title="Adjust the master volume. If you can't hear anything, check that sound is not muted on your device and that system volume is set to a reasonable level.">Volume: <span id="master-volume-value">75</span>%</label>
                         <div class="volume-labels">
                             <span>Quieter</span>
                             <span>&nbsp;</span>
@@ -256,7 +268,7 @@
                                 id="master-volume-slider"
                                 min="0"
                                 max="100"
-                                value="100"
+                                value="75"
                                 step="5"
                                 class="styled-slider"
                                 aria-label="Master volume"
@@ -272,19 +284,6 @@
             <div class="tab-content" id="settings-tab">
                 <h2>Settings</h2>
 
-                <!-- Voice Part Selection -->
-                <div class="settings-section settings-voice-part">
-                    <h3>Your voice part</h3>
-                    <div class="control-group">
-                        <select id="voice-part-settings" aria-label="Select your voice part" title="Select your voice part (Soprano/Alto/Tenor/Bass) - this determines which instrument channel is highlighted as 'your part' and affects the balance control">
-                            <option value="soprano">Soprano (piccolo)</option>
-                            <option value="alto">Alto (clarinet)</option>
-                            <option value="tenor">Tenor (french horn)</option>
-                            <option value="bass">Bass (bassoon)</option>
-                        </select>
-                    </div>
-                </div>
-
                 <!-- Shareable URL Section -->
                 <div class="settings-section settings-share">
                     <h3>Share This Work</h3>
@@ -297,17 +296,11 @@
                     </div>
                     <p id="no-work-selected-msg" style="color: #666;">No work currently selected</p>
                 </div>
-
-                <!-- Clear Saved Data Section -->
-                <div class="settings-section settings-clear">
-                    <h3>Clear Saved Data</h3>
-                    <p style="margin-bottom: 10px;">Clear all saved settings including recent works, voice part selection, and balance preferences.</p>
-                    <button id="clear-saved-data-btn" class="btn btn-small" title="Clear all saved data and reset to defaults">Clear All Saved Data</button>
-                </div>
-
                 <!-- Currently Selected Movement and Channel Selection -->
                 <div class="settings-section settings-channels" id="movement-channels-section" style="display: none;">
                     <h3>Currently selected midi file – <span id="current-movement-name">-</span></h3>
+
+                    <p id="voice-part-display" style="margin-top: 10px; font-weight: bold;">Your voice part: <span id="voice-part-name-settings">Tenor</span> (<span id="voice-part-instrument-settings">french horn</span>)</p>
 
                     <p id="channels-not-loaded-msg" style="color: #666; margin-top: 10px;">Click Play to load the MIDI file and see available channels</p>
 
@@ -363,6 +356,13 @@
                             </table>
                         </div>
                     </div>
+                </div>
+
+                <!-- Clear Saved Data Section -->
+                <div class="settings-section settings-clear">
+                    <h3>Clear Saved Data</h3>
+                    <p style="margin-bottom: 10px;">Clear all saved settings including recent works, voice part selection, and balance preferences.</p>
+                    <button id="clear-saved-data-btn" class="btn btn-small" title="Clear all saved data and reset to defaults">Clear All Saved Data</button>
                 </div>
 
                 <!-- Contact Us -->

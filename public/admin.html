@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - My Choral Part</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            margin-bottom: 5px;
+        }
+
+        header p {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .summary-card h2 {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .top-works {
+            margin-top: 15px;
+        }
+
+        .top-works h3 {
+            font-size: 0.95em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .top-works-list {
+            list-style: none;
+        }
+
+        .top-works-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+        }
+
+        .top-works-list li:last-child {
+            border-bottom: none;
+        }
+
+        .work-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-right: 10px;
+        }
+
+        .work-count {
+            background: #3498db;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.85em;
+        }
+
+        .export-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .export-section h2 {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+        }
+
+        .export-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .form-group input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .refresh-btn {
+            float: right;
+            background: #27ae60;
+        }
+
+        .refresh-btn:hover {
+            background: #219a52;
+        }
+
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 600px) {
+            .export-form {
+                flex-direction: column;
+            }
+
+            .form-group {
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Activity Dashboard</h1>
+            <p>My Choral Part - User Activity Monitoring</p>
+        </header>
+
+        <div id="error-container"></div>
+
+        <div id="loading" class="loading">Loading activity data...</div>
+
+        <div id="content" style="display: none;">
+            <div class="summary-grid">
+                <!-- Last 24 Hours -->
+                <div class="summary-card">
+                    <h2>Last 24 Hours <button class="btn refresh-btn" onclick="refreshData()">Refresh</button></h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Downloads</span>
+                        <span class="stat-value" id="downloads-24h">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Rehearsal Sessions</span>
+                        <span class="stat-value" id="rehearsals-24h">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Unique Devices</span>
+                        <span class="stat-value" id="devices-24h">-</span>
+                    </div>
+                    <div class="top-works">
+                        <h3>Top Works</h3>
+                        <ul class="top-works-list" id="top-works-24h"></ul>
+                    </div>
+                </div>
+
+                <!-- Week to Date -->
+                <div class="summary-card">
+                    <h2>Week to Date</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Downloads</span>
+                        <span class="stat-value" id="downloads-week">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Rehearsal Sessions</span>
+                        <span class="stat-value" id="rehearsals-week">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Unique Devices</span>
+                        <span class="stat-value" id="devices-week">-</span>
+                    </div>
+                    <div class="top-works">
+                        <h3>Top Works</h3>
+                        <ul class="top-works-list" id="top-works-week"></ul>
+                    </div>
+                </div>
+
+                <!-- Month to Date -->
+                <div class="summary-card">
+                    <h2>Month to Date</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Downloads</span>
+                        <span class="stat-value" id="downloads-month">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Rehearsal Sessions</span>
+                        <span class="stat-value" id="rehearsals-month">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Unique Devices</span>
+                        <span class="stat-value" id="devices-month">-</span>
+                    </div>
+                    <div class="top-works">
+                        <h3>Top Works</h3>
+                        <ul class="top-works-list" id="top-works-month"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Section -->
+            <div class="export-section">
+                <h2>Export Data</h2>
+                <form class="export-form" id="export-form">
+                    <div class="form-group">
+                        <label for="start-date">Start Date</label>
+                        <input type="date" id="start-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end-date">End Date</label>
+                        <input type="date" id="end-date" required>
+                    </div>
+                    <button type="submit" class="btn">Download XLSX</button>
+                </form>
+            </div>
+        </div>
+
+        <footer>
+            <p>Generated at: <span id="generated-at">-</span></p>
+        </footer>
+    </div>
+
+    <script src="/admin.js"></script>
+</body>
+</html>

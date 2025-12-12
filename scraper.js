@@ -42,15 +42,15 @@ class ChoralMusicScraper {
 
     // Works to skip entirely (URL patterns)
     this.skippedWorks = [
-      '/Verdi/AltRequiem/'  // Same notes as main Requiem, just different dynamics
+      '/Verdi/Requiem/'  // Use AltRequiem instead (different dynamics)
     ];
 
     // Section merges: Map URL patterns to merged section names
     // When multiple section names point to the same MIDI file, use this combined name
     this.sectionMerges = {
-      // Verdi Requiem - multiple sections in one MIDI file
-      '/Verdi/Requiem/rex.mid': 'Rex Tremendae, Recordare',
-      '/Verdi/Requiem/ingemisco.mid': 'Ingemisco, Confutatis, Lacrymosa'
+      // Verdi AltRequiem - multiple sections in one MIDI file
+      '/Verdi/AltRequiem/rex.mid': 'Rex Tremendae, Recordare',
+      '/Verdi/AltRequiem/ingemisco.mid': 'Ingemisco, Confutatis, Lacrymosa'
     };
 
     // Composer name normalization rules

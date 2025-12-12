@@ -6,8 +6,12 @@ const ChoralMusicScraper = require('./scraper');
 // Import routes
 const createApiRoutes = require('./routes/api');
 const proxyRouter = require('./routes/proxy');
+const activityRouter = require('./routes/activity');
+const adminRouter = require('./routes/admin');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { apiLimiter, proxyLimiter } = require('./middleware/rateLimiter');
+const basicAuthMiddleware = require('./middleware/basicAuth');
+const { initDatabase } = require('./utils/database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -44,11 +48,17 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Activity logging routes (rate limited) - must be before general /api routes
+app.use('/api/activity', apiLimiter, activityRouter);
+
 // Apply rate limiting to API routes
 app.use('/api', apiLimiter, createApiRoutes(scraper));
 
 // Apply stricter rate limiting to proxy route
 app.use('/proxy', proxyLimiter, proxyRouter);
+
+// Admin routes (Basic Auth protected)
+app.use('/admin', basicAuthMiddleware, adminRouter);
 
 // Soundfont mode routes - serve index.html for different soundfont modes
 // Default mode is 'standard' (SpessaSynth, ~31MB memory)
@@ -80,6 +90,11 @@ if (require.main === module) {
   app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Visit http://localhost:${PORT}`);
+
+    // Initialize activity logging database
+    console.log('Initializing activity database...');
+    await initDatabase();
+    console.log('Activity database ready');
 
     // Initialize scraper
     console.log('Initializing MIDI index scraper...');

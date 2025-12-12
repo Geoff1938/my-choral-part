@@ -61,7 +61,7 @@ class MIDIPlayer {
         this.channelVolumes = {};
         this.progressInterval = null;
         this.masterVolume = 1.0;
-        this.balance = 0; // -100 to 100, 0 is equal
+        this.balance = 30; // -100 to 100, 0 is equal, default 30 to emphasize user's part
         this.voicePart = 'soprano'; // Default voice part
         this.selectedChannelIndex = null; // Specific channel index when multiple exist
         this.loopStart = 0;
@@ -89,6 +89,10 @@ class MIDIPlayer {
 
         // Loading progress tracking
         this.loadingProgress = { current: 0, total: 0 };
+
+        // Activity logging
+        this.heartbeatInterval = null;
+        this.deviceId = this.getOrCreateDeviceId();
 
         this.initializeElements();
 
@@ -291,14 +295,16 @@ class MIDIPlayer {
         this.headerHelpBtn = document.getElementById('header-help-btn');
 
         // Settings tab elements
-        this.voicePartSelect = document.getElementById('voice-part-settings');
         this.shareableUrlSectionSettings = document.getElementById('shareable-url-section-settings');
         this.shareableUrlInputSettings = document.getElementById('shareable-url-settings');
         this.copyUrlBtnSettings = document.getElementById('copy-url-btn-settings');
         this.noWorkSelectedMsg = document.getElementById('no-work-selected-msg');
 
-        // Balance label elements
-        this.balanceVoicePartSpan = document.getElementById('balance-voice-part');
+        // Voice part elements (Play tab dropdown and Settings display)
+        this.voicePartSelect = document.getElementById('voice-part-select');
+        this.balanceVoicePartInstrument = document.getElementById('balance-voice-part-instrument');
+        this.voicePartNameSettings = document.getElementById('voice-part-name-settings');
+        this.voicePartInstrumentSettings = document.getElementById('voice-part-instrument-settings');
 
         // State for current selection
         this.selectedComposer = null;
@@ -352,8 +358,9 @@ class MIDIPlayer {
         if (savedVoicePart && this.voicePartSelect) {
             this.voicePart = savedVoicePart;
             this.voicePartSelect.value = savedVoicePart;
-            this.updateBalanceLabel(); // Update balance label to show loaded voice part
         }
+        // Always update balance label to show current voice part (even if default)
+        this.updateBalanceLabel();
 
         // Load balance from localStorage
         const savedBalance = localStorage.getItem('balance');
@@ -367,8 +374,8 @@ class MIDIPlayer {
             }
         }
 
-        // Always start with volume at 100% (not persisted)
-        this.masterVolume = 100;
+        // Always start with volume at 75% (not persisted)
+        this.masterVolume = 75;
         if (this.masterVolumeSlider) {
             this.masterVolumeSlider.value = this.masterVolume;
         }
@@ -390,6 +397,7 @@ class MIDIPlayer {
             localStorage.removeItem('balance');
             localStorage.removeItem('recentWorks');
             localStorage.removeItem('masterVolume'); // In case old value exists
+            // Note: deviceId is intentionally NOT cleared - it's used for anonymous activity tracking
 
             // Show confirmation
             this.showStatus('All saved data cleared. Reloading...', 'success');
@@ -401,25 +409,118 @@ class MIDIPlayer {
         }
     }
 
-    updateBalanceLabel() {
-        // Update the balance label and dropdown to show voice part with current instrument
-        // Format: "Tenor (french horn)" or "Tenor (clarinet)" if overridden
-        const voicePartName = this.voicePart.charAt(0).toUpperCase() + this.voicePart.slice(1);
-        const instrumentName = this.getCurrentInstrumentForVoicePart();
-        const formattedInstrument = instrumentName.replace(/_/g, ' ');
-        const displayText = `${voicePartName} (${formattedInstrument})`;
+    // ==================== Activity Logging ====================
 
-        // Update balance label in Play tab
-        if (this.balanceVoicePartSpan) {
-            this.balanceVoicePartSpan.textContent = displayText;
+    /**
+     * Get or create a unique device ID for activity tracking
+     * This ID is anonymous and stored in localStorage
+     */
+    getOrCreateDeviceId() {
+        let deviceId = localStorage.getItem('deviceId');
+        if (!deviceId) {
+            // Generate a random UUID
+            deviceId = crypto.randomUUID ? crypto.randomUUID() :
+                'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    const r = Math.random() * 16 | 0;
+                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            localStorage.setItem('deviceId', deviceId);
         }
+        return deviceId;
+    }
 
-        // Update the selected option text in the voice part dropdown in Settings
-        if (this.voicePartSelect) {
-            const selectedOption = this.voicePartSelect.querySelector(`option[value="${this.voicePart}"]`);
-            if (selectedOption) {
-                selectedOption.textContent = displayText;
+    /**
+     * Log an activity event to the server
+     * @param {string} eventType - 'download', 'rehearsal_start', or 'rehearsal_heartbeat'
+     */
+    async logActivity(eventType) {
+        try {
+            console.log('[Activity] Logging:', eventType, {
+                deviceId: this.deviceId,
+                composer: this.selectedComposer,
+                work: this.selectedWork,
+                movement: this.currentMovement
+            });
+            const response = await fetch('/api/activity/log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    deviceId: this.deviceId,
+                    eventType,
+                    composer: this.selectedComposer || null,
+                    work: this.selectedWork || null,
+                    movement: this.currentMovement || null
+                })
+            });
+            if (!response.ok) {
+                console.warn('[Activity] Server returned:', response.status, await response.text());
+            } else {
+                console.log('[Activity] Logged successfully');
             }
+        } catch (error) {
+            // Silent fail - don't disrupt user experience
+            console.warn('[Activity] Failed to log activity:', error.message);
+        }
+    }
+
+    /**
+     * Start the rehearsal heartbeat timer
+     * Logs rehearsal_start immediately, then rehearsal_heartbeat every 10 minutes
+     */
+    startRehearsalHeartbeat() {
+        // Stop any existing heartbeat
+        this.stopRehearsalHeartbeat();
+
+        // Log rehearsal start
+        this.logActivity('rehearsal_start');
+
+        // Set up 10-minute heartbeat
+        this.heartbeatInterval = setInterval(() => {
+            if (this.isPlaying) {
+                this.logActivity('rehearsal_heartbeat');
+            }
+        }, 10 * 60 * 1000); // 10 minutes
+    }
+
+    /**
+     * Stop the rehearsal heartbeat timer
+     */
+    stopRehearsalHeartbeat() {
+        if (this.heartbeatInterval) {
+            clearInterval(this.heartbeatInterval);
+            this.heartbeatInterval = null;
+        }
+    }
+
+    // ==================== End Activity Logging ====================
+
+    updateBalanceLabel() {
+        try {
+            // Update voice part displays in Play tab and Settings tab
+            const voicePartName = this.voicePart ? this.voicePart.charAt(0).toUpperCase() + this.voicePart.slice(1) : 'Soprano';
+            const instrumentName = this.getCurrentInstrumentForVoicePart() || 'piccolo';
+            const formattedInstrument = instrumentName.replace(/_/g, ' ');
+
+            // Update Play tab: ensure dropdown is set correctly
+            if (this.voicePartSelect) {
+                this.voicePartSelect.value = this.voicePart;
+            }
+
+            // Update Play tab: show instrument in parentheses after dropdown
+            if (this.balanceVoicePartInstrument) {
+                this.balanceVoicePartInstrument.textContent = `(${formattedInstrument})`;
+            }
+
+            // Update Settings tab: voice part name and instrument display
+            if (this.voicePartNameSettings) {
+                this.voicePartNameSettings.textContent = voicePartName;
+            }
+            if (this.voicePartInstrumentSettings) {
+                this.voicePartInstrumentSettings.textContent = formattedInstrument;
+            }
+        } catch (error) {
+            console.warn('[App] Error updating balance label:', error);
         }
     }
 
@@ -1269,6 +1370,7 @@ class MIDIPlayer {
             const recentWorks = await this.recentWorksManager.load();
 
             let composer, work, movements;
+            let isDefaultMozart = false; // Track if we're loading default Mozart (not from recent)
 
             if (recentWorks && recentWorks.length > 0) {
                 // Load the most recent work
@@ -1304,6 +1406,7 @@ class MIDIPlayer {
                 // No recent works - load Mozart - Requiem as default
                 composer = 'Mozart';
                 work = 'Requiem (Sussmayr completion)';
+                isDefaultMozart = true; // Don't save to recent works on initial load
 
                 // Hardcoded first few movements for Mozart Requiem
                 movements = [
@@ -1375,7 +1478,8 @@ class MIDIPlayer {
                     ? selectedMovementData.midiUrl
                     : `https://www.learnchoralmusic.co.uk${selectedMovementData.midiUrl}`;
 
-                await this.loadMIDIFromURL(absoluteUrl, selectedMovementData.name);
+                // Skip saving to recent works if this is the default Mozart load
+                await this.loadMIDIFromURL(absoluteUrl, selectedMovementData.name, isDefaultMozart);
             }
         } catch (error) {
             console.error('Error loading default work:', error);
@@ -1520,6 +1624,9 @@ class MIDIPlayer {
         this.movementSelect.addEventListener('change', (e) => {
             if (e.target.value) {
                 try {
+                    // Stop rehearsal heartbeat when changing movement
+                    this.stopRehearsalHeartbeat();
+
                     const movementData = JSON.parse(e.target.value);
                     // Convert relative URL to absolute
                     const absoluteUrl = this.toAbsoluteUrl(movementData.midiUrl);
@@ -1532,14 +1639,16 @@ class MIDIPlayer {
         });
 
         // Voice part selection
-        this.voicePartSelect.addEventListener('change', (e) => {
-            this.voicePart = e.target.value;
-            this.selectedChannelIndex = null; // Reset channel selection to allow auto-selection
-            this.savePreferences();
-            this.updateBalanceLabel(); // Update the balance label to show new voice part
-            this.updateChannelsList(); // Update the channels list with new selection
-            this.applyBalance(); // Reapply balance with new voice part
-        });
+        if (this.voicePartSelect) {
+            this.voicePartSelect.addEventListener('change', (e) => {
+                this.voicePart = e.target.value;
+                this.selectedChannelIndex = null; // Reset channel selection to allow auto-selection
+                this.savePreferences();
+                this.updateBalanceLabel(); // Update the balance label to show new voice part
+                this.updateChannelsList(); // Update the channels list with new selection
+                this.applyBalance(); // Reapply balance with new voice part
+            });
+        }
 
         this.playBtn.addEventListener('click', () => this.play());
         this.pauseBtn.addEventListener('click', () => this.pause());
@@ -2635,7 +2744,7 @@ class MIDIPlayer {
         }
     }
 
-    async loadMIDIFromURL(url, title = null) {
+    async loadMIDIFromURL(url, title = null, skipSaveRecent = false) {
         if (!url) {
             this.showStatus('Invalid MIDI URL', 'error');
             return;
@@ -2746,11 +2855,16 @@ class MIDIPlayer {
                 } else {
                     this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
                 }
-                // Save recent work with movement
-                await this.saveRecentWork(this.selectedComposer, this.selectedWork, title);
+                // Save recent work with movement (unless this is initial default load)
+                if (!skipSaveRecent) {
+                    await this.saveRecentWork(this.selectedComposer, this.selectedWork, title);
+                }
             } else if (title) {
                 this.currentMovementName.textContent = title;
             }
+
+            // Log download activity (always log when MIDI loads successfully)
+            this.logActivity('download');
 
             // Re-enable play button and clear loading indicator
             this.setLoadingState(false, title);
@@ -2899,11 +3013,13 @@ class MIDIPlayer {
                 this.usingSpessaSynth = true;
 
                 // Store track info for UI compatibility
+                // Also store MIDI channel for volume control
                 for (const { track, trackIndex } of trackData) {
                     this.instruments.push({
                         instrument: null,
                         gainNode: null,
                         trackIndex,
+                        midiChannel: track.channel, // MIDI channel (0-15) for SpessaSynth volume control
                         volumeMultiplier: 1.0,
                         isSpessaSynth: true
                     });
@@ -2913,8 +3029,9 @@ class MIDIPlayer {
                 // We don't create Tone.Parts - SpessaSynth handles everything
                 console.log(`[Soundfont] Ready with ${trackData.length} tracks`);
 
-                // Apply initial master volume
+                // Apply initial master volume and balance
                 this.applyMasterVolume();
+                this.applyBalance();
 
                 this.showStatus('Ready', 'success');
                 return;
@@ -3199,8 +3316,21 @@ class MIDIPlayer {
             // Ensure volume doesn't go negative
             volumeMultiplier = Math.max(0, volumeMultiplier);
 
-            // Store the volume multiplier - it's applied in the Part callback
+            // Store the volume multiplier - it's applied in the Part callback (for Tone.js mode)
             instrumentData.volumeMultiplier = volumeMultiplier;
+
+            // Apply to SpessaSynth using MIDI CC 7 (channel volume)
+            if (this.usingSpessaSynth && this.spessaSynth && instrumentData.midiChannel !== undefined) {
+                // Convert volumeMultiplier (0-2 range) to MIDI CC value (0-127)
+                // Default MIDI volume is 100 (out of 127), so we scale around that
+                // volumeMultiplier of 1.0 = 100, 2.0 = 127, 0.0 = 0
+                const midiVolume = Math.min(127, Math.max(0, Math.round(volumeMultiplier * 100)));
+                try {
+                    this.spessaSynth.controllerChange(instrumentData.midiChannel, 7, midiVolume);
+                } catch (e) {
+                    console.debug('[Balance] Failed to set SpessaSynth channel volume:', e.message);
+                }
+            }
         }
     }
 
@@ -3285,6 +3415,9 @@ class MIDIPlayer {
 
             // Start progress update for SpessaSynth
             this.startProgressUpdate();
+
+            // Start rehearsal heartbeat for activity tracking
+            this.startRehearsalHeartbeat();
             return;
         }
 
@@ -3309,6 +3442,9 @@ class MIDIPlayer {
 
         // Start progress update
         this.startProgressUpdate();
+
+        // Start rehearsal heartbeat for activity tracking
+        this.startRehearsalHeartbeat();
     }
 
     pause() {
@@ -3343,6 +3479,9 @@ class MIDIPlayer {
     }
 
     stop() {
+        // Stop rehearsal heartbeat
+        this.stopRehearsalHeartbeat();
+
         // Handle SpessaSynth stop
         if (this.usingSpessaSynth && this.spessaSequencer) {
             this.spessaSequencer.pause();
