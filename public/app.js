@@ -3712,8 +3712,9 @@ class MIDIPlayer {
                 const loopRangeSet = (this.loopStart > 0 || this.loopEnd < this.originalDuration - 0.5);
 
                 // Check if playback has finished (SpessaSynth may stop before hitting exact duration)
-                const isFinished = (this.usingSpessaSynth && this.spessaSequencer && this.spessaSequencer.isFinished) ||
-                                   (this.currentTime >= this.originalDuration - 0.1);
+                // For SpessaSynth: require both isFinished AND time near end (isFinished may stay true after seeking backward)
+                const isFinished = (this.usingSpessaSynth && this.spessaSequencer && this.spessaSequencer.isFinished && this.currentTime >= this.originalDuration - 0.5) ||
+                                   (!this.usingSpessaSynth && this.currentTime >= this.originalDuration - 0.1);
 
                 if (loopRangeSet && this.currentTime >= this.loopEnd) {
                     // Loop back to loop start within the same movement
