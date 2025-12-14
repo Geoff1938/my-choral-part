@@ -3570,7 +3570,12 @@ class MIDIPlayer {
         // Handle SpessaSynth seeking
         if (this.usingSpessaSynth && this.spessaSequencer) {
             this.spessaSequencer.pause();
-            this.spessaSequencer.currentTime = this.currentTime;
+            // Reset to 0 first to clear any "finished" state, then seek to target
+            // This ensures the sequencer properly resets when seeking backward
+            this.spessaSequencer.currentTime = 0;
+            if (this.currentTime > 0) {
+                this.spessaSequencer.currentTime = this.currentTime;
+            }
         } else {
             // Standard Tone.js seeking
             // Stop and cancel everything completely
