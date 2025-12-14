@@ -3604,7 +3604,12 @@ class MIDIPlayer {
 
         // Resume playback if it was playing before and autoResume is true
         if (wasPlaying && autoResume) {
-            this.play();
+            // SpessaSynth needs a small delay after seeking before play() will work properly
+            if (this.usingSpessaSynth) {
+                setTimeout(() => this.play(), 50);
+            } else {
+                this.play();
+            }
         }
     }
 
