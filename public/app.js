@@ -61,7 +61,7 @@ class MIDIPlayer {
         this.channelVolumes = {};
         this.progressInterval = null;
         this.masterVolume = 1.0;
-        this.balance = 40; // -100 to 100, 0 is equal, default 40 to emphasize user's part
+        this.balance = 50; // -100 to 100, 0 is equal, default 50 to emphasize user's part
         this.voicePart = 'soprano'; // Default voice part
         this.selectedChannelIndex = null; // Specific channel index when multiple exist
         this.loopStart = 0;
@@ -1310,8 +1310,13 @@ class MIDIPlayer {
             return null;
         }
 
+        // Adjust for audio latency - SpessaSynth's currentTime is slightly ahead of actual audio output
+        // Subtract a small offset so bar number changes match what the user hears
+        const audioLatencyOffset = 0.2; // seconds
+        const adjustedTime = Math.max(0, this.currentTime - audioLatencyOffset);
+
         for (let i = this.bars.length - 1; i >= 0; i--) {
-            if (this.currentTime >= this.bars[i].time) {
+            if (adjustedTime >= this.bars[i].time) {
                 // Add the starting bar offset (e.g., if movement starts at bar 262)
                 return this.bars[i].number + this.startingBarOffset;
             }
