@@ -61,7 +61,7 @@ class MIDIPlayer {
         this.channelVolumes = {};
         this.progressInterval = null;
         this.masterVolume = 1.0;
-        this.balance = 30; // -100 to 100, 0 is equal, default 30 to emphasize user's part
+        this.balance = 40; // -100 to 100, 0 is equal, default 40 to emphasize user's part
         this.voicePart = 'soprano'; // Default voice part
         this.selectedChannelIndex = null; // Specific channel index when multiple exist
         this.loopStart = 0;
@@ -1748,11 +1748,21 @@ class MIDIPlayer {
         });
 
         // Balance control
+        // During drag: only update display (don't reload MIDI to avoid audio glitches)
         this.balanceSlider.addEventListener('input', (e) => {
             this.balance = parseInt(e.target.value);
             this.balanceValue.textContent = e.target.value;
+            // For Tone.js mode, we can apply balance immediately
+            // For SpessaSynth, wait until slider release to reload MIDI
+            if (!this.usingSpessaSynth) {
+                this.applyBalance();
+            }
+        });
+        // On slider release: apply balance (reloads MIDI for SpessaSynth)
+        this.balanceSlider.addEventListener('change', (e) => {
+            this.balance = parseInt(e.target.value);
             this.applyBalance();
-            this.savePreferences(); // Save balance whenever it changes
+            this.savePreferences();
         });
 
         // Master volume control
@@ -2781,6 +2791,29 @@ class MIDIPlayer {
                 throw new MIDILoadError('Invalid MIDI file or no tracks found', url);
             }
 
+            // Extract CC7 (volume) events from each track for dynamic balance scaling
+            // This allows balance to work with MIDI files that use CC7 for dynamics
+            this.channelCC7Events = {}; // Map channel -> sorted array of {time, value}
+            this.currentChannelCC7 = {}; // Current CC7 value per channel (updated during playback)
+            for (const track of this.midi.tracks) {
+                if (track.channel !== undefined && track.controlChanges) {
+                    const cc7Events = track.controlChanges[7] || [];
+                    if (cc7Events.length > 0) {
+                        // Store events sorted by time, converting value from 0-1 to 0-127
+                        this.channelCC7Events[track.channel] = cc7Events.map(e => ({
+                            time: e.time,
+                            value: Math.round(e.value * 127)
+                        })).sort((a, b) => a.time - b.time);
+                        // Initialize current value (use first event or default 100)
+                        this.currentChannelCC7[track.channel] = this.channelCC7Events[track.channel][0]?.value || 100;
+                    } else {
+                        // No CC7 events - use default value
+                        this.currentChannelCC7[track.channel] = 100;
+                    }
+                }
+            }
+            console.log('[MIDI] Extracted CC7 events for channels:', Object.keys(this.channelCC7Events));
+
             // Find the earliest note time to skip leading silence
             let earliestNote = Infinity;
             for (const track of this.midi.tracks) {
@@ -3278,47 +3311,140 @@ class MIDIPlayer {
         }
     }
 
-    applyBalance() {
-        // Apply balance to all instruments by updating their volumeMultiplier
-        // Volume is applied via the gain parameter in instrument.play()
-        if (!this.instruments || this.instruments.length === 0) return;
+    /**
+     * Calculate volume multiplier for a channel based on balance setting
+     * @param {number} channelIndex - The instrument/channel index
+     * @returns {number} Volume multiplier (0.0 to 3.0)
+     */
+    getBalanceMultiplier(channelIndex) {
+        const isMyPart = (this.selectedChannelIndex !== null && channelIndex === this.selectedChannelIndex);
 
-        for (let i = 0; i < this.instruments.length; i++) {
-            const instrumentData = this.instruments[i];
-
-            let volumeMultiplier = 1.0;
-
-            // Check if this is the user's selected channel
-            const isMyPart = (this.selectedChannelIndex !== null && i === this.selectedChannelIndex);
-
+        if (this.balance >= 0) {
+            // Positive balance: boost My Part (up to 3x), reduce others
             if (isMyPart) {
-                // This is the user's part
-                // Balance adjusts this part's volume
-                volumeMultiplier = 1.0 + (this.balance / 100);
+                return 1.0 + (this.balance / 100) * 2; // 1.0 to 3.0 (capped at max CC7 in createBalancedMidi)
             } else {
-                // This is not the user's part
-                // Balance inversely adjusts other parts' volume
-                volumeMultiplier = 1.0 - (this.balance / 100);
+                return 1.0 - (this.balance / 100); // 1.0 to 0.0 (floored at 30 in createBalancedMidi)
             }
+        } else {
+            // Negative balance: reduce My Part only, leave others unchanged
+            if (isMyPart) {
+                return 1.0 + (this.balance / 100); // 1.0 to 0.0 (balance is negative)
+            } else {
+                return 1.0; // Others unchanged
+            }
+        }
+    }
 
-            // Ensure volume doesn't go negative
-            volumeMultiplier = Math.max(0, volumeMultiplier);
+    /**
+     * Create a copy of the MIDI with CC7 values scaled by balance
+     * @returns {Uint8Array} Modified MIDI data
+     */
+    createBalancedMidi() {
+        if (!this.midi) return null;
 
-            // Store the volume multiplier - it's applied in the Part callback (for Tone.js mode)
-            instrumentData.volumeMultiplier = volumeMultiplier;
+        // Clone the MIDI object
+        const balancedMidi = this.midi.clone();
 
-            // Apply to SpessaSynth using MIDI CC 7 (channel volume)
-            if (this.usingSpessaSynth && this.spessaSynth && instrumentData.midiChannel !== undefined) {
-                // Convert volumeMultiplier (0-2 range) to MIDI CC value (0-127)
-                // Default MIDI volume is 100 (out of 127), so we scale around that
-                // volumeMultiplier of 1.0 = 100, 2.0 = 127, 0.0 = 0
-                const midiVolume = Math.min(127, Math.max(0, Math.round(volumeMultiplier * 100)));
-                try {
-                    this.spessaSynth.controllerChange(instrumentData.midiChannel, 7, midiVolume);
-                } catch (e) {
-                    console.debug('[Balance] Failed to set SpessaSynth channel volume:', e.message);
+        // Build a map of channel index to MIDI channel
+        const channelMap = {}; // instrumentIndex -> midiChannel
+        if (this.instruments) {
+            this.instruments.forEach((inst, idx) => {
+                if (inst.midiChannel !== undefined) {
+                    channelMap[inst.midiChannel] = idx;
+                }
+            });
+        }
+
+        // Floor for "other parts" CC7 values (30 out of 127, normalized to 0-1)
+        const otherPartsFloor = 30 / 127;
+
+        // Scale CC7 values in each track
+        for (const track of balancedMidi.tracks) {
+            if (track.channel === undefined) continue;
+
+            const instrumentIndex = channelMap[track.channel];
+            if (instrumentIndex === undefined) continue;
+
+            const isMyPart = (this.selectedChannelIndex !== null && instrumentIndex === this.selectedChannelIndex);
+            const multiplier = this.getBalanceMultiplier(instrumentIndex);
+
+            // Scale CC7 (volume) control changes
+            if (track.controlChanges && track.controlChanges[7]) {
+                for (const cc of track.controlChanges[7]) {
+                    // cc.value is 0-1, scale it
+                    let scaledValue = cc.value * multiplier;
+
+                    // Apply floor of 30 for other parts when balance is positive
+                    if (!isMyPart && this.balance > 0) {
+                        scaledValue = Math.max(otherPartsFloor, scaledValue);
+                    }
+
+                    cc.value = Math.min(1, Math.max(0, scaledValue));
                 }
             }
+        }
+
+        // Convert back to array buffer
+        return balancedMidi.toArray();
+    }
+
+    /**
+     * Reload SpessaSynth with balance-adjusted MIDI
+     * Preserves current playback position
+     */
+    async reloadWithBalance() {
+        if (!this.usingSpessaSynth || !this.spessaSequencer || !this.midi) return;
+
+        const wasPlaying = this.isPlaying;
+        const currentPos = this.currentTime;
+
+        // Pause playback
+        if (wasPlaying) {
+            this.spessaSequencer.pause();
+        }
+
+        try {
+            // Create balance-adjusted MIDI
+            const balancedMidiArray = this.createBalancedMidi();
+            if (!balancedMidiArray) return;
+
+            // Parse and load into sequencer
+            const { BasicMIDI } = this.spessaCoreModule;
+            const parsedMidi = BasicMIDI.fromArrayBuffer(balancedMidiArray.buffer);
+            await this.spessaSequencer.loadNewSongList([parsedMidi]);
+
+            // Restore position
+            this.spessaSequencer.currentTime = currentPos;
+
+            // Resume if was playing
+            if (wasPlaying) {
+                setTimeout(() => {
+                    this.spessaSequencer.play();
+                    this.isPlaying = true;
+                }, 50);
+            }
+
+            console.log('[Balance] Reloaded MIDI with balance adjustment');
+        } catch (e) {
+            console.error('[Balance] Failed to reload balanced MIDI:', e);
+        }
+    }
+
+    applyBalance() {
+        // Apply balance to all instruments
+        if (!this.instruments || this.instruments.length === 0) return;
+
+        // Update volume multipliers for Tone.js mode
+        for (let i = 0; i < this.instruments.length; i++) {
+            const instrumentData = this.instruments[i];
+            instrumentData.volumeMultiplier = Math.max(0, this.getBalanceMultiplier(i));
+        }
+
+        // For SpessaSynth, reload the MIDI with scaled CC7 values
+        // This is called on balance change (slider release)
+        if (this.usingSpessaSynth && this.spessaSynth) {
+            this.reloadWithBalance();
         }
     }
 
