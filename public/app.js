@@ -144,15 +144,11 @@ class MIDIPlayer {
     }
 
     checkDeviceCapabilities() {
-        // Check device memory and show warning if limited
-        // This helps prevent crashes on low-memory devices
+        // Check device capabilities and store for error handling
+        // Note: Memory warning removed as SpessaSynth uses only ~31MB (vs ~35MB/instrument with old soundfonts)
         const capabilities = checkDeviceCapabilities();
 
-        // Show warning if device seems limited
-        if (capabilities.hasLimitedMemory && this.memoryWarning) {
-            this.memoryWarning.style.display = 'block';
-            console.warn('Limited device capabilities detected:', capabilities.info);
-        } else if (capabilities.info) {
+        if (capabilities.info) {
             console.log('Device capabilities:', capabilities.info);
         }
 
@@ -269,7 +265,6 @@ class MIDIPlayer {
         this.currentWorkDisplay = document.getElementById('current-work-display');
         this.recentWorksDropdown = document.getElementById('recent-works-dropdown');
         this.recentWorksSelect = document.getElementById('recent-works-select');
-        this.memoryWarning = document.getElementById('memory-warning');
 
         // Currently selected movement section
         this.movementChannelsSection = document.getElementById('movement-channels-section');
