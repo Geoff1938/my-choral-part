@@ -779,10 +779,11 @@ class MIDIPlayer {
                 const currentTempo = temposWithTime[currentTempoIndex];
                 const bpm = currentTempo.bpm;
 
-                // Store bar
+                // Store bar - adjust time for skipToTime (skipped leading silence)
+                // This ensures bar times are in the same timeline as currentTime
                 this.bars.push({
                     number: barNumber,
-                    time: currentTime,
+                    time: Math.max(0, currentTime - this.skipToTime),
                     bpm: bpm,
                     timeSignature: `${displayNumerator}/${displayDenominator}`
                 });
