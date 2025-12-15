@@ -3316,11 +3316,11 @@ class MIDIPlayer {
         const isMyPart = (this.selectedChannelIndex !== null && channelIndex === this.selectedChannelIndex);
 
         if (this.balance >= 0) {
-            // Positive balance: boost My Part (up to 3x), reduce others
+            // Positive balance: boost My Part (up to 4x), reduce others
             if (isMyPart) {
-                return 1.0 + (this.balance / 100) * 2; // 1.0 to 3.0 (capped at max CC7 in createBalancedMidi)
+                return 1.0 + (this.balance / 100) * 3; // 1.0 to 4.0 (capped at max CC7 in createBalancedMidi)
             } else {
-                return 1.0 - (this.balance / 100); // 1.0 to 0.0 (floored at 30 in createBalancedMidi)
+                return 1.0 - (this.balance / 100); // 1.0 to 0.0 (floored at 45 in createBalancedMidi)
             }
         } else {
             // Negative balance: reduce My Part only, leave others unchanged
@@ -3352,8 +3352,8 @@ class MIDIPlayer {
             });
         }
 
-        // Floor for "other parts" CC7 values (30 out of 127, normalized to 0-1)
-        const otherPartsFloor = 30 / 127;
+        // Floor for "other parts" CC7 values (45 out of 127, normalized to 0-1)
+        const otherPartsFloor = 45 / 127;
 
         // Scale CC7 values in each track
         for (const track of balancedMidi.tracks) {
