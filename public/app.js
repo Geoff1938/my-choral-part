@@ -650,43 +650,38 @@ class MIDIPlayer {
         // This prevents accidental changes on touch devices
         if (!slider) return;
 
-        let savedValue = null;
-        let isDragging = false;
+        // Calculate thumb position as percentage
+        const getThumbPercent = () => {
+            const min = parseFloat(slider.min) || 0;
+            const max = parseFloat(slider.max) || 100;
+            const value = parseFloat(slider.value) || 0;
+            return ((value - min) / (max - min)) * 100;
+        };
 
-        // Save value before any change
-        slider.addEventListener('mousedown', () => {
-            savedValue = slider.value;
-            isDragging = false;
+        // Check if click/touch is near the thumb (within tolerance)
+        const isNearThumb = (clientX) => {
+            const rect = slider.getBoundingClientRect();
+            const clickPercent = ((clientX - rect.left) / rect.width) * 100;
+            const thumbPercent = getThumbPercent();
+            const tolerance = 15; // percentage points - generous for touch
+            return Math.abs(clickPercent - thumbPercent) <= tolerance;
+        };
+
+        // Prevent mousedown on track (not thumb) from changing value
+        slider.addEventListener('mousedown', (e) => {
+            if (!isNearThumb(e.clientX)) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
         }, { capture: true });
 
-        slider.addEventListener('touchstart', () => {
-            savedValue = slider.value;
-            isDragging = false;
+        // Prevent touchstart on track (not thumb) from changing value
+        slider.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0 && !isNearThumb(e.touches[0].clientX)) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
         }, { capture: true });
-
-        // Mark as dragging if mouse/touch moves
-        slider.addEventListener('mousemove', () => {
-            isDragging = true;
-        });
-
-        slider.addEventListener('touchmove', () => {
-            isDragging = true;
-        });
-
-        // On release, if no drag occurred, restore original value
-        slider.addEventListener('mouseup', () => {
-            if (!isDragging && savedValue !== null) {
-                slider.value = savedValue;
-                slider.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        });
-
-        slider.addEventListener('touchend', () => {
-            if (!isDragging && savedValue !== null) {
-                slider.value = savedValue;
-                slider.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        });
     }
 
     calculateBars() {
@@ -1694,6 +1689,7 @@ class MIDIPlayer {
         this.preventSliderClickToJump(this.progressBar);
         this.preventSliderClickToJump(this.tempoSlider);
         this.preventSliderClickToJump(this.balanceSlider);
+        this.preventSliderClickToJump(this.masterVolumeSlider);
 
         // Previous movement button - single click: go to start, double click: previous movement
         let prevMovementClickTimer = null;
