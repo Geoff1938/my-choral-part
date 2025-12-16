@@ -61,7 +61,7 @@ class MIDIPlayer {
         this.channelVolumes = {};
         this.progressInterval = null;
         this.masterVolume = 1.0;
-        this.balance = 50; // -100 to 100, 0 is equal, default 50 to emphasize user's part
+        this.balance = 60; // -100 to 100, 0 is equal, default 60 to emphasize user's part
         this.voicePart = 'soprano'; // Default voice part
         this.selectedChannelIndex = null; // Specific channel index when multiple exist
         this.loopStart = 0;
@@ -2514,6 +2514,25 @@ class MIDIPlayer {
 
     async selectWork(workName, autoLoadFirstMovement = true) {
         this.selectedWork = workName;
+
+        // Reset tempo and balance to defaults when switching works
+        // (Volume is intentionally preserved)
+        this.tempoMultiplier = 1;
+        this.balance = 60;
+
+        // Update UI to reflect reset values
+        if (this.tempoSlider) {
+            this.tempoSlider.value = 100;
+            if (this.tempoValue) {
+                this.tempoValue.textContent = '100%';
+            }
+        }
+        if (this.balanceSlider) {
+            this.balanceSlider.value = 60;
+            if (this.balanceValue) {
+                this.balanceValue.textContent = '60';
+            }
+        }
 
         // Clear any previous status messages
         this.findMusicStatus.classList.remove('show');
