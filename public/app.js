@@ -645,6 +645,50 @@ class MIDIPlayer {
         });
     }
 
+    preventSliderClickToJump(slider) {
+        // Prevent clicking on slider track from changing value - only dragging works
+        // This prevents accidental changes on touch devices
+        if (!slider) return;
+
+        let savedValue = null;
+        let isDragging = false;
+
+        // Save value before any change
+        slider.addEventListener('mousedown', () => {
+            savedValue = slider.value;
+            isDragging = false;
+        }, { capture: true });
+
+        slider.addEventListener('touchstart', () => {
+            savedValue = slider.value;
+            isDragging = false;
+        }, { capture: true });
+
+        // Mark as dragging if mouse/touch moves
+        slider.addEventListener('mousemove', () => {
+            isDragging = true;
+        });
+
+        slider.addEventListener('touchmove', () => {
+            isDragging = true;
+        });
+
+        // On release, if no drag occurred, restore original value
+        slider.addEventListener('mouseup', () => {
+            if (!isDragging && savedValue !== null) {
+                slider.value = savedValue;
+                slider.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+
+        slider.addEventListener('touchend', () => {
+            if (!isDragging && savedValue !== null) {
+                slider.value = savedValue;
+                slider.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+    }
+
     calculateBars() {
         // Calculate bar positions from MIDI data, accounting for time signature and tempo changes
         // Key insight: 8/4 in MIDI often represents 2/2 (Alla Breve) in the score
@@ -1646,10 +1690,11 @@ class MIDIPlayer {
         this.backwardBtn.addEventListener('click', () => this.seek(-10));
         this.forwardBtn.addEventListener('click', () => this.seek(10));
 
-        // Add click-to-jump functionality for progress bar, tempo, and balance sliders (NOT loop sliders)
+        // Add click-to-jump functionality for progress bar only (NOT tempo, balance, or loop sliders)
+        // Tempo and balance sliders require dragging to prevent accidental changes on touch devices
         this.addSliderClickToJump(this.progressBar);
-        this.addSliderClickToJump(this.tempoSlider);
-        this.addSliderClickToJump(this.balanceSlider);
+        this.preventSliderClickToJump(this.tempoSlider);
+        this.preventSliderClickToJump(this.balanceSlider);
 
         // Previous movement button - single click: go to start, double click: previous movement
         let prevMovementClickTimer = null;
