@@ -2922,6 +2922,10 @@ class MIDIPlayer {
             // Update balance label to show instrument if override exists
             this.updateBalanceLabel();
 
+            // Apply balance now that selectedChannelIndex is set
+            // (setupPlayback called applyBalance before channel was determined)
+            this.applyBalance();
+
             // Load time signature overrides from localStorage
             this.loadTimeSignatureOverrides();
 
