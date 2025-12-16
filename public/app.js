@@ -650,38 +650,46 @@ class MIDIPlayer {
         // This prevents accidental changes on touch devices
         if (!slider) return;
 
-        // Calculate thumb position as percentage
-        const getThumbPercent = () => {
-            const min = parseFloat(slider.min) || 0;
-            const max = parseFloat(slider.max) || 100;
-            const value = parseFloat(slider.value) || 0;
-            return ((value - min) / (max - min)) * 100;
+        let savedValue = null;
+        let isDragging = false;
+        let hasMoved = false;
+
+        // On mousedown/touchstart, save current value and reset drag state
+        const onStart = () => {
+            savedValue = slider.value;
+            isDragging = true;
+            hasMoved = false;
         };
 
-        // Check if click/touch is near the thumb (within tolerance)
-        const isNearThumb = (clientX) => {
-            const rect = slider.getBoundingClientRect();
-            const clickPercent = ((clientX - rect.left) / rect.width) * 100;
-            const thumbPercent = getThumbPercent();
-            const tolerance = 15; // percentage points - generous for touch
-            return Math.abs(clickPercent - thumbPercent) <= tolerance;
+        // On mousemove/touchmove, mark that movement has occurred
+        const onMove = () => {
+            if (isDragging) {
+                hasMoved = true;
+            }
         };
 
-        // Prevent mousedown on track (not thumb) from changing value
-        slider.addEventListener('mousedown', (e) => {
-            if (!isNearThumb(e.clientX)) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }, { capture: true });
+        // On mouseup/touchend, reset drag state
+        const onEnd = () => {
+            isDragging = false;
+            // Small delay then reset hasMoved for next interaction
+            setTimeout(() => { hasMoved = false; }, 50);
+        };
 
-        // Prevent touchstart on track (not thumb) from changing value
-        slider.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 0 && !isNearThumb(e.touches[0].clientX)) {
-                e.preventDefault();
-                e.stopPropagation();
+        // On input (value change), revert if no drag movement occurred
+        const onInput = () => {
+            if (isDragging && !hasMoved && savedValue !== null) {
+                // Value changed without dragging - revert immediately
+                slider.value = savedValue;
             }
-        }, { capture: true });
+        };
+
+        slider.addEventListener('mousedown', onStart);
+        slider.addEventListener('touchstart', onStart);
+        slider.addEventListener('mousemove', onMove);
+        slider.addEventListener('touchmove', onMove);
+        document.addEventListener('mouseup', onEnd);
+        document.addEventListener('touchend', onEnd);
+        slider.addEventListener('input', onInput);
     }
 
     calculateBars() {
