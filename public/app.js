@@ -1690,9 +1690,8 @@ class MIDIPlayer {
         this.backwardBtn.addEventListener('click', () => this.seek(-10));
         this.forwardBtn.addEventListener('click', () => this.seek(10));
 
-        // Add click-to-jump functionality for progress bar only (NOT tempo, balance, or loop sliders)
-        // Tempo and balance sliders require dragging to prevent accidental changes on touch devices
-        this.addSliderClickToJump(this.progressBar);
+        // All sliders require dragging to prevent accidental changes on touch devices
+        this.preventSliderClickToJump(this.progressBar);
         this.preventSliderClickToJump(this.tempoSlider);
         this.preventSliderClickToJump(this.balanceSlider);
 
