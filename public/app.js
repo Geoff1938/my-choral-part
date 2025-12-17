@@ -3055,7 +3055,6 @@ class MIDIPlayer {
 
                     // Create audio context
                     const audioContext = new AudioContext();
-                    console.log(`[Soundfont] AudioContext created: sampleRate=${audioContext.sampleRate}, state=${audioContext.state}`);
 
                     // Load the AudioWorklet processor (must be same-origin)
                     await audioContext.audioWorklet.addModule('/spessasynth_processor.min.js');
@@ -3506,29 +3505,18 @@ class MIDIPlayer {
 
     applyBalance() {
         // Apply balance to all instruments
-        if (!this.instruments || this.instruments.length === 0) {
-            console.log('[Balance] No instruments, skipping');
-            return;
-        }
-
-        console.log(`[Balance] Applying balance=${this.balance}, selectedChannel=${this.selectedChannelIndex}, usingSpessaSynth=${this.usingSpessaSynth}`);
+        if (!this.instruments || this.instruments.length === 0) return;
 
         // Update volume multipliers for Tone.js mode
         for (let i = 0; i < this.instruments.length; i++) {
             const instrumentData = this.instruments[i];
-            const multiplier = this.getBalanceMultiplier(i);
-            instrumentData.volumeMultiplier = Math.max(0, multiplier);
-            const isMyPart = (this.selectedChannelIndex !== null && i === this.selectedChannelIndex);
-            console.log(`[Balance] Channel ${i}: multiplier=${multiplier.toFixed(2)}, isMyPart=${isMyPart}`);
+            instrumentData.volumeMultiplier = Math.max(0, this.getBalanceMultiplier(i));
         }
 
         // For SpessaSynth, reload the MIDI with scaled CC7 values
         // This is called on balance change (slider release)
         if (this.usingSpessaSynth && this.spessaSynth) {
-            console.log('[Balance] Calling reloadWithBalance()');
             this.reloadWithBalance();
-        } else {
-            console.log('[Balance] Not using SpessaSynth, skipping reload');
         }
     }
 
@@ -3539,7 +3527,6 @@ class MIDIPlayer {
     applyMasterVolume() {
         // Convert percentage to 0-1 range
         const volumeLevel = this.masterVolume / 100;
-        console.log(`[Volume] Applying masterVolume=${this.masterVolume}%, volumeLevel=${volumeLevel}`);
 
         // Apply to SpessaSynth (standard mode)
         if (this.usingSpessaSynth && this.spessaSynth) {
@@ -3547,9 +3534,6 @@ class MIDIPlayer {
             // Value is a gain multiplier (1.0 = normal, 0.5 = 50%, etc.)
             if (typeof this.spessaSynth.setMasterParameter === 'function') {
                 this.spessaSynth.setMasterParameter("masterGain", volumeLevel);
-                console.log(`[Volume] SpessaSynth masterGain set to ${volumeLevel}`);
-            } else {
-                console.log('[Volume] SpessaSynth setMasterParameter not available');
             }
         }
 
@@ -3558,7 +3542,6 @@ class MIDIPlayer {
             // Convert to dB: 0% = -Infinity, 100% = 0dB
             const dbValue = volumeLevel > 0 ? 20 * Math.log10(volumeLevel) : -Infinity;
             Tone.Destination.volume.value = dbValue;
-            console.log(`[Volume] Tone.Destination set to ${dbValue.toFixed(2)} dB`);
         }
     }
 
