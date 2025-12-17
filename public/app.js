@@ -3055,6 +3055,7 @@ class MIDIPlayer {
 
                     // Create audio context
                     const audioContext = new AudioContext();
+                    console.log(`[Soundfont] AudioContext created: sampleRate=${audioContext.sampleRate}, state=${audioContext.state}`);
 
                     // Load the AudioWorklet processor (must be same-origin)
                     await audioContext.audioWorklet.addModule('/spessasynth_processor.min.js');
@@ -3538,6 +3539,7 @@ class MIDIPlayer {
     applyMasterVolume() {
         // Convert percentage to 0-1 range
         const volumeLevel = this.masterVolume / 100;
+        console.log(`[Volume] Applying masterVolume=${this.masterVolume}%, volumeLevel=${volumeLevel}`);
 
         // Apply to SpessaSynth (standard mode)
         if (this.usingSpessaSynth && this.spessaSynth) {
@@ -3545,6 +3547,9 @@ class MIDIPlayer {
             // Value is a gain multiplier (1.0 = normal, 0.5 = 50%, etc.)
             if (typeof this.spessaSynth.setMasterParameter === 'function') {
                 this.spessaSynth.setMasterParameter("masterGain", volumeLevel);
+                console.log(`[Volume] SpessaSynth masterGain set to ${volumeLevel}`);
+            } else {
+                console.log('[Volume] SpessaSynth setMasterParameter not available');
             }
         }
 
@@ -3553,6 +3558,7 @@ class MIDIPlayer {
             // Convert to dB: 0% = -Infinity, 100% = 0dB
             const dbValue = volumeLevel > 0 ? 20 * Math.log10(volumeLevel) : -Infinity;
             Tone.Destination.volume.value = dbValue;
+            console.log(`[Volume] Tone.Destination set to ${dbValue.toFixed(2)} dB`);
         }
     }
 
