@@ -1010,6 +1010,13 @@ section:last-child {
     cursor: pointer;
 }
 
+.styled-slider:focus,
+.styled-slider:focus-visible {
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
 .styled-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
