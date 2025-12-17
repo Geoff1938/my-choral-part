@@ -3505,18 +3505,29 @@ class MIDIPlayer {
 
     applyBalance() {
         // Apply balance to all instruments
-        if (!this.instruments || this.instruments.length === 0) return;
+        if (!this.instruments || this.instruments.length === 0) {
+            console.log('[Balance] No instruments, skipping');
+            return;
+        }
+
+        console.log(`[Balance] Applying balance=${this.balance}, selectedChannel=${this.selectedChannelIndex}, usingSpessaSynth=${this.usingSpessaSynth}`);
 
         // Update volume multipliers for Tone.js mode
         for (let i = 0; i < this.instruments.length; i++) {
             const instrumentData = this.instruments[i];
-            instrumentData.volumeMultiplier = Math.max(0, this.getBalanceMultiplier(i));
+            const multiplier = this.getBalanceMultiplier(i);
+            instrumentData.volumeMultiplier = Math.max(0, multiplier);
+            const isMyPart = (this.selectedChannelIndex !== null && i === this.selectedChannelIndex);
+            console.log(`[Balance] Channel ${i}: multiplier=${multiplier.toFixed(2)}, isMyPart=${isMyPart}`);
         }
 
         // For SpessaSynth, reload the MIDI with scaled CC7 values
         // This is called on balance change (slider release)
         if (this.usingSpessaSynth && this.spessaSynth) {
+            console.log('[Balance] Calling reloadWithBalance()');
             this.reloadWithBalance();
+        } else {
+            console.log('[Balance] Not using SpessaSynth, skipping reload');
         }
     }
 
