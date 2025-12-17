@@ -541,9 +541,29 @@ class ChoralMusicScraper {
     console.log('Building complete MIDI index...');
     await this.initializeDataDirectory();
 
+    // Load existing exceptions to preserve duplicate work preferences
+    let existingExceptions = { duplicateWorks: [] };
+    try {
+      if (await fs.pathExists(this.exceptionsFile)) {
+        existingExceptions = await fs.readJSON(this.exceptionsFile);
+        console.log(`Loaded existing exceptions: ${existingExceptions.duplicateWorks?.length || 0} duplicate works`);
+      }
+    } catch (e) {
+      console.log('No existing exceptions file or failed to read:', e.message);
+    }
+
+    // Build a set of known duplicate URLs to skip (the duplicateUrl, not the firstUrl)
+    const knownDuplicateUrls = new Set();
+    if (existingExceptions.duplicateWorks) {
+      for (const dup of existingExceptions.duplicateWorks) {
+        knownDuplicateUrls.add(dup.duplicateUrl);
+        console.log(`  Will skip known duplicate: ${dup.duplicateUrl}`);
+      }
+    }
+
     // Track exceptions (duplicates, unavailable works, etc.) for review
     const exceptions = {
-      duplicateWorks: [],
+      duplicateWorks: existingExceptions.duplicateWorks || [], // Preserve existing duplicate entries
       unavailableWorks: [],
       skippedWorks: [],
       unavailableSongs: [],
@@ -600,6 +620,12 @@ class ChoralMusicScraper {
             url: work.url,
             reason: 'Hardcoded skip rule'
           });
+          continue;
+        }
+
+        // Skip known duplicate URLs (from existing exceptions file)
+        if (knownDuplicateUrls.has(work.url)) {
+          console.log(`  SKIPPING KNOWN DUPLICATE: "${work.name}" at ${work.url}`);
           continue;
         }
 

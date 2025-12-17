@@ -32404,59 +32404,59 @@
       },
       {
         "name": "Requiem",
-        "url": "/Verdi/AltRequiem/requiem.html",
+        "url": "/Verdi/Requiem/Requiem.html",
         "sections": [
           {
             "name": "1: Requiem & Kyrie",
-            "midiUrl": "/Verdi/AltRequiem/11-req.mid"
+            "midiUrl": "/Verdi/Requiem/arequiem.mid"
           },
           {
             "name": "2: Dies Irae - Tuba Mirum",
-            "midiUrl": "/Verdi/AltRequiem/21-2di-t.mid"
+            "midiUrl": "/Verdi/Requiem/b2di-tub.mid"
           },
           {
             "name": "2: Dies Irae - Liber Scriptus",
-            "midiUrl": "/Verdi/AltRequiem/23-liber.mid"
+            "midiUrl": "/Verdi/Requiem/b3liber.mid"
           },
           {
             "name": "2: Dies Irae - Quid sum Miser",
-            "midiUrl": "/Verdi/AltRequiem/24-quid.mid"
+            "midiUrl": "/Verdi/Requiem/b4quid.mid"
           },
           {
             "name": "2: Dies Irae - Rex Tremendae, Recordare",
-            "midiUrl": "/Verdi/AltRequiem/25-6rx-r.mid"
+            "midiUrl": "/Verdi/Requiem/b5-6rx-r.mid"
           },
           {
             "name": "2: Dies Irae - Ingemisco, Confutatis Maledictus, Lacrymosa",
-            "midiUrl": "/Verdi/AltRequiem/27-8-9.mid"
+            "midiUrl": "/Verdi/Requiem/b7-8-9.mid"
           },
           {
             "name": "3: Offertorio",
-            "midiUrl": "/Verdi/AltRequiem/31-offer.mid"
+            "midiUrl": "/Verdi/Requiem/c-offert.mid"
           },
           {
             "name": "4: Sanctus",
-            "midiUrl": "/Verdi/AltRequiem/41-sanct.mid"
+            "midiUrl": "/Verdi/Requiem/dsanctus.mid"
           },
           {
             "name": "5: Agnus Dei",
-            "midiUrl": "/Verdi/AltRequiem/51-agnus.mid"
+            "midiUrl": "/Verdi/Requiem/e-agnusd.mid"
           },
           {
             "name": "6: Lux Aeterna",
-            "midiUrl": "/Verdi/AltRequiem/61-luxet.mid"
+            "midiUrl": "/Verdi/Requiem/f-luxaet.mid"
           },
           {
             "name": "7: Libera Me (1)",
-            "midiUrl": "/Verdi/AltRequiem/71-liber.mid"
+            "midiUrl": "/Verdi/Requiem/g1-lib.mid"
           },
           {
             "name": "7: Libera Me - Dies Irae",
-            "midiUrl": "/Verdi/AltRequiem/72-dies.mid"
+            "midiUrl": "/Verdi/Requiem/g2-dies.mid"
           },
           {
             "name": "7: Libera Me - Libera Me (2)",
-            "midiUrl": "/Verdi/AltRequiem/73-liber.mid"
+            "midiUrl": "/Verdi/Requiem/g3-lib2.mid"
           }
         ]
       }
