@@ -369,8 +369,8 @@ class MIDIPlayer {
             }
         }
 
-        // Always start with volume at 75% (not persisted)
-        this.masterVolume = 75;
+        // Always start with volume at 90% (not persisted)
+        this.masterVolume = 90;
         if (this.masterVolumeSlider) {
             this.masterVolumeSlider.value = this.masterVolume;
         }
