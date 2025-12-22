@@ -2,7 +2,7 @@ services:
   - type: web
     name: my-choral-part
     env: node
-    buildCommand: npm install
+    buildCommand: npm install && node generate-version.js
     startCommand: npm start
     envVars:
       - key: NODE_ENV

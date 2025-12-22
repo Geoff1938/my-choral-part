@@ -4153,4 +4153,24 @@ if ('serviceWorker' in navigator) {
 // Initialize the player when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.midiPlayer = new MIDIPlayer();
+    loadVersionInfo();
 });
+
+// Load and display version information
+async function loadVersionInfo() {
+    const versionElement = document.getElementById('app-version');
+    if (!versionElement) return;
+
+    try {
+        const response = await fetch('/version.json');
+        if (response.ok) {
+            const versionInfo = await response.json();
+            versionElement.textContent = versionInfo.version || 'unknown';
+        } else {
+            versionElement.textContent = 'unknown';
+        }
+    } catch (error) {
+        console.log('Could not load version info:', error.message);
+        versionElement.textContent = 'unknown';
+    }
+}

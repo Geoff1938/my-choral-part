@@ -353,11 +353,13 @@
                     </div>
                 </div>
 
-                <!-- Clear Saved Data Section -->
-                <div class="settings-section settings-clear">
-                    <h3>Clear Saved Data</h3>
-                    <p style="margin-bottom: 10px;">Clear all saved settings including recent works, voice part selection, and balance preferences.</p>
-                    <button id="clear-saved-data-btn" class="btn btn-small" title="Clear all saved data and reset to defaults">Clear All Saved Data</button>
+                <!-- Privacy & Saved Data Section -->
+                <div class="settings-section settings-privacy">
+                    <h3>Privacy & Saved Data</h3>
+                    <p><strong>Stored on your device:</strong> Your preferences (voice part, recent works, playback settings) are stored locally on your device to remember your choices between visits.</p>
+                    <p><strong>Stored on our server:</strong> When you play a work, we record which movement you are rehearsing and a browser identifier. This helps us understand which works are most used. We do not collect any personal information such as your name or email address.</p>
+                    <button id="clear-saved-data-btn" class="btn btn-small" style="margin-top: 10px;" title="Clear all saved data and reset to defaults">Clear All Saved Data</button>
+                    <p style="margin-top: 8px; font-size: 0.85em; color: #666;">This will reset all local preferences to defaults.</p>
                 </div>
 
                 <!-- Contact Us -->
@@ -371,6 +373,11 @@
                     <h3>Copyright Notice</h3>
                     <p>The MIDI files used by this player were created by John Hooper and he is the Copyright owner. They may be used for the purpose of private individuals rehearsing music but not for any other purpose without prior written permission from John Hooper.</p>
                     <p>For more information please visit <a href="https://www.learnchoralmusic.co.uk/" target="_blank" rel="noopener noreferrer">https://www.learnchoralmusic.co.uk/</a></p>
+                </div>
+
+                <!-- Version Info -->
+                <div class="settings-section version-section">
+                    <p class="version-info">Version: <span id="app-version">loading...</span></p>
                 </div>
             </div>
         </main>

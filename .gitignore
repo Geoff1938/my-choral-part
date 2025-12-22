@@ -31,6 +31,7 @@ build/
 # Generated/runtime data files
 # Note: midi-index-full.json is now committed (pre-built index)
 data/recent-works.json
+public/version.json
 
 # Test output files
 midi-test-results*.csv

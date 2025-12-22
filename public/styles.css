@@ -1462,6 +1462,29 @@ section:last-child {
     text-decoration: underline;
 }
 
+/* Privacy section */
+.settings-privacy {
+    background: var(--color-background-alt);
+}
+
+.settings-privacy p {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+/* Version section */
+.version-section {
+    background: transparent;
+    padding: 10px 15px;
+    text-align: center;
+}
+
+.version-info {
+    font-size: 0.85em;
+    color: #888;
+    margin: 0;
+}
+
 /* Movement Channels Section */
 .movement-channels-section {
     background: var(--surface);

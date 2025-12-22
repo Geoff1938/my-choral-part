@@ -2743,6 +2743,16 @@
     "name": "Bairstow",
     "works": [
       {
+        "name": "Blessed city, heavenly Salem",
+        "url": "/Bairstow/Blessed City/blessed-city.html",
+        "sections": [
+          {
+            "name": "Blessed city, heavenly Salem",
+            "midiUrl": "/Bairstow/Blessed City/Blessed City.mid"
+          }
+        ]
+      },
+      {
         "name": "I sat down under His shadow",
         "url": "/Bairstow/I sat down/i-sat-down.html",
         "sections": [
@@ -19193,6 +19203,10 @@
           {
             "name": "Te Deum Laudamus",
             "midiUrl": "/Haydn/Te-Deum/te-deum.mid"
+          },
+          {
+            "name": "Te Deum Laudamus",
+            "midiUrl": "/Haydn/Te-Deum/Latin/te-deum.mid"
           }
         ]
       },
@@ -30002,6 +30016,16 @@
     "name": "Smyth",
     "works": [
       {
+        "name": "Laggard Dawn",
+        "url": "/Smyth/Laggard Dawn/laggard-dawn.html",
+        "sections": [
+          {
+            "name": "Laggard Dawn",
+            "midiUrl": "/Smyth/Laggard Dawn/Laggard Dawn.mid"
+          }
+        ]
+      },
+      {
         "name": "Mass in D",
         "url": "/Smyth/Mass in D/mass-in-d.html",
         "sections": [
@@ -31720,11 +31744,11 @@
     "works": [
       {
         "name": "Give almes of thy goods",
-        "url": null,
+        "url": "/Tye/Give almes/give-almes.html",
         "sections": [
           {
             "name": "Give almes of thy goods",
-            "midiUrl": "/Madrigals-etc/Tye/Give almes.mid"
+            "midiUrl": "/Tye/Give almes/Give almes.mid"
           }
         ]
       },
