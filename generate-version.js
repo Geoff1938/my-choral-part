@@ -8,7 +8,15 @@ const path = require('path');
 
 try {
     // Get short git commit hash
-    const hash = execSync('git rev-parse --short HEAD').toString().trim();
+    // First try Render's environment variable, then fall back to git command
+    let hash;
+    if (process.env.RENDER_GIT_COMMIT) {
+        hash = process.env.RENDER_GIT_COMMIT.substring(0, 7);
+        console.log('Using RENDER_GIT_COMMIT environment variable');
+    } else {
+        hash = execSync('git rev-parse --short HEAD').toString().trim();
+        console.log('Using git rev-parse command');
+    }
 
     // Get current date in YYYY-MM-DD format
     const date = new Date().toISOString().split('T')[0];
