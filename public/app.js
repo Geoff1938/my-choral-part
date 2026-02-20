@@ -712,7 +712,7 @@ class MIDIPlayer {
             this.voicePartSelect.appendChild(option);
         }
 
-        // Add "Other..." option to navigate to Settings tab for manual override
+        // Add "Other..." option to open channel selection dialog
         const otherOption = document.createElement('option');
         otherOption.value = 'other';
         otherOption.textContent = 'Other...';
@@ -1356,19 +1356,17 @@ class MIDIPlayer {
                 '<strong>Progress bar:</strong><br>' +
                 '• Drag the slider to jump to any point<br>' +
                 '• Drag the triangles to set a loop range for practice<br><br>' +
-                '<strong>Tempo &amp; Balance:</strong><br>' +
-                '• Slow down the tempo for learning difficult passages<br>' +
-                '• Adjust balance to hear your part more or less prominently';
+                '<strong>My Part &amp; Balance:</strong><br>' +
+                '• Use the <strong>My Part</strong> dropdown to select which voice part you sing<br>' +
+                '• The dropdown updates automatically when a MIDI file loads, showing the available vocal parts<br>' +
+                '• Select <strong>Other...</strong> to choose from all channels (including non-vocal)<br>' +
+                '• Adjust balance to hear your part more or less prominently<br><br>' +
+                '<strong>Tempo:</strong><br>' +
+                '• Slow down the tempo for learning difficult passages';
         } else if (activeTabId === 'settings-tab') {
             title = 'Settings - Help';
             content =
                 tooltipHelp + '<br><br>' +
-                '<strong>Your voice part:</strong><br>' +
-                '• Select your voice part (Soprano, Alto, Tenor, Bass)<br>' +
-                '• This affects which part is highlighted by the Balance control<br><br>' +
-                '<strong>Channel overrides:</strong><br>' +
-                '• Some MIDI files may not correctly identify voice parts<br>' +
-                '• Use this to manually assign which channel is your part<br><br>' +
                 '<strong>Time signatures:</strong><br>' +
                 '• Adjust bar numbering if your score starts at a different bar<br>' +
                 '• Override time signatures if they are incorrectly detected<br><br>' +
@@ -1924,7 +1922,7 @@ class MIDIPlayer {
                         this.voicePart = selected.voicePart;
                         this.lastSelectedTrackName = selected.trackName;
                     } else {
-                        // Non-choral channel selected (added via Settings override)
+                        // Non-choral channel selected (added via channel selection dialog)
                         const tracksWithNotes = this.getTracksWithNotes();
                         if (channelIndex < tracksWithNotes.length) {
                             const { track, trackIndex } = tracksWithNotes[channelIndex];
@@ -2974,7 +2972,7 @@ class MIDIPlayer {
             if (this.movementLoadingStatus) {
                 this.movementLoadingStatus.textContent = '- loading...';
             }
-            // Update movement name to show loading (in Settings pane)
+            // Update movement name to show loading (if element exists)
             if (this.currentMovementName && movementTitle) {
                 this.currentMovementName.textContent = buildDisplayText(' - loading...');
             }
@@ -2993,7 +2991,7 @@ class MIDIPlayer {
             if (this.movementLoadingStatus) {
                 this.movementLoadingStatus.textContent = '';
             }
-            // Update movement name to remove loading indicator (in Settings pane)
+            // Update movement name to remove loading indicator (if element exists)
             if (this.currentMovementName && movementTitle) {
                 this.currentMovementName.textContent = buildDisplayText();
             }
