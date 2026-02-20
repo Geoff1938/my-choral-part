@@ -8,6 +8,8 @@ import {
     MEMORY,
     VOICE_TO_INSTRUMENT,
     VOICE_PARTS,
+    INSTRUMENT_TO_VOICE,
+    CHORAL_INSTRUMENTS,
     SOUNDFONT_MODE,
     SOUNDFONT_URLS
 } from './constants.js';
@@ -64,6 +66,7 @@ class MIDIPlayer {
         this.balance = 60; // -100 to 100, 0 is equal, default 60 to emphasize user's part
         this.voicePart = 'soprano'; // Default voice part
         this.selectedChannelIndex = null; // Specific channel index when multiple exist
+        this.lastSelectedTrackName = null; // Track name for cross-movement continuity (session only)
         this.loopStart = 0;
         this.loopEnd = 0;
         this.repeatMode = false; // If true, repeat current movement; if false, auto-advance to next
@@ -140,7 +143,7 @@ class MIDIPlayer {
         // Add listeners for first user interaction
         document.addEventListener('click', startAudio);
         document.addEventListener('keydown', startAudio);
-        document.addEventListener('touchstart', startAudio);
+        document.addEventListener('touchstart', startAudio, { passive: true });
     }
 
     checkDeviceCapabilities() {
@@ -266,12 +269,10 @@ class MIDIPlayer {
         this.recentWorksDropdown = document.getElementById('recent-works-dropdown');
         this.recentWorksSelect = document.getElementById('recent-works-select');
 
-        // Currently selected movement section
-        this.movementChannelsSection = document.getElementById('movement-channels-section');
-        this.currentMovementName = document.getElementById('current-movement-name');
-        this.channelsTbody = document.getElementById('channels-tbody');
-        this.channelsNotLoadedMsg = document.getElementById('channels-not-loaded-msg');
-        this.channelsListContainer = document.getElementById('channels-list-container');
+        // Channel selection dialog
+        this.channelSelectDialog = document.getElementById('channel-select-dialog');
+        this.channelDialogTbody = document.getElementById('channel-dialog-tbody');
+        this.channelDialogCloseBtn = document.getElementById('channel-dialog-close');
 
         // Time signature settings section
         this.timeSignatureSection = document.getElementById('time-signature-section');
@@ -295,11 +296,9 @@ class MIDIPlayer {
         this.copyUrlBtnSettings = document.getElementById('copy-url-btn-settings');
         this.noWorkSelectedMsg = document.getElementById('no-work-selected-msg');
 
-        // Voice part elements (Play tab dropdown and Settings display)
+        // Voice part elements (Play tab dropdown)
         this.voicePartSelect = document.getElementById('voice-part-select');
         this.balanceVoicePartInstrument = document.getElementById('balance-voice-part-instrument');
-        this.voicePartNameSettings = document.getElementById('voice-part-name-settings');
-        this.voicePartInstrumentSettings = document.getElementById('voice-part-instrument-settings');
 
         // State for current selection
         this.selectedComposer = null;
@@ -480,27 +479,19 @@ class MIDIPlayer {
 
     updateBalanceLabel() {
         try {
-            // Update voice part displays in Play tab and Settings tab
-            const voicePartName = this.voicePart ? this.voicePart.charAt(0).toUpperCase() + this.voicePart.slice(1) : 'Soprano';
             const instrumentName = this.getCurrentInstrumentForVoicePart() || 'piccolo';
             const formattedInstrument = instrumentName.replace(/_/g, ' ');
 
-            // Update Play tab: ensure dropdown is set correctly
-            if (this.voicePartSelect) {
+            // Update Play tab: ensure dropdown is set correctly (only in static mode)
+            const isDynamic = this.voicePartSelect?.dataset.dynamic === 'true';
+            if (this.voicePartSelect && !isDynamic) {
                 this.voicePartSelect.value = this.voicePart;
             }
 
             // Update Play tab: show instrument in parentheses after dropdown
+            // In dynamic mode, the dropdown already shows the instrument so hide this
             if (this.balanceVoicePartInstrument) {
-                this.balanceVoicePartInstrument.textContent = `(${formattedInstrument})`;
-            }
-
-            // Update Settings tab: voice part name and instrument display
-            if (this.voicePartNameSettings) {
-                this.voicePartNameSettings.textContent = voicePartName;
-            }
-            if (this.voicePartInstrumentSettings) {
-                this.voicePartInstrumentSettings.textContent = formattedInstrument;
+                this.balanceVoicePartInstrument.textContent = isDynamic ? '' : `(${formattedInstrument})`;
             }
         } catch (error) {
             console.warn('[App] Error updating balance label:', error);
@@ -612,6 +603,233 @@ class MIDIPlayer {
         }
     }
 
+    getChoralChannels() {
+        // Returns array of vocal (non-solo) channels from the loaded MIDI
+        // Uses track name matching against vocal keywords, excludes solo parts
+        const tracksWithNotes = this.getTracksWithNotes();
+        const choralChannels = [];
+
+        for (let i = 0; i < tracksWithNotes.length; i++) {
+            const { track, trackIndex } = tracksWithNotes[i];
+            const rawName = track.name || `Channel ${trackIndex + 1}`;
+            const normalizedName = this.normalizeChannelName(rawName);
+            const instrumentName = this.getInstrumentName(track);
+
+            // Detect voice part from track name
+            const voicePart = this.detectVoicePartFromName(normalizedName);
+            if (!voicePart) continue;
+
+            // Exclude solo parts
+            if (/\bsolo\b/i.test(normalizedName)) continue;
+
+            choralChannels.push({
+                index: i,
+                trackName: normalizedName,
+                instrumentName: instrumentName,
+                voicePart: voicePart
+            });
+        }
+
+        // Number voice parts consistently when there are multiple of the same type
+        // e.g. "Soprano 1" and "Soprano" become "Soprano 1" and "Soprano 2"
+        // e.g. two tracks both named "Soprano" become "Soprano 1" and "Soprano 2"
+        const partGroups = {};
+        for (const ch of choralChannels) {
+            if (!partGroups[ch.voicePart]) partGroups[ch.voicePart] = [];
+            partGroups[ch.voicePart].push(ch);
+        }
+        for (const channels of Object.values(partGroups)) {
+            if (channels.length <= 1) continue;
+
+            // Find which numbers are already used (e.g., "Soprano 1" already has 1)
+            const usedNumbers = new Set();
+            const unnumbered = [];
+            for (const ch of channels) {
+                const match = ch.trackName.match(/\s+(\d+)\s*$/);
+                if (match) {
+                    usedNumbers.add(parseInt(match[1]));
+                } else {
+                    unnumbered.push(ch);
+                }
+            }
+
+            // Assign numbers to unnumbered tracks
+            let nextNum = 1;
+            for (const ch of unnumbered) {
+                while (usedNumbers.has(nextNum)) nextNum++;
+                ch.trackName = `${ch.trackName} ${nextNum}`;
+                usedNumbers.add(nextNum);
+                nextNum++;
+            }
+        }
+
+        return choralChannels;
+    }
+
+    detectVoicePartFromName(name) {
+        // Detect voice part category from a track name
+        // Returns 'soprano', 'alto', 'tenor', 'bass', or null if not a vocal part
+        if (!name) return null;
+        const lower = name.toLowerCase();
+
+        // Exclude non-vocal uses of "bass" (D'Bass = double bass, bass guitar, bass drum, etc.)
+        if (/\bd['']\s*bass\b/.test(lower)) return null;
+        if (/\bbass\s*(guitar|drum|trombone|clarinet|flute|sax)\b/.test(lower)) return null;
+
+        // Order matters: check more specific patterns before general ones
+        if (/\bmezzo[-\s]?soprano\b/.test(lower)) return 'alto';
+        if (/\bsoprano\b/.test(lower)) return 'soprano';
+        if (/\btreble\b/.test(lower)) return 'soprano';
+        if (/\bcounter[-\s]?tenor\b/.test(lower)) return 'alto';
+        if (/\balto\b/.test(lower)) return 'alto';
+        if (/\btenor\b/.test(lower)) return 'tenor';
+        if (/\bbaritone\b/.test(lower)) return 'bass';
+        if (/\bbass\b/.test(lower)) return 'bass';
+
+        return null;
+    }
+
+    populateVoicePartDropdown() {
+        // Dynamically populate the "My Part" dropdown with choral channels from loaded MIDI
+        if (!this.voicePartSelect) return;
+
+        const choralChannels = this.midi ? this.getChoralChannels() : [];
+
+        if (choralChannels.length === 0) {
+            this.resetToStaticDropdown();
+            return;
+        }
+
+        // Dynamic mode: populate with choral channels
+        this.voicePartSelect.dataset.dynamic = 'true';
+        this.voicePartSelect.innerHTML = '';
+
+        for (const ch of choralChannels) {
+            const option = document.createElement('option');
+            option.value = `channel:${ch.index}`;
+            const displayInstrument = ch.instrumentName.replace(/_/g, ' ');
+            option.textContent = `${ch.trackName} (${displayInstrument})`;
+            this.voicePartSelect.appendChild(option);
+        }
+
+        // Add "Other..." option to navigate to Settings tab for manual override
+        const otherOption = document.createElement('option');
+        otherOption.value = 'other';
+        otherOption.textContent = 'Other...';
+        this.voicePartSelect.appendChild(otherOption);
+
+        // Auto-select the best matching channel
+        this.autoSelectDropdownChannel(choralChannels);
+
+        this.voicePartSelect.title = 'Select which channel is your part';
+    }
+
+    resetToStaticDropdown() {
+        // Restore the 4 standard voice part options
+        if (!this.voicePartSelect) return;
+
+        this.voicePartSelect.dataset.dynamic = 'false';
+        this.voicePartSelect.innerHTML =
+            '<option value="soprano">Soprano</option>' +
+            '<option value="alto">Alto</option>' +
+            '<option value="tenor">Tenor</option>' +
+            '<option value="bass">Bass</option>';
+        this.voicePartSelect.value = this.voicePart;
+        this.voicePartSelect.title = 'Select your voice part (Soprano/Alto/Tenor/Bass)';
+    }
+
+    autoSelectDropdownChannel(choralChannels) {
+        // Auto-select the best matching channel in the dynamic dropdown
+        // Priority: 1) saved override, 2) track name match, 3) voice part match, 4) first channel
+
+        // Priority 1: Saved channel override for this movement
+        if (this.selectedChannelIndex !== null) {
+            const matchByIndex = choralChannels.find(ch => ch.index === this.selectedChannelIndex);
+            if (matchByIndex) {
+                this.voicePartSelect.value = `channel:${matchByIndex.index}`;
+                this.lastSelectedTrackName = matchByIndex.trackName;
+                return;
+            }
+        }
+
+        // Priority 2: Match by track name from previous movement (same work)
+        if (this.lastSelectedTrackName) {
+            const matchByName = choralChannels.find(ch => ch.trackName === this.lastSelectedTrackName);
+            if (matchByName) {
+                this.voicePartSelect.value = `channel:${matchByName.index}`;
+                this.selectedChannelIndex = matchByName.index;
+                return;
+            }
+        }
+
+        // Priority 3: First channel matching saved voicePart preference
+        const matchByVoicePart = choralChannels.find(ch => ch.voicePart === this.voicePart);
+        if (matchByVoicePart) {
+            this.voicePartSelect.value = `channel:${matchByVoicePart.index}`;
+            this.selectedChannelIndex = matchByVoicePart.index;
+            this.lastSelectedTrackName = matchByVoicePart.trackName;
+            return;
+        }
+
+        // Priority 4: First choral channel
+        if (choralChannels.length > 0) {
+            this.voicePartSelect.value = `channel:${choralChannels[0].index}`;
+            this.selectedChannelIndex = choralChannels[0].index;
+            this.lastSelectedTrackName = choralChannels[0].trackName;
+        }
+    }
+
+    syncDropdownToChannel() {
+        // Sync the dropdown to match the currently selected channel (e.g., after Settings radio change)
+        if (!this.voicePartSelect || this.voicePartSelect.dataset.dynamic !== 'true') return;
+        if (this.selectedChannelIndex === null) return;
+
+        // Remove any previously added override option (non-choral channel)
+        const existingOverride = this.voicePartSelect.querySelector('option[data-override="true"]');
+        if (existingOverride) {
+            existingOverride.remove();
+        }
+
+        const targetValue = `channel:${this.selectedChannelIndex}`;
+        const existingOption = this.voicePartSelect.querySelector(`option[value="${targetValue}"]`);
+
+        if (existingOption) {
+            // Channel is already in the dropdown (choral channel)
+            this.voicePartSelect.value = targetValue;
+            const choralChannels = this.getChoralChannels();
+            const matched = choralChannels.find(ch => ch.index === this.selectedChannelIndex);
+            if (matched) {
+                this.lastSelectedTrackName = matched.trackName;
+            }
+        } else {
+            // Non-choral channel selected via Settings - add it as a temporary option
+            const tracksWithNotes = this.getTracksWithNotes();
+            if (this.selectedChannelIndex < tracksWithNotes.length) {
+                const { track, trackIndex } = tracksWithNotes[this.selectedChannelIndex];
+                const rawName = track.name || `Channel ${trackIndex + 1}`;
+                const channelName = this.normalizeChannelName(rawName);
+                const instrumentName = this.getInstrumentName(track);
+                const displayInstrument = instrumentName.replace(/_/g, ' ');
+
+                const overrideOption = document.createElement('option');
+                overrideOption.value = targetValue;
+                overrideOption.textContent = `${channelName} (${displayInstrument})`;
+                overrideOption.dataset.override = 'true';
+
+                // Insert before the "Other..." option
+                const otherOption = this.voicePartSelect.querySelector('option[value="other"]');
+                if (otherOption) {
+                    this.voicePartSelect.insertBefore(overrideOption, otherOption);
+                } else {
+                    this.voicePartSelect.appendChild(overrideOption);
+                }
+
+                this.voicePartSelect.value = targetValue;
+                this.lastSelectedTrackName = channelName;
+            }
+        }
+    }
+
     addSliderClickToJump(slider) {
         // Allow clicking anywhere on the slider track to jump to that position
         if (!slider) return;
@@ -642,7 +860,7 @@ class MIDIPlayer {
 
             slider.value = value;
             slider.dispatchEvent(new Event('input', { bubbles: true }));
-        });
+        }, { passive: true });
     }
 
     preventSliderClickToJump(slider) {
@@ -684,9 +902,9 @@ class MIDIPlayer {
         };
 
         slider.addEventListener('mousedown', onStart);
-        slider.addEventListener('touchstart', onStart);
+        slider.addEventListener('touchstart', onStart, { passive: true });
         slider.addEventListener('mousemove', onMove);
-        slider.addEventListener('touchmove', onMove);
+        slider.addEventListener('touchmove', onMove, { passive: true });
         document.addEventListener('mouseup', onEnd);
         document.addEventListener('touchend', onEnd);
         slider.addEventListener('input', onInput);
@@ -1267,7 +1485,7 @@ class MIDIPlayer {
 
             element.addEventListener('touchmove', () => {
                 hideTooltip();
-            });
+            }, { passive: true });
 
             element.addEventListener('touchcancel', () => {
                 hideTooltip();
@@ -1469,6 +1687,11 @@ class MIDIPlayer {
                 }
             }
 
+            // Clear track name continuity when switching to a different work
+            if (this.selectedComposer !== composer || this.selectedWork !== work) {
+                this.lastSelectedTrackName = null;
+            }
+
             this.selectedComposer = composer;
             this.selectedWork = work;
 
@@ -1500,13 +1723,6 @@ class MIDIPlayer {
                     this.currentMovementName.textContent = `${composer}, ${work} - ${firstMovementName}`;
                 }
             }
-            if (this.movementChannelsSection) {
-                this.movementChannelsSection.style.display = 'block';
-            }
-
-            // Update channels list to show the "Click Play to load..." message
-            this.updateChannelsList();
-
             // Auto-load the first movement to show bars and markers immediately
             const selectedMovementData = JSON.parse(this.movementSelect.value);
             if (selectedMovementData && selectedMovementData.midiUrl) {
@@ -1520,6 +1736,7 @@ class MIDIPlayer {
         } catch (error) {
             console.error('Error loading default work:', error);
             // Fall back to hardcoded Mozart Requiem if API fails
+            this.lastSelectedTrackName = null;
             this.selectedComposer = 'Mozart';
             this.selectedWork = 'Requiem (Sussmayr completion)';
 
@@ -1574,6 +1791,13 @@ class MIDIPlayer {
         // Help modal close button
         if (this.helpModalClose) {
             this.helpModalClose.addEventListener('click', () => this.hideHelpModal());
+        }
+
+        // Channel selection dialog close button
+        if (this.channelDialogCloseBtn) {
+            this.channelDialogCloseBtn.addEventListener('click', () => {
+                this.channelSelectDialog.close();
+            });
         }
 
         // Help modal background click
@@ -1677,12 +1901,50 @@ class MIDIPlayer {
         // Voice part selection
         if (this.voicePartSelect) {
             this.voicePartSelect.addEventListener('change', (e) => {
-                this.voicePart = e.target.value;
-                this.selectedChannelIndex = null; // Reset channel selection to allow auto-selection
+                const value = e.target.value;
+
+                if (value === 'other') {
+                    // "Other..." selected: open channel selection dialog
+                    this.openChannelSelectDialog();
+                    // Revert dropdown to previous selection (don't leave "Other..." selected)
+                    this.syncDropdownToChannel();
+                    return;
+                }
+
+                if (value.startsWith('channel:')) {
+                    // Dynamic mode: user selected a specific channel
+                    const channelIndex = parseInt(value.split(':')[1]);
+                    this.selectedChannelIndex = channelIndex;
+
+                    // Derive voicePart and save track name
+                    // Check choral channels first, then fall back to all tracks
+                    const choralChannels = this.getChoralChannels();
+                    const selected = choralChannels.find(ch => ch.index === channelIndex);
+                    if (selected) {
+                        this.voicePart = selected.voicePart;
+                        this.lastSelectedTrackName = selected.trackName;
+                    } else {
+                        // Non-choral channel selected (added via Settings override)
+                        const tracksWithNotes = this.getTracksWithNotes();
+                        if (channelIndex < tracksWithNotes.length) {
+                            const { track, trackIndex } = tracksWithNotes[channelIndex];
+                            const rawName = track.name || `Channel ${trackIndex + 1}`;
+                            this.lastSelectedTrackName = this.normalizeChannelName(rawName);
+                        }
+                    }
+
+                    this.saveChannelOverride();
+                } else {
+                    // Static mode: user selected a general voice part
+                    this.voicePart = value;
+                    this.selectedChannelIndex = null;
+                    this.lastSelectedTrackName = null;
+                }
+
                 this.savePreferences();
-                this.updateBalanceLabel(); // Update the balance label to show new voice part
-                this.updateChannelsList(); // Update the channels list with new selection
-                this.applyBalance(); // Reapply balance with new voice part
+                this.updateBalanceLabel();
+                this.updateChannelsList();
+                this.applyBalance();
             });
         }
 
@@ -1743,7 +2005,7 @@ class MIDIPlayer {
             // Capture playing state IMMEDIATELY before any other events can modify it
             this.wasPlayingBeforeDrag = this.isPlaying;
             isSeeking = true;
-        }, { capture: true });
+        }, { capture: true, passive: true });
 
         this.progressBar.addEventListener('input', (e) => {
             let newTime = (e.target.value / 100) * this.originalDuration;
@@ -2173,43 +2435,25 @@ class MIDIPlayer {
         document.addEventListener('mouseup', endDrag);
 
         // Touch events
-        marker.addEventListener('touchstart', startDrag);
+        marker.addEventListener('touchstart', startDrag, { passive: false });
         document.addEventListener('touchmove', drag, { passive: false });
         document.addEventListener('touchend', endDrag);
         document.addEventListener('touchcancel', endDrag);
     }
 
     updateChannelsList() {
-        // Show/populate the channels list section
-        // Check if MIDI is loaded (not just instruments, as orchestral pieces may have no voice parts)
+        // Kept as a no-op for compatibility - channel selection now handled via dialog
+        // Called from various places in the code, safe to do nothing here
+    }
+
+    openChannelSelectDialog() {
+        // Populate and open the channel selection dialog
+        if (!this.channelSelectDialog || !this.channelDialogTbody) return;
+
         const tracksWithNotes = this.getTracksWithNotes();
+        if (tracksWithNotes.length === 0) return;
 
-        if (tracksWithNotes.length === 0) {
-            // No tracks with notes - show message
-            if (this.channelsNotLoadedMsg) {
-                this.channelsNotLoadedMsg.style.display = 'block';
-            }
-            if (this.channelsListContainer) {
-                this.channelsListContainer.style.display = 'none';
-            }
-            return;
-        }
-
-        // MIDI file loaded - hide message, show channels table
-        if (this.channelsNotLoadedMsg) {
-            this.channelsNotLoadedMsg.style.display = 'none';
-        }
-        if (this.channelsListContainer) {
-            this.channelsListContainer.style.display = 'block';
-        }
-
-        this.movementChannelsSection.style.display = 'block';
-
-        // Find the channel that matches the selected voice part instrument (for auto-selection)
-        const selectedInstrument = this.voicePartInstruments[this.voicePart];
-        let autoSelectedIndex = null;
-
-        // Build the channels table from tracks with notes
+        // Build the channels table from all tracks with notes
         let html = '';
         for (let i = 0; i < tracksWithNotes.length; i++) {
             const { track, trackIndex } = tracksWithNotes[i];
@@ -2217,23 +2461,15 @@ class MIDIPlayer {
             const rawChannelName = track.name || `Channel ${trackIndex + 1}`;
             const channelName = this.normalizeChannelName(rawChannelName);
 
-            // Check if this channel matches the voice part instrument
-            const isMatching = (instrumentName === selectedInstrument);
-            if (isMatching && autoSelectedIndex === null) {
-                autoSelectedIndex = i;
-            }
+            const isChecked = (this.selectedChannelIndex === i);
 
-            // Determine if this channel should be checked
-            const isChecked = (this.selectedChannelIndex !== null ? this.selectedChannelIndex === i : isMatching);
-
-            // Escape channel name and instrument for safe HTML display
             const channelNameDisplay = escapeHtml(channelName);
             const instrumentDisplay = escapeHtml(instrumentName.replace(/_/g, ' '));
 
             html += `
-                <tr>
+                <tr data-channel-index="${i}">
                     <td style="text-align: center;">
-                        <input type="radio" name="channel-selection" value="${i}" ${isChecked ? 'checked' : ''} />
+                        <input type="radio" name="channel-dialog-selection" value="${i}" ${isChecked ? 'checked' : ''} />
                     </td>
                     <td>${channelNameDisplay}</td>
                     <td>${instrumentDisplay}</td>
@@ -2241,23 +2477,37 @@ class MIDIPlayer {
             `;
         }
 
-        this.channelsTbody.innerHTML = html;
+        this.channelDialogTbody.innerHTML = html;
 
-        // If no manual selection has been made, use auto-selected channel
-        if (this.selectedChannelIndex === null && autoSelectedIndex !== null) {
-            this.selectedChannelIndex = autoSelectedIndex;
-        }
+        // Add click handlers to rows (click anywhere on row to select)
+        const rows = this.channelDialogTbody.querySelectorAll('tr');
+        rows.forEach(row => {
+            row.addEventListener('click', (e) => {
+                const channelIndex = parseInt(row.dataset.channelIndex);
+                this.selectedChannelIndex = channelIndex;
 
-        // Add event listeners to radio buttons
-        const radioButtons = this.channelsTbody.querySelectorAll('input[type="radio"]');
-        radioButtons.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                this.selectedChannelIndex = parseInt(e.target.value);
-                this.saveChannelOverride(); // Save override for this movement
-                this.updateBalanceLabel(); // Update label to show instrument
-                this.applyBalance(); // Reapply balance with new selection
+                // Derive voicePart from the track name if possible
+                const { track, trackIndex: tIdx } = tracksWithNotes[channelIndex];
+                const rawName = track.name || `Channel ${tIdx + 1}`;
+                const normalizedName = this.normalizeChannelName(rawName);
+                const detectedPart = this.detectVoicePartFromName(normalizedName);
+                if (detectedPart) {
+                    this.voicePart = detectedPart;
+                    this.savePreferences();
+                }
+                this.lastSelectedTrackName = normalizedName;
+
+                this.saveChannelOverride();
+                this.syncDropdownToChannel();
+                this.updateBalanceLabel();
+                this.applyBalance();
+
+                // Close the dialog
+                this.channelSelectDialog.close();
             });
         });
+
+        this.channelSelectDialog.showModal();
     }
 
     switchTab(tabName) {
@@ -2724,10 +2974,6 @@ class MIDIPlayer {
             if (this.movementLoadingStatus) {
                 this.movementLoadingStatus.textContent = '- loading...';
             }
-            // Show the movement/channels section so user can see loading status
-            if (this.movementChannelsSection) {
-                this.movementChannelsSection.style.display = 'block';
-            }
             // Update movement name to show loading (in Settings pane)
             if (this.currentMovementName && movementTitle) {
                 this.currentMovementName.textContent = buildDisplayText(' - loading...');
@@ -2916,6 +3162,9 @@ class MIDIPlayer {
             // Update UI
             this.updateMIDIInfo();
 
+            // Populate dynamic "My Part" dropdown with choral channels
+            this.populateVoicePartDropdown();
+
             // Update channels list based on voice part
             this.updateChannelsList();
 
@@ -2943,16 +3192,18 @@ class MIDIPlayer {
             // Update the current movement name display with composer, work, and movement
             if (title && this.selectedComposer && this.selectedWork) {
                 // For single-movement works where work name equals movement name, don't repeat it
-                if (this.selectedWork === title) {
-                    this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork}`;
-                } else {
-                    this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
+                if (this.currentMovementName) {
+                    if (this.selectedWork === title) {
+                        this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork}`;
+                    } else {
+                        this.currentMovementName.textContent = `${this.selectedComposer}, ${this.selectedWork} - ${title}`;
+                    }
                 }
                 // Save recent work with movement (unless this is initial default load)
                 if (!skipSaveRecent) {
                     await this.saveRecentWork(this.selectedComposer, this.selectedWork, title);
                 }
-            } else if (title) {
+            } else if (title && this.currentMovementName) {
                 this.currentMovementName.textContent = title;
             }
 

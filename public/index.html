@@ -216,7 +216,7 @@
                         <div class="balance-header">
                             <label for="balance-slider" id="balance-label" title="Adjust the balance between your part and the other parts">
                                 My Part:
-                                <select id="voice-part-select" aria-label="Select your voice part" title="Select your voice part (Soprano/Alto/Tenor/Bass)">
+                                <select id="voice-part-select" data-dynamic="false" aria-label="Select your voice part" title="Select your voice part (Soprano/Alto/Tenor/Bass)">
                                     <option value="soprano">Soprano</option>
                                     <option value="alto">Alto</option>
                                     <option value="tenor">Tenor</option>
@@ -290,31 +290,6 @@
                     </div>
                     <p id="no-work-selected-msg" style="color: #666;">No work currently selected</p>
                 </div>
-                <!-- Currently Selected Movement and Channel Selection -->
-                <div class="settings-section settings-channels" id="movement-channels-section" style="display: none;">
-                    <h3>Currently selected midi file – <span id="current-movement-name">-</span></h3>
-
-                    <p id="voice-part-display" style="margin-top: 10px; font-weight: bold;">Your voice part: <span id="voice-part-name-settings">Tenor</span> (<span id="voice-part-instrument-settings">french horn</span>)</p>
-
-                    <p id="channels-not-loaded-msg" style="color: #666; margin-top: 10px;">Click Play to load the MIDI file and see available channels</p>
-
-                    <div class="channels-list" id="channels-list-container" style="display: none;">
-                        <p style="margin-bottom: 10px;" title="If the automatic voice part detection is wrong, you can manually select which channel represents your part">Override which channel represents your part in this midi file:</p>
-                        <table class="channels-table" title="Select the radio button next to the channel that represents your voice part">
-                            <thead>
-                                <tr>
-                                    <th title="Select this to mark the channel as your voice part">Your Part</th>
-                                    <th title="The name of the channel as defined in the MIDI file">Channel name</th>
-                                    <th title="The instrument used to play this channel">Instrument</th>
-                                </tr>
-                            </thead>
-                            <tbody id="channels-tbody">
-                                <!-- Dynamically populated -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
                 <!-- Time Signature Settings -->
                 <div class="settings-section settings-time-sig" id="time-signature-section">
                     <h3>Time Signatures and Bar Numbering</h3>
@@ -402,6 +377,28 @@
     <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
     <!-- Load SoundFont player for high-quality mode (FluidR3_GM soundfont) -->
     <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
+    <!-- Channel Selection Modal -->
+    <dialog id="channel-select-dialog" class="channel-select-dialog">
+        <div class="channel-dialog-header">
+            <h3>Select your part</h3>
+            <button id="channel-dialog-close" class="channel-dialog-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="channel-dialog-body">
+            <table class="channels-table">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Channel name</th>
+                        <th>Instrument</th>
+                    </tr>
+                </thead>
+                <tbody id="channel-dialog-tbody">
+                    <!-- Dynamically populated -->
+                </tbody>
+            </table>
+        </div>
+    </dialog>
+
     <!-- Our app logic -->
     <script type="module" src="/app.js"></script>
 </body>

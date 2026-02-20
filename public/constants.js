@@ -86,6 +86,17 @@ export const VOICE_TO_INSTRUMENT = {
     [VOICE_PARTS.BASS]: 'bassoon'
 };
 
+// Reverse mapping: instrument name -> voice part (for identifying choral channels)
+export const INSTRUMENT_TO_VOICE = {
+    'piccolo': VOICE_PARTS.SOPRANO,
+    'clarinet': VOICE_PARTS.ALTO,
+    'french_horn': VOICE_PARTS.TENOR,
+    'bassoon': VOICE_PARTS.BASS
+};
+
+// Set of instruments that identify choral channels
+export const CHORAL_INSTRUMENTS = new Set(Object.keys(INSTRUMENT_TO_VOICE));
+
 // Common instruments to pre-cache (based on MIDI file analysis)
 export const CACHED_INSTRUMENTS = [
     'acoustic_grand_piano',  // 890 uses
