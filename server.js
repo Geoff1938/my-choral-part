@@ -1,7 +1,43 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const { execSync } = require('child_process');
 const compression = require('compression');
 const ChoralMusicScraper = require('./scraper');
+
+// Generate version.json at startup so it's available as a static file
+function generateVersionFile() {
+  try {
+    let hash;
+    if (process.env.RENDER_GIT_COMMIT) {
+      hash = process.env.RENDER_GIT_COMMIT.substring(0, 7);
+    } else {
+      hash = execSync('git rev-parse --short HEAD').toString().trim();
+    }
+    const date = new Date().toISOString().split('T')[0];
+    const versionInfo = {
+      version: `${date}.${hash}`,
+      commit: hash,
+      date: date,
+      built: new Date().toISOString()
+    };
+    const outputPath = path.join(__dirname, 'public', 'version.json');
+    fs.writeFileSync(outputPath, JSON.stringify(versionInfo, null, 2));
+    console.log(`Version: ${versionInfo.version}`);
+  } catch (error) {
+    console.error('Failed to generate version file:', error.message);
+    const fallback = {
+      version: 'unknown',
+      commit: 'unknown',
+      date: new Date().toISOString().split('T')[0],
+      built: new Date().toISOString()
+    };
+    const outputPath = path.join(__dirname, 'public', 'version.json');
+    fs.writeFileSync(outputPath, JSON.stringify(fallback, null, 2));
+  }
+}
+
+generateVersionFile();
 
 // Import routes
 const createApiRoutes = require('./routes/api');
