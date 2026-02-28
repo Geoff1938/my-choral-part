@@ -1076,16 +1076,21 @@ class ChoralMusicScraper {
    * @returns {Promise<Object|null>} Object with composer and work names, or null if not found
    */
   async resolveSlug(composerSlug, workSlug) {
+    // Strip trailing punctuation that gets appended when URLs appear in sentences
+    // e.g., "Check out https://player.mychoralpart.com/verdi/requiem." (trailing period)
+    const cleanComposer = composerSlug.replace(/[.,;:!?)]+$/, '');
+    const cleanWork = workSlug.replace(/[.,;:!?)]+$/, '');
+
     const index = await this.loadIndex();
     const composer = index.find(c =>
-      c.name === composerSlug ||
-      this.nameToSlug(c.name) === composerSlug.toLowerCase()
+      c.name === cleanComposer ||
+      this.nameToSlug(c.name) === cleanComposer.toLowerCase()
     );
     if (!composer) return null;
 
     const work = composer.works.find(w =>
-      w.name === workSlug ||
-      this.nameToSlug(w.name) === workSlug.toLowerCase()
+      w.name === cleanWork ||
+      this.nameToSlug(w.name) === cleanWork.toLowerCase()
     );
     if (!work) return null;
 
