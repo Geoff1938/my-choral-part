@@ -72,6 +72,10 @@ app.use(express.static('public', {
     if (filepath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
+    // Service worker must never be cached - browser needs to check for updates
+    else if (filepath.endsWith('service-worker.js')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
     // Longer cache for images and fonts
     else if (filepath.match(/\.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/)) {
       res.setHeader('Cache-Control', 'public, max-age=604800'); // 1 week

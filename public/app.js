@@ -4372,7 +4372,7 @@ class MIDIPlayer {
 // Register service worker for caching soundfonts
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('/service-worker.js', { updateViaCache: 'none' })
             .then((registration) => {
                 console.log('[App] Service Worker registered successfully:', registration.scope);
 
