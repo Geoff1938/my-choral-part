@@ -65,6 +65,9 @@ function createApiRoutes(scraper) {
       if (result) {
         res.json(result);
       } else {
+        // Log details to help diagnose intermittent 404s
+        const index = await scraper.loadIndex();
+        console.warn(`[resolve] 404 for "${req.params.composerSlug}/${req.params.workSlug}" - index has ${index.length} composers`);
         res.status(404).json({ error: 'Composer or work not found' });
       }
     } catch (error) {

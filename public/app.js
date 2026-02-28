@@ -2532,29 +2532,39 @@ class MIDIPlayer {
         // Check if URL contains composer/work path (e.g., /handel/nabal)
         // Returns true if URL specified a work, false otherwise
         const path = window.location.pathname;
+        console.log(`[checkURLRoute] pathname="${path}"`);
         if (path && path !== '/') {
             const parts = path.split('/').filter(p => p);
             if (parts.length >= 2) {
                 const composerSlug = decodeURIComponent(parts[0]);
                 const workSlug = decodeURIComponent(parts[1]);
+                const fetchUrl = `/api/resolve/${encodeURIComponent(composerSlug)}/${encodeURIComponent(workSlug)}`;
+                console.log(`[checkURLRoute] fetching: ${fetchUrl}`);
 
                 try {
                     // Resolve slugs to actual names
-                    const response = await fetch(`/api/resolve/${encodeURIComponent(composerSlug)}/${encodeURIComponent(workSlug)}`);
+                    const response = await fetch(fetchUrl);
+                    console.log(`[checkURLRoute] response status=${response.status}`);
                     if (response.ok) {
                         const { composer, work } = await response.json();
+                        console.log(`[checkURLRoute] resolved: composer="${composer}", work="${work}"`);
                         // Load using the actual names
                         await this.selectComposer(composer);
                         await this.selectWork(work);
                         return true; // URL route was found and loaded
                     } else {
-                        console.error('Could not resolve URL to composer/work');
+                        const body = await response.text();
+                        console.error(`[checkURLRoute] resolve failed: status=${response.status}, body=${body}`);
                         this.showStatus('Could not find the requested work', 'error');
                     }
                 } catch (error) {
-                    console.error('Error resolving URL route:', error);
+                    console.error('[checkURLRoute] fetch error:', error);
                 }
+            } else {
+                console.log(`[checkURLRoute] not enough path parts: ${parts.length}`);
             }
+        } else {
+            console.log('[checkURLRoute] root path, skipping');
         }
         return false; // No URL route found
     }

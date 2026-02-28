@@ -131,9 +131,9 @@ app.use(errorHandler);
 
 // Only start server if not being required by another module (e.g., tests)
 if (require.main === module) {
-  app.listen(PORT, async () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`Visit http://localhost:${PORT}`);
+  (async () => {
+    // Initialize everything BEFORE accepting requests to avoid race conditions
+    // (e.g., deep link resolve returning 404 because index isn't loaded yet)
 
     // Initialize activity logging database
     console.log('Initializing activity database...');
@@ -156,18 +156,18 @@ if (require.main === module) {
       console.log(`Loaded existing index with ${existingIndex.length} composers`);
     }
 
-    // Background indexing strategy:
-    // - The full index is pre-built locally (run: npm run build-index)
-    // - The pre-built index is committed to the repository
-    // - Render uses the pre-built index (no scraping on startup)
-    // - Optional: Schedule weekly updates with long delays to stay current
-
     console.log('Using pre-built index.');
 
-    // Start the scheduler for nightly index rebuilds
-    // Pass scraper reference so cache can be cleared after rebuild
-    startScheduler(scraper);
-  });
+    // Now start accepting requests - index is ready
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+      console.log(`Visit http://localhost:${PORT}`);
+
+      // Start the scheduler for nightly index rebuilds
+      // Pass scraper reference so cache can be cleared after rebuild
+      startScheduler(scraper);
+    });
+  })();
 }
 
 // Export app and scraper for testing and scheduler access
