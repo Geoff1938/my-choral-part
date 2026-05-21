@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/branding/logo-icon-32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/branding/logo-icon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/branding/logo-icon-256.png">
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles.css?v={{VERSION}}">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -371,12 +371,10 @@
         </div>
     </div>
 
-    <!-- Load Tone.js from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/tone@14.8.49/build/Tone.js"></script>
-    <!-- Load MIDI file parser -->
-    <script src="https://cdn.jsdelivr.net/npm/@tonejs/midi@2.0.28/build/Midi.js"></script>
-    <!-- Load SoundFont player for high-quality mode (FluidR3_GM soundfont) -->
-    <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
+    <!-- Self-hosted vendor libraries (see scripts/copy-vendor.js) -->
+    <script src="/vendor/tone.js?v={{VERSION}}"></script>
+    <script src="/vendor/midi.js?v={{VERSION}}"></script>
+    <script src="/vendor/soundfont-player.min.js?v={{VERSION}}"></script>
     <!-- Channel Selection Modal -->
     <dialog id="channel-select-dialog" class="channel-select-dialog">
         <div class="channel-dialog-header">
@@ -400,6 +398,6 @@
     </dialog>
 
     <!-- Our app logic -->
-    <script type="module" src="/app.js"></script>
+    <script type="module" src="/app.js?v={{VERSION}}"></script>
 </body>
 </html>

@@ -3282,14 +3282,12 @@ class MIDIPlayer {
             console.log('[Soundfont] Using standard mode');
 
             try {
-                // Dynamically import SpessaSynth libraries
-                // Note: esm.sh properly resolves internal dependencies
+                // Dynamically import SpessaSynth libraries from self-hosted /vendor/
                 if (!this.spessaSynthModule) {
                     this.showStatus('Loading SpessaSynth library...', 'info');
-                    // Import both lib (for Synthesizer/Sequencer) and core (for MIDI parser)
                     const [libModule, coreModule] = await Promise.all([
-                        import('https://esm.sh/spessasynth_lib@4.0.18?deps=spessasynth_core@4.0.6'),
-                        import('https://esm.sh/spessasynth_core@4.0.6')
+                        import('/vendor/spessasynth_lib.js'),
+                        import('/vendor/spessasynth_core.js')
                     ]);
                     this.spessaSynthModule = libModule;
                     this.spessaCoreModule = coreModule;
@@ -3306,7 +3304,7 @@ class MIDIPlayer {
                     const audioContext = new AudioContext();
 
                     // Load the AudioWorklet processor (must be same-origin)
-                    await audioContext.audioWorklet.addModule('/spessasynth_processor.min.js');
+                    await audioContext.audioWorklet.addModule('/vendor/spessasynth_processor.min.js');
                     console.log('[Soundfont] Worklet processor loaded');
 
                     // Create the synthesizer

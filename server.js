@@ -5,8 +5,10 @@ const { execSync } = require('child_process');
 const compression = require('compression');
 const ChoralMusicScraper = require('./scraper');
 
-// Generate version.json at startup so it's available as a static file
+// Generate version.json at startup so it's available as a static file.
+// Returns the version string so we can also use it to cache-bust HTML asset references.
 function generateVersionFile() {
+  let versionInfo;
   try {
     let hash;
     if (process.env.RENDER_GIT_COMMIT) {
@@ -15,29 +17,40 @@ function generateVersionFile() {
       hash = execSync('git rev-parse --short HEAD').toString().trim();
     }
     const date = new Date().toISOString().split('T')[0];
-    const versionInfo = {
+    versionInfo = {
       version: `${date}.${hash}`,
       commit: hash,
       date: date,
       built: new Date().toISOString()
     };
-    const outputPath = path.join(__dirname, 'public', 'version.json');
-    fs.writeFileSync(outputPath, JSON.stringify(versionInfo, null, 2));
     console.log(`Version: ${versionInfo.version}`);
   } catch (error) {
     console.error('Failed to generate version file:', error.message);
-    const fallback = {
+    versionInfo = {
       version: 'unknown',
       commit: 'unknown',
       date: new Date().toISOString().split('T')[0],
       built: new Date().toISOString()
     };
-    const outputPath = path.join(__dirname, 'public', 'version.json');
-    fs.writeFileSync(outputPath, JSON.stringify(fallback, null, 2));
   }
+  const outputPath = path.join(__dirname, 'public', 'version.json');
+  fs.writeFileSync(outputPath, JSON.stringify(versionInfo, null, 2));
+  return versionInfo.version;
 }
 
-generateVersionFile();
+const APP_VERSION = generateVersionFile();
+
+// Pre-render index.html at startup with the version baked into asset URLs.
+// We substitute {{VERSION}} placeholders once and serve the cached string for
+// every request. This keeps the HTML always-fresh (no-cache below) while
+// allowing /vendor/ and other JS/CSS to be cached aggressively because their
+// URLs change on every deploy.
+function buildIndexHtml() {
+  const src = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
+  return src.replace(/\{\{VERSION\}\}/g, encodeURIComponent(APP_VERSION));
+}
+
+const INDEX_HTML = buildIndexHtml();
 
 // Import routes
 const createApiRoutes = require('./routes/api');
@@ -63,26 +76,47 @@ app.use(compression());
 // Middleware to parse JSON
 app.use(express.json());
 
-// Serve static files from the public directory with caching headers
-// JavaScript and CSS files are cached for 1 day, other assets for 1 week
+// Serve the pre-rendered index.html for "/" and "/index.html" so the
+// {{VERSION}} placeholder gets substituted with the current build version.
+// Must come BEFORE express.static so static doesn't intercept the raw file.
+function serveIndex(req, res) {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(INDEX_HTML);
+}
+app.get('/', serveIndex);
+app.get('/index.html', serveIndex);
+
+// Serve static files from the public directory with caching headers.
+// Asset URLs that reference /app.js, /styles.css, and /vendor/* are
+// version-busted via ?v={{VERSION}} in index.html, so the URL changes
+// on every deploy and we can cache aggressively without staleness risk.
 app.use(express.static('public', {
   maxAge: '1d',
   setHeaders: (res, filepath) => {
-    // Shorter cache for HTML (no cache - always get latest)
-    if (filepath.endsWith('.html')) {
+    // /vendor/ files only change when copy-vendor.js runs (npm install or
+    // explicit `npm run vendor`). Their script tags are version-busted, so
+    // the URL changes per deploy. Safe to cache for a year.
+    const normalized = filepath.replace(/\\/g, '/');
+    if (normalized.includes('/public/vendor/')) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    // HTML: should not be cached; route handler above serves the real index.
+    else if (filepath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
-    // Service worker must never be cached - browser needs to check for updates
+    // Service worker must never be cached - browser needs to check for updates.
     else if (filepath.endsWith('service-worker.js')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
-    // Longer cache for images and fonts
+    // Longer cache for images and fonts.
     else if (filepath.match(/\.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/)) {
       res.setHeader('Cache-Control', 'public, max-age=604800'); // 1 week
     }
-    // Standard cache for JS/CSS
+    // JS/CSS at the root (app.js, styles.css): URL is version-busted in
+    // index.html, so cache for a year.
     else if (filepath.match(/\.(js|css)$/)) {
-      res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 day
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
   }
 }));

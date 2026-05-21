@@ -33,6 +33,10 @@ build/
 data/recent-works.json
 public/version.json
 
+# Vendored third-party libraries (populated by `npm install` via postinstall,
+# see scripts/copy-vendor.js). Sources are pinned in package.json dependencies.
+public/vendor/
+
 # Test output files
 midi-test-results*.csv
 instrument-statistics*.csv
