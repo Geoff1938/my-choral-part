@@ -3288,7 +3288,7 @@ class MIDIPlayer {
                     this.showStatus('Loading SpessaSynth library...', 'info');
                     // Import both lib (for Synthesizer/Sequencer) and core (for MIDI parser)
                     const [libModule, coreModule] = await Promise.all([
-                        import('https://esm.sh/spessasynth_lib@4.0.18'),
+                        import('https://esm.sh/spessasynth_lib@4.0.18?deps=spessasynth_core@4.0.6'),
                         import('https://esm.sh/spessasynth_core@4.0.6')
                     ]);
                     this.spessaSynthModule = libModule;
