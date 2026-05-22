@@ -5,10 +5,15 @@
  * - Pre-cache the 6 most commonly used instruments based on analysis of 272 composers
  * - Cache other instruments on-demand as they are requested
  * - Version-based cache invalidation (increment VERSION to clear old cache)
+ * - Navigation requests always fetch fresh from the network (cache: 'reload'),
+ *   so a device can never get stuck serving a stale index.html from a prior
+ *   build. The version-busted asset URLs in the fresh HTML then pull fresh
+ *   JS/CSS. This is what heals a phone whose HTTP cache went stale.
  *
  * Version History:
  * - v1: Initial cache with basic instruments
  * - v2: Updated to use usage statistics from MIDI analysis (272 composers, 2000+ works)
+ * - v2 (2026-05-22): Added cache-bypassing navigation handler (soundfont cache unchanged)
  */
 
 const CACHE_VERSION = 'v2';
@@ -122,6 +127,19 @@ self.addEventListener('activate', (event) => {
  */
 self.addEventListener('fetch', (event) => {
     const url = event.request.url;
+
+    // Navigation requests (the top-level HTML document): always fetch fresh
+    // from the network, bypassing the browser's HTTP cache. index.html is
+    // already served no-store, so for a healthy browser this is a no-op; the
+    // value is healing a device that is wrongly serving a cached old page.
+    // Fresh HTML carries version-busted asset URLs, so the rest follows.
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request, { cache: 'reload' })
+                .catch(() => caches.match(event.request))
+        );
+        return;
+    }
 
     // Only intercept requests to the soundfont CDN
     if (url.includes('gleitz.github.io/midi-js-soundfonts')) {
