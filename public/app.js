@@ -4409,7 +4409,7 @@ async function loadVersionInfo() {
     if (!versionElement) return;
 
     try {
-        const response = await fetch('/version.json');
+        const response = await fetch('/version.json', { cache: 'no-store' });
         if (response.ok) {
             const versionInfo = await response.json();
             versionElement.textContent = versionInfo.version || 'unknown';

@@ -109,6 +109,11 @@ app.use(express.static('public', {
     else if (filepath.endsWith('service-worker.js')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
+    // version.json reports the live build - must never be cached, or the
+    // displayed version (and any update check) lags behind the deploy.
+    else if (filepath.endsWith('version.json')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    }
     // Longer cache for images and fonts.
     else if (filepath.match(/\.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/)) {
       res.setHeader('Cache-Control', 'public, max-age=604800'); // 1 week
