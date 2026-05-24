@@ -1383,36 +1383,40 @@ class MIDIPlayer {
     }
 
     attachLongPressTooltips() {
-        // Get all elements with title attributes
-        const elementsWithHelp = document.querySelectorAll('[title]');
         let longPressTimer = null;
         let currentTooltip = null;
 
+        const findTitledAncestor = (el) => {
+            while (el && el !== document.body) {
+                if (el.getAttribute && el.getAttribute('title')) {
+                    return el;
+                }
+                el = el.parentElement;
+            }
+            return null;
+        };
+
         const showTooltip = (element, x, y) => {
-            // Remove any existing tooltip
             hideTooltip();
 
             const title = element.getAttribute('title');
             if (!title) return;
 
-            // Create tooltip element
             currentTooltip = document.createElement('div');
             currentTooltip.className = 'touch-tooltip';
             currentTooltip.textContent = title;
             document.body.appendChild(currentTooltip);
 
-            // Position tooltip above the touch point
             const tooltipRect = currentTooltip.getBoundingClientRect();
             let left = x - tooltipRect.width / 2;
             let top = y - tooltipRect.height - 20;
 
-            // Keep within screen bounds
             if (left < 10) left = 10;
             if (left + tooltipRect.width > window.innerWidth - 10) {
                 left = window.innerWidth - tooltipRect.width - 10;
             }
             if (top < 10) {
-                top = y + 30; // Show below if not enough space above
+                top = y + 30;
             }
 
             currentTooltip.style.left = `${left}px`;
@@ -1430,30 +1434,18 @@ class MIDIPlayer {
             }
         };
 
-        elementsWithHelp.forEach(element => {
-            // Skip if already has long-press listener
-            if (element.dataset.hasLongPressHelp) return;
-            element.dataset.hasLongPressHelp = 'true';
+        document.addEventListener('touchstart', (e) => {
+            const titled = findTitledAncestor(e.target);
+            if (!titled) return;
+            const touch = e.touches[0];
+            longPressTimer = setTimeout(() => {
+                showTooltip(titled, touch.clientX, touch.clientY);
+            }, 500);
+        }, { passive: true });
 
-            element.addEventListener('touchstart', (e) => {
-                const touch = e.touches[0];
-                longPressTimer = setTimeout(() => {
-                    showTooltip(element, touch.clientX, touch.clientY);
-                }, 500); // 500ms for long press
-            }, { passive: true });
-
-            element.addEventListener('touchend', () => {
-                hideTooltip();
-            });
-
-            element.addEventListener('touchmove', () => {
-                hideTooltip();
-            }, { passive: true });
-
-            element.addEventListener('touchcancel', () => {
-                hideTooltip();
-            });
-        });
+        document.addEventListener('touchend', hideTooltip);
+        document.addEventListener('touchmove', hideTooltip, { passive: true });
+        document.addEventListener('touchcancel', hideTooltip);
     }
 
     updateBarMarkers() {

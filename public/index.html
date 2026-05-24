@@ -43,11 +43,11 @@
             <!-- Find Music Tab -->
             <div class="tab-content" id="find-music-tab">
                 <!-- Search Section -->
-                <div class="search-section">
+                <div class="search-section" title="Search for music — type a composer, work or movement name to find pieces to practice">
                     <label class="search-label">🔍 Search:</label>
 
                     <!-- Search Filters -->
-                    <div class="search-filters">
+                    <div class="search-filters" title="Choose which categories to include in your search">
                         <label class="checkbox-label">
                             <input type="checkbox" id="search-composers" checked>
                             <span>Composers</span>
@@ -77,7 +77,7 @@
                 <div id="find-music-status" class="status-message"></div>
 
                 <!-- Works List -->
-                <div id="works-container" class="works-container" style="display: none;">
+                <div id="works-container" class="works-container" style="display: none;" title="Select a work to load and practice">
                     <label>Select Work:</label>
                     <div id="works-list" class="works-list"></div>
                 </div>
@@ -89,7 +89,7 @@
                 <div class="selection-controls">
 
                     <!-- Recent Works Dropdown -->
-                    <div class="control-group" id="recent-works-dropdown" style="display: none;">
+                    <div class="control-group" id="recent-works-dropdown" style="display: none;" title="Quickly switch to a recently practiced work">
                         <label for="recent-works-select">Recently played works:</label>
                         <select id="recent-works-select" aria-label="Select from recent works" title="Quickly switch to a recently practiced work">
                             <option value="" disabled selected>Choose a recent work...</option>
@@ -98,7 +98,7 @@
                 </div>
 
                 <!-- Work Info -->
-                <div class="work-info-section">
+                <div class="work-info-section" title="The currently selected work">
                     <div class="work-title">
                         <h2 id="current-work-display">No work selected</h2>
                     </div>
@@ -109,7 +109,7 @@
 
                 <!-- Playback Controls Section -->
                 <section class="controls-section" id="controls-section">
-                    <div class="playback-info">
+                    <div class="playback-info" title="Select which movement of the current work to practice">
                         <select id="movement-select" class="movement-select-main" title="Select which movement of the work to practice">
                             <option value="">Choose a movement...</option>
                         </select>
@@ -117,7 +117,7 @@
                     </div>
 
                     <!-- Progress Bar -->
-                    <div class="progress-container">
+                    <div class="progress-container" title="Playback progress — drag the slider to jump to any point in the movement, drag the triangles to set a loop range for practice">
                         <div class="progress-header">
                             <div class="progress-info">
                                 <span id="current-time">0:00</span>
@@ -159,7 +159,7 @@
                     </div>
 
                     <!-- Transport Controls Toolbar -->
-                    <div class="transport-toolbar">
+                    <div class="transport-toolbar" title="Playback controls — play, pause, skip and repeat">
                         <button id="stop-btn" class="btn-transport" aria-label="Stop" title="Stop playback and return to beginning">
                             <i class="fa-solid fa-stop"></i>
                         </button>
@@ -187,7 +187,7 @@
                     </div>
 
                     <!-- Tempo Control -->
-                    <div class="tempo-control">
+                    <div class="tempo-control" title="Tempo — adjust playback speed. Slow down for learning difficult passages, speed up as you improve.">
                         <label title="Adjust playback speed - slower for learning, faster as you improve">Tempo: <span id="tempo-value">100</span>%</label>
                         <div class="tempo-labels">
                             <span>Slower</span>
@@ -212,7 +212,7 @@
                     </div>
 
                     <!-- Balance Control -->
-                    <div class="balance-control">
+                    <div class="balance-control" title="Balance — adjust how loud your part is relative to the other voices">
                         <div class="balance-header">
                             <label for="balance-slider" id="balance-label" title="Adjust the balance between your part and the other parts">
                                 My Part:
@@ -249,7 +249,7 @@
                     </div>
 
                     <!-- Volume Control -->
-                    <div class="volume-control">
+                    <div class="volume-control" title="Master volume — overall playback volume. If you can't hear anything, also check that sound is not muted on your device.">
                         <label for="master-volume-slider" id="volume-label" title="Adjust the master volume. If you can't hear anything, check that sound is not muted on your device and that system volume is set to a reasonable level.">Volume: <span id="master-volume-value">90</span>%</label>
                         <div class="volume-labels">
                             <span>Quieter</span>
@@ -279,7 +279,7 @@
                 <h2>Settings</h2>
 
                 <!-- Shareable URL Section -->
-                <div class="settings-section settings-share">
+                <div class="settings-section settings-share" title="Share This Work — copy a URL that opens the currently selected work for someone else">
                     <h3>Share This Work</h3>
                     <div class="shareable-url-section" id="shareable-url-section-settings" style="display: none;">
                         <p>Share this URL with others to let them practice the same piece:</p>
@@ -291,7 +291,7 @@
                     <p id="no-work-selected-msg" style="color: #666;">No work currently selected</p>
                 </div>
                 <!-- Time Signature Settings -->
-                <div class="settings-section settings-time-sig" id="time-signature-section">
+                <div class="settings-section settings-time-sig" id="time-signature-section" title="Time Signatures and Bar Numbering — adjust the starting bar number to match your printed score, or override incorrect time signatures detected in the MIDI file">
                     <h3>Time Signatures and Bar Numbering</h3>
                     <p id="ts-movement-name-display" style="color: #666; margin-bottom: 10px;"><strong>Movement:</strong> <span id="ts-movement-name">No movement loaded</span></p>
 
@@ -328,7 +328,7 @@
                 </div>
 
                 <!-- Privacy & Saved Data Section -->
-                <div class="settings-section settings-privacy">
+                <div class="settings-section settings-privacy" title="Privacy & Saved Data — what is stored on your device, what is stored on our server, and how to clear it">
                     <h3>Privacy & Saved Data</h3>
                     <p><strong>Stored on your device:</strong> Your preferences (voice part, recent works, playback settings) are stored locally on your device to remember your choices between visits.</p>
                     <p><strong>Stored on our server:</strong> When you play a work, we record which movement you are rehearsing and a browser identifier. This helps us understand which works are most used. We do not collect any personal information such as your name or email address.</p>
@@ -337,20 +337,20 @@
                 </div>
 
                 <!-- Contact Us -->
-                <div class="settings-section settings-contact">
+                <div class="settings-section settings-contact" title="Contact Us — email us to report a problem or give feedback">
                     <h3>Contact Us</h3>
                     <p>If you would like to report a problem with a specific midi file, or give any other feedback please contact us at <a href="mailto:hello@mychoralpart.com">hello@mychoralpart.com</a></p>
                 </div>
 
                 <!-- Copyright Notice -->
-                <div class="settings-section copyright-section">
+                <div class="settings-section copyright-section" title="Copyright Notice — terms of use for the MIDI files in this player">
                     <h3>Copyright Notice</h3>
                     <p>The MIDI files used by this player were created by John Hooper and he is the Copyright owner. They may be used for the purpose of private individuals rehearsing music but not for any other purpose without prior written permission from John Hooper.</p>
                     <p>For more information please visit <a href="https://www.learnchoralmusic.co.uk/" target="_blank" rel="noopener noreferrer">https://www.learnchoralmusic.co.uk/</a></p>
                 </div>
 
                 <!-- Version Info -->
-                <div class="settings-section version-section">
+                <div class="settings-section version-section" title="The version of the app currently loaded in your browser">
                     <p class="version-info">Version: <span id="app-version">loading...</span></p>
                 </div>
             </div>

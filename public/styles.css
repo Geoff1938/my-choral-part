@@ -5,6 +5,29 @@
     box-sizing: border-box;
 }
 
+/* Suppress text selection and iOS long-press callout app-wide so long-press
+   always triggers our own tooltip handler rather than the OS text-selection UI.
+   Real text inputs opt back in below. */
+body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+input[type="email"],
+input[type="tel"],
+input[type="password"],
+textarea,
+[contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+}
+
 :root {
     /* Colors - Voice Parts */
     --color-soprano: #E74C3C;
