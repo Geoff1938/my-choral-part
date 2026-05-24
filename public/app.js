@@ -1382,41 +1382,6 @@ class MIDIPlayer {
         this.showHelpModal(title, content, true);
     }
 
-    attachDoubleClickHelp() {
-        // Get all elements with title attributes (these have help text)
-        const elementsWithHelp = document.querySelectorAll('[title]');
-
-        elementsWithHelp.forEach(element => {
-            // Skip if already has double-click listener
-            if (element.dataset.hasDoubleClickHelp) return;
-            element.dataset.hasDoubleClickHelp = 'true';
-
-            // For mobile: detect double-tap
-            let lastTap = 0;
-            element.addEventListener('touchend', (e) => {
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTap;
-
-                if (tapLength < 300 && tapLength > 0) {
-                    // Double tap detected
-                    e.preventDefault();
-                    const title = element.getAttribute('aria-label') || element.textContent.trim().substring(0, 30) || 'Control';
-                    const helpText = element.getAttribute('title');
-                    this.showHelpModal(title, helpText);
-                }
-                lastTap = currentTime;
-            });
-
-            // For desktop: double-click
-            element.addEventListener('dblclick', (e) => {
-                e.preventDefault();
-                const title = element.getAttribute('aria-label') || element.textContent.trim().substring(0, 30) || 'Control';
-                const helpText = element.getAttribute('title');
-                this.showHelpModal(title, helpText);
-            });
-        });
-    }
-
     attachLongPressTooltips() {
         // Get all elements with title attributes
         const elementsWithHelp = document.querySelectorAll('[title]');
@@ -1806,9 +1771,6 @@ class MIDIPlayer {
                 }
             });
         }
-
-        // Attach double-click/tap help to all elements with title attributes
-        this.attachDoubleClickHelp();
 
         // Attach long-press tooltips for touch devices
         this.attachLongPressTooltips();
@@ -2275,8 +2237,8 @@ class MIDIPlayer {
             const startLabel = this.loopStartMarker.querySelector('.loop-marker-label');
             const endLabel = this.loopEndMarker.querySelector('.loop-marker-label');
 
-            if (startLabel) startLabel.textContent = `Bar: ${startBar}`;
-            if (endLabel) endLabel.textContent = `Bar: ${endBar}`;
+            if (startLabel) startLabel.innerHTML = `Bar: ${startBar}<br>${formatTime(this.loopStart)}`;
+            if (endLabel) endLabel.innerHTML = `Bar: ${endBar}<br>${formatTime(this.loopEnd)}`;
         }
     }
 
