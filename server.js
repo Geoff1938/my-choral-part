@@ -60,8 +60,8 @@ const adminRouter = require('./routes/admin');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const { apiLimiter, proxyLimiter } = require('./middleware/rateLimiter');
 const basicAuthMiddleware = require('./middleware/basicAuth');
-const { initDatabase } = require('./utils/database');
-const { startScheduler } = require('./utils/scheduler');
+const { initDatabase, flushDatabase } = require('./utils/database');
+const { startScheduler, stopScheduler } = require('./utils/scheduler');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -206,7 +206,7 @@ if (require.main === module) {
     // Initialize scraper
     console.log('Initializing MIDI index scraper...');
 
-    // Ensure initial index is copied to data directory
+    // Copy the shipped index files into the data directory if missing
     // (This handles Render's persistent disk mount which starts empty)
     await scraper.ensureInitialIndex();
 
@@ -226,11 +226,32 @@ if (require.main === module) {
       console.log(`Server is running on port ${PORT}`);
       console.log(`Visit http://localhost:${PORT}`);
 
-      // Start the scheduler for nightly index rebuilds
+      // Start the scheduler for nightly index rebuilds and database backups
       // Pass scraper reference so cache can be cleared after rebuild
       startScheduler(scraper);
     });
-  })();
+  })().catch((error) => {
+    console.error('Startup failed:', error);
+    process.exit(1);
+  });
+
+  // Render sends SIGTERM before stopping the instance (e.g. on deploy):
+  // write any pending activity database changes before exiting
+  let shuttingDown = false;
+  const shutdown = async (signal) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`${signal} received - saving activity database and exiting`);
+    stopScheduler();
+    try {
+      await flushDatabase();
+    } catch (error) {
+      console.error('Error saving database on shutdown:', error);
+    }
+    process.exit(0);
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 // Export app and scraper for testing and scheduler access
