@@ -58,8 +58,14 @@ const proxyRouter = require('./routes/proxy');
 const activityRouter = require('./routes/activity');
 const adminRouter = require('./routes/admin');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
-const { apiLimiter, proxyLimiter } = require('./middleware/rateLimiter');
+const {
+  apiLimiter,
+  proxyLimiter,
+  activityLogLimiter,
+  adminLimiter
+} = require('./middleware/rateLimiter');
 const basicAuthMiddleware = require('./middleware/basicAuth');
+const requireSameOrigin = require('./middleware/sameOrigin');
 const { initDatabase, flushDatabase } = require('./utils/database');
 const { startScheduler, stopScheduler } = require('./utils/scheduler');
 
@@ -72,6 +78,10 @@ app.set('trust proxy', 1);
 
 // Enable gzip compression for all responses
 app.use(compression());
+
+// Activity events are tiny - parse them with a small body limit (this runs
+// first, so the general parser below skips these requests)
+app.use('/api/activity', express.json({ limit: '10kb' }));
 
 // Middleware to parse JSON
 app.use(express.json());
@@ -165,7 +175,7 @@ app.get('/health', (req, res) => {
 });
 
 // Activity logging routes (rate limited) - must be before general /api routes
-app.use('/api/activity', apiLimiter, activityRouter);
+app.use('/api/activity', activityLogLimiter, activityRouter);
 
 // Apply rate limiting to API routes
 app.use('/api', apiLimiter, createApiRoutes(scraper));
@@ -173,8 +183,9 @@ app.use('/api', apiLimiter, createApiRoutes(scraper));
 // Apply stricter rate limiting to proxy route
 app.use('/proxy', proxyLimiter, proxyRouter);
 
-// Admin routes (Basic Auth protected)
-app.use('/admin', basicAuthMiddleware, adminRouter);
+// Admin routes (Basic Auth protected, failed attempts rate limited,
+// POSTs must come from our own pages)
+app.use('/admin', adminLimiter, requireSameOrigin, basicAuthMiddleware, adminRouter);
 
 // Soundfont mode routes - serve index.html for different soundfont modes
 // Default mode is 'standard' (SpessaSynth, ~31MB memory)

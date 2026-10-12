@@ -1,15 +1,17 @@
 /**
  * Integration tests for admin authentication (users come from ADMIN_USERS)
- * Uses a throwaway database so the real data/activity.db is untouched
+ * Uses the throwaway database set up in tests/setup.js
  */
 
-const os = require('os');
-const path = require('path');
-const fs = require('fs');
 const request = require('supertest');
 
-const TEST_DB_PATH = path.join(os.tmpdir(), `admin-test-${process.pid}.db`);
-process.env.DATABASE_PATH = TEST_DB_PATH;
+// Never start a real index rebuild (it would scrape the live site)
+jest.mock('../../utils/scheduler', () => ({
+  ...jest.requireActual('../../utils/scheduler'),
+  runIndexRebuild: jest.fn().mockResolvedValue({ success: true })
+}));
+const { runIndexRebuild } = require('../../utils/scheduler');
+
 process.env.ADMIN_USERS = JSON.stringify({
   'Admin@Example.com': 'correct horse: battery staple'
 });
@@ -22,10 +24,6 @@ describe('Admin authentication', () => {
 
   beforeAll(() => {
     app = require('../../server').app;
-  });
-
-  afterAll(() => {
-    fs.rmSync(TEST_DB_PATH, { force: true });
   });
 
   test('rejects requests without credentials', async () => {
@@ -57,6 +55,78 @@ describe('Admin authentication', () => {
       .set('Authorization', basicAuth('someone@example.com', 'correct horse: battery staple'));
 
     expect(response.status).toBe(401);
+  });
+});
+
+describe('Admin request protection', () => {
+  let app;
+  const auth = basicAuth('admin@example.com', 'correct horse: battery staple');
+
+  beforeAll(() => {
+    app = require('../../server').app;
+  });
+
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test('blocks a rebuild POST without an Origin or Referer', async () => {
+    const response = await request(app)
+      .post('/admin/api/rebuild-index')
+      .set('CF-Connecting-IP', '192.0.2.10')
+      .set('Authorization', auth);
+
+    expect(response.status).toBe(403);
+    expect(runIndexRebuild).not.toHaveBeenCalled();
+  });
+
+  test('blocks a rebuild POST from another site', async () => {
+    const response = await request(app)
+      .post('/admin/api/rebuild-index')
+      .set('CF-Connecting-IP', '192.0.2.10')
+      .set('Host', 'player.example.test')
+      .set('Origin', 'https://evil.example.test')
+      .set('Authorization', auth);
+
+    expect(response.status).toBe(403);
+    expect(runIndexRebuild).not.toHaveBeenCalled();
+  });
+
+  test('allows a rebuild POST from the admin page itself', async () => {
+    const response = await request(app)
+      .post('/admin/api/rebuild-index')
+      .set('CF-Connecting-IP', '192.0.2.10')
+      .set('Host', 'player.example.test')
+      .set('Referer', 'https://player.example.test/admin')
+      .set('Authorization', auth);
+
+    expect(response.status).toBe(200);
+    expect(runIndexRebuild).toHaveBeenCalledTimes(1);
+  });
+
+  test('limits repeated failed requests from one client', async () => {
+    for (let i = 0; i < 20; i++) {
+      const response = await request(app)
+        .get('/admin/api/summary')
+        .set('CF-Connecting-IP', '192.0.2.20');
+      expect(response.status).toBe(401);
+    }
+
+    const limited = await request(app)
+      .get('/admin/api/summary')
+      .set('CF-Connecting-IP', '192.0.2.20')
+      .set('Authorization', auth);
+    const otherClient = await request(app)
+      .get('/admin/api/summary')
+      .set('CF-Connecting-IP', '192.0.2.21')
+      .set('Authorization', auth);
+
+    expect(limited.status).toBe(429);
+    expect(otherClient.status).toBe(200);
   });
 });
 
