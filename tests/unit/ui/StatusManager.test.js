@@ -2,47 +2,7 @@
  * Unit tests for StatusManager
  */
 
-// Copy of StatusManager class for testing
-class StatusManager {
-    constructor(statusElement) {
-        this.statusElement = statusElement;
-    }
-
-    show(message, type = 'info') {
-        if (!this.statusElement) return;
-
-        this.statusElement.textContent = message;
-        this.statusElement.className = `status-message show ${type}`;
-
-        if (type === 'success') {
-            setTimeout(() => {
-                this.statusElement.classList.remove('show');
-            }, 3000);
-        }
-    }
-
-    info(message) {
-        this.show(message, 'info');
-    }
-
-    error(message) {
-        this.show(message, 'error');
-    }
-
-    success(message) {
-        this.show(message, 'success');
-    }
-
-    warning(message) {
-        this.show(message, 'warning');
-    }
-
-    clear() {
-        if (!this.statusElement) return;
-        this.statusElement.textContent = '';
-        this.statusElement.className = 'status';
-    }
-}
+const { StatusManager } = require('../../../public/ui/StatusManager.js');
 
 describe('StatusManager', () => {
     let statusElement;
@@ -58,6 +18,14 @@ describe('StatusManager', () => {
             }
         };
         statusManager = new StatusManager(statusElement);
+
+        // Success messages schedule an auto-hide timer
+        jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+        jest.clearAllTimers();
+        jest.useRealTimers();
     });
 
     describe('constructor', () => {
@@ -101,9 +69,7 @@ describe('StatusManager', () => {
             expect(statusElement.className).toBe('status-message show info');
         });
 
-        test('auto-hides success messages after 3 seconds', (done) => {
-            jest.useFakeTimers();
-
+        test('auto-hides success messages after 3 seconds', () => {
             statusManager.show('Success!', 'success');
 
             expect(statusElement.classList.remove).not.toHaveBeenCalled();
@@ -111,35 +77,22 @@ describe('StatusManager', () => {
             jest.advanceTimersByTime(3000);
 
             expect(statusElement.classList.remove).toHaveBeenCalledWith('show');
-
-            jest.useRealTimers();
-            done();
         });
 
-        test('does not auto-hide info messages', (done) => {
-            jest.useFakeTimers();
-
+        test('does not auto-hide info messages', () => {
             statusManager.show('Info message', 'info');
 
             jest.advanceTimersByTime(5000);
 
             expect(statusElement.classList.remove).not.toHaveBeenCalled();
-
-            jest.useRealTimers();
-            done();
         });
 
-        test('does not auto-hide error messages', (done) => {
-            jest.useFakeTimers();
-
+        test('does not auto-hide error messages', () => {
             statusManager.show('Error message', 'error');
 
             jest.advanceTimersByTime(5000);
 
             expect(statusElement.classList.remove).not.toHaveBeenCalled();
-
-            jest.useRealTimers();
-            done();
         });
 
         test('handles null statusElement gracefully', () => {
@@ -210,6 +163,22 @@ describe('StatusManager', () => {
             const nullManager = new StatusManager(null);
 
             expect(() => nullManager.clear()).not.toThrow();
+        });
+    });
+
+    describe('hide()', () => {
+        test('removes the show class but keeps the message', () => {
+            statusManager.show('Test message', 'error');
+            statusManager.hide();
+
+            expect(statusElement.classList.remove).toHaveBeenCalledWith('show');
+            expect(statusElement.textContent).toBe('Test message');
+        });
+
+        test('handles null statusElement gracefully', () => {
+            const nullManager = new StatusManager(null);
+
+            expect(() => nullManager.hide()).not.toThrow();
         });
     });
 });

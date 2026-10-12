@@ -26,7 +26,7 @@ export class InstrumentLoader {
      * @returns {string} Instrument name
      */
     midiProgramToInstrument(program) {
-        if (program >= 0 && program < GM_INSTRUMENTS.length) {
+        if (Number.isInteger(program) && program >= 0 && program < GM_INSTRUMENTS.length) {
             return GM_INSTRUMENTS[program];
         }
         return 'acoustic_grand_piano';

@@ -2,63 +2,7 @@
  * Unit tests for RecentWorksManager
  */
 
-// Copy of RecentWorksManager class for testing
-class RecentWorksManager {
-    constructor() {
-        this.storageKey = 'recentWorks';
-        this.maxCount = 5;
-    }
-
-    async load() {
-        try {
-            const stored = localStorage.getItem(this.storageKey);
-            if (!stored) {
-                return [];
-            }
-
-            const works = JSON.parse(stored);
-            return Array.isArray(works) ? works : [];
-        } catch (error) {
-            console.error('Error loading recent works from localStorage:', error);
-            return [];
-        }
-    }
-
-    async save(composer, work) {
-        try {
-            let recent = await this.load();
-
-            // Remove any existing entry for this work (dedup)
-            recent = recent.filter(item =>
-                !(item.composer === composer && item.work === work)
-            );
-
-            // Add to the beginning
-            recent.unshift({ composer, work });
-
-            // Limit to max count
-            if (recent.length > this.maxCount) {
-                recent = recent.slice(0, this.maxCount);
-            }
-
-            // Save to localStorage
-            localStorage.setItem(this.storageKey, JSON.stringify(recent));
-
-            return recent;
-        } catch (error) {
-            console.error('Error saving recent work to localStorage:', error);
-            return [];
-        }
-    }
-
-    async clear() {
-        try {
-            localStorage.removeItem(this.storageKey);
-        } catch (error) {
-            console.error('Error clearing recent works:', error);
-        }
-    }
-}
+const { RecentWorksManager } = require('../../../public/api/RecentWorksManager.js');
 
 describe('RecentWorksManager', () => {
     let manager;
@@ -81,7 +25,7 @@ describe('RecentWorksManager', () => {
         };
 
         // Mock console methods
-        global.console.error = jest.fn();
+        jest.spyOn(console, 'error').mockImplementation(() => {});
 
         manager = new RecentWorksManager();
     });
@@ -181,6 +125,33 @@ describe('RecentWorksManager', () => {
             expect(result).toHaveLength(2);
             expect(result[0]).toEqual({ composer: 'Bach', work: 'Mass in B Minor' });
             expect(result[1]).toEqual({ composer: 'Handel', work: 'Messiah' });
+        });
+
+        test('stores movement when provided', async () => {
+            const result = await manager.save('Handel', 'Messiah', 'Hallelujah');
+
+            expect(result).toEqual([
+                { composer: 'Handel', work: 'Messiah', movement: 'Hallelujah' }
+            ]);
+            expect(JSON.parse(mockLocalStorage['recentWorks'])).toEqual(result);
+        });
+
+        test('omits movement key when movement is not provided', async () => {
+            const result = await manager.save('Bach', 'Mass in B Minor');
+
+            expect(result[0]).not.toHaveProperty('movement');
+        });
+
+        test('deduplicates by composer and work regardless of movement', async () => {
+            mockLocalStorage['recentWorks'] = JSON.stringify([
+                { composer: 'Handel', work: 'Messiah', movement: 'Overture' }
+            ]);
+
+            const result = await manager.save('Handel', 'Messiah', 'Hallelujah');
+
+            expect(result).toEqual([
+                { composer: 'Handel', work: 'Messiah', movement: 'Hallelujah' }
+            ]);
         });
 
         test('limits to maxCount (5) works', async () => {
