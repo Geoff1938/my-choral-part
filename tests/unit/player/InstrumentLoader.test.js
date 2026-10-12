@@ -2,144 +2,11 @@
  * Unit tests for InstrumentLoader
  */
 
-// Mock GM_INSTRUMENTS (subset for testing)
-const GM_INSTRUMENTS = [
-    'acoustic_grand_piano', 'bright_acoustic_piano', 'electric_grand_piano', 'honkytonk_piano',
-    'electric_piano_1', 'electric_piano_2', 'harpsichord', 'clavinet',
-    'celesta', 'glockenspiel', 'music_box', 'vibraphone',
-    'marimba', 'xylophone', 'tubular_bells', 'dulcimer',
-    // ... (truncated for testing, full array has 128 items)
-];
+const { InstrumentLoader, loadSoundfontInstrument } = require('../../../public/player/InstrumentLoader.js');
+const { SOUNDFONT_URLS, TIMEOUTS } = require('../../../public/constants.js');
 
-// Mock SOUNDFONT_URLS (matches constants.js)
-const SOUNDFONT_URLS = {
-    full: [
-        'https://pub-8f69698b476240b0b34d5e8a46b69a65.r2.dev/FluidR3_GM',
-        'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM'
-    ]
-};
-
-// Copy of loadSoundfontInstrument for testing
-async function loadSoundfontInstrument(audioContext, instrumentName, options) {
-    let lastError;
-    for (const baseUrl of SOUNDFONT_URLS.full) {
-        try {
-            return await Soundfont.instrument(audioContext, instrumentName, {
-                ...options,
-                nameToUrl: (name, soundfont, format) => {
-                    format = format === 'ogg' ? format : 'mp3';
-                    return `${baseUrl}/${name}-${format}.js`;
-                }
-            });
-        } catch (error) {
-            console.warn(`[Soundfont] Failed to load ${instrumentName} from ${baseUrl}`);
-            lastError = error;
-        }
-    }
-    throw lastError;
-}
-
-// Copy of InstrumentLoader class for testing
-class InstrumentLoader {
-    constructor(maxCacheSize = 20) {
-        this.instrumentCache = new Map();
-        this.maxCacheSize = maxCacheSize;
-    }
-
-    getInstrumentName(track) {
-        if (track.instrument) {
-            const program = track.instrument.number;
-            return this.midiProgramToInstrument(program);
-        }
-        return 'acoustic_grand_piano';
-    }
-
-    midiProgramToInstrument(program) {
-        if (typeof program === 'number' && program >= 0 && program < GM_INSTRUMENTS.length) {
-            return GM_INSTRUMENTS[program];
-        }
-        return 'acoustic_grand_piano';
-    }
-
-    async loadInstrument(audioContext, instrumentName, gainNode) {
-        const loadOptions = {
-            soundfont: 'FluidR3_GM',
-            destination: gainNode
-        };
-
-        try {
-            const instrument = await loadSoundfontInstrument(audioContext, instrumentName, loadOptions);
-            this.addToCache(instrumentName, instrument);
-            return { instrument, instrumentName, isFallback: false };
-        } catch (error) {
-            console.error(`Failed to load ${instrumentName}, falling back to piano:`, error);
-
-            try {
-                const instrument = await loadSoundfontInstrument(audioContext, 'acoustic_grand_piano', loadOptions);
-                return { instrument, instrumentName: 'acoustic_grand_piano', isFallback: true };
-            } catch (fallbackError) {
-                console.error(`Even piano fallback failed:`, fallbackError);
-                throw fallbackError;
-            }
-        }
-    }
-
-    addToCache(instrumentName, instrument) {
-        if (this.instrumentCache.size >= this.maxCacheSize) {
-            const firstKey = this.instrumentCache.keys().next().value;
-            this.instrumentCache.delete(firstKey);
-        }
-        this.instrumentCache.set(instrumentName, instrument);
-    }
-
-    isCached(instrumentName) {
-        return this.instrumentCache.has(instrumentName);
-    }
-
-    async preloadCommonInstruments(audioContext, commonInstruments = [
-        'acoustic_grand_piano',
-        'piccolo',
-        'clarinet',
-        'french_horn',
-        'bassoon'
-    ]) {
-        // Don't await - let this happen in the background
-        (async () => {
-            for (const instrumentName of commonInstruments) {
-                try {
-                    if (this.isCached(instrumentName)) {
-                        continue;
-                    }
-
-                    const tempGainNode = audioContext.createGain();
-                    tempGainNode.connect(audioContext.destination);
-                    tempGainNode.gain.value = 0;
-
-                    const loadPromise = loadSoundfontInstrument(audioContext, instrumentName, {
-                        soundfont: 'FluidR3_GM',
-                        destination: tempGainNode
-                    });
-
-                    const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Preload timeout')), 10000)
-                    );
-
-                    await Promise.race([loadPromise, timeoutPromise]);
-                    tempGainNode.disconnect();
-
-                    await new Promise(resolve => setTimeout(resolve, 500));
-
-                } catch (error) {
-                    console.log(`Pre-load of ${instrumentName} failed, will load on demand:`, error.message);
-                }
-            }
-        })();
-    }
-
-    clearCache() {
-        this.instrumentCache.clear();
-    }
-}
+// Let pending promise callbacks run (setImmediate is left real under fake timers below)
+const flushPromises = () => new Promise(resolve => setImmediate(resolve));
 
 describe('InstrumentLoader', () => {
     let loader;
@@ -162,9 +29,9 @@ describe('InstrumentLoader', () => {
         };
 
         // Mock console methods
-        global.console.error = jest.fn();
-        global.console.warn = jest.fn();
-        global.console.log = jest.fn();
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.spyOn(console, 'warn').mockImplementation(() => {});
+        jest.spyOn(console, 'log').mockImplementation(() => {});
 
         // Mock global Soundfont
         global.Soundfont = {
@@ -177,8 +44,8 @@ describe('InstrumentLoader', () => {
     });
 
     describe('constructor', () => {
-        test('initializes with default max cache size of 20', () => {
-            expect(loader.maxCacheSize).toBe(20);
+        test('initializes with default max cache size of 15', () => {
+            expect(loader.maxCacheSize).toBe(15);
         });
 
         test('initializes with custom max cache size', () => {
@@ -243,6 +110,15 @@ describe('InstrumentLoader', () => {
 
         test('returns acoustic_grand_piano for null', () => {
             expect(loader.midiProgramToInstrument(null)).toBe('acoustic_grand_piano');
+        });
+
+        test('returns acoustic_grand_piano for non-integer program numbers', () => {
+            expect(loader.midiProgramToInstrument(1.5)).toBe('acoustic_grand_piano');
+            expect(loader.midiProgramToInstrument('6')).toBe('acoustic_grand_piano');
+        });
+
+        test('maps the last GM program (127)', () => {
+            expect(loader.midiProgramToInstrument(127)).toBe('gunshot');
         });
     });
 
@@ -420,40 +296,86 @@ describe('InstrumentLoader', () => {
         });
     });
 
+    describe('loadSoundfontInstrument()', () => {
+        test('tries every soundfont host and rethrows the last error', async () => {
+            Soundfont.instrument
+                .mockRejectedValueOnce(new Error('first'))
+                .mockRejectedValueOnce(new Error('second'));
+
+            await expect(
+                loadSoundfontInstrument(mockAudioContext, 'piano', {})
+            ).rejects.toThrow('second');
+
+            expect(Soundfont.instrument).toHaveBeenCalledTimes(SOUNDFONT_URLS.full.length);
+            expect(console.warn).toHaveBeenCalledTimes(SOUNDFONT_URLS.full.length);
+        });
+    });
+
     describe('preloadCommonInstruments()', () => {
+        beforeEach(() => {
+            jest.useFakeTimers({ doNotFake: ['setImmediate'] });
+        });
+
+        afterEach(() => {
+            jest.clearAllTimers();
+            jest.useRealTimers();
+        });
+
         test('skips already cached instruments', async () => {
+            Soundfont.instrument.mockResolvedValue({ play: jest.fn() });
             loader.addToCache('acoustic_grand_piano', { cached: true });
 
             loader.preloadCommonInstruments(mockAudioContext, ['acoustic_grand_piano', 'piccolo']);
+            await flushPromises();
 
-            // Give async operations time to start
-            await new Promise(resolve => setTimeout(resolve, 10));
-
-            // Should have only tried to preload piccolo, not acoustic_grand_piano
-            // (actual test is difficult due to async nature, this is simplified)
+            expect(Soundfont.instrument).toHaveBeenCalledTimes(1);
+            expect(Soundfont.instrument.mock.calls[0][1]).toBe('piccolo');
         });
 
         test('handles preload failures gracefully', async () => {
             Soundfont.instrument.mockRejectedValue(new Error('Preload failed'));
 
-            loader.preloadCommonInstruments(mockAudioContext, ['invalid_instrument']);
+            await expect(
+                loader.preloadCommonInstruments(mockAudioContext, ['invalid_instrument'])
+            ).resolves.toBeUndefined();
+            await flushPromises();
 
-            // Should not throw, errors are logged
-            await new Promise(resolve => setTimeout(resolve, 10));
+            expect(console.log).toHaveBeenCalledWith(
+                expect.stringContaining('Pre-load of invalid_instrument failed'),
+                'Preload failed'
+            );
+        });
 
-            // No exception should be thrown
+        test('gives up on an instrument after the preload timeout', async () => {
+            Soundfont.instrument.mockReturnValue(new Promise(() => {}));
+
+            loader.preloadCommonInstruments(mockAudioContext, ['piano']);
+            await flushPromises();
+            jest.advanceTimersByTime(TIMEOUTS.INSTRUMENT_LOAD);
+            await flushPromises();
+
+            expect(console.log).toHaveBeenCalledWith(
+                expect.stringContaining('Pre-load of piano failed'),
+                'Preload timeout'
+            );
         });
 
         test('creates silent gain nodes for preloading', async () => {
             Soundfont.instrument.mockResolvedValue({ play: jest.fn() });
+            mockGainNode.gain.value = 1;
 
             loader.preloadCommonInstruments(mockAudioContext, ['piano']);
+            await flushPromises();
 
-            // Give async operations time to start
-            await new Promise(resolve => setTimeout(resolve, 10));
-
-            // Can't reliably test due to async nature without more complex setup
-            // This is mainly for code coverage
+            expect(mockAudioContext.createGain).toHaveBeenCalledTimes(1);
+            expect(mockGainNode.connect).toHaveBeenCalledWith(mockAudioContext.destination);
+            expect(mockGainNode.gain.value).toBe(0);
+            expect(mockGainNode.disconnect).toHaveBeenCalled();
+            expect(Soundfont.instrument).toHaveBeenCalledWith(
+                mockAudioContext,
+                'piano',
+                expect.objectContaining({ destination: mockGainNode })
+            );
         });
     });
 });

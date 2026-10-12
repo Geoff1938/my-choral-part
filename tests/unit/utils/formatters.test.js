@@ -1,19 +1,15 @@
-// Example unit test - Time formatting utilities
-
 /**
- * Format seconds as MM:SS
- * @param {number} seconds
- * @returns {string}
+ * Unit tests for public/utils/formatters.js
  */
-function formatTime(seconds) {
-  if (isNaN(seconds) || seconds < 0 || seconds === undefined) {
-    return '0:00';
-  }
 
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
+const {
+  formatTime,
+  volumePercentToDb,
+  formatWorkTitle,
+  formatFileSize,
+  formatTempo,
+  truncate
+} = require('../../../public/utils/formatters.js');
 
 describe('Time Formatting', () => {
   describe('formatTime()', () => {
@@ -41,6 +37,10 @@ describe('Time Formatting', () => {
       expect(formatTime(605)).toBe('10:05');
     });
 
+    test('truncates fractional seconds', () => {
+      expect(formatTime(65.9)).toBe('1:05');
+    });
+
     test('handles negative times', () => {
       expect(formatTime(-5)).toBe('0:00');
       expect(formatTime(-100)).toBe('0:00');
@@ -65,7 +65,78 @@ describe('Time Formatting', () => {
   });
 });
 
-// Export for use in main app (if needed)
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { formatTime };
-}
+describe('Volume Conversion', () => {
+  describe('volumePercentToDb()', () => {
+    test('0% is silent', () => {
+      expect(volumePercentToDb(0)).toBe(-Infinity);
+    });
+
+    test('100% is the -10 dB default', () => {
+      expect(volumePercentToDb(100)).toBe(-10);
+    });
+
+    test('200% is +10 dB', () => {
+      expect(volumePercentToDb(200)).toBe(10);
+    });
+
+    test('maps 0-100% linearly between -60 dB and -10 dB', () => {
+      expect(volumePercentToDb(50)).toBe(-35);
+      expect(volumePercentToDb(10)).toBe(-55);
+    });
+
+    test('maps 100-200% linearly between -10 dB and +10 dB', () => {
+      expect(volumePercentToDb(150)).toBe(0);
+    });
+  });
+});
+
+describe('Display Formatting', () => {
+  describe('formatWorkTitle()', () => {
+    test('joins composer and work', () => {
+      expect(formatWorkTitle('Bach', 'Mass in B Minor')).toBe('Bach, Mass in B Minor');
+    });
+
+    test('appends movement when given', () => {
+      expect(formatWorkTitle('Handel', 'Messiah', 'Hallelujah')).toBe('Handel, Messiah - Hallelujah');
+    });
+  });
+
+  describe('formatFileSize()', () => {
+    test('formats zero bytes', () => {
+      expect(formatFileSize(0)).toBe('0 Bytes');
+    });
+
+    test('formats bytes, KB and MB', () => {
+      expect(formatFileSize(500)).toBe('500 Bytes');
+      expect(formatFileSize(1536)).toBe('1.5 KB');
+      expect(formatFileSize(2.5 * 1024 * 1024)).toBe('2.5 MB');
+    });
+  });
+
+  describe('formatTempo()', () => {
+    test('formats multiplier as a rounded percentage', () => {
+      expect(formatTempo(1)).toBe('100%');
+      expect(formatTempo(0.75)).toBe('75%');
+      expect(formatTempo(0.333)).toBe('33%');
+    });
+  });
+
+  describe('truncate()', () => {
+    test('returns short text unchanged', () => {
+      expect(truncate('Gloria', 10)).toBe('Gloria');
+    });
+
+    test('truncates long text including the suffix in the length', () => {
+      expect(truncate('Magnificat in D', 10)).toBe('Magnifi...');
+    });
+
+    test('supports a custom suffix', () => {
+      expect(truncate('Magnificat in D', 10, '~')).toBe('Magnifica~');
+    });
+
+    test('returns falsy input unchanged', () => {
+      expect(truncate('', 5)).toBe('');
+      expect(truncate(null, 5)).toBeNull();
+    });
+  });
+});
