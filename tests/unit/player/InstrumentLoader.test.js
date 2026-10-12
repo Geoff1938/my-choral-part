@@ -120,11 +120,17 @@ class InstrumentLoader {
                         destination: tempGainNode
                     });
 
-                    const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Preload timeout')), 10000)
-                    );
+                    let timeoutId;
+                    const timeoutPromise = new Promise((_, reject) => {
+                        timeoutId = setTimeout(() => reject(new Error('Preload timeout')), 10000);
+                    });
 
-                    await Promise.race([loadPromise, timeoutPromise]);
+                    try {
+                        await Promise.race([loadPromise, timeoutPromise]);
+                    } finally {
+                        // Don't leave the 10 s timer running (it kept Jest's worker alive)
+                        clearTimeout(timeoutId);
+                    }
                     tempGainNode.disconnect();
 
                     await new Promise(resolve => setTimeout(resolve, 500));

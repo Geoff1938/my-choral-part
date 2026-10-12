@@ -3,6 +3,9 @@
  * Tests all routes and error handling
  */
 
+const https = require('https');
+const { EventEmitter } = require('events');
+const { PassThrough } = require('stream');
 const request = require('supertest');
 
 describe('API Integration Tests', () => {
@@ -76,17 +79,82 @@ describe('API Integration Tests', () => {
       expect(response.body.error).toContain('HTTP');
     });
 
-    test('allows learnchoralmusic.co.uk domain', async () => {
-      // Note: This test only validates URL acceptance, not actual fetching
-      // The actual fetch will fail since we're not mocking the HTTP request
-      const response = await request(app)
-        .get('/proxy')
-        .query({ url: 'https://www.learnchoralmusic.co.uk/test.mid' });
+    describe('with the upstream site stubbed', () => {
+      // Fake https.get: each call takes the next entry from `responses`,
+      // either { status, headers, body } or 'timeout'
+      let responses;
+      let upstreamResponses;
 
-      // Should not be 400 (bad URL) or 403 (forbidden domain)
-      // It will likely be 500 or timeout since the file doesn't exist
-      expect(response.status).not.toBe(400);
-      expect(response.status).not.toBe(403);
+      beforeEach(() => {
+        responses = [];
+        upstreamResponses = [];
+        jest.spyOn(console, 'log').mockImplementation(() => {});
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+        jest.spyOn(https, 'get').mockImplementation((url, options, callback) => {
+          const upstreamRequest = new EventEmitter();
+          upstreamRequest.destroy = jest.fn();
+          const next = responses.shift();
+          process.nextTick(() => {
+            if (next === 'timeout') {
+              upstreamRequest.emit('timeout');
+              return;
+            }
+            const upstreamResponse = new PassThrough();
+            upstreamResponse.statusCode = next.status;
+            upstreamResponse.headers = next.headers || {};
+            upstreamResponse.resume = jest.fn(upstreamResponse.resume.bind(upstreamResponse));
+            upstreamResponses.push(upstreamResponse);
+            callback(upstreamResponse);
+            upstreamResponse.end(next.body || '');
+          });
+          return upstreamRequest;
+        });
+      });
+
+      afterEach(() => {
+        jest.restoreAllMocks();
+      });
+
+      const proxy = (url = 'https://www.learnchoralmusic.co.uk/test.mid') =>
+        request(app).get('/proxy').query({ url }).buffer(true)
+          .parse((res, done) => {
+            const chunks = [];
+            res.on('data', chunk => chunks.push(chunk));
+            res.on('end', () => done(null, Buffer.concat(chunks)));
+          });
+
+      test('allows learnchoralmusic.co.uk domain and streams the file with a day of caching', async () => {
+        responses.push({ status: 200, headers: { 'content-length': '4' }, body: 'MThd' });
+
+        const response = await proxy();
+
+        expect(response.status).toBe(200);
+        expect(response.headers['content-type']).toBe('audio/midi');
+        expect(response.headers['cache-control']).toBe('public, max-age=86400');
+        expect(response.body.toString()).toBe('MThd');
+        expect(https.get.mock.calls[0][1].headers).not.toHaveProperty('Accept-Encoding');
+      });
+
+      test('follows a redirect, drains it, and passes a 404 through uncached', async () => {
+        responses.push({ status: 302, headers: { location: '/moved.mid' } });
+        responses.push({ status: 404 });
+
+        const response = await proxy();
+
+        expect(https.get.mock.calls[1][0]).toBe('https://www.learnchoralmusic.co.uk/moved.mid');
+        expect(upstreamResponses[0].resume).toHaveBeenCalled();
+        expect(upstreamResponses[1].resume).toHaveBeenCalled();
+        expect(response.status).toBe(404);
+        expect(response.headers['cache-control']).toBe('no-cache, no-store, must-revalidate');
+      });
+
+      test('reports an upstream timeout as 504', async () => {
+        responses.push('timeout');
+
+        const response = await proxy();
+
+        expect(response.status).toBe(504);
+      });
     });
   });
 
