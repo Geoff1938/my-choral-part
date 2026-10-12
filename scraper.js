@@ -3,6 +3,46 @@ const cheerio = require('cheerio');
 const fs = require('fs-extra');
 const path = require('path');
 
+// The index files shipped with the repo (used to seed DATA_DIR and as a fallback)
+const SHIPPED_DATA_DIR = path.join(__dirname, 'data');
+
+// Index file names (the same in the shipped folder and DATA_DIR)
+const FULL_INDEX_FILE = 'midi-index-full.json';
+const INITIAL_INDEX_FILE = 'initial-index.json';
+const EXCEPTIONS_FILE = 'indexing-exceptions.json';
+
+// A rebuilt index with fewer than this fraction of the current composers or
+// works is assumed to be a failed scrape and is not saved
+const MIN_INDEX_RATIO = 0.9;
+
+/**
+ * Directory holding the live index files. In production this must be on the
+ * persistent disk: DATA_DIR if set, else the folder holding DATABASE_PATH,
+ * else the repo's data/ folder.
+ * @returns {string} Absolute directory path
+ */
+function resolveDataDir() {
+  if (process.env.DATA_DIR) {
+    return path.resolve(process.env.DATA_DIR);
+  }
+  if (process.env.DATABASE_PATH) {
+    return path.dirname(path.resolve(process.env.DATABASE_PATH));
+  }
+  return SHIPPED_DATA_DIR;
+}
+
+/**
+ * Write JSON to a temporary file and rename it into place, so readers never
+ * see a half-written file
+ * @param {string} filePath - Destination file
+ * @param {*} data - Data to write
+ */
+async function writeJsonAtomic(filePath, data) {
+  const tmpPath = `${filePath}.tmp`;
+  await fs.writeJSON(tmpPath, data, { spaces: 2 });
+  await fs.rename(tmpPath, filePath);
+}
+
 /**
  * Choral Music Scraper
  * Scrapes MIDI file metadata from learnchoralmusic.co.uk and provides search/query APIs
@@ -14,9 +54,14 @@ class ChoralMusicScraper {
   constructor() {
     this.baseUrl = 'https://www.learnchoralmusic.co.uk';
     this.composerListUrl = `${this.baseUrl}/complist.html#list`;
-    this.dataFile = path.join(__dirname, 'data', 'midi-index-full.json'); // Full index (all composers)
-    this.initialIndexFile = path.join(__dirname, 'data', 'initial-index.json'); // Initial index (A composers only)
-    this.exceptionsFile = path.join(__dirname, 'data', 'indexing-exceptions.json'); // Exception report
+    this.dataDir = resolveDataDir();
+    this.dataFile = path.join(this.dataDir, FULL_INDEX_FILE); // Full index (all composers)
+    this.initialIndexFile = path.join(this.dataDir, INITIAL_INDEX_FILE); // Initial index (A composers only)
+    this.exceptionsFile = path.join(this.dataDir, EXCEPTIONS_FILE); // Exception report
+
+    // HTTP timeout and retry delays (ms) for scraping - retried on 429, 5xx and timeouts
+    this.requestTimeout = 20000;
+    this.retryDelays = [2000, 5000];
 
     // Songs URLs (madrigals and carols - single songs merged into main index)
     this.madrigalsUrl = `${this.baseUrl}/Madrigals-etc/Madrigals-complist.html`;
@@ -127,6 +172,7 @@ class ChoralMusicScraper {
 
     // Configure axios with browser-like headers to avoid blocking
     this.axiosConfig = {
+      timeout: this.requestTimeout,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -242,35 +288,53 @@ class ChoralMusicScraper {
   }
 
   async initializeDataDirectory() {
-    await fs.ensureDir(path.dirname(this.dataFile));
+    await fs.ensureDir(this.dataDir);
   }
 
   /**
-   * Ensure the initial index file exists in the data directory
-   * Copies from template if needed (important for Render's ephemeral filesystem)
+   * Seed the data directory with the index files shipped in the repo's data/
+   * folder, for any that are missing (a new persistent disk starts empty).
+   * Existing files are left alone - they are kept up to date by the nightly rebuild.
    * @returns {Promise<void>}
    */
   async ensureInitialIndex() {
-    // Ensure data directory exists
     await this.initializeDataDirectory();
+    console.log(`Index data directory: ${this.dataDir}`);
 
-    // Check if initial index exists in data directory
-    const initialIndexExists = await fs.pathExists(this.initialIndexFile);
+    if (path.resolve(this.dataDir) === path.resolve(SHIPPED_DATA_DIR)) {
+      return;
+    }
 
-    if (!initialIndexExists) {
-      // Copy template from root to data directory
-      const templatePath = path.join(__dirname, 'initial-index-template.json');
-      const templateExists = await fs.pathExists(templatePath);
-
-      if (templateExists) {
-        console.log('Copying initial index template to data directory...');
-        await fs.copy(templatePath, this.initialIndexFile);
-        console.log('Initial index copied successfully');
-      } else {
-        console.log('Warning: No initial index template found');
+    for (const fileName of [FULL_INDEX_FILE, INITIAL_INDEX_FILE, EXCEPTIONS_FILE]) {
+      const target = path.join(this.dataDir, fileName);
+      const source = path.join(SHIPPED_DATA_DIR, fileName);
+      if (!(await fs.pathExists(target)) && (await fs.pathExists(source))) {
+        console.log(`Seeding ${target} from the shipped copy`);
+        await fs.copy(source, target);
       }
-    } else {
-      console.log('Initial index already exists in data directory');
+    }
+  }
+
+  /**
+   * GET a page, retrying a few times (with increasing delays) on rate
+   * limiting, server errors, timeouts and dropped connections
+   * @param {string} url - URL to fetch
+   * @returns {Promise<Object>} axios response
+   */
+  async fetchPage(url) {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await axios.get(url, this.axiosConfig);
+      } catch (error) {
+        const status = error.response && error.response.status;
+        const retryable = status === 429 || status >= 500 ||
+          ['ECONNABORTED', 'ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN'].includes(error.code);
+        if (!retryable || attempt >= this.retryDelays.length) {
+          throw error;
+        }
+        console.log(`Retrying ${url} after ${status || error.code} (attempt ${attempt + 2})`);
+        await new Promise(resolve => setTimeout(resolve, this.retryDelays[attempt]));
+      }
     }
   }
 
@@ -278,7 +342,7 @@ class ChoralMusicScraper {
     console.log('Starting to scrape composer list...');
 
     try {
-      const response = await axios.get(this.composerListUrl, this.axiosConfig);
+      const response = await this.fetchPage(this.composerListUrl);
       const $ = cheerio.load(response.data);
       
       const composers = [];
@@ -357,7 +421,7 @@ class ChoralMusicScraper {
       }
       visitedUrls.add(workUrl);
 
-      const response = await axios.get(fullUrl, this.axiosConfig);
+      const response = await this.fetchPage(fullUrl);
       const $ = cheerio.load(response.data);
 
       const sections = [];
@@ -571,6 +635,9 @@ class ChoralMusicScraper {
     };
 
     const composers = await this.scrapeComposerList();
+    if (composers.length === 0) {
+      throw new Error('Composer list scrape failed or returned no composers');
+    }
     let filteredComposers = composers;
 
     // In test mode, only process composers starting with A or B
@@ -684,13 +751,28 @@ class ChoralMusicScraper {
     // Remove composers with no works
     const filteredIndex = completeIndex.filter(c => c.works.length > 0);
 
+    // A test-mode build covers only some composers - return it without
+    // replacing the live index files
+    if (testMode) {
+      return filteredIndex;
+    }
+
+    // Refuse to replace the live index with one that is much smaller - most
+    // likely the site was unreachable or changed layout part way through
+    const currentIndex = await this.readIndexFile(this.dataFile) ||
+      await this.readIndexFile(path.join(SHIPPED_DATA_DIR, FULL_INDEX_FILE));
+    const sizeCheck = ChoralMusicScraper.checkIndexSize(currentIndex, filteredIndex);
+    if (!sizeCheck.ok) {
+      throw new Error(`Rebuilt index not saved: ${sizeCheck.reason}`);
+    }
+
     // Save the exception report if there are any exceptions
     const hasExceptions = exceptions.duplicateWorks.length > 0 ||
                           exceptions.unavailableWorks.length > 0 ||
                           exceptions.skippedWorks.length > 0 ||
                           exceptions.unavailableSongs.length > 0;
     if (hasExceptions) {
-      await fs.writeJSON(this.exceptionsFile, exceptions, { spaces: 2 });
+      await writeJsonAtomic(this.exceptionsFile, exceptions);
       console.log(`Exception report saved to ${this.exceptionsFile}`);
       if (exceptions.duplicateWorks.length > 0) {
         console.log(`  - ${exceptions.duplicateWorks.length} duplicate works found`);
@@ -707,11 +789,72 @@ class ChoralMusicScraper {
     }
 
     // Save the index to file
-    await fs.writeJSON(this.dataFile, filteredIndex, { spaces: 2 });
+    await writeJsonAtomic(this.dataFile, filteredIndex);
     console.log(`Index saved to ${this.dataFile}`);
     console.log(`Total composers with works: ${filteredIndex.length}`);
 
     return filteredIndex;
+  }
+
+  /**
+   * Count composers, works and sections in an index
+   * @param {Array} index - Index to count
+   * @returns {{composers: number, works: number, sections: number}}
+   */
+  static countIndex(index) {
+    let works = 0;
+    let sections = 0;
+    for (const composer of index || []) {
+      works += composer.works.length;
+      for (const work of composer.works) {
+        sections += (work.sections || []).length;
+      }
+    }
+    return { composers: (index || []).length, works, sections };
+  }
+
+  /**
+   * Check that a rebuilt index is not much smaller than the current one
+   * @param {Array|null} currentIndex - Index now in use (null or empty if none)
+   * @param {Array} newIndex - Freshly built index
+   * @param {number} minRatio - Smallest acceptable fraction of the current size
+   * @returns {{ok: boolean, reason?: string}}
+   */
+  static checkIndexSize(currentIndex, newIndex, minRatio = MIN_INDEX_RATIO) {
+    const current = ChoralMusicScraper.countIndex(currentIndex);
+    const rebuilt = ChoralMusicScraper.countIndex(newIndex);
+
+    if (rebuilt.composers === 0) {
+      return { ok: false, reason: 'the rebuilt index is empty' };
+    }
+    for (const key of ['composers', 'works']) {
+      if (current[key] > 0 && rebuilt[key] < current[key] * minRatio) {
+        return {
+          ok: false,
+          reason: `only ${rebuilt[key]} ${key} against ${current[key]} in the current index ` +
+            `(below ${Math.round(minRatio * 100)}%)`
+        };
+      }
+    }
+    return { ok: true };
+  }
+
+  /**
+   * Read an index JSON file
+   * @param {string} filePath - File to read
+   * @returns {Promise<Array|null>} The index, or null if missing, unreadable or empty
+   */
+  async readIndexFile(filePath) {
+    try {
+      if (!(await fs.pathExists(filePath))) {
+        return null;
+      }
+      const index = await fs.readJSON(filePath);
+      return Array.isArray(index) && index.length > 0 ? index : null;
+    } catch (error) {
+      console.error(`Error reading index ${filePath}:`, error.message);
+      return null;
+    }
   }
 
   async buildIndexInBackground(testMode = false) {
@@ -860,7 +1003,8 @@ class ChoralMusicScraper {
 
   /**
    * Load the MIDI index from disk
-   * Tries full index first, falls back to initial index (A composers) if full index unavailable
+   * Tries the full index in the data directory first, then the copy shipped
+   * in the repo, then the initial index (A composers) from each
    * @returns {Promise<Array>} Array of composer objects with works and sections
    * @example
    * const index = await scraper.loadIndex();
@@ -872,31 +1016,23 @@ class ChoralMusicScraper {
       return this.indexCache;
     }
 
-    try {
-      // Try loading the full index first
-      if (await fs.pathExists(this.dataFile)) {
-        console.log('Loading full MIDI index...');
-        const fullIndex = await fs.readJSON(this.dataFile);
-        // If full index has data, cache and return it
-        if (fullIndex && fullIndex.length > 0) {
-          this.indexCache = fullIndex;
-          return fullIndex;
-        }
-        console.log('Full index is empty, falling back to initial index...');
-      }
+    const candidates = [...new Set([
+      this.dataFile,
+      path.join(SHIPPED_DATA_DIR, FULL_INDEX_FILE),
+      this.initialIndexFile,
+      path.join(SHIPPED_DATA_DIR, INITIAL_INDEX_FILE)
+    ])];
 
-      // Fallback to initial index (A composers only)
-      if (await fs.pathExists(this.initialIndexFile)) {
-        console.log('Loading initial MIDI index (A composers only)...');
-        const initialIndex = await fs.readJSON(this.initialIndexFile);
-        this.indexCache = initialIndex;
-        return initialIndex;
+    for (const filePath of candidates) {
+      const index = await this.readIndexFile(filePath);
+      if (index) {
+        console.log(`Loaded MIDI index from ${filePath}`);
+        this.indexCache = index;
+        return index;
       }
-
-      console.log('No index file found');
-    } catch (error) {
-      console.error('Error loading index:', error.message);
     }
+
+    console.log('No index file found');
     return [];
   }
 
@@ -1139,7 +1275,7 @@ class ChoralMusicScraper {
     console.log(`Scraping ${category} page: ${pageUrl}`);
 
     try {
-      const response = await axios.get(pageUrl, this.axiosConfig);
+      const response = await this.fetchPage(pageUrl);
       const $ = cheerio.load(response.data);
 
       const composers = [];

@@ -1,20 +1,59 @@
 /**
- * Scheduler for nightly index rebuild
- * Uses node-cron to run tasks at scheduled times
+ * Scheduler for nightly jobs: index rebuild, activity retention purge and
+ * database backup. Uses node-cron to run tasks at scheduled times
  */
 
 const cron = require('node-cron');
 const ChoralMusicScraper = require('../scraper');
-const { setLastRebuildTime, getLastRebuildTime } = require('./database');
+const {
+    setLastRebuildTime,
+    getLastRebuildTime,
+    purgeOldActivities,
+    backupDatabase
+} = require('./database');
 
-let scheduledTask = null;
+// Activities older than this are deleted nightly (see the privacy notice)
+const RETENTION_MONTHS = 12;
+
+// Number of daily database backups to keep
+const BACKUPS_TO_KEEP = 7;
+
+let scheduledTasks = [];
 let serverScraper = null; // Reference to server's scraper for cache invalidation
+let rebuildInProgress = null; // Promise of the running rebuild, if any
 
 /**
- * Run the index rebuild
+ * Whether an index rebuild is currently running
+ * @returns {boolean}
+ */
+function isRebuildRunning() {
+    return rebuildInProgress !== null;
+}
+
+/**
+ * Run the index rebuild. Only one rebuild runs at a time - a request made
+ * while one is running returns immediately without starting another.
  * @returns {Promise<Object>} Result of the rebuild
  */
 async function runIndexRebuild() {
+    if (rebuildInProgress) {
+        console.log('[Scheduler] Index rebuild already running - not starting another');
+        return { success: false, alreadyRunning: true, error: 'Index rebuild already running' };
+    }
+
+    rebuildInProgress = rebuildIndex();
+    try {
+        return await rebuildInProgress;
+    } finally {
+        rebuildInProgress = null;
+    }
+}
+
+/**
+ * Rebuild the index and record the result
+ * @returns {Promise<Object>} Result of the rebuild
+ */
+async function rebuildIndex() {
     const startTime = new Date();
     console.log(`[Scheduler] Starting index rebuild at ${startTime.toISOString()}`);
 
@@ -24,14 +63,7 @@ async function runIndexRebuild() {
         const index = await scraper.buildCompleteIndex();
 
         // Count totals
-        let totalWorks = 0;
-        let totalSections = 0;
-        for (const composer of index) {
-            totalWorks += composer.works.length;
-            for (const work of composer.works) {
-                totalSections += work.sections.length;
-            }
-        }
+        const { composers, works, sections } = ChoralMusicScraper.countIndex(index);
 
         const endTime = new Date();
         const durationMs = endTime - startTime;
@@ -40,9 +72,9 @@ async function runIndexRebuild() {
         const result = {
             success: true,
             timestamp: endTime.toISOString(),
-            composers: index.length,
-            works: totalWorks,
-            sections: totalSections,
+            composers,
+            works,
+            sections,
             durationMinutes: parseFloat(durationMinutes)
         };
 
@@ -50,7 +82,7 @@ async function runIndexRebuild() {
         await setLastRebuildTime(result);
 
         console.log(`[Scheduler] Index rebuild complete at ${endTime.toISOString()}`);
-        console.log(`[Scheduler] Composers: ${index.length}, Works: ${totalWorks}, Sections: ${totalSections}`);
+        console.log(`[Scheduler] Composers: ${composers}, Works: ${works}, Sections: ${sections}`);
         console.log(`[Scheduler] Duration: ${durationMinutes} minutes`);
 
         // Clear the server's cached index so it reloads from disk
@@ -68,21 +100,39 @@ async function runIndexRebuild() {
             error: error.message
         };
 
-        // Store the failed result
+        // Store the failed result (the previous index is left in place)
         await setLastRebuildTime(result);
 
-        console.error(`[Scheduler] Index rebuild failed:`, error.message);
+        console.error('[Scheduler] Index rebuild failed - keeping the existing index:', error.message);
         return result;
     }
 }
 
 /**
- * Start the scheduled index rebuild task
- * Runs at 2:00 AM every day
+ * Nightly database housekeeping: delete activities past the retention
+ * period, then write a dated backup. Errors are logged, not thrown.
+ */
+async function runNightlyMaintenance() {
+    try {
+        await purgeOldActivities(RETENTION_MONTHS);
+    } catch (error) {
+        console.error('[Scheduler] Retention purge failed:', error.message);
+    }
+
+    try {
+        await backupDatabase(new Date(), BACKUPS_TO_KEEP);
+    } catch (error) {
+        console.error('[Scheduler] Database backup failed:', error.message);
+    }
+}
+
+/**
+ * Start the scheduled tasks
+ * Index rebuild at 2:00 AM, database maintenance at 3:30 AM (UK time)
  * @param {Object} scraper - Optional reference to server's scraper for cache invalidation
  */
 function startScheduler(scraper = null) {
-    if (scheduledTask) {
+    if (scheduledTasks.length > 0) {
         console.log('[Scheduler] Scheduler already running');
         return;
     }
@@ -90,26 +140,31 @@ function startScheduler(scraper = null) {
     // Store reference to server's scraper for cache invalidation after rebuild
     serverScraper = scraper;
 
-    // Schedule for 2:00 AM every day
-    // Cron format: second minute hour day-of-month month day-of-week
-    scheduledTask = cron.schedule('0 2 * * *', async () => {
+    // Cron format: minute hour day-of-month month day-of-week
+    scheduledTasks.push(cron.schedule('0 2 * * *', async () => {
         console.log('[Scheduler] Triggered nightly index rebuild');
         await runIndexRebuild();
     }, {
-        scheduled: true,
         timezone: 'Europe/London' // UK timezone
-    });
+    }));
 
-    console.log('[Scheduler] Scheduled nightly index rebuild at 2:00 AM (Europe/London)');
+    scheduledTasks.push(cron.schedule('30 3 * * *', async () => {
+        console.log('[Scheduler] Triggered nightly database maintenance');
+        await runNightlyMaintenance();
+    }, {
+        timezone: 'Europe/London'
+    }));
+
+    console.log('[Scheduler] Scheduled nightly index rebuild at 2:00 AM and database maintenance at 3:30 AM (Europe/London)');
 }
 
 /**
- * Stop the scheduled task
+ * Stop the scheduled tasks
  */
 function stopScheduler() {
-    if (scheduledTask) {
-        scheduledTask.stop();
-        scheduledTask = null;
+    if (scheduledTasks.length > 0) {
+        scheduledTasks.forEach(task => task.stop());
+        scheduledTasks = [];
         console.log('[Scheduler] Scheduler stopped');
     }
 }
@@ -126,5 +181,7 @@ module.exports = {
     startScheduler,
     stopScheduler,
     runIndexRebuild,
+    isRebuildRunning,
+    runNightlyMaintenance,
     getLastRebuildStatus
 };

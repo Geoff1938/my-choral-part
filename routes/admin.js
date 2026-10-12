@@ -12,7 +12,7 @@ const {
     getActivitiesForExport,
     getDateRanges
 } = require('../utils/database');
-const { getLastRebuildStatus, runIndexRebuild } = require('../utils/scheduler');
+const { getLastRebuildStatus, runIndexRebuild, isRebuildRunning } = require('../utils/scheduler');
 
 /**
  * GET /admin
@@ -150,6 +150,10 @@ router.get('/api/index-status', async (req, res, next) => {
 router.post('/api/rebuild-index', async (req, res, next) => {
     try {
         console.log('[Admin] Manual index rebuild requested');
+
+        if (isRebuildRunning()) {
+            return res.status(409).json({ error: 'An index rebuild is already running' });
+        }
 
         // Run rebuild in background and respond immediately
         res.json({
