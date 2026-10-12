@@ -1,5 +1,7 @@
 # Soundfonts Evaluation
 
+> **Historical note (Oct 2026):** the High Quality mode (`/fullfonts`) has since been removed. Only the Standard mode (SpessaSynth + GeneralUser GS) remains; the soundfont is now served from Cloudflare R2. See CLAUDE.md.
+
 This document summarizes the soundfont options evaluated for the My Choral Part MIDI player application.
 
 ## Soundfonts Tried

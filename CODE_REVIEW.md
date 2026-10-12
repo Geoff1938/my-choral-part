@@ -1,5 +1,7 @@
 # Code Review & Testing Strategy
 
+> **Historical document (Oct 2025).** Superseded by the October 2026 review; much of this is now done or out of date. See CLAUDE.md for the current architecture.
+
 ## Current Codebase Analysis
 
 **Total Lines of Code**: ~3,400 lines

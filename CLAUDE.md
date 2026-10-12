@@ -4,149 +4,65 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a web-based MIDI playback application designed for choral practice. Users can load MIDI files from URLs and control playback with features like tempo adjustment, seeking, and individual channel volume control.
+My Choral Part (https://player.mychoralpart.com) is a web app for choir singers to practise their part. Users find a work by composer, pick a movement, and play the MIDI rehearsal file with their own part emphasised, at an adjustable tempo, looping sections bar by bar. The MIDI files come from learnchoralmusic.co.uk; this app indexes them and proxies them.
 
 ## Architecture
 
-### Application Structure
+### Server (Node/Express, CommonJS)
 
-The application follows a simple client-server architecture:
+- `server.js` - app setup, middleware order, static files and caching, startup (database, index, scheduler)
+- `routes/api.js` - composer search, works, sections, deep-link resolve (`/api/...`)
+- `routes/proxy.js` - `/proxy?url=` fetches MIDI files from learnchoralmusic.co.uk only (domain allowlist, re-checked on redirects)
+- `routes/activity.js` - `POST /api/activity/log` usage events from the player
+- `routes/admin.js` - `/admin` dashboard: summary, CSV export, index status, manual index rebuild
+- `middleware/` - rate limiting (keyed on `CF-Connecting-IP`), admin Basic Auth, same-origin check for admin POSTs, error handler
+- `scraper.js` - builds the MIDI index by scraping learnchoralmusic.co.uk; refuses to overwrite the index if a rebuild comes back much smaller
+- `utils/database.js` - activity database (sql.js / SQLite in memory, saved atomically to disk), admin users, retention
+- `utils/scheduler.js` - nightly jobs (node-cron, Europe/London): index rebuild 02:00; backup and 12-month purge 03:30
 
-- **Server**: Minimal Node.js/Express server (`server.js`) that serves static files from the `public/` directory
-- **Client**: Single-page application with vanilla JavaScript (no frameworks)
-- **Audio Processing**: All MIDI parsing and playback happens client-side using Tone.js and @tonejs/midi
+### Client (vanilla JS ES modules, no build step)
 
-### Key Components
+- `public/app.js` - the `MIDIPlayer` class: search and selection, MIDI loading, playback, balance, tempo, bars and loops, activity logging
+- `public/constants.js`, `public/utils/`, `public/ui/StatusManager.js`, `public/api/RecentWorksManager.js`, `public/player/InstrumentLoader.js` (General MIDI names, used to identify voice parts)
+- `public/service-worker.js` - caches the soundfont after first use; navigations always fetch fresh
+- `public/vendor/` - not in git; copied from node_modules by `scripts/copy-vendor.js` (runs on `npm install`)
 
-**public/app.js** - Core application logic organized as a `MIDIPlayer` class:
-- `loadMIDI()`: Fetches and parses MIDI files from URLs using the @tonejs/midi library
-- `setupPlayback()`: Creates Tone.js PolySynths and Parts for each MIDI track
-- `play()/pause()/stop()`: Controls Tone.Transport for playback state
-- `seek()/seekTo()`: Implements time-based navigation through the MIDI file
-- `setTempo()`: Adjusts playback speed via Tone.Transport.bpm
-- `setChannelVolume()`: Controls individual synth volumes in decibels
-- `startProgressUpdate()`: Uses setInterval to update UI during playback
+### Audio
 
-**public/index.html** - UI structure:
-- MIDI URL input section
-- Playback controls (play/pause/stop, seek ±10s)
-- Progress bar (interactive - click to seek)
-- Tempo slider (25%-200%)
-- Dynamic channel volume controls (created per MIDI file)
+- MIDI is fetched through `/proxy`, parsed with `@tonejs/midi` (`Midi` global, `public/vendor/midi.js`) for the UI (tracks, bars, tempo map), and played by **SpessaSynth** (`spessasynth_lib`/`spessasynth_core`, AudioWorklet) using the **GeneralUser GS** soundfont.
+- The 10.6 MB soundfont is served from a Cloudflare R2 bucket (`ASSET_HOST` in `public/constants.js`) to keep bandwidth off Render (5 GB/month allowance); `public/soundfonts/GeneralUserGS.sf3` is the fallback. The R2 CORS policy must list every origin the app is served from (player.mychoralpart.com, the onrender.com URL, localhost:3001).
+- Leading silence over 0.5 s is skipped: the app's timeline (`currentTime`, bars, loop markers) starts at the first note, while the sequencer works in absolute song time - convert with `toSequencerTime()` / `fromSequencerTime()`.
+- Tempo is the sequencer's `playbackRate`. Balance rewrites CC7 (channel volume) in a copy of the MIDI and reloads it.
+- iOS: the AudioContext is resumed from every user gesture and in `play()`; playback pauses if the context is interrupted.
 
-**public/styles.css** - Responsive design:
-- Mobile-first approach with breakpoints at 768px and 480px
-- Flexbox and CSS Grid for responsive layouts
-- CSS custom properties (variables) for theming
+### Caching and versioning
 
-### Audio Implementation Details
+`index.html` is served with the build version substituted into `?v=` asset URLs, and the server rewrites relative ES module imports to carry `?v=` too, so versioned JS/CSS can be cached for a year. Unversioned JS/CSS URLs are revalidated (`no-cache`). Always serve pages through `serveIndex` so the `{{VERSION}}` placeholder is replaced.
 
-**MIDI Playback Flow**:
-1. MIDI file fetched as ArrayBuffer from user-provided URL
-2. Parsed using @tonejs/midi into track objects with note arrays
-3. For each track with notes:
-   - Create a PolySynth (polyphonic synthesizer)
-   - Create a Tone.Part mapping note events to synth triggers
-4. Tone.Transport manages global playback timing and tempo
-5. Parts start at current time position when play() is called
+### Data and privacy
 
-**Volume Control**:
-- Implemented using synth.volume.value in decibels
-- 0% = -Infinity dB (silent)
-- 100% = -10 dB (default)
-- 200% = +10 dB (amplified)
-
-**Tempo Control**:
-- Multiplier applied to original BPM from MIDI header
-- Tone.Transport.bpm.value updated in real-time
-- Affects all parts simultaneously
-
-### State Management
-
-Application state is maintained in the `MIDIPlayer` class instance:
-- `midi`: Parsed MIDI object from @tonejs/midi
-- `synths[]`: Array of Tone.PolySynth instances (one per track)
-- `parts[]`: Array of Tone.Part instances (scheduled note events)
-- `isPlaying`: Boolean playback state
-- `currentTime`: Playback position in seconds
-- `duration`: Total MIDI duration
-- `tempoMultiplier`: Speed multiplier (1 = 100%)
-- `channelVolumes{}`: Per-channel volume percentages
+- Activity events: anonymous random device ID, event type (`download`, `rehearsal_start`, `rehearsal_time` with `duration_seconds`), composer/work/movement, user agent. No IP addresses. Kept 12 months. The privacy text in `index.html` must stay accurate.
+- Production data lives on the Render disk at `/var/data`: `activity.db`, `backups/` (7 nightly copies), and the index files, seeded from the repo's `data/` on first start. After that the disk copy wins - a newer index committed to git does not replace it.
 
 ## Commands
 
-### Development
-
 ```bash
-# Install dependencies
-npm install
-
-# Start development server (port 3000)
-npm start
+npm install        # also copies vendor libraries into public/vendor
+npm start          # http://localhost:3001
+npx jest           # all tests (unit + integration, no network access)
 ```
 
-### Deployment
+Admin locally needs `ADMIN_USERS` set before `npm start`, e.g. `ADMIN_USERS='{"you@example.com":"password"}'`; without it the admin area is locked.
 
-The app is configured for Render deployment:
-- `render.yaml` defines the service configuration
-- Environment variable PORT is used if available
-- Build command: `npm install`
-- Start command: `npm start`
+## Deployment (Render)
 
-## Common Development Tasks
+- Service `my-choral-part`, Starter plan, Frankfurt, auto-deploys from `main`. `render.yaml` documents the configuration; the dashboard is authoritative unless the service is synced as a Blueprint.
+- Environment: `DATABASE_PATH=/var/data/activity.db`, `DATA_DIR=/var/data`, `NODE_ENV=production`, and `ADMIN_USERS` (JSON object of email: password, set only in the dashboard - this repo is public, never commit credentials).
+- Health check: `/health`.
 
-### Adding New Playback Controls
+## Gotchas
 
-1. Add HTML controls to `public/index.html` in the `.controls-section`
-2. Add styling to `public/styles.css`
-3. In `public/app.js`:
-   - Add element reference in `initializeElements()`
-   - Add event listener in `attachEventListeners()`
-   - Implement control logic as a new method
-
-### Modifying Audio Synthesis
-
-Audio synthesis happens in `setupPlayback()` at public/app.js:99. Each PolySynth is configured with:
-- Oscillator type (currently 'triangle')
-- ADSR envelope parameters
-
-To change sound:
-- Modify oscillator type: 'sine', 'square', 'triangle', 'sawtooth'
-- Adjust envelope: attack, decay, sustain, release values
-- Consider using different Tone.js instruments (e.g., MembraneSynth, MetalSynth)
-
-### Handling CORS Issues
-
-MIDI files must be served with CORS headers. If users report loading errors:
-- The error will appear in the status message
-- Browser console will show CORS-specific errors
-- Users may need to use a CORS proxy or host files on CORS-enabled servers
-
-## Technical Constraints
-
-1. **Browser Compatibility**: Requires Web Audio API support (all modern browsers)
-2. **CORS Requirements**: MIDI files must be accessible via CORS-enabled URLs
-3. **Client-Side Processing**: All MIDI parsing happens in browser - large files may cause delays
-4. **Memory Usage**: Each track creates a PolySynth; very complex MIDI files could impact performance
-
-## Important Code Locations
-
-- Server configuration: `server.js:7` (PORT and static file serving)
-- MIDI loading: `public/app.js:111` (fetch and parse)
-- Playback setup: `public/app.js:144` (synth and part creation)
-- Play/pause/stop: `public/app.js:231-289` (transport control)
-- Seeking: `public/app.js:291-316` (time navigation)
-- Tempo adjustment: `public/app.js:318-327` (BPM control)
-- Channel volume: `public/app.js:227` (synth volume in dB)
-
-## Dependencies
-
-**Runtime** (loaded from CDN in HTML):
-- Tone.js v14.8.49 - Web Audio framework
-- @tonejs/midi v2.0.28 - MIDI file parser
-
-**Server**:
-- express v4.18.2 - Static file server
-
-No build process required; libraries loaded via CDN for simplicity.
+- The repo is public: no secrets, personal data or exports in commits (`data/*.db`, `output_files/` and `*.xlsx` are git-ignored).
+- When testing locally after editing client modules, restart the server or hard-reload: the version string only changes on restart, so the browser may reuse cached modules.
+- On this Windows machine, run `npm install` from PowerShell; npm install scripts fail to spawn a shell from Git Bash.
 - ask me if you want the server stopped and restarted
