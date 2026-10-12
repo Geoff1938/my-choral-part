@@ -3,7 +3,33 @@
  * Handles loading, caching, and mapping of MIDI instruments
  */
 
-import { TIMEOUTS, GM_INSTRUMENTS } from '../constants.js';
+import { TIMEOUTS, GM_INSTRUMENTS, SOUNDFONT_URLS } from '../constants.js';
+
+/**
+ * Load a FluidR3_GM instrument, trying each soundfont host in turn
+ * @param {AudioContext} audioContext - Web Audio API context
+ * @param {string} instrumentName - Name of instrument to load
+ * @param {Object} options - Soundfont-player options (nameToUrl is supplied here)
+ * @returns {Promise<Object>} Loaded instrument
+ */
+export async function loadSoundfontInstrument(audioContext, instrumentName, options) {
+    let lastError;
+    for (const baseUrl of SOUNDFONT_URLS.full) {
+        try {
+            return await Soundfont.instrument(audioContext, instrumentName, {
+                ...options,
+                nameToUrl: (name, soundfont, format) => {
+                    format = format === 'ogg' ? format : 'mp3';
+                    return `${baseUrl}/${name}-${format}.js`;
+                }
+            });
+        } catch (error) {
+            console.warn(`[Soundfont] Failed to load ${instrumentName} from ${baseUrl}`);
+            lastError = error;
+        }
+    }
+    throw lastError;
+}
 
 export class InstrumentLoader {
     /**
@@ -49,15 +75,11 @@ export class InstrumentLoader {
     async loadInstrument(audioContext, instrumentName, gainNode) {
         const loadOptions = {
             soundfont: 'FluidR3_GM',
-            destination: gainNode,
-            nameToUrl: (name, soundfont, format) => {
-                format = format === 'ogg' ? format : 'mp3';
-                return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
-            }
+            destination: gainNode
         };
 
         try {
-            const instrument = await Soundfont.instrument(audioContext, instrumentName, loadOptions);
+            const instrument = await loadSoundfontInstrument(audioContext, instrumentName, loadOptions);
             // Add to cache (note: this is for tracking, actual HTTP cache happens in browser)
             this.addToCache(instrumentName, instrument);
             return { instrument, instrumentName, isFallback: false };
@@ -66,7 +88,7 @@ export class InstrumentLoader {
 
             // Fallback to piano
             try {
-                const instrument = await Soundfont.instrument(audioContext, 'acoustic_grand_piano', loadOptions);
+                const instrument = await loadSoundfontInstrument(audioContext, 'acoustic_grand_piano', loadOptions);
                 return { instrument, instrumentName: 'acoustic_grand_piano', isFallback: true };
             } catch (fallbackError) {
                 console.error(`Even piano fallback failed:`, fallbackError);
@@ -123,13 +145,9 @@ export class InstrumentLoader {
                     tempGainNode.connect(audioContext.destination);
                     tempGainNode.gain.value = 0;
 
-                    const loadPromise = Soundfont.instrument(audioContext, instrumentName, {
+                    const loadPromise = loadSoundfontInstrument(audioContext, instrumentName, {
                         soundfont: 'FluidR3_GM',
-                        destination: tempGainNode,
-                        nameToUrl: (name, soundfont, format) => {
-                            format = format === 'ogg' ? format : 'mp3';
-                            return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
-                        }
+                        destination: tempGainNode
                     });
 
                     const timeoutPromise = new Promise((_, reject) =>

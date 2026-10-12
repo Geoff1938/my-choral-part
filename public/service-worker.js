@@ -1,9 +1,10 @@
 /**
- * Service Worker for caching soundfont instruments
+ * Service Worker for caching soundfonts
  *
  * Caching Strategy:
- * - Pre-cache the 6 most commonly used instruments based on analysis of 272 composers
- * - Cache other instruments on-demand as they are requested
+ * - Soundfont files (GeneralUser GS and FluidR3_GM instruments) are cached
+ *   the first time they are used, then served from the cache on every later
+ *   visit. Nothing is pre-cached, so visitors only download what they play.
  * - Version-based cache invalidation (increment VERSION to clear old cache)
  * - Navigation requests always fetch fresh from the network (cache: 'reload'),
  *   so a device can never get stuck serving a stale index.html from a prior
@@ -14,74 +15,27 @@
  * - v1: Initial cache with basic instruments
  * - v2: Updated to use usage statistics from MIDI analysis (272 composers, 2000+ works)
  * - v2 (2026-05-22): Added cache-bypassing navigation handler (soundfont cache unchanged)
+ * - v3 (2026-10-12): Soundfonts served from Cloudflare R2; cache GeneralUser GS;
+ *   stopped pre-caching FluidR3_GM instruments on install
  */
 
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `choral-practice-soundfonts-${CACHE_VERSION}`;
 
-/**
- * Top 6 most commonly used instruments based on MIDI file analysis
- * Source: analyze-cached-works.js on 272 composers
- *
- * Usage statistics:
- * - acoustic_grand_piano: 890 uses (most common)
- * - piccolo: 3139 uses (soprano voice part)
- * - clarinet: 3184 uses (alto voice part)
- * - bassoon: 3347 uses (bass voice part)
- * - french_horn: 3561 uses (tenor voice part)
- * - string_ensemble_1: 5666 uses (orchestral arrangements)
- */
-const INSTRUMENTS_TO_CACHE = [
-    'acoustic_grand_piano',
-    'piccolo',
-    'clarinet',
-    'bassoon',
-    'french_horn',
-    'string_ensemble_1'
+// Soundfont URLs to cache: our R2 bucket, the original gleitz site (fallback
+// for FluidR3_GM) and our own server (fallback for GeneralUser GS)
+const SOUNDFONT_URL_PATTERNS = [
+    'pub-8f69698b476240b0b34d5e8a46b69a65.r2.dev/',
+    'gleitz.github.io/midi-js-soundfonts/',
+    '/soundfonts/GeneralUserGS.sf3'
 ];
 
-// Generate soundfont URLs for the instruments
-const SOUNDFONT_BASE = 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM';
-const getSoundfontUrls = () => {
-    const urls = [];
-    INSTRUMENTS_TO_CACHE.forEach(instrument => {
-        // Both mp3 and ogg formats
-        urls.push(`${SOUNDFONT_BASE}/${instrument}-mp3.js`);
-        urls.push(`${SOUNDFONT_BASE}/${instrument}-ogg.js`);
-    });
-    return urls;
-};
-
 /**
- * Install event - pre-cache the most common soundfonts
- * Fails gracefully if caching fails (instruments will be cached on-demand)
+ * Install event - activate immediately without waiting for page reload
  */
 self.addEventListener('install', (event) => {
-    console.log(`[Service Worker ${CACHE_VERSION}] Installing and caching soundfonts...`);
-
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                const urls = getSoundfontUrls();
-                console.log(`[Service Worker] Pre-caching ${urls.length} soundfont files for ${INSTRUMENTS_TO_CACHE.length} instruments...`);
-
-                // Cache all in parallel for faster installation
-                return cache.addAll(urls)
-                    .then(() => {
-                        console.log('[Service Worker] All common soundfonts cached successfully');
-                    })
-                    .catch((error) => {
-                        console.warn('[Service Worker] Some soundfonts failed to pre-cache:', error);
-                        console.warn('[Service Worker] Continuing anyway - will cache on-demand');
-                        // Don't fail installation if pre-caching fails
-                        // Instruments will be cached on first use instead
-                    });
-            })
-            .then(() => {
-                // Activate immediately without waiting for page reload
-                return self.skipWaiting();
-            })
-    );
+    console.log(`[Service Worker ${CACHE_VERSION}] Installing...`);
+    event.waitUntil(self.skipWaiting());
 });
 
 /**
@@ -141,8 +95,8 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Only intercept requests to the soundfont CDN
-    if (url.includes('gleitz.github.io/midi-js-soundfonts')) {
+    // Only intercept soundfont requests
+    if (event.request.method === 'GET' && SOUNDFONT_URL_PATTERNS.some(pattern => url.includes(pattern))) {
         event.respondWith(
             caches.match(event.request)
                 .then((cachedResponse) => {

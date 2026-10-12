@@ -11,6 +11,34 @@ const GM_INSTRUMENTS = [
     // ... (truncated for testing, full array has 128 items)
 ];
 
+// Mock SOUNDFONT_URLS (matches constants.js)
+const SOUNDFONT_URLS = {
+    full: [
+        'https://pub-8f69698b476240b0b34d5e8a46b69a65.r2.dev/FluidR3_GM',
+        'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM'
+    ]
+};
+
+// Copy of loadSoundfontInstrument for testing
+async function loadSoundfontInstrument(audioContext, instrumentName, options) {
+    let lastError;
+    for (const baseUrl of SOUNDFONT_URLS.full) {
+        try {
+            return await Soundfont.instrument(audioContext, instrumentName, {
+                ...options,
+                nameToUrl: (name, soundfont, format) => {
+                    format = format === 'ogg' ? format : 'mp3';
+                    return `${baseUrl}/${name}-${format}.js`;
+                }
+            });
+        } catch (error) {
+            console.warn(`[Soundfont] Failed to load ${instrumentName} from ${baseUrl}`);
+            lastError = error;
+        }
+    }
+    throw lastError;
+}
+
 // Copy of InstrumentLoader class for testing
 class InstrumentLoader {
     constructor(maxCacheSize = 20) {
@@ -36,22 +64,18 @@ class InstrumentLoader {
     async loadInstrument(audioContext, instrumentName, gainNode) {
         const loadOptions = {
             soundfont: 'FluidR3_GM',
-            destination: gainNode,
-            nameToUrl: (name, soundfont, format) => {
-                format = format === 'ogg' ? format : 'mp3';
-                return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
-            }
+            destination: gainNode
         };
 
         try {
-            const instrument = await Soundfont.instrument(audioContext, instrumentName, loadOptions);
+            const instrument = await loadSoundfontInstrument(audioContext, instrumentName, loadOptions);
             this.addToCache(instrumentName, instrument);
             return { instrument, instrumentName, isFallback: false };
         } catch (error) {
             console.error(`Failed to load ${instrumentName}, falling back to piano:`, error);
 
             try {
-                const instrument = await Soundfont.instrument(audioContext, 'acoustic_grand_piano', loadOptions);
+                const instrument = await loadSoundfontInstrument(audioContext, 'acoustic_grand_piano', loadOptions);
                 return { instrument, instrumentName: 'acoustic_grand_piano', isFallback: true };
             } catch (fallbackError) {
                 console.error(`Even piano fallback failed:`, fallbackError);
@@ -91,13 +115,9 @@ class InstrumentLoader {
                     tempGainNode.connect(audioContext.destination);
                     tempGainNode.gain.value = 0;
 
-                    const loadPromise = Soundfont.instrument(audioContext, instrumentName, {
+                    const loadPromise = loadSoundfontInstrument(audioContext, instrumentName, {
                         soundfont: 'FluidR3_GM',
-                        destination: tempGainNode,
-                        nameToUrl: (name, soundfont, format) => {
-                            format = format === 'ogg' ? format : 'mp3';
-                            return `https://gleitz.github.io/midi-js-soundfonts/${soundfont}/${name}-${format}.js`;
-                        }
+                        destination: tempGainNode
                     });
 
                     const timeoutPromise = new Promise((_, reject) =>
@@ -143,6 +163,7 @@ describe('InstrumentLoader', () => {
 
         // Mock console methods
         global.console.error = jest.fn();
+        global.console.warn = jest.fn();
         global.console.log = jest.fn();
 
         // Mock global Soundfont
@@ -260,6 +281,7 @@ describe('InstrumentLoader', () => {
             const pianoInstrument = { play: jest.fn() };
             Soundfont.instrument
                 .mockRejectedValueOnce(new Error('Load failed'))
+                .mockRejectedValueOnce(new Error('Load failed'))
                 .mockResolvedValueOnce(pianoInstrument);
 
             const result = await loader.loadInstrument(mockAudioContext, 'invalid_instrument', mockGainNode);
@@ -290,7 +312,7 @@ describe('InstrumentLoader', () => {
 
             const options = Soundfont.instrument.mock.calls[0][2];
             const url = options.nameToUrl('piano', 'FluidR3_GM', 'mp3');
-            expect(url).toBe('https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/piano-mp3.js');
+            expect(url).toBe('https://pub-8f69698b476240b0b34d5e8a46b69a65.r2.dev/FluidR3_GM/piano-mp3.js');
         });
 
         test('uses correct URL generator for ogg format', async () => {
@@ -301,7 +323,26 @@ describe('InstrumentLoader', () => {
 
             const options = Soundfont.instrument.mock.calls[0][2];
             const url = options.nameToUrl('piano', 'FluidR3_GM', 'ogg');
-            expect(url).toBe('https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/piano-ogg.js');
+            expect(url).toBe('https://pub-8f69698b476240b0b34d5e8a46b69a65.r2.dev/FluidR3_GM/piano-ogg.js');
+        });
+
+        test('falls back to the second soundfont host when the first fails', async () => {
+            const mockInstrument = { play: jest.fn() };
+            Soundfont.instrument
+                .mockRejectedValueOnce(new Error('R2 unavailable'))
+                .mockResolvedValueOnce(mockInstrument);
+
+            const result = await loader.loadInstrument(mockAudioContext, 'piano', mockGainNode);
+
+            expect(result).toEqual({
+                instrument: mockInstrument,
+                instrumentName: 'piano',
+                isFallback: false
+            });
+            const options = Soundfont.instrument.mock.calls[1][2];
+            const url = options.nameToUrl('piano', 'FluidR3_GM', 'mp3');
+            expect(url).toBe('https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/piano-mp3.js');
+            expect(console.warn).toHaveBeenCalledTimes(1);
         });
     });
 

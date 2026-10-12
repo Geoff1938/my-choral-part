@@ -97,6 +97,7 @@ function displayPeriodData(suffix, periodData) {
     document.getElementById(`downloads-${suffix}`).textContent = downloads;
     document.getElementById(`rehearsals-${suffix}`).textContent = rehearsals;
     document.getElementById(`devices-${suffix}`).textContent = periodData.uniqueDevices;
+    document.getElementById(`hours-${suffix}`).textContent = periodData.rehearsalHours ?? 0;
 
     // Top works
     const topWorksList = document.getElementById(`top-works-${suffix}`);

@@ -42,7 +42,7 @@ import {
 } from './utils/validation.js';
 
 // Import helper modules
-import { InstrumentLoader } from './player/InstrumentLoader.js';
+import { InstrumentLoader, loadSoundfontInstrument } from './player/InstrumentLoader.js';
 import { StatusManager } from './ui/StatusManager.js';
 import { RecentWorksManager } from './api/RecentWorksManager.js';
 
@@ -95,6 +95,8 @@ class MIDIPlayer {
 
         // Activity logging
         this.heartbeatInterval = null;
+        this.playStartedAt = null;      // When the current stretch of playing began (ms)
+        this.unreportedPlayMs = 0;      // Playing time not yet sent to the server
         this.deviceId = this.getOrCreateDeviceId();
 
         this.initializeElements();
@@ -192,15 +194,22 @@ class MIDIPlayer {
     }
 
     /**
-     * Get the soundfont URL base for the current mode
-     * @returns {string|null} Soundfont URL base, or null if not using traditional soundfonts
+     * Fetch the GeneralUser GS soundfont, trying each source in turn
+     * @returns {Promise<ArrayBuffer>} Soundfont data
      */
-    getSoundfontUrl() {
-        if (this.soundfontMode === SOUNDFONT_MODE.HIGH_QUALITY) {
-            return SOUNDFONT_URLS.full;
+    async fetchGeneralUserSoundfont() {
+        for (const url of SOUNDFONT_URLS.standard) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    return await response.arrayBuffer();
+                }
+                console.warn(`[Soundfont] ${url} returned ${response.status}`);
+            } catch (error) {
+                console.warn(`[Soundfont] Failed to fetch ${url}:`, error.message);
+            }
         }
-        // Standard mode uses SpessaSynth which loads its own soundfont
-        return null;
+        throw new Error('Could not load the soundfont from any source');
     }
 
     /**
@@ -426,20 +435,30 @@ class MIDIPlayer {
 
     /**
      * Log an activity event to the server
-     * @param {string} eventType - 'download', 'rehearsal_start', or 'rehearsal_heartbeat'
+     * @param {string} eventType - 'download', 'rehearsal_start' or 'rehearsal_time'
+     * @param {Object} [options]
+     * @param {number} [options.durationSeconds] - Playing time, for 'rehearsal_time'
+     * @param {boolean} [options.useBeacon] - Send with sendBeacon (survives the page closing)
      */
-    async logActivity(eventType) {
+    async logActivity(eventType, { durationSeconds = null, useBeacon = false } = {}) {
+        const body = JSON.stringify({
+            deviceId: this.deviceId,
+            eventType,
+            composer: this.selectedComposer || null,
+            work: this.selectedWork || null,
+            movement: this.currentMovement || null,
+            durationSeconds
+        });
+
         try {
+            if (useBeacon && navigator.sendBeacon) {
+                navigator.sendBeacon('/api/activity/log', new Blob([body], { type: 'application/json' }));
+                return;
+            }
             await fetch('/api/activity/log', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    deviceId: this.deviceId,
-                    eventType,
-                    composer: this.selectedComposer || null,
-                    work: this.selectedWork || null,
-                    movement: this.currentMovement || null
-                })
+                body
             });
         } catch (error) {
             // Silent fail - don't disrupt user experience
@@ -447,32 +466,59 @@ class MIDIPlayer {
     }
 
     /**
-     * Start the rehearsal heartbeat timer
-     * Logs rehearsal_start immediately, then rehearsal_heartbeat every 10 minutes
+     * Start tracking rehearsal (playing) time
+     * Logs rehearsal_start immediately. Playing time accumulates across
+     * play/pause/seek and is reported as rehearsal_time events.
      */
     startRehearsalHeartbeat() {
-        // Stop any existing heartbeat
+        // Stop any existing tracking (banks the time played so far)
         this.stopRehearsalHeartbeat();
 
         // Log rehearsal start
         this.logActivity('rehearsal_start');
 
-        // Set up 10-minute heartbeat
+        this.playStartedAt = Date.now();
+
+        // Report accumulated playing time every 5 minutes during long runs
         this.heartbeatInterval = setInterval(() => {
-            if (this.isPlaying) {
-                this.logActivity('rehearsal_heartbeat');
-            }
-        }, 10 * 60 * 1000); // 10 minutes
+            this.reportRehearsalTime();
+        }, 5 * 60 * 1000);
     }
 
     /**
-     * Stop the rehearsal heartbeat timer
+     * Stop tracking rehearsal time (on pause, stop or movement change)
      */
     stopRehearsalHeartbeat() {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
             this.heartbeatInterval = null;
         }
+        this.reportRehearsalTime();
+        this.playStartedAt = null;
+    }
+
+    /**
+     * Add the time played since the last check to the unreported total, and
+     * send it to the server once there is enough to be worth a request
+     * @param {Object} [options]
+     * @param {number} [options.minSeconds=30] - Keep accumulating below this
+     * @param {boolean} [options.useBeacon=false] - Send with sendBeacon
+     */
+    reportRehearsalTime({ minSeconds = 30, useBeacon = false } = {}) {
+        if (this.playStartedAt) {
+            const now = Date.now();
+            // Cap each stretch so a sleeping device can't add hours of phantom time
+            this.unreportedPlayMs += Math.min(now - this.playStartedAt, 10 * 60 * 1000);
+            this.playStartedAt = now;
+        }
+
+        const seconds = Math.round(this.unreportedPlayMs / 1000);
+        if (seconds < minSeconds) {
+            return;
+        }
+
+        this.unreportedPlayMs = 0;
+        this.logActivity('rehearsal_time', { durationSeconds: seconds, useBeacon });
     }
 
     // ==================== End Activity Logging ====================
@@ -1900,6 +1946,11 @@ class MIDIPlayer {
             });
         }
 
+        // Send any unreported playing time when the page is hidden or closed
+        window.addEventListener('pagehide', () => {
+            this.reportRehearsalTime({ minSeconds: 1, useBeacon: true });
+        });
+
         this.playBtn.addEventListener('click', () => this.play());
         this.pauseBtn.addEventListener('click', () => this.pause());
         this.stopBtn.addEventListener('click', () => this.stop());
@@ -3270,8 +3321,7 @@ class MIDIPlayer {
                     console.log('[Soundfont] Connected to audio destination');
 
                     // Load the GeneralUser GS soundfont
-                    const sfResponse = await fetch('/soundfonts/GeneralUserGS.sf3');
-                    const sfArrayBuffer = await sfResponse.arrayBuffer();
+                    const sfArrayBuffer = await this.fetchGeneralUserSoundfont();
                     await this.spessaSynth.soundBankManager.addSoundBank(sfArrayBuffer, 'GeneralUserGS');
                     console.log('[Soundfont] GeneralUser GS soundfont loaded');
 
@@ -3359,8 +3409,6 @@ class MIDIPlayer {
             return;
         }
 
-        // Get soundfont URL based on mode (only FULL mode uses traditional soundfonts here)
-        const soundfontUrl = this.getSoundfontUrl();
         const soundfontName = 'FluidR3_GM';
 
         // Show loading progress
@@ -3400,14 +3448,10 @@ class MIDIPlayer {
                         console.log(`[Instrument Cache] ✗ Loading new instrument: ${instrumentName}`);
 
                         // Add timeout to prevent hanging on suspended audio context
-                        const loadPromise = Soundfont.instrument(audioContext, instrumentName, {
+                        const loadPromise = loadSoundfontInstrument(audioContext, instrumentName, {
                             soundfont: soundfontName,
                             // Connect to destination directly - volume controlled via gain param
-                            destination: audioContext.destination,
-                            nameToUrl: (name, sf, format) => {
-                                format = format === 'ogg' ? format : 'mp3';
-                                return `${soundfontUrl}/${name}-${format}.js`;
-                            }
+                            destination: audioContext.destination
                         });
 
                         const timeoutPromise = new Promise((_, reject) =>
@@ -3434,13 +3478,9 @@ class MIDIPlayer {
 
                     // Fallback to piano
                     try {
-                        const instrument = await Soundfont.instrument(audioContext, 'acoustic_grand_piano', {
+                        const instrument = await loadSoundfontInstrument(audioContext, 'acoustic_grand_piano', {
                             soundfont: soundfontName,
-                            destination: gainNode,
-                            nameToUrl: (name, sf, format) => {
-                                format = format === 'ogg' ? format : 'mp3';
-                                return `${soundfontUrl}/${name}-${format}.js`;
-                            }
+                            destination: gainNode
                         });
 
                         // Update progress even for fallback
@@ -3836,6 +3876,9 @@ class MIDIPlayer {
 
     pause() {
         if (!this.isPlaying) return;
+
+        // Bank the playing time for activity tracking
+        this.stopRehearsalHeartbeat();
 
         // Handle SpessaSynth pause
         if (this.usingSpessaSynth && this.spessaSequencer) {

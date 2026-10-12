@@ -87,6 +87,37 @@ function serveIndex(req, res) {
 app.get('/', serveIndex);
 app.get('/index.html', serveIndex);
 
+// Note whether the request carries the ?v= version, so the static handler
+// below only caches for a year when the URL changes on every deploy.
+app.use((req, res, next) => {
+  res.locals.versioned = req.query.v !== undefined;
+  next();
+});
+
+// Our own ES modules (app.js and the files it imports) are served with their
+// relative imports rewritten to carry ?v=VERSION. Otherwise a returning
+// browser could pair a new app.js with old cached copies of constants.js etc.
+// and fail to start. The vendor libraries and the service worker are excluded.
+const RELATIVE_IMPORT = /(\bfrom\s*|\bimport\s*\(?\s*)(['"])(\.\.?\/[^'"?]+\.js)\2/g;
+app.get(/^\/(?!vendor\/)(?!service-worker\.js$).+\.js$/, async (req, res, next) => {
+  const filePath = path.join(__dirname, 'public', path.normalize(req.path));
+  if (!filePath.startsWith(path.join(__dirname, 'public') + path.sep)) {
+    return next();
+  }
+  let source;
+  try {
+    source = await fs.promises.readFile(filePath, 'utf8');
+  } catch (error) {
+    return next();
+  }
+  const version = encodeURIComponent(APP_VERSION);
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  res.setHeader('Cache-Control', res.locals.versioned
+    ? 'public, max-age=31536000, immutable'
+    : 'no-cache');
+  res.send(source.replace(RELATIVE_IMPORT, `$1$2$3?v=${version}$2`));
+});
+
 // Serve static files from the public directory with caching headers.
 // Asset URLs that reference /app.js, /styles.css, and /vendor/* are
 // version-busted via ?v={{VERSION}} in index.html, so the URL changes
@@ -118,10 +149,12 @@ app.use(express.static('public', {
     else if (filepath.match(/\.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$/)) {
       res.setHeader('Cache-Control', 'public, max-age=604800'); // 1 week
     }
-    // JS/CSS at the root (app.js, styles.css): URL is version-busted in
-    // index.html, so cache for a year.
+    // Other JS/CSS: cache for a year only when the URL is version-busted
+    // (?v=); otherwise make the browser check for a newer copy each time.
     else if (filepath.match(/\.(js|css)$/)) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.setHeader('Cache-Control', res.locals.versioned
+        ? 'public, max-age=31536000, immutable'
+        : 'no-cache');
     }
   }
 }));

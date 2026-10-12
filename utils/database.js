@@ -61,6 +61,13 @@ async function initDatabase() {
         )
     `);
 
+    // Add duration column for rehearsal_time events (databases created before Oct 2026)
+    const columns = db.exec(`PRAGMA table_info(activities)`)[0].values.map(row => row[1]);
+    if (!columns.includes('duration_seconds')) {
+        db.run(`ALTER TABLE activities ADD COLUMN duration_seconds INTEGER`);
+        console.log('[Database] Added duration_seconds column');
+    }
+
     // Create indexes for common queries
     db.run(`CREATE INDEX IF NOT EXISTS idx_activities_timestamp ON activities(timestamp)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_activities_device ON activities(device_id)`);
@@ -122,13 +129,13 @@ async function seedAdminUsers() {
 /**
  * Log an activity event
  */
-async function logActivity(deviceId, eventType, composer, work, movement, userAgent, ipAddress) {
+async function logActivity(deviceId, eventType, composer, work, movement, userAgent, ipAddress, durationSeconds = null) {
     await initDatabase();
 
     db.run(`
-        INSERT INTO activities (device_id, event_type, composer, work, movement, user_agent, ip_address)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, [deviceId, eventType, composer, work, movement, userAgent, ipAddress]);
+        INSERT INTO activities (device_id, event_type, composer, work, movement, user_agent, ip_address, duration_seconds)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `, [deviceId, eventType, composer, work, movement, userAgent, ipAddress, durationSeconds]);
 
     // Save to disk after each write
     await saveDatabase();
@@ -173,6 +180,14 @@ async function getActivitySummary(startDate, endDate) {
         WHERE timestamp >= '${start}' AND timestamp <= '${end}'
     `);
 
+    // Total rehearsal (playing) time
+    const rehearsalSeconds = db.exec(`
+        SELECT COALESCE(SUM(duration_seconds), 0)
+        FROM activities
+        WHERE timestamp >= '${start}' AND timestamp <= '${end}'
+        AND event_type = 'rehearsal_time'
+    `);
+
     // Top works (by download count)
     const topWorks = db.exec(`
         SELECT composer, work, COUNT(*) as count
@@ -192,6 +207,8 @@ async function getActivitySummary(startDate, endDate) {
         })) : [],
         uniqueDevices: uniqueDevices.length > 0 && uniqueDevices[0].values.length > 0
             ? uniqueDevices[0].values[0][0] : 0,
+        rehearsalHours: rehearsalSeconds.length > 0 && rehearsalSeconds[0].values.length > 0
+            ? Math.round(rehearsalSeconds[0].values[0][0] / 360) / 10 : 0,
         topWorks: topWorks.length > 0 ? topWorks[0].values.map(row => ({
             composer: row[0],
             work: row[1],
@@ -210,7 +227,7 @@ async function getActivitiesForExport(startDate, endDate) {
     const end = endDate.toISOString();
 
     const result = db.exec(`
-        SELECT timestamp, device_id, event_type, composer, work, movement, ip_address, user_agent
+        SELECT timestamp, device_id, event_type, composer, work, movement, ip_address, user_agent, duration_seconds
         FROM activities
         WHERE timestamp >= '${start}' AND timestamp <= '${end}'
         ORDER BY timestamp DESC
@@ -226,7 +243,8 @@ async function getActivitiesForExport(startDate, endDate) {
         work: row[4],
         movement: row[5],
         ipAddress: row[6],
-        userAgent: row[7]
+        userAgent: row[7],
+        durationSeconds: row[8]
     }));
 }
 

@@ -53,9 +53,22 @@ export const SOUNDFONT_MODE = {
     HIGH_QUALITY: 'highQuality', // FluidR3_GM (high quality, high memory - recommended for powerful devices)
 };
 
-// Soundfont URLs
+// Cloudflare R2 bucket (mychoralpart-assets) that hosts the soundfonts, keeping
+// their bandwidth off Render. Public development URL - see service-worker.js too.
+export const ASSET_HOST = 'https://pub-8f69698b476240b0b34d5e8a46b69a65.r2.dev';
+
+// Soundfont URLs - each list is tried in order until one succeeds
 export const SOUNDFONT_URLS = {
-    full: 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM',
+    // FluidR3_GM instrument folders (highQuality mode): our R2 copy, then the original site
+    full: [
+        `${ASSET_HOST}/FluidR3_GM`,
+        'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM'
+    ],
+    // GeneralUser GS soundfont (standard mode): R2, then our own server
+    standard: [
+        `${ASSET_HOST}/GeneralUserGS.sf3`,
+        '/soundfonts/GeneralUserGS.sf3'
+    ],
 };
 
 
@@ -109,7 +122,6 @@ export const CACHED_INSTRUMENTS = [
 
 // Base URLs
 export const BASE_URL = 'https://www.learnchoralmusic.co.uk';
-export const SOUNDFONT_BASE_URL = 'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM';
 
 // UI Update Intervals (milliseconds)
 export const UI = {

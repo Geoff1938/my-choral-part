@@ -77,7 +77,7 @@ router.get('/api/export', async (req, res, next) => {
 
         // Convert activities to worksheet
         const wsData = [
-            ['Timestamp', 'Device ID', 'Event Type', 'Composer', 'Work', 'Movement', 'IP Address', 'User Agent']
+            ['Timestamp', 'Device ID', 'Event Type', 'Composer', 'Work', 'Movement', 'IP Address', 'User Agent', 'Duration (s)']
         ];
 
         activities.forEach(activity => {
@@ -89,7 +89,8 @@ router.get('/api/export', async (req, res, next) => {
                 activity.work || '',
                 activity.movement || '',
                 activity.ipAddress || '',
-                activity.userAgent || ''
+                activity.userAgent || '',
+                activity.durationSeconds ?? ''
             ]);
         });
 
@@ -104,7 +105,8 @@ router.get('/api/export', async (req, res, next) => {
             { wch: 35 }, // Work
             { wch: 30 }, // Movement
             { wch: 15 }, // IP Address
-            { wch: 50 }  // User Agent
+            { wch: 50 }, // User Agent
+            { wch: 12 }  // Duration (s)
         ];
         ws['!cols'] = colWidths;
 
