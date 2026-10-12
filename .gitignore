@@ -32,6 +32,14 @@ build/
 # Note: midi-index-full.json is now committed (pre-built index)
 data/recent-works.json
 public/version.json
+data/*.db
+data/*.db.*
+data/backups/
+data/*.tmp
+
+# Local analysis output
+output_files/
+*.xlsx
 
 # Vendored third-party libraries (populated by `npm install` via postinstall,
 # see scripts/copy-vendor.js). Sources are pinned in package.json dependencies.

@@ -10,6 +10,8 @@ const GENERIC_ERRORS = {
   401: 'Unauthorized',
   403: 'Forbidden',
   404: 'Not found',
+  413: 'Request too large',
+  429: 'Too many requests',
   500: 'Internal server error',
   502: 'Bad gateway',
   503: 'Service unavailable',
@@ -57,7 +59,8 @@ function sanitizeErrorMessage(message, statusCode) {
   }
 
   // Otherwise return generic message based on status code
-  return GENERIC_ERRORS[statusCode] || GENERIC_ERRORS[500];
+  return GENERIC_ERRORS[statusCode] ||
+    (statusCode < 500 ? GENERIC_ERRORS[400] : GENERIC_ERRORS[500]);
 }
 
 /**
@@ -73,8 +76,17 @@ function errorHandler(err, req, res, next) {
   console.error('Stack:', err.stack);
   console.error('Path:', req.path);
 
-  // Default to 500 server error
-  const statusCode = err.statusCode || 500;
+  // If the response has already started, Express must close the connection
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  // Use the error's own HTTP status if it has a valid one (e.g. 413 from the
+  // body parser), otherwise 500
+  const errorStatus = err.statusCode || err.status;
+  const statusCode = Number.isInteger(errorStatus) && errorStatus >= 400 && errorStatus < 600
+    ? errorStatus
+    : 500;
   const rawMessage = err.message || 'Internal server error';
 
   // Sanitize message for client response

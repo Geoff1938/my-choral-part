@@ -222,6 +222,13 @@ async function triggerRebuild() {
             method: 'POST'
         });
 
+        if (response.status === 409) {
+            msg.textContent = 'A rebuild is already running. Refresh later to see results.';
+            msg.style.color = '#666';
+            btn.disabled = false;
+            return;
+        }
+
         if (!response.ok) {
             throw new Error(`HTTP error: ${response.status}`);
         }

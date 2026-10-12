@@ -8,7 +8,7 @@
     "dev": "node server.js",
     "vendor": "node scripts/copy-vendor.js",
     "postinstall": "node scripts/copy-vendor.js",
-    "build-index": "node build-index.js",
+    "build-index": "node rebuild-index.js",
     "analyze-midi": "node scripts/analyze-midi-files.js",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -38,8 +38,7 @@
     "spessasynth_core": "4.3.4",
     "spessasynth_lib": "4.3.3",
     "sql.js": "^1.13.0",
-    "tone": "14.8.49",
-    "xlsx": "^0.18.5"
+    "tone": "14.8.49"
   },
   "devDependencies": {
     "jest": "^29.7.0",

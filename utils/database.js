@@ -13,30 +13,35 @@ const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 
 
 let db = null;
 let SQL = null;
+let initPromise = null;
+
+// Saves are chained so two writes never overlap. pendingSave is a save that
+// is queued but not yet started - later callers share it rather than queue
+// another identical write.
+let lastSave = Promise.resolve();
+let pendingSave = null;
 
 /**
  * Initialize the database connection and create tables if needed
  */
-async function initDatabase() {
-    if (db) return db;
+function initDatabase() {
+    if (!initPromise) {
+        initPromise = openDatabase().catch(error => {
+            initPromise = null;
+            throw error;
+        });
+    }
+    return initPromise;
+}
 
+/**
+ * Load the database file (or create a new database) and prepare the schema
+ */
+async function openDatabase() {
     // Initialize sql.js
     SQL = await initSqlJs();
 
-    // Load existing database or create new one
-    try {
-        if (await fs.pathExists(DB_PATH)) {
-            const fileBuffer = await fs.readFile(DB_PATH);
-            db = new SQL.Database(fileBuffer);
-            console.log('[Database] Loaded existing database');
-        } else {
-            db = new SQL.Database();
-            console.log('[Database] Created new database');
-        }
-    } catch (error) {
-        console.error('[Database] Error loading database, creating new one:', error.message);
-        db = new SQL.Database();
-    }
+    db = await loadDatabaseFile();
 
     // Create tables if they don't exist
     db.run(`
@@ -81,6 +86,13 @@ async function initDatabase() {
         )
     `);
 
+    // IP addresses are no longer collected - clear any stored before that change
+    db.run(`UPDATE activities SET ip_address = NULL WHERE ip_address IS NOT NULL`);
+    const clearedIps = db.getRowsModified();
+    if (clearedIps > 0) {
+        console.log(`[Database] Cleared ${clearedIps} stored IP addresses`);
+    }
+
     // Make the admin users match the ADMIN_USERS environment variable
     await syncAdminUsers();
 
@@ -92,19 +104,82 @@ async function initDatabase() {
 }
 
 /**
- * Save the database to disk
+ * Load the database from DB_PATH, or create a new one if there is no file.
+ * A file that cannot be read as a database is renamed aside (never
+ * overwritten) so its data can still be recovered by hand.
+ * @returns {Promise<Object>} sql.js Database
  */
-async function saveDatabase() {
-    if (!db) return;
-
-    try {
-        await fs.ensureDir(path.dirname(DB_PATH));
-        const data = db.export();
-        const buffer = Buffer.from(data);
-        await fs.writeFile(DB_PATH, buffer);
-    } catch (error) {
-        console.error('[Database] Error saving database:', error.message);
+async function loadDatabaseFile() {
+    if (!(await fs.pathExists(DB_PATH))) {
+        console.log('[Database] Created new database');
+        return new SQL.Database();
     }
+
+    let loaded = null;
+    try {
+        const fileBuffer = await fs.readFile(DB_PATH);
+        loaded = new SQL.Database(fileBuffer);
+        // sql.js only notices a bad file on the first query
+        loaded.exec(`SELECT COUNT(*) FROM sqlite_master`);
+        console.log('[Database] Loaded existing database');
+        return loaded;
+    } catch (error) {
+        if (loaded) {
+            loaded.close();
+        }
+        const corruptPath = `${DB_PATH}.corrupt-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+        // If this rename fails the error propagates and startup stops, rather
+        // than a new empty database being saved over the old file
+        await fs.rename(DB_PATH, corruptPath);
+        console.error('[Database] ************************************************************');
+        console.error(`[Database] COULD NOT LOAD ${DB_PATH}: ${error.message}`);
+        console.error(`[Database] The file has been moved to ${corruptPath}`);
+        console.error('[Database] Starting with an EMPTY activity database');
+        console.error('[Database] ************************************************************');
+        return new SQL.Database();
+    }
+}
+
+/**
+ * Write the database to disk: to a temporary file first, then renamed over
+ * the real one, so a crash mid-write cannot leave a truncated database.
+ * @param {string} targetPath - File to write
+ */
+async function writeDatabaseFile(targetPath = DB_PATH) {
+    await fs.ensureDir(path.dirname(targetPath));
+    const tmpPath = `${targetPath}.tmp`;
+    await fs.writeFile(tmpPath, Buffer.from(db.export()));
+    await fs.rename(tmpPath, targetPath);
+}
+
+/**
+ * Save the database to disk. Saves run one at a time; the returned promise
+ * resolves once a save that includes every change made so far has finished.
+ * @returns {Promise<void>}
+ */
+function saveDatabase() {
+    if (!db) return Promise.resolve();
+
+    if (!pendingSave) {
+        pendingSave = lastSave.then(async () => {
+            pendingSave = null;
+            try {
+                await writeDatabaseFile();
+            } catch (error) {
+                console.error('[Database] Error saving database:', error.message);
+            }
+        });
+        lastSave = pendingSave;
+    }
+    return pendingSave;
+}
+
+/**
+ * Wait for any queued saves and write the latest state (used on shutdown)
+ * @returns {Promise<void>}
+ */
+async function flushDatabase() {
+    await saveDatabase();
 }
 
 /**
@@ -199,48 +274,59 @@ async function validateAdmin(email, password) {
 }
 
 /**
+ * Format a Date the way SQLite's CURRENT_TIMESTAMP stores it
+ * ('YYYY-MM-DD HH:MM:SS', UTC) so it compares correctly with stored values.
+ * An ISO string would not: 'T' sorts after ' ', which dropped the first day
+ * of every range.
+ * @param {Date} date - Date to format
+ * @returns {string} SQLite timestamp
+ */
+function toSqlTimestamp(date) {
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+/**
  * Get activity summary for a time period
  */
 async function getActivitySummary(startDate, endDate) {
     await initDatabase();
 
-    const start = startDate.toISOString();
-    const end = endDate.toISOString();
+    const range = [toSqlTimestamp(startDate), toSqlTimestamp(endDate)];
 
     // Total events by type
     const eventCounts = db.exec(`
         SELECT event_type, COUNT(*) as count
         FROM activities
-        WHERE timestamp >= '${start}' AND timestamp <= '${end}'
+        WHERE timestamp >= ? AND timestamp <= ?
         GROUP BY event_type
-    `);
+    `, range);
 
     // Unique devices
     const uniqueDevices = db.exec(`
         SELECT COUNT(DISTINCT device_id) as count
         FROM activities
-        WHERE timestamp >= '${start}' AND timestamp <= '${end}'
-    `);
+        WHERE timestamp >= ? AND timestamp <= ?
+    `, range);
 
     // Total rehearsal (playing) time
     const rehearsalSeconds = db.exec(`
         SELECT COALESCE(SUM(duration_seconds), 0)
         FROM activities
-        WHERE timestamp >= '${start}' AND timestamp <= '${end}'
+        WHERE timestamp >= ? AND timestamp <= ?
         AND event_type = 'rehearsal_time'
-    `);
+    `, range);
 
     // Top works (by download count)
     const topWorks = db.exec(`
         SELECT composer, work, COUNT(*) as count
         FROM activities
-        WHERE timestamp >= '${start}' AND timestamp <= '${end}'
+        WHERE timestamp >= ? AND timestamp <= ?
         AND event_type = 'download'
         AND composer IS NOT NULL
         GROUP BY composer, work
         ORDER BY count DESC
         LIMIT 10
-    `);
+    `, range);
 
     return {
         eventCounts: eventCounts.length > 0 ? eventCounts[0].values.map(row => ({
@@ -265,15 +351,14 @@ async function getActivitySummary(startDate, endDate) {
 async function getActivitiesForExport(startDate, endDate) {
     await initDatabase();
 
-    const start = startDate.toISOString();
-    const end = endDate.toISOString();
+    const range = [toSqlTimestamp(startDate), toSqlTimestamp(endDate)];
 
     const result = db.exec(`
-        SELECT timestamp, device_id, event_type, composer, work, movement, ip_address, user_agent, duration_seconds
+        SELECT timestamp, device_id, event_type, composer, work, movement, user_agent, duration_seconds
         FROM activities
-        WHERE timestamp >= '${start}' AND timestamp <= '${end}'
+        WHERE timestamp >= ? AND timestamp <= ?
         ORDER BY timestamp DESC
-    `);
+    `, range);
 
     if (result.length === 0) return [];
 
@@ -284,10 +369,56 @@ async function getActivitiesForExport(startDate, endDate) {
         composer: row[3],
         work: row[4],
         movement: row[5],
-        ipAddress: row[6],
-        userAgent: row[7],
-        durationSeconds: row[8]
+        userAgent: row[6],
+        durationSeconds: row[7]
     }));
+}
+
+/**
+ * Delete activities older than the retention period
+ * @param {number} months - How many months of activity to keep
+ * @returns {Promise<number>} Number of activities deleted
+ */
+async function purgeOldActivities(months = 12) {
+    await initDatabase();
+
+    db.run(`DELETE FROM activities WHERE timestamp < datetime('now', ?)`, [`-${months} months`]);
+    const deleted = db.getRowsModified();
+
+    if (deleted > 0) {
+        await saveDatabase();
+    }
+    console.log(`[Database] Retention purge removed ${deleted} activities older than ${months} months`);
+    return deleted;
+}
+
+/**
+ * Write a dated copy of the database to a backups folder next to it
+ * (e.g. /var/data/backups/activity-2026-10-12.db), keeping the newest few.
+ * @param {Date} date - Date to name the backup after
+ * @param {number} keep - How many daily backups to keep
+ * @returns {Promise<string>} Path of the backup written
+ */
+async function backupDatabase(date = new Date(), keep = 7) {
+    await initDatabase();
+
+    const backupDir = path.join(path.dirname(DB_PATH), 'backups');
+    const baseName = path.basename(DB_PATH, path.extname(DB_PATH));
+    const backupPath = path.join(backupDir, `${baseName}-${date.toISOString().slice(0, 10)}.db`);
+
+    // Queue behind any pending save so the backup is not written mid-save
+    await saveDatabase();
+    await writeDatabaseFile(backupPath);
+
+    // Remove the oldest backups (names sort by date)
+    const pattern = new RegExp(`^${baseName}-\\d{4}-\\d{2}-\\d{2}\\.db$`);
+    const backups = (await fs.readdir(backupDir)).filter(name => pattern.test(name)).sort();
+    for (const name of backups.slice(0, Math.max(0, backups.length - keep))) {
+        await fs.remove(path.join(backupDir, name));
+    }
+
+    console.log(`[Database] Backup written to ${backupPath}`);
+    return backupPath;
 }
 
 /**
@@ -345,9 +476,13 @@ async function getLastRebuildTime() {
 }
 
 module.exports = {
+    DB_PATH,
     initDatabase,
     saveDatabase,
+    flushDatabase,
     logActivity,
+    purgeOldActivities,
+    backupDatabase,
     validateAdmin,
     parseAdminUsers,
     getActivitySummary,

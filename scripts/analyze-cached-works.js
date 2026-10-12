@@ -12,7 +12,7 @@ const CACHED_INSTRUMENTS = new Set([
 ]);
 
 async function analyzeCachedWorks() {
-    const csvPath = path.join(__dirname, 'midi-test-results.csv');
+    const csvPath = path.join(__dirname, '..', 'midi-test-results.csv');
     const csvContent = await fs.readFile(csvPath, 'utf8');
 
     const lines = csvContent.split('\n');

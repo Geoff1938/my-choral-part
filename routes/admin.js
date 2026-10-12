@@ -6,13 +6,31 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const XLSX = require('xlsx');
 const {
     getActivitySummary,
     getActivitiesForExport,
     getDateRanges
 } = require('../utils/database');
-const { getLastRebuildStatus, runIndexRebuild } = require('../utils/scheduler');
+const { getLastRebuildStatus, runIndexRebuild, isRebuildRunning } = require('../utils/scheduler');
+
+/**
+ * Format a value as a CSV field. Values starting with = + - @ (or a tab or
+ * carriage return) get a leading apostrophe so a spreadsheet does not run
+ * them as formulas - composer and work names come from the public
+ * activity endpoint.
+ * @param {*} value - Field value
+ * @returns {string} CSV-safe field
+ */
+function csvField(value) {
+    let text = value === null || value === undefined ? '' : String(value);
+    if (/^[=+\-@\t\r]/.test(text)) {
+        text = `'${text}`;
+    }
+    if (/[",\r\n]/.test(text)) {
+        text = `"${text.replace(/"/g, '""')}"`;
+    }
+    return text;
+}
 
 /**
  * GET /admin
@@ -50,7 +68,7 @@ router.get('/api/summary', async (req, res, next) => {
 
 /**
  * GET /admin/api/export
- * Export activities as XLSX file
+ * Export activities as a CSV file
  * Query params:
  *   start: ISO date string (required)
  *   end: ISO date string (required)
@@ -72,54 +90,31 @@ router.get('/api/export', async (req, res, next) => {
 
         const activities = await getActivitiesForExport(startDate, endDate);
 
-        // Create workbook
-        const wb = XLSX.utils.book_new();
-
-        // Convert activities to worksheet
-        const wsData = [
-            ['Timestamp', 'Device ID', 'Event Type', 'Composer', 'Work', 'Movement', 'IP Address', 'User Agent', 'Duration (s)']
+        const rows = [
+            ['Timestamp', 'Device ID', 'Event Type', 'Composer', 'Work', 'Movement', 'User Agent', 'Duration (s)']
         ];
 
         activities.forEach(activity => {
-            wsData.push([
+            rows.push([
                 activity.timestamp,
                 activity.deviceId,
                 activity.eventType,
                 activity.composer || '',
                 activity.work || '',
                 activity.movement || '',
-                activity.ipAddress || '',
                 activity.userAgent || '',
                 activity.durationSeconds ?? ''
             ]);
         });
 
-        const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-        // Auto-size columns
-        const colWidths = [
-            { wch: 20 }, // Timestamp
-            { wch: 40 }, // Device ID
-            { wch: 18 }, // Event Type
-            { wch: 25 }, // Composer
-            { wch: 35 }, // Work
-            { wch: 30 }, // Movement
-            { wch: 15 }, // IP Address
-            { wch: 50 }, // User Agent
-            { wch: 12 }  // Duration (s)
-        ];
-        ws['!cols'] = colWidths;
-
-        XLSX.utils.book_append_sheet(wb, ws, 'Activities');
-
-        // Generate buffer
-        const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        // The byte order mark makes Excel read the file as UTF-8
+        const csv = '﻿' + rows.map(row => row.map(csvField).join(',')).join('\r\n') + '\r\n';
 
         // Set headers for file download
-        const filename = `activity-export-${start.slice(0, 10)}-to-${end.slice(0, 10)}.xlsx`;
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        const filename = `activity-export-${startDate.toISOString().slice(0, 10)}-to-${endDate.toISOString().slice(0, 10)}.csv`;
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.send(buffer);
+        res.send(csv);
     } catch (error) {
         console.error('[Admin] Error exporting activities:', error.message);
         next(error);
@@ -150,6 +145,10 @@ router.get('/api/index-status', async (req, res, next) => {
 router.post('/api/rebuild-index', async (req, res, next) => {
     try {
         console.log('[Admin] Manual index rebuild requested');
+
+        if (isRebuildRunning()) {
+            return res.status(409).json({ error: 'An index rebuild is already running' });
+        }
 
         // Run rebuild in background and respond immediately
         res.json({

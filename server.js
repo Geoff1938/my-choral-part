@@ -58,10 +58,16 @@ const proxyRouter = require('./routes/proxy');
 const activityRouter = require('./routes/activity');
 const adminRouter = require('./routes/admin');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
-const { apiLimiter, proxyLimiter } = require('./middleware/rateLimiter');
+const {
+  apiLimiter,
+  proxyLimiter,
+  activityLogLimiter,
+  adminLimiter
+} = require('./middleware/rateLimiter');
 const basicAuthMiddleware = require('./middleware/basicAuth');
-const { initDatabase } = require('./utils/database');
-const { startScheduler } = require('./utils/scheduler');
+const requireSameOrigin = require('./middleware/sameOrigin');
+const { initDatabase, flushDatabase } = require('./utils/database');
+const { startScheduler, stopScheduler } = require('./utils/scheduler');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -72,6 +78,10 @@ app.set('trust proxy', 1);
 
 // Enable gzip compression for all responses
 app.use(compression());
+
+// Activity events are tiny - parse them with a small body limit (this runs
+// first, so the general parser below skips these requests)
+app.use('/api/activity', express.json({ limit: '10kb' }));
 
 // Middleware to parse JSON
 app.use(express.json());
@@ -165,7 +175,7 @@ app.get('/health', (req, res) => {
 });
 
 // Activity logging routes (rate limited) - must be before general /api routes
-app.use('/api/activity', apiLimiter, activityRouter);
+app.use('/api/activity', activityLogLimiter, activityRouter);
 
 // Apply rate limiting to API routes
 app.use('/api', apiLimiter, createApiRoutes(scraper));
@@ -173,8 +183,9 @@ app.use('/api', apiLimiter, createApiRoutes(scraper));
 // Apply stricter rate limiting to proxy route
 app.use('/proxy', proxyLimiter, proxyRouter);
 
-// Admin routes (Basic Auth protected)
-app.use('/admin', basicAuthMiddleware, adminRouter);
+// Admin routes (Basic Auth protected, failed attempts rate limited,
+// POSTs must come from our own pages)
+app.use('/admin', adminLimiter, requireSameOrigin, basicAuthMiddleware, adminRouter);
 
 // Soundfont mode routes - serve index.html for different soundfont modes
 // Default mode is 'standard' (SpessaSynth, ~31MB memory)
@@ -206,7 +217,7 @@ if (require.main === module) {
     // Initialize scraper
     console.log('Initializing MIDI index scraper...');
 
-    // Ensure initial index is copied to data directory
+    // Copy the shipped index files into the data directory if missing
     // (This handles Render's persistent disk mount which starts empty)
     await scraper.ensureInitialIndex();
 
@@ -226,11 +237,32 @@ if (require.main === module) {
       console.log(`Server is running on port ${PORT}`);
       console.log(`Visit http://localhost:${PORT}`);
 
-      // Start the scheduler for nightly index rebuilds
+      // Start the scheduler for nightly index rebuilds and database backups
       // Pass scraper reference so cache can be cleared after rebuild
       startScheduler(scraper);
     });
-  })();
+  })().catch((error) => {
+    console.error('Startup failed:', error);
+    process.exit(1);
+  });
+
+  // Render sends SIGTERM before stopping the instance (e.g. on deploy):
+  // write any pending activity database changes before exiting
+  let shuttingDown = false;
+  const shutdown = async (signal) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`${signal} received - saving activity database and exiting`);
+    stopScheduler();
+    try {
+      await flushDatabase();
+    } catch (error) {
+      console.error('Error saving database on shutdown:', error);
+    }
+    process.exit(0);
+  };
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 // Export app and scraper for testing and scheduler access
