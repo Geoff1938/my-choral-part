@@ -81,8 +81,8 @@ async function initDatabase() {
         )
     `);
 
-    // Seed admin users if they don't exist
-    await seedAdminUsers();
+    // Make the admin users match the ADMIN_USERS environment variable
+    await syncAdminUsers();
 
     // Save database to disk
     await saveDatabase();
@@ -108,22 +108,64 @@ async function saveDatabase() {
 }
 
 /**
- * Seed initial admin users
+ * Parse the ADMIN_USERS environment variable
+ * Format: a JSON object mapping email to password, e.g.
+ *   {"someone@example.com": "a long password", "other@example.com": "another one"}
+ * @param {string|undefined} value - Raw environment variable value
+ * @returns {Array<{email: string, password: string}>|null} Users, or null if unset or invalid
  */
-async function seedAdminUsers() {
-    const adminUsers = [
-        { email: 'gichapman@gmail.com', password: 'GeoffMcp' },
-        { email: 'john@learnchoralmusic.co.uk', password: 'JohnMcp' }
-    ];
+function parseAdminUsers(value) {
+    if (!value) {
+        return null;
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(value);
+    } catch (error) {
+        console.error('[Database] ADMIN_USERS is not valid JSON - admin access disabled');
+        return null;
+    }
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        console.error('[Database] ADMIN_USERS must be a JSON object of email: password - admin access disabled');
+        return null;
+    }
+
+    const users = Object.entries(parsed)
+        .filter(([email, password]) => email && typeof password === 'string' && password.length > 0)
+        .map(([email, password]) => ({ email: email.trim().toLowerCase(), password }));
+
+    return users.length > 0 ? users : null;
+}
+
+/**
+ * Make the admin_users table match the ADMIN_USERS environment variable.
+ * Users not listed are removed, so changing the variable and restarting is
+ * all it takes to change a password or revoke access. If the variable is
+ * missing or invalid, every admin user is removed and the admin area is locked.
+ */
+async function syncAdminUsers() {
+    const adminUsers = parseAdminUsers(process.env.ADMIN_USERS);
+
+    if (!adminUsers) {
+        db.run(`DELETE FROM admin_users`);
+        console.warn('[Database] ADMIN_USERS not set - admin access disabled');
+        return;
+    }
+
+    const emails = adminUsers.map(user => user.email);
+    const placeholders = emails.map(() => '?').join(', ');
+    db.run(`DELETE FROM admin_users WHERE email NOT IN (${placeholders})`, emails);
 
     for (const user of adminUsers) {
-        const existing = db.exec(`SELECT id FROM admin_users WHERE email = '${user.email}'`);
-        if (existing.length === 0 || existing[0].values.length === 0) {
-            const passwordHash = await bcrypt.hash(user.password, 10);
-            db.run(`INSERT INTO admin_users (email, password_hash) VALUES (?, ?)`, [user.email, passwordHash]);
-            console.log(`[Database] Created admin user: ${user.email}`);
-        }
+        const passwordHash = await bcrypt.hash(user.password, 10);
+        db.run(`
+            INSERT INTO admin_users (email, password_hash) VALUES (?, ?)
+            ON CONFLICT(email) DO UPDATE SET password_hash = excluded.password_hash
+        `, [user.email, passwordHash]);
     }
+    console.log(`[Database] Admin users: ${emails.join(', ')}`);
 }
 
 /**
@@ -147,7 +189,7 @@ async function logActivity(deviceId, eventType, composer, work, movement, userAg
 async function validateAdmin(email, password) {
     await initDatabase();
 
-    const result = db.exec(`SELECT password_hash FROM admin_users WHERE email = ?`, [email]);
+    const result = db.exec(`SELECT password_hash FROM admin_users WHERE email = ?`, [email.trim().toLowerCase()]);
     if (result.length === 0 || result[0].values.length === 0) {
         return false;
     }
@@ -307,6 +349,7 @@ module.exports = {
     saveDatabase,
     logActivity,
     validateAdmin,
+    parseAdminUsers,
     getActivitySummary,
     getActivitiesForExport,
     getDateRanges,

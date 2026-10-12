@@ -56,6 +56,17 @@ describe('JS module versioning', () => {
     expect(response.headers['cache-control']).toBe('no-cache, no-store, must-revalidate');
   });
 
+  test('deep links and /fullfonts get the version-substituted page', async () => {
+    for (const url of ['/mozart/requiem', '/fullfonts', '/']) {
+      const response = await request(app).get(url);
+
+      expect(response.status).toBe(200);
+      expect(response.headers['cache-control']).toBe('no-cache, no-store, must-revalidate');
+      expect(response.text).toMatch(/app\.js\?v=\d{4}-\d{2}-\d{2}\./);
+      expect(response.text).not.toContain('{{VERSION}}');
+    }
+  });
+
   test('missing JS files still 404', async () => {
     const response = await request(app).get('/does-not-exist.js');
 

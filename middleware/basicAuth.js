@@ -17,7 +17,13 @@ function parseBasicAuth(header) {
     try {
         const base64Credentials = header.slice(6);
         const credentials = Buffer.from(base64Credentials, 'base64').toString('utf8');
-        const [email, password] = credentials.split(':');
+        // Split at the first colon only - passwords may contain colons
+        const separator = credentials.indexOf(':');
+        if (separator === -1) {
+            return null;
+        }
+        const email = credentials.slice(0, separator);
+        const password = credentials.slice(separator + 1);
 
         if (!email || !password) {
             return null;

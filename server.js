@@ -179,21 +179,12 @@ app.use('/admin', basicAuthMiddleware, adminRouter);
 // Soundfont mode routes - serve index.html for different soundfont modes
 // Default mode is 'standard' (SpessaSynth, ~31MB memory)
 // Use /fullfonts for high-quality soundfonts (requires ~1.7GB memory)
-app.get('/fullfonts', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+app.get('/fullfonts', serveIndex);
 
 // Catch-all route for composer/work URLs (e.g., /domenico-scarlatti/magnificat)
-// This allows sharing direct links to works
-app.get('/:composer/:work', (req, res) => {
-  // Serve index.html, which will read the URL and load the appropriate work
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Serve index.html for root path
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// This allows sharing direct links to works. Uses the pre-rendered index so
+// the asset URLs carry the real version, not the {{VERSION}} placeholder.
+app.get('/:composer/:work', serveIndex);
 
 // 404 handler - must be after all other routes
 app.use(notFoundHandler);
