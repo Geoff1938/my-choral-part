@@ -62,7 +62,7 @@ class MidiIndexTester {
     }
 
     async loadIndex() {
-        const indexPath = path.join(__dirname, 'data', 'midi-index-full.json');
+        const indexPath = path.join(__dirname, '..', 'data', 'midi-index-full.json');
         return await fs.readJSON(indexPath);
     }
 
@@ -410,11 +410,11 @@ async function main() {
     await tester.runTests();
 
     // Write results to CSV
-    const outputFile = path.join(__dirname, 'midi-test-results.csv');
+    const outputFile = path.join(__dirname, '..', 'midi-test-results.csv');
     await tester.writeCSV(outputFile);
 
     // Write instrument statistics to CSV
-    const instrumentStatsFile = path.join(__dirname, 'instrument-statistics.csv');
+    const instrumentStatsFile = path.join(__dirname, '..', 'instrument-statistics.csv');
     await tester.writeInstrumentStatsCSV(instrumentStatsFile);
 
     // Print summary

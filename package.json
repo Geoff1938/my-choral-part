@@ -8,7 +8,7 @@
     "dev": "node server.js",
     "vendor": "node scripts/copy-vendor.js",
     "postinstall": "node scripts/copy-vendor.js",
-    "build-index": "node build-index.js",
+    "build-index": "node rebuild-index.js",
     "analyze-midi": "node scripts/analyze-midi-files.js",
     "test": "jest",
     "test:watch": "jest --watch",
