@@ -6,10 +6,10 @@
 // HTTP Request Timeouts (milliseconds)
 export const TIMEOUTS = {
     MIDI_FETCH: 30000,           // 30 seconds for MIDI file download
+    SOUNDFONT_FETCH: 90000,      // 90 seconds for the 10MB soundfont (slow mobile connections)
     INSTRUMENT_LOAD: 10000,      // 10 seconds per instrument
     AUTO_PLAY_DELAY: 500,        // 500ms delay before auto-play
     RETRY_DELAY_BASE: 1000,      // Base delay for retry backoff (1 second)
-    INSTRUMENT_PRELOAD_DELAY: 500, // Delay between sequential instrument loads
     REQUEST_DELAY: 500           // Delay between API requests to avoid rate limiting
 };
 
@@ -42,15 +42,6 @@ export const AUDIO = {
 export const MEMORY = {
     LOW_MEMORY_GB: 4,            // Desktop/laptop with ≤4GB considered low
     MOBILE_LOW_MEMORY_GB: 6,     // Mobile device with ≤6GB considered low
-    MB_PER_INSTRUMENT: 35,       // Estimated MB per decoded instrument (~30-50MB typical)
-    MAX_INSTRUMENTS_4GB: 8,      // Max instruments for 4GB device
-    MAX_INSTRUMENTS_DEFAULT: 20, // Max instruments for normal devices
-};
-
-// Soundfont Mode Settings
-export const SOUNDFONT_MODE = {
-    STANDARD: 'standard',        // SpessaSynth + GeneralUser GS (~10MB download, ~31MB RAM, good quality) - DEFAULT
-    HIGH_QUALITY: 'highQuality', // FluidR3_GM (high quality, high memory - recommended for powerful devices)
 };
 
 // Cloudflare R2 bucket (mychoralpart-assets) that hosts the soundfonts, keeping
@@ -59,12 +50,7 @@ export const ASSET_HOST = 'https://pub-8f69698b476240b0b34d5e8a46b69a65.r2.dev';
 
 // Soundfont URLs - each list is tried in order until one succeeds
 export const SOUNDFONT_URLS = {
-    // FluidR3_GM instrument folders (highQuality mode): our R2 copy, then the original site
-    full: [
-        `${ASSET_HOST}/FluidR3_GM`,
-        'https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM'
-    ],
-    // GeneralUser GS soundfont (standard mode): R2, then our own server
+    // GeneralUser GS soundfont: R2, then our own server
     standard: [
         `${ASSET_HOST}/GeneralUserGS.sf3`,
         '/soundfonts/GeneralUserGS.sf3'
@@ -109,16 +95,6 @@ export const INSTRUMENT_TO_VOICE = {
 
 // Set of instruments that identify choral channels
 export const CHORAL_INSTRUMENTS = new Set(Object.keys(INSTRUMENT_TO_VOICE));
-
-// Common instruments to pre-cache (based on MIDI file analysis)
-export const CACHED_INSTRUMENTS = [
-    'acoustic_grand_piano',  // 890 uses
-    'piccolo',               // 3139 uses
-    'clarinet',              // 3184 uses
-    'bassoon',               // 3347 uses
-    'french_horn',           // 3561 uses
-    'string_ensemble_1'      // 5666 uses
-];
 
 // Base URLs
 export const BASE_URL = 'https://www.learnchoralmusic.co.uk';

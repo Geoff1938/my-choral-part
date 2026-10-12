@@ -1,45 +1,12 @@
 /**
  * InstrumentLoader
- * Handles loading, caching, and mapping of MIDI instruments
+ * Maps MIDI tracks and program numbers to General MIDI instrument names
+ * (used to identify the voice parts - piccolo = soprano, etc.)
  */
 
-import { TIMEOUTS, GM_INSTRUMENTS, SOUNDFONT_URLS } from '../constants.js';
-
-/**
- * Load a FluidR3_GM instrument, trying each soundfont host in turn
- * @param {AudioContext} audioContext - Web Audio API context
- * @param {string} instrumentName - Name of instrument to load
- * @param {Object} options - Soundfont-player options (nameToUrl is supplied here)
- * @returns {Promise<Object>} Loaded instrument
- */
-export async function loadSoundfontInstrument(audioContext, instrumentName, options) {
-    let lastError;
-    for (const baseUrl of SOUNDFONT_URLS.full) {
-        try {
-            return await Soundfont.instrument(audioContext, instrumentName, {
-                ...options,
-                nameToUrl: (name, soundfont, format) => {
-                    format = format === 'ogg' ? format : 'mp3';
-                    return `${baseUrl}/${name}-${format}.js`;
-                }
-            });
-        } catch (error) {
-            console.warn(`[Soundfont] Failed to load ${instrumentName} from ${baseUrl}`);
-            lastError = error;
-        }
-    }
-    throw lastError;
-}
+import { GM_INSTRUMENTS } from '../constants.js';
 
 export class InstrumentLoader {
-    /**
-     * @param {number} maxCacheSize - Maximum number of instruments to cache
-     */
-    constructor(maxCacheSize = 15) {
-        this.instrumentCache = new Map();
-        this.maxCacheSize = maxCacheSize;
-    }
-
     /**
      * Get instrument name from MIDI track
      * @param {Object} track - MIDI track object
@@ -63,114 +30,5 @@ export class InstrumentLoader {
             return GM_INSTRUMENTS[program];
         }
         return 'acoustic_grand_piano';
-    }
-
-    /**
-     * Load a Soundfont instrument
-     * @param {AudioContext} audioContext - Web Audio API context
-     * @param {string} instrumentName - Name of instrument to load
-     * @param {GainNode} gainNode - Gain node to connect to
-     * @returns {Promise<Object>} Loaded instrument
-     */
-    async loadInstrument(audioContext, instrumentName, gainNode) {
-        const loadOptions = {
-            soundfont: 'FluidR3_GM',
-            destination: gainNode
-        };
-
-        try {
-            const instrument = await loadSoundfontInstrument(audioContext, instrumentName, loadOptions);
-            // Add to cache (note: this is for tracking, actual HTTP cache happens in browser)
-            this.addToCache(instrumentName, instrument);
-            return { instrument, instrumentName, isFallback: false };
-        } catch (error) {
-            console.error(`Failed to load ${instrumentName}, falling back to piano:`, error);
-
-            // Fallback to piano
-            try {
-                const instrument = await loadSoundfontInstrument(audioContext, 'acoustic_grand_piano', loadOptions);
-                return { instrument, instrumentName: 'acoustic_grand_piano', isFallback: true };
-            } catch (fallbackError) {
-                console.error(`Even piano fallback failed:`, fallbackError);
-                throw fallbackError;
-            }
-        }
-    }
-
-    /**
-     * Add instrument to cache with LRU eviction
-     * @param {string} instrumentName - Name of instrument
-     * @param {Object} instrument - Soundfont instrument object
-     */
-    addToCache(instrumentName, instrument) {
-        if (this.instrumentCache.size >= this.maxCacheSize) {
-            const firstKey = this.instrumentCache.keys().next().value;
-            this.instrumentCache.delete(firstKey);
-        }
-        this.instrumentCache.set(instrumentName, instrument);
-    }
-
-    /**
-     * Check if instrument is cached
-     * @param {string} instrumentName - Name of instrument
-     * @returns {boolean} True if cached
-     */
-    isCached(instrumentName) {
-        return this.instrumentCache.has(instrumentName);
-    }
-
-    /**
-     * Pre-load common instruments in the background
-     * @param {AudioContext} audioContext - Web Audio API context
-     * @param {Array<string>} commonInstruments - List of instrument names to preload
-     * @returns {Promise<void>}
-     */
-    async preloadCommonInstruments(audioContext, commonInstruments = [
-        'acoustic_grand_piano',
-        'piccolo',
-        'clarinet',
-        'french_horn',
-        'bassoon'
-    ]) {
-        // Don't await - let this happen in the background
-        (async () => {
-            for (const instrumentName of commonInstruments) {
-                try {
-                    if (this.isCached(instrumentName)) {
-                        continue;
-                    }
-
-                    // Create silent gain node just for caching
-                    const tempGainNode = audioContext.createGain();
-                    tempGainNode.connect(audioContext.destination);
-                    tempGainNode.gain.value = 0;
-
-                    const loadPromise = loadSoundfontInstrument(audioContext, instrumentName, {
-                        soundfont: 'FluidR3_GM',
-                        destination: tempGainNode
-                    });
-
-                    const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Preload timeout')), TIMEOUTS.INSTRUMENT_LOAD)
-                    );
-
-                    await Promise.race([loadPromise, timeoutPromise]);
-                    tempGainNode.disconnect();
-
-                    // Small delay between loads
-                    await new Promise(resolve => setTimeout(resolve, 500));
-
-                } catch (error) {
-                    console.log(`Pre-load of ${instrumentName} failed, will load on demand:`, error.message);
-                }
-            }
-        })();
-    }
-
-    /**
-     * Clear the instrument cache
-     */
-    clearCache() {
-        this.instrumentCache.clear();
     }
 }

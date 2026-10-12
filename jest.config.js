@@ -35,7 +35,8 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '/coverage/',
-    '/data/'
+    '/data/',
+    '/.claude/'
   ],
 
   // Verbose output

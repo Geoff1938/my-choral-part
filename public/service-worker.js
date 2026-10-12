@@ -1,11 +1,12 @@
 /**
- * Service Worker for caching soundfonts
+ * Service Worker for caching the soundfont
  *
  * Caching Strategy:
- * - Soundfont files (GeneralUser GS and FluidR3_GM instruments) are cached
- *   the first time they are used, then served from the cache on every later
- *   visit. Nothing is pre-cached, so visitors only download what they play.
- * - Version-based cache invalidation (increment VERSION to clear old cache)
+ * - The GeneralUser GS soundfont is cached the first time it is used, then
+ *   served from the cache on every later visit.
+ * - Version-based cache invalidation: the soundfont URL never changes, so if
+ *   the soundfont file is ever replaced, increment CACHE_VERSION to make
+ *   existing users download the new one.
  * - Navigation requests always fetch fresh from the network (cache: 'reload'),
  *   so a device can never get stuck serving a stale index.html from a prior
  *   build. The version-busted asset URLs in the fresh HTML then pull fresh
@@ -17,16 +18,15 @@
  * - v2 (2026-05-22): Added cache-bypassing navigation handler (soundfont cache unchanged)
  * - v3 (2026-10-12): Soundfonts served from Cloudflare R2; cache GeneralUser GS;
  *   stopped pre-caching FluidR3_GM instruments on install
+ * - v3 (2026-10-12): High-quality (FluidR3_GM) mode removed; cache unchanged
  */
 
 const CACHE_VERSION = 'v3';
 const CACHE_NAME = `choral-practice-soundfonts-${CACHE_VERSION}`;
 
-// Soundfont URLs to cache: our R2 bucket, the original gleitz site (fallback
-// for FluidR3_GM) and our own server (fallback for GeneralUser GS)
+// Soundfont URLs to cache: our R2 bucket and our own server (the fallback)
 const SOUNDFONT_URL_PATTERNS = [
     'pub-8f69698b476240b0b34d5e8a46b69a65.r2.dev/',
-    'gleitz.github.io/midi-js-soundfonts/',
     '/soundfonts/GeneralUserGS.sf3'
 ];
 
@@ -112,12 +112,16 @@ self.addEventListener('fetch', (event) => {
                         .then((response) => {
                             // Only cache successful responses
                             if (response && response.status === 200) {
+                                // waitUntil keeps the worker alive until the 10MB
+                                // write finishes (iOS may otherwise stop it early)
                                 const responseToCache = response.clone();
-                                caches.open(CACHE_NAME)
-                                    .then((cache) => {
-                                        cache.put(event.request, responseToCache);
-                                        console.log('[Service Worker] ✓ Cached for next time:', url.split('/').pop());
-                                    });
+                                event.waitUntil(
+                                    caches.open(CACHE_NAME)
+                                        .then((cache) => cache.put(event.request, responseToCache))
+                                        .then(() => {
+                                            console.log('[Service Worker] ✓ Cached for next time:', url.split('/').pop());
+                                        })
+                                );
                             }
                             return response;
                         })
