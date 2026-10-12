@@ -3528,9 +3528,16 @@ class MIDIPlayer {
         }
 
         // Make sure audio is running (the context may not have existed when
-        // resume was first attempted, e.g. on the very first play)
-        await audioResumed;
-        await this.resumeAudioContext();
+        // resume was first attempted, e.g. on the very first play). A browser
+        // that refuses (no user gesture) never settles the promise, so give up
+        // after a few seconds rather than leaving play() hanging.
+        const audioTimeout = new Promise(resolve => setTimeout(resolve, 3000));
+        await Promise.race([audioResumed, audioTimeout]);
+        await Promise.race([this.resumeAudioContext(), audioTimeout]);
+        if (this.spessaAudioContext.state !== 'running') {
+            this.showStatus('The browser has not allowed audio yet - tap Play again', 'error');
+            return;
+        }
 
         this.spessaSequencer.play();
         this.isPlaying = true;
