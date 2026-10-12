@@ -56,7 +56,7 @@ async function refreshData() {
         content.style.display = 'block';
     } catch (error) {
         loading.style.display = 'none';
-        errorContainer.innerHTML = `<div class="error">Error loading data: ${error.message}</div>`;
+        errorContainer.innerHTML = `<div class="error">Error loading data: ${escapeHtml(error.message)}</div>`;
         content.style.display = 'block';
     }
 }
@@ -151,9 +151,13 @@ function setupExportForm() {
  */
 function escapeHtml(text) {
     if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+    // Escape quotes too - the result is also used inside title="..." attributes
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 /**
