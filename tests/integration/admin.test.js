@@ -130,6 +130,48 @@ describe('Admin request protection', () => {
   });
 });
 
+describe('CSV export', () => {
+  let app;
+  const auth = basicAuth('admin@example.com', 'correct horse: battery staple');
+
+  beforeAll(async () => {
+    app = require('../../server').app;
+    const { logActivity } = require('../../utils/database');
+    await logActivity('device-csv', 'download', 'Bach, JS', '=HYPERLINK("x")', 'Kyrie "eleison"', 'Test UA', null);
+  });
+
+  test('downloads activities as CSV without IP addresses', async () => {
+    const start = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const end = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    const response = await request(app)
+      .get('/admin/api/export')
+      .query({ start, end })
+      .set('CF-Connecting-IP', '192.0.2.30')
+      .set('Authorization', auth);
+
+    expect(response.status).toBe(200);
+    expect(response.headers['content-type']).toBe('text/csv; charset=utf-8');
+    expect(response.headers['content-disposition']).toMatch(/^attachment; filename="activity-export-.+\.csv"$/);
+
+    const lines = response.text.replace(/^﻿/, '').trim().split('\r\n');
+    expect(lines[0]).toBe('Timestamp,Device ID,Event Type,Composer,Work,Movement,User Agent,Duration (s)');
+    const row = lines.find(line => line.includes('device-csv'));
+    // Commas and quotes are quoted; a leading = is neutralised
+    expect(row).toContain(',download,"Bach, JS","\'=HYPERLINK(""x"")","Kyrie ""eleison""",Test UA,');
+  });
+
+  test('rejects invalid dates', async () => {
+    const response = await request(app)
+      .get('/admin/api/export')
+      .query({ start: 'not-a-date', end: 'also-not' })
+      .set('CF-Connecting-IP', '192.0.2.30')
+      .set('Authorization', auth);
+
+    expect(response.status).toBe(400);
+  });
+});
+
 describe('parseAdminUsers', () => {
   const { parseAdminUsers } = require('../../utils/database');
 
