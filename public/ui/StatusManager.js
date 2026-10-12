@@ -22,10 +22,15 @@ export class StatusManager {
         this.statusElement.textContent = message;
         this.statusElement.className = `status-message show ${type}`;
 
+        // Cancel any pending auto-hide so it can't hide this newer message
+        clearTimeout(this.hideTimer);
+        this.hideTimer = null;
+
         // Auto-hide success messages after 3 seconds
         if (type === 'success') {
-            setTimeout(() => {
+            this.hideTimer = setTimeout(() => {
                 this.statusElement.classList.remove('show');
+                this.hideTimer = null;
             }, 3000);
         }
     }
