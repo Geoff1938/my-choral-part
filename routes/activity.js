@@ -47,9 +47,8 @@ router.post('/log', async (req, res, next) => {
             }
         }
 
-        // Get client info
+        // Get client info (IP addresses are deliberately not stored - see the privacy notice)
         const userAgent = req.headers['user-agent'] || 'Unknown';
-        const ipAddress = req.ip || req.connection.remoteAddress || 'Unknown';
 
         // Log the activity
         await logActivity(
@@ -59,7 +58,7 @@ router.post('/log', async (req, res, next) => {
             work || null,
             movement || null,
             userAgent,
-            ipAddress,
+            null,
             duration
         );
 
