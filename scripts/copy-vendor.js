@@ -6,9 +6,7 @@ const VENDOR_DIR = path.join(ROOT, 'public', 'vendor');
 const NODE_MODULES = path.join(ROOT, 'node_modules');
 
 const COPIES = [
-  { from: 'tone/build/Tone.js',                              to: 'tone.js' },
   { from: '@tonejs/midi/build/Midi.js',                      to: 'midi.js' },
-  { from: 'soundfont-player/dist/soundfont-player.min.js',   to: 'soundfont-player.min.js' },
   { from: 'spessasynth_lib/dist/index.js',                   to: 'spessasynth_lib.js' },
   { from: 'spessasynth_core/dist/index.js',                  to: 'spessasynth_core.js' },
   { from: 'spessasynth_lib/dist/spessasynth_processor.min.js', to: 'spessasynth_processor.min.js' }

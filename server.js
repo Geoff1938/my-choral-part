@@ -187,10 +187,9 @@ app.use('/proxy', proxyLimiter, proxyRouter);
 // POSTs must come from our own pages)
 app.use('/admin', adminLimiter, requireSameOrigin, basicAuthMiddleware, adminRouter);
 
-// Soundfont mode routes - serve index.html for different soundfont modes
-// Default mode is 'standard' (SpessaSynth, ~31MB memory)
-// Use /fullfonts for high-quality soundfonts (requires ~1.7GB memory)
-app.get('/fullfonts', serveIndex);
+// The high-quality soundfont mode (/fullfonts) has been removed; send any
+// old bookmarks to the normal player
+app.get('/fullfonts', (req, res) => res.redirect(301, '/'));
 
 // Catch-all route for composer/work URLs (e.g., /domenico-scarlatti/magnificat)
 // This allows sharing direct links to works. Uses the pre-rendered index so

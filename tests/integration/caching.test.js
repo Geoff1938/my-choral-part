@@ -56,8 +56,15 @@ describe('JS module versioning', () => {
     expect(response.headers['cache-control']).toBe('no-cache, no-store, must-revalidate');
   });
 
-  test('deep links and /fullfonts get the version-substituted page', async () => {
-    for (const url of ['/mozart/requiem', '/fullfonts', '/']) {
+  test('/fullfonts redirects to the player', async () => {
+    const response = await request(app).get('/fullfonts');
+
+    expect(response.status).toBe(301);
+    expect(response.headers.location).toBe('/');
+  });
+
+  test('deep links get the version-substituted page', async () => {
+    for (const url of ['/mozart/requiem', '/']) {
       const response = await request(app).get(url);
 
       expect(response.status).toBe(200);
