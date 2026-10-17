@@ -1214,20 +1214,25 @@ class ChoralMusicScraper {
   async resolveSlug(composerSlug, workSlug) {
     // Strip trailing punctuation that gets appended when URLs appear in sentences
     // e.g., "Check out https://player.mychoralpart.com/verdi/requiem." (trailing period)
-    const cleanComposer = composerSlug.replace(/[.,;:!?)]+$/, '');
-    const cleanWork = workSlug.replace(/[.,;:!?)]+$/, '');
+    // Remove one trailing character at a time, so names ending in ")" still match
+    const findByNameOrSlug = (items, slug) => {
+      let candidate = slug;
+      while (true) {
+        const match = items.find(item =>
+          item.name === candidate ||
+          this.nameToSlug(item.name) === candidate.toLowerCase()
+        );
+        if (match) return match;
+        if (!/[.,;:!?)]$/.test(candidate)) return null;
+        candidate = candidate.slice(0, -1);
+      }
+    };
 
     const index = await this.loadIndex();
-    const composer = index.find(c =>
-      c.name === cleanComposer ||
-      this.nameToSlug(c.name) === cleanComposer.toLowerCase()
-    );
+    const composer = findByNameOrSlug(index, composerSlug);
     if (!composer) return null;
 
-    const work = composer.works.find(w =>
-      w.name === cleanWork ||
-      this.nameToSlug(w.name) === cleanWork.toLowerCase()
-    );
+    const work = findByNameOrSlug(composer.works, workSlug);
     if (!work) return null;
 
     return {

@@ -176,3 +176,34 @@ describe('Scheduler rebuild guard', () => {
     expect(build).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('resolveSlug', () => {
+  let scraper;
+
+  beforeEach(() => {
+    scraper = new ChoralMusicScraper();
+    jest.spyOn(scraper, 'loadIndex').mockResolvedValue([{
+      name: 'Mozart',
+      works: [
+        { name: 'Requiem (Sussmayr completion)', sections: [] },
+        { name: 'Ave verum corpus', sections: [] }
+      ]
+    }]);
+  });
+
+  test('matches work names that end in a closing bracket', async () => {
+    await expect(scraper.resolveSlug('mozart', 'requiem-(sussmayr-completion)'))
+      .resolves.toEqual({ composer: 'Mozart', work: 'Requiem (Sussmayr completion)' });
+  });
+
+  test('ignores punctuation added after a link in a sentence', async () => {
+    await expect(scraper.resolveSlug('mozart', 'ave-verum-corpus.'))
+      .resolves.toEqual({ composer: 'Mozart', work: 'Ave verum corpus' });
+    await expect(scraper.resolveSlug('mozart', 'requiem-(sussmayr-completion)).'))
+      .resolves.toEqual({ composer: 'Mozart', work: 'Requiem (Sussmayr completion)' });
+  });
+
+  test('returns null for unknown works', async () => {
+    await expect(scraper.resolveSlug('mozart', 'requiem')).resolves.toBeNull();
+  });
+});

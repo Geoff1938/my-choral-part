@@ -3478,13 +3478,9 @@ class MIDIPlayer {
         // Convert percentage to 0-1 range
         const volumeLevel = this.masterVolume / 100;
 
-        // Apply to SpessaSynth (standard mode)
+        // SpessaSynth 4 master gain: a multiplier (1.0 = normal, 0.5 = 50%)
         if (this.usingSpessaSynth && this.spessaSynth) {
-            // SpessaSynth uses setMasterParameter("masterGain", value)
-            // Value is a gain multiplier (1.0 = normal, 0.5 = 50%, etc.)
-            if (typeof this.spessaSynth.setMasterParameter === 'function') {
-                this.spessaSynth.setMasterParameter("masterGain", volumeLevel);
-            }
+            this.spessaSynth.setSystemParameter('gain', volumeLevel);
         }
     }
 
