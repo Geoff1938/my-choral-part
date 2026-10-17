@@ -58,7 +58,7 @@ Deployed on [Render](https://render.com) as a Node web service that auto-deploys
 
 ## Privacy
 
-The app stores an anonymous random browser ID, which pieces are opened and played and for how long, and the browser type. It does not store names, email addresses or IP addresses. Records are deleted after 12 months.
+The app stores an anonymous random browser ID, which pieces are opened and played and for how long, and the browser type. It does not store names, email addresses or IP addresses. Records are deleted after 5 years.
 
 ## License
 

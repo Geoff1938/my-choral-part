@@ -18,7 +18,7 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 - `middleware/` - rate limiting (keyed on `CF-Connecting-IP`), admin Basic Auth, same-origin check for admin POSTs, error handler
 - `scraper.js` - builds the MIDI index by scraping learnchoralmusic.co.uk; refuses to overwrite the index if a rebuild comes back much smaller
 - `utils/database.js` - activity database (sql.js / SQLite in memory, saved atomically to disk), admin users, retention
-- `utils/scheduler.js` - nightly jobs (node-cron, Europe/London): index rebuild 02:00; backup and 12-month purge 03:30
+- `utils/scheduler.js` - nightly jobs (node-cron, Europe/London): index rebuild 02:00; backup and 5-year purge 03:30
 
 ### Client (vanilla JS ES modules, no build step)
 
@@ -41,7 +41,7 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 
 ### Data and privacy
 
-- Activity events: anonymous random device ID, event type (`download`, `rehearsal_start`, `rehearsal_time` with `duration_seconds`), composer/work/movement, user agent. No IP addresses. Kept 12 months. The privacy text in `index.html` must stay accurate.
+- Activity events: anonymous random device ID, event type (`download`, `rehearsal_start`, `rehearsal_time` with `duration_seconds`), composer/work/movement, user agent. No IP addresses. Kept 5 years. The privacy text in `index.html` must stay accurate.
 - Production data lives on the Render disk at `/var/data`: `activity.db`, `backups/` (7 nightly copies), and the index files, seeded from the repo's `data/` on first start. After that the disk copy wins - a newer index committed to git does not replace it.
 
 ## Commands

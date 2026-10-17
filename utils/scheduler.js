@@ -13,7 +13,7 @@ const {
 } = require('./database');
 
 // Activities older than this are deleted nightly (see the privacy notice)
-const RETENTION_MONTHS = 12;
+const RETENTION_MONTHS = 60;
 
 // Number of daily database backups to keep
 const BACKUPS_TO_KEEP = 7;

@@ -379,7 +379,7 @@ async function getActivitiesForExport(startDate, endDate) {
  * @param {number} months - How many months of activity to keep
  * @returns {Promise<number>} Number of activities deleted
  */
-async function purgeOldActivities(months = 12) {
+async function purgeOldActivities(months = 60) {
     await initDatabase();
 
     db.run(`DELETE FROM activities WHERE timestamp < datetime('now', ?)`, [`-${months} months`]);
