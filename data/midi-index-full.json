@@ -4241,6 +4241,16 @@
         ]
       },
       {
+        "name": "Geistliches Lied (Op. 30)",
+        "url": "/Brahms/Geistliches Lied/geistliches-lied.html",
+        "sections": [
+          {
+            "name": "Geistliches Lied",
+            "midiUrl": "/Brahms/Geistliches Lied/Geistliches-Lied.mid"
+          }
+        ]
+      },
+      {
         "name": "German Requiem",
         "url": "/Brahms/German-requiem/german-requiem.html",
         "sections": [
@@ -5027,6 +5037,196 @@
         ]
       },
       {
+        "name": "Geistliche Chormusik",
+        "url": "/Bruckner/Geistliche Chormusik/geistliche-chormusik.html",
+        "sections": [
+          {
+            "name": "1: Aequale-1",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/1-Aequale-1.mid"
+          },
+          {
+            "name": "2: Aequale-1I",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/2-Aequale-II.mid"
+          },
+          {
+            "name": "3: Afferentur regi",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/3-Afferentur-regi.mid"
+          },
+          {
+            "name": "4: Agnus Dei",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/4-AgnusDei.mid"
+          },
+          {
+            "name": "5: Alleluia",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/5-Alleluia.mid"
+          },
+          {
+            "name": "6: Asperges me",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/6-Asperges-me.mid"
+          },
+          {
+            "name": "7: Asperges me",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/7-Asperges-me.mid"
+          },
+          {
+            "name": "8: Asperges me",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/8-Asperges-me.mid"
+          },
+          {
+            "name": "9: Ave Maria",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/9-AveMaria.mid"
+          },
+          {
+            "name": "10: Ave Maria",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/10-AveMaria.mid"
+          },
+          {
+            "name": "11: Ave Maria",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/11-AveMaria.mid"
+          },
+          {
+            "name": "12: Christus factus est",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/12-Christus-factus-est.mid"
+          },
+          {
+            "name": "13: Christus factus est",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/13-Christus-factus-est.mid"
+          },
+          {
+            "name": "14: Credo",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/14-Credo.mid"
+          },
+          {
+            "name": "15: Dextera Domini",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/15-Dextera-Domini.mid"
+          },
+          {
+            "name": "16: Dir, Herr, dir will ich mich ergeben",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/16-Dir,Herr.mid"
+          },
+          {
+            "name": "17: In jener letzten der Nächte",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/17-In-jener.mid"
+          },
+          {
+            "name": "18: Inveni David",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/18-Inveni-David.mid"
+          },
+          {
+            "name": "19: Iam lucis orto sidere",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/19-Iam-lucis.mid"
+          },
+          {
+            "name": "20: Iam lucis orto sidere",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/20-Iam-lucis.mid"
+          },
+          {
+            "name": "21: Locus iste",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/21-Locus-iste.mid"
+          },
+          {
+            "name": "22: Libera me",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/22-Libera-me.mid"
+          },
+          {
+            "name": "23: Magnificat",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/23-Magnificat.mid"
+          },
+          {
+            "name": "24: Mass in C - 1-Kyrie",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/24-Mass in C-1-Kyrie.mid"
+          },
+          {
+            "name": ". . . . . . . . . . . . . 2: Gloria",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/24-Mass in C-2-Gloria.mid"
+          },
+          {
+            "name": ". . . . . . . . . . . . . 3: Credo",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/24-Mass in C-3-Credo.mid"
+          },
+          {
+            "name": ". . . . . . . . . . . . . 4: Sanctus & Benedictus",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/24-Mass in C-4-Sanct-Bened.mid"
+          },
+          {
+            "name": ". . . . . . . . . . . . . 5: AgnusDei",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/24-Mass in C-5-AgnusDei.mid"
+          },
+          {
+            "name": "25: Mass in D - 1-Kyrie",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/25-Mass in D-1-Kyrie.mid"
+          },
+          {
+            "name": ". . . . . . . . . . . . . 2: Sanctus & Benedictus",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/25-Mass in D-2-Sanct-Bened.mid"
+          },
+          {
+            "name": ". . . . . . . . . . . . . 3: Agnus Dei",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/25-Mass in D-3-AgnusDei.mid"
+          },
+          {
+            "name": "26: O du liebes Jesu Kind",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/26-O-du-liebes-Jesu-Kind.mid"
+          },
+          {
+            "name": "27: O irh, die ihr heut mit mir zum Grabe geht",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/27-O-irh-die-ihr-heut.mid"
+          },
+          {
+            "name": "28: Os justi",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/28-6-Os-jus.mid"
+          },
+          {
+            "name": "29: Pange lingua et Tantum ergo",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/29-3-Pange.mid"
+          },
+          {
+            "name": "30: Pange lingua in C",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/30-Pange-lingua.mid"
+          },
+          {
+            "name": "31: Psalm 23",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/31-Psalm-23.mid"
+          },
+          {
+            "name": "32: Salvum fac populum tuum",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/32-Salvum-fac.mid"
+          },
+          {
+            "name": "33: Sanctus-Benedictus",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/33-Sanctus-Bened.mid"
+          },
+          {
+            "name": "34: Tantum ergo in C",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/34-Tantum-ergo.mid"
+          },
+          {
+            "name": "35: Tantum ergo in D",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/35-Tantum-ergo.mid"
+          },
+          {
+            "name": "36: Tantum ergo in D",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/36-Tantum-ergo.mid"
+          },
+          {
+            "name": "37: Tota pulchra es",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/37-Tota-pulchra-es.mid"
+          },
+          {
+            "name": "38: Vexilla regis",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/38-Vexilla.mid"
+          },
+          {
+            "name": "39: Virga Jesse",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/39-Virga-Jesse.mid"
+          },
+          {
+            "name": "Christus factus est",
+            "midiUrl": "/Bruckner/Geistliche Chormusik/40-Anhang-Christus.mid"
+          }
+        ]
+      },
+      {
         "name": "Libera me",
         "url": "/Bruckner/Libera me/libera-me.html",
         "sections": [
@@ -5043,6 +5243,60 @@
           {
             "name": "Locus iste",
             "midiUrl": "/Bruckner/Locus-iste/Loc-iste.mid"
+          }
+        ]
+      },
+      {
+        "name": "Magnificat",
+        "url": "/Bruckner/Magnificat/magnificat.html",
+        "sections": [
+          {
+            "name": "Magnificat",
+            "midiUrl": "/Bruckner/Magnificat/Magnificat.mid"
+          }
+        ]
+      },
+      {
+        "name": "Mass in C",
+        "url": "/Bruckner/Mass in C/mass-in-c.html",
+        "sections": [
+          {
+            "name": "1: Kyrie",
+            "midiUrl": "/Bruckner/Mass in C/1-Kyrie.mid"
+          },
+          {
+            "name": "2: Gloria",
+            "midiUrl": "/Bruckner/Mass in C/2-Gloria.mid"
+          },
+          {
+            "name": "3: Credo",
+            "midiUrl": "/Bruckner/Mass in C/3-Credo.mid"
+          },
+          {
+            "name": "4: Sanctus & Benedictus",
+            "midiUrl": "/Bruckner/Mass in C/4-Sanct-Bened.mid"
+          },
+          {
+            "name": "5: Agnus Dei",
+            "midiUrl": "/Bruckner/Mass in C/5-AgnusDei.mid"
+          }
+        ]
+      },
+      {
+        "name": "Mass in D",
+        "url": "/Bruckner/Mass in D/mass-in-d.html",
+        "sections": [
+          {
+            "name": "1: Kyrie",
+            "midiUrl": "/Bruckner/Mass in D/1-Kyrie.mid"
+          },
+          {
+            "name": "2: Sanctus & Benedictus",
+            "midiUrl": "/Bruckner/Mass in D/2-Sanct-Bened.mid"
+          },
+          {
+            "name": "3: Agnus Dei",
+            "midiUrl": "/Bruckner/Mass in D/3-AgnusDei.mid"
           }
         ]
       },
@@ -5133,6 +5387,16 @@
           {
             "name": "6: Agnus Dei",
             "midiUrl": "/Bruckner/Mass No 1 in D/6-Agnus.mid"
+          }
+        ]
+      },
+      {
+        "name": "Psalm 23",
+        "url": "/Bruckner/Psalm 23/31-psalm-23.html",
+        "sections": [
+          {
+            "name": "Psalm 23",
+            "midiUrl": "/Bruckner/Psalm 23/31-Psalm-23.mid"
           }
         ]
       },
@@ -5388,11 +5652,11 @@
       },
       {
         "name": "Lullaby, my sweet little baby",
-        "url": null,
+        "url": "/Byrd/Lullaby, my sweet little baby/lullaby.html",
         "sections": [
           {
             "name": "Lullaby, my sweet little baby",
-            "midiUrl": "/Madrigals-etc/Byrd/Lullaby-my-sweet.mid"
+            "midiUrl": "/Byrd/Lullaby, my sweet little baby/Lullaby.mid"
           }
         ]
       },
@@ -5689,6 +5953,16 @@
           {
             "name": "Upon a summer's day",
             "midiUrl": "/Madrigals-etc/Byrd/Upon a summer's day.mid"
+          }
+        ]
+      },
+      {
+        "name": "Venite Comedite",
+        "url": "/Byrd/Venite Comedite/venite-comedite.html",
+        "sections": [
+          {
+            "name": "Venite Comedite",
+            "midiUrl": "/Byrd/Venite Comedite/Venite-Comedite.mid"
           }
         ]
       },
@@ -7872,6 +8146,36 @@
             "midiUrl": "/Durante/Magnificat a 5/5-Gloria.mid"
           }
         ]
+      },
+      {
+        "name": "Magnificat in B",
+        "url": "/Durante/Magnificat in B/magnificat.html",
+        "sections": [
+          {
+            "name": "1: Magnificat",
+            "midiUrl": "/Durante/Magnificat in B/1-Magnificat.mid"
+          },
+          {
+            "name": "2: Et misericordia ejus",
+            "midiUrl": "/Durante/Magnificat in B/2-Et-misericordia.mid"
+          },
+          {
+            "name": "3: Deposuit potentes de sede",
+            "midiUrl": "/Durante/Magnificat in B/3-Deposuit.mid"
+          },
+          {
+            "name": "4: Suscepit Israel",
+            "midiUrl": "/Durante/Magnificat in B/4-Suscepit.mid"
+          },
+          {
+            "name": "5: Sicut locutus est",
+            "midiUrl": "/Durante/Magnificat in B/5-Sicut.mid"
+          },
+          {
+            "name": "6: Gloria Patri - Sicut erat in principio",
+            "midiUrl": "/Durante/Magnificat in B/6-Gloria.mid"
+          }
+        ]
       }
     ]
   },
@@ -9671,6 +9975,26 @@
         ]
       },
       {
+        "name": "Once in royal David's city (with Wells last verse)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Once in royal David's city (with Wells last verse)",
+            "midiUrl": "/Carols & Anthems/Gauntlett/Roydavid-Wells.mid"
+          }
+        ]
+      },
+      {
+        "name": "Once in royal David's city (with Willcocks last verse)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Once in royal David's city (with Willcocks last verse)",
+            "midiUrl": "/Carols & Anthems/Gauntlett/Roydavid-Willcocks.mid"
+          }
+        ]
+      },
+      {
         "name": "Ye Choirs of new Jerusalem",
         "url": null,
         "sections": [
@@ -9858,6 +10182,16 @@
           {
             "name": "O clap your hands together",
             "midiUrl": "/Gibbons/O-clap-hands/O-clap.mid"
+          }
+        ]
+      },
+      {
+        "name": "O God, the King of glory",
+        "url": "/Gibbons/O God, the King/o-god-the-king.html",
+        "sections": [
+          {
+            "name": "O God, the King of Glory",
+            "midiUrl": "/Gibbons/O God, the King/O God the King.mid"
           }
         ]
       },
@@ -10838,6 +11172,16 @@
             "midiUrl": "/Greene/O-clap-hands/O-clap-hands.mid"
           }
         ]
+      },
+      {
+        "name": "Thou visitest the earth",
+        "url": "/Greene/Thou-visitest/thou-visitest.html",
+        "sections": [
+          {
+            "name": "Thou visitest the earth",
+            "midiUrl": "/Greene/Thou-visitest/Thou-visitest.mid"
+          }
+        ]
       }
     ]
   },
@@ -11011,6 +11355,21 @@
           {
             "name": "6: Les fourriers d'ete",
             "midiUrl": "/Hahn/Chansons & Madrigals/6-Les-Fourriers.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Hammerschmidt",
+    "works": [
+      {
+        "name": "Machet die Tore weit",
+        "url": "/Hammerschmidt/Machet die Tore weit/machet-tore.html",
+        "sections": [
+          {
+            "name": "Machet die Tore weit",
+            "midiUrl": "/Hammerschmidt/Machet die Tore weit/Machet Tore.mid"
           }
         ]
       }
@@ -13164,6 +13523,36 @@
           {
             "name": "6: Halleluja",
             "midiUrl": "/Handel/Foundling-Hospital-Anthem/6-Hallel.mid"
+          }
+        ]
+      },
+      {
+        "name": "Gloria",
+        "url": "/Handel/Gloria/gloria.html",
+        "sections": [
+          {
+            "name": "1: Gloria in excelsis Deo",
+            "midiUrl": "/Handel/Gloria/1-Gloria.mid"
+          },
+          {
+            "name": "2: Et in terra pax",
+            "midiUrl": "/Handel/Gloria/2-Et-in-terra.mid"
+          },
+          {
+            "name": "3: Laudamus te",
+            "midiUrl": "/Handel/Gloria/3-Laudamus.mid"
+          },
+          {
+            "name": "4: Domine Deus, Rex coelestis",
+            "midiUrl": "/Handel/Gloria/4-Domine.mid"
+          },
+          {
+            "name": "5: Qui tollis peccata mundi",
+            "midiUrl": "/Handel/Gloria/5-Qui-tollis.mid"
+          },
+          {
+            "name": "6: Quoniam tu solus sanctus",
+            "midiUrl": "/Handel/Gloria/6-Quoniam.mid"
           }
         ]
       },
@@ -17440,6 +17829,66 @@
           {
             "name": "29: Hallelujah",
             "midiUrl": "/Handel/Occasional Oratorio/29-Hallelujah.mid"
+          },
+          {
+            "name": "30: Sinfonia",
+            "midiUrl": "/Handel/Occasional Oratorio/30-Sinfonia.mid"
+          },
+          {
+            "name": "31: I will sing unto the Lord",
+            "midiUrl": "/Handel/Occasional Oratorio/31-I-will-sing.mid"
+          },
+          {
+            "name": "32: Thou shalt bring them in",
+            "midiUrl": "/Handel/Occasional Oratorio/32-Thou-shalt.mid"
+          },
+          {
+            "name": "33: Who is like unto Thee, O Lord",
+            "midiUrl": "/Handel/Occasional Oratorio/33-Who-is-like.mid"
+          },
+          {
+            "name": "34: He gave them hailstones for rain",
+            "midiUrl": "/Handel/Occasional Oratorio/34-He-gave-them.mid"
+          },
+          {
+            "name": "35: When warlike ensigns wave on high",
+            "midiUrl": "/Handel/Occasional Oratorio/35-When-warlike.mid"
+          },
+          {
+            "name": "36: The enemy said: I will pursue",
+            "midiUrl": "/Handel/Occasional Oratorio/36-The-enemy.mid"
+          },
+          {
+            "name": "37: The enemy said: I will pursue",
+            "midiUrl": "/Handel/Occasional Oratorio/37-The-enemy.mid"
+          },
+          {
+            "name": "38: The sword that's drawn in virtue's cause . . . Millions unborn shall bless the hand",
+            "midiUrl": "/Handel/Occasional Oratorio/38-The-sword.mid"
+          },
+          {
+            "name": "39: When Israel, like the bounteous Nile",
+            "midiUrl": "/Handel/Occasional Oratorio/39-When-Israel.mid"
+          },
+          {
+            "name": "40: When Israel, like the bounteous Nile",
+            "midiUrl": "/Handel/Occasional Oratorio/40-When-Israel.mid"
+          },
+          {
+            "name": "41: Tyrants, tyrants whom no covenants bind",
+            "midiUrl": "/Handel/Occasional Oratorio/41-Tyrants.mid"
+          },
+          {
+            "name": "42: May balmy peace, and wreathed renown",
+            "midiUrl": "/Handel/Occasional Oratorio/42-May-balmy.mid"
+          },
+          {
+            "name": "43: May balmy peace, and wreathed renown",
+            "midiUrl": "/Handel/Occasional Oratorio/43-May-balmy.mid"
+          },
+          {
+            "name": "44: Blessed, blessed are all they that fear the Lord . . . God save the King, long live the King",
+            "midiUrl": "/Handel/Occasional Oratorio/44-Blessed.mid"
           }
         ]
       },
@@ -18347,6 +18796,16 @@
     "name": "Harris (William H)",
     "works": [
       {
+        "name": "Holy is the true light",
+        "url": "/HarrisWH/Holy is the true light/holy-is-the-true-light.html",
+        "sections": [
+          {
+            "name": "Holy is the true light",
+            "midiUrl": "/HarrisWH/Holy is the true light/Holy is the true light.mid"
+          }
+        ]
+      },
+      {
         "name": "Let my prayer come up into thy presence",
         "url": "/HarrisWH/Let-my-prayer/let-my-prayer.html",
         "sections": [
@@ -18363,6 +18822,21 @@
           {
             "name": "O what their joy and their glory must be",
             "midiUrl": "/HarrisWH/O-what-their-joy/O-what-their-joy.mid"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Harwood",
+    "works": [
+      {
+        "name": "O how glorious is the kingdom",
+        "url": "/Harwood/O how glorious/0-how-glorious.html",
+        "sections": [
+          {
+            "name": "O how glorious is the kingdom",
+            "midiUrl": "/Harwood/O how glorious/0-how-glorious.mid"
           }
         ]
       }
@@ -19935,12 +20409,12 @@
         ]
       },
       {
-        "name": "Turn back, O man",
-        "url": null,
+        "name": "Turn back, O Man",
+        "url": "/Holst/Turn back/turn-back.html",
         "sections": [
           {
-            "name": "Turn back, O man",
-            "midiUrl": "/Carols & Anthems/Holst/turnback.mid"
+            "name": "Turn back, O Man",
+            "midiUrl": "/Holst/Turn back/Turn-back.mid"
           }
         ]
       }
@@ -23086,6 +23560,16 @@
             "midiUrl": "/Mendelssohn/Verleih-uns-Frieden/VerleihO.mid"
           }
         ]
+      },
+      {
+        "name": "You Spotted Snakes",
+        "url": "/Mendelssohn/Spotted-snakes/spotted-snakes.html",
+        "sections": [
+          {
+            "name": "You Spotted Snakes",
+            "midiUrl": "/Mendelssohn/Spotted-snakes/Spotted-snakes.mid"
+          }
+        ]
       }
     ]
   },
@@ -23363,6 +23847,16 @@
           {
             "name": "Lamento d'Arianna - 1: Lasciatemi morire",
             "midiUrl": "/Madrigals-etc/Monteverdi/Arianna/1-morire.mid"
+          }
+        ]
+      },
+      {
+        "name": "Magnificat a 8",
+        "url": "/Monteverdi/Magnificat a 8/magnificat-a-8.html",
+        "sections": [
+          {
+            "name": "Magnificat a 8",
+            "midiUrl": "/Monteverdi/Magnificat a 8/Magnificat a 8.mid"
           }
         ]
       },
@@ -23739,6 +24233,16 @@
     "name": "Mozart",
     "works": [
       {
+        "name": "Alma Dei creatoris (K277)",
+        "url": "/Mozart/Alma Dei creatoris K227/alma-dei-creatoris.html",
+        "sections": [
+          {
+            "name": "Alma Dei creatoris",
+            "midiUrl": "/Mozart/Alma Dei creatoris K227/Alma Dei KV277.mid"
+          }
+        ]
+      },
+      {
         "name": "Ave verum corpus",
         "url": "/Mozart/Aveverumcorp/aveverum.html",
         "sections": [
@@ -24003,6 +24507,30 @@
             "midiUrl": "/Mozart/Mass-in-C-minor/10-et-in.mid"
           },
           {
+            "name": "10: Credo - Et incarnatus est",
+            "midiUrl": "/Mozart/Mass-in-C-minor/10-et-in-BREITKOPF.mid"
+          },
+          {
+            "name": "10: Credo - Crucifixus",
+            "midiUrl": "/Mozart/Mass-in-C-minor/11-Crucifixus-Breit.mid"
+          },
+          {
+            "name": "10: Credo - Et resurrexit",
+            "midiUrl": "/Mozart/Mass-in-C-minor/12-Et-resurrexit-Breit.mid"
+          },
+          {
+            "name": "10: Credo - Et Spiritum sanctum",
+            "midiUrl": "/Mozart/Mass-in-C-minor/13-Et-Spiritum.mid"
+          },
+          {
+            "name": "10: Credo - Credo in unam sanctam",
+            "midiUrl": "/Mozart/Mass-in-C-minor/14-Credo-in-unam-sanctam.mid"
+          },
+          {
+            "name": "10: Credo - Et vitam venturi saeculi",
+            "midiUrl": "/Mozart/Mass-in-C-minor/15-Et-vitam.mid"
+          },
+          {
             "name": "11: Sanctus",
             "midiUrl": "/Mozart/Mass-in-C-minor/11-sanct.mid"
           },
@@ -24015,12 +24543,28 @@
             "midiUrl": "/Mozart/Mass-in-C-minor/11-san-B.mid"
           },
           {
+            "name": "11: Sanctus",
+            "midiUrl": "/Mozart/Mass-in-C-minor/11-SANCT-Breitkopf.mid"
+          },
+          {
             "name": "12: Benedictus",
             "midiUrl": "/Mozart/Mass-in-C-minor/12-bened.mid"
           },
           {
             "name": "12: Benedictus",
             "midiUrl": "/Mozart/Mass-in-C-minor/12-ben-B.mid"
+          },
+          {
+            "name": "12: Benedictus",
+            "midiUrl": "/Mozart/Mass-in-C-minor/12-bened-Breitkopf.mid"
+          },
+          {
+            "name": "13: Agnus Dei",
+            "midiUrl": "/Mozart/Mass-in-C-minor/13-AgnusDei.mid"
+          },
+          {
+            "name": "13: Agnus Dei",
+            "midiUrl": "/Mozart/Mass-in-C-minor/13-AgnusDei-Breitkopf.mid"
           }
         ]
       },
@@ -24591,6 +25135,16 @@
           {
             "name": "Veni sancte spiritus",
             "midiUrl": "/Mozart/Veni sancte spiritus/Veni-K47.mid"
+          }
+        ]
+      },
+      {
+        "name": "Venite populi (KV 260)",
+        "url": "/Mozart/Venite populi K260/venite-populi.html",
+        "sections": [
+          {
+            "name": "Venite populi",
+            "midiUrl": "/Mozart/Venite populi K260/Venite-populi.mid"
           }
         ]
       },
@@ -25553,6 +26107,10 @@
           {
             "name": "I was glad",
             "midiUrl": "/Parry/iwasglad/iwasglad.mid"
+          },
+          {
+            "name": "I was glad ( Without Vivats)",
+            "midiUrl": "/Parry/iwasglad/IWasGlad-NoVivat.mid"
           }
         ]
       },
@@ -25567,6 +26125,10 @@
           {
             "name": "2: Thee fair Poetry oft hath sought",
             "midiUrl": "/Parry/Invocation/02-Tenor.mid"
+          },
+          {
+            "name": "3: The monstrous sea with melancholy war",
+            "midiUrl": "/Parry/Invocation/03-Chor.mid"
           },
           {
             "name": "4: Love to Love calleth",
@@ -25667,6 +26229,16 @@
           {
             "name": "The Pied Piper of Hamelin",
             "midiUrl": "/Parry/Pied-Piper/Pied-Piper.mid"
+          }
+        ]
+      },
+      {
+        "name": "Welcome, Yule!",
+        "url": "/Parry/Welcome-Yule/welcome-yule.html",
+        "sections": [
+          {
+            "name": "Welcome Yule",
+            "midiUrl": "/Parry/Welcome-Yule/Welcome Yule.mid"
           }
         ]
       }
@@ -27691,6 +28263,16 @@
         ]
       },
       {
+        "name": "All who would see God's greatness (alternative version)",
+        "url": null,
+        "sections": [
+          {
+            "name": "All who would see God's greatness (alternative version)",
+            "midiUrl": "/Carols & Anthems/Render/All-who-see-Alt.mid"
+          }
+        ]
+      },
+      {
         "name": "Child of joy and peace",
         "url": null,
         "sections": [
@@ -28078,8 +28660,48 @@
     ]
   },
   {
-    "name": "Rutter - not publicly available",
+    "name": "Rutter (John)",
     "works": [
+      {
+        "name": "All the bells in paradise",
+        "url": null,
+        "sections": [
+          {
+            "name": "All the bells in paradise",
+            "midiUrl": "/Carols & Anthems/Rutter/All-bells.mid"
+          }
+        ]
+      },
+      {
+        "name": "Angel tidings",
+        "url": null,
+        "sections": [
+          {
+            "name": "Angel tidings",
+            "midiUrl": "/Carols & Anthems/Rutter/Angel-tidings.mid"
+          }
+        ]
+      },
+      {
+        "name": "Candlelight Carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "Candlelight Carol",
+            "midiUrl": "/Carols & Anthems/Rutter/Candlelight.mid"
+          }
+        ]
+      },
+      {
+        "name": "Child in a manger",
+        "url": null,
+        "sections": [
+          {
+            "name": "Child in a manger",
+            "midiUrl": "/Carols & Anthems/Rutter/Child-manger.mid"
+          }
+        ]
+      },
       {
         "name": "Christiana Canticles",
         "url": "/Rutter/Christiana Canticles/christiana-canticles.html",
@@ -28091,6 +28713,66 @@
           {
             "name": "Nunc Dimittis",
             "midiUrl": "/Rutter/Christiana Canticles/Nunc Dimittis.mid"
+          }
+        ]
+      },
+      {
+        "name": "Christmas Lullaby",
+        "url": null,
+        "sections": [
+          {
+            "name": "Christmas Lullaby",
+            "midiUrl": "/Carols & Anthems/Rutter/ChristmasLull.mid"
+          }
+        ]
+      },
+      {
+        "name": "Christmas night",
+        "url": null,
+        "sections": [
+          {
+            "name": "Christmas night",
+            "midiUrl": "/Carols & Anthems/Rutter/XmasNite.mid"
+          }
+        ]
+      },
+      {
+        "name": "Cradle song",
+        "url": null,
+        "sections": [
+          {
+            "name": "Cradle song",
+            "midiUrl": "/Carols & Anthems/Rutter/Cradle-song.mid"
+          }
+        ]
+      },
+      {
+        "name": "Donkey Carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "Donkey Carol",
+            "midiUrl": "/Carols & Anthems/Rutter/Donkey-carol.mid"
+          }
+        ]
+      },
+      {
+        "name": "Dormi Jesu",
+        "url": null,
+        "sections": [
+          {
+            "name": "Dormi Jesu",
+            "midiUrl": "/Carols & Anthems/Rutter/DormJesu.mid"
+          }
+        ]
+      },
+      {
+        "name": "Down in yon forest",
+        "url": null,
+        "sections": [
+          {
+            "name": "Down in yon forest",
+            "midiUrl": "/Carols & Anthems/Rutter/Down-in-forest.mid"
           }
         ]
       },
@@ -28129,12 +28811,122 @@
         ]
       },
       {
+        "name": "Flemish carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "Flemish carol",
+            "midiUrl": "/Carols & Anthems/Rutter/Flemish-carol.mid"
+          }
+        ]
+      },
+      {
+        "name": "Here we come a-wassailing",
+        "url": null,
+        "sections": [
+          {
+            "name": "Here we come a-wassailing",
+            "midiUrl": "/Carols & Anthems/Rutter/2s-Wass.mid"
+          }
+        ]
+      },
+      {
+        "name": "Here we come a-wassailing (2nd version)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Here we come a-wassailing (2nd version)",
+            "midiUrl": "/Carols & Anthems/Rutter/HereWass.mid"
+          }
+        ]
+      },
+      {
         "name": "Hymn to the Creator of Light",
         "url": "/Rutter/Creator-Light/creator-light.html",
         "sections": [
           {
             "name": "Hymn to the Creator of Light",
             "midiUrl": "/Rutter/Creator-Light/Creator.mid"
+          }
+        ]
+      },
+      {
+        "name": "I saw three ships",
+        "url": null,
+        "sections": [
+          {
+            "name": "I saw three ships",
+            "midiUrl": "/Carols & Anthems/Rutter/3-ships.mid"
+          }
+        ]
+      },
+      {
+        "name": "I wonder as I wander",
+        "url": null,
+        "sections": [
+          {
+            "name": "I wonder as I wander",
+            "midiUrl": "/Carols & Anthems/Rutter/Wonder.mid"
+          }
+        ]
+      },
+      {
+        "name": "Il est ne, le divin enfant",
+        "url": null,
+        "sections": [
+          {
+            "name": "Il est ne, le divin enfant",
+            "midiUrl": "/Carols & Anthems/Rutter/ENFANT.mid"
+          }
+        ]
+      },
+      {
+        "name": "In dulci jubilo",
+        "url": null,
+        "sections": [
+          {
+            "name": "In dulci jubilo",
+            "midiUrl": "/Carols & Anthems/Rutter/in-dulci.mid"
+          }
+        ]
+      },
+      {
+        "name": "Jesus child",
+        "url": null,
+        "sections": [
+          {
+            "name": "Jesus child",
+            "midiUrl": "/Carols & Anthems/Rutter/Jesus-child.mid"
+          }
+        ]
+      },
+      {
+        "name": "King Jesus hath a garden",
+        "url": null,
+        "sections": [
+          {
+            "name": "King Jesus hath a garden",
+            "midiUrl": "/Carols & Anthems/Rutter/King-Jesus.mid"
+          }
+        ]
+      },
+      {
+        "name": "Love came down at Christmas",
+        "url": null,
+        "sections": [
+          {
+            "name": "Love came down at Christmas",
+            "midiUrl": "/Carols & Anthems/Rutter/Love-came.mid"
+          }
+        ]
+      },
+      {
+        "name": "Mary's lullaby",
+        "url": null,
+        "sections": [
+          {
+            "name": "Mary's lullaby",
+            "midiUrl": "/Carols & Anthems/Rutter/Mary'sLullaby.mid"
           }
         ]
       },
@@ -28161,6 +28953,56 @@
           {
             "name": "5: Finale (Dona nobis pacem)",
             "midiUrl": "/Rutter/children.mss/05-Final.mid"
+          }
+        ]
+      },
+      {
+        "name": "Nativity carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "Nativity carol",
+            "midiUrl": "/Carols & Anthems/Rutter/Nativity.mid"
+          }
+        ]
+      },
+      {
+        "name": "Noel nouvelet (Nowell, sing Nowell)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Noel nouvelet (Nowell, sing Nowell)",
+            "midiUrl": "/Carols & Anthems/Rutter/Noel-nouvelet.mid"
+          }
+        ]
+      },
+      {
+        "name": "Past three a clock",
+        "url": null,
+        "sections": [
+          {
+            "name": "Past three a clock",
+            "midiUrl": "/Carols & Anthems/Rutter/Past-3oC.mid"
+          }
+        ]
+      },
+      {
+        "name": "Quem pastores laudavere",
+        "url": null,
+        "sections": [
+          {
+            "name": "Quem pastores laudavere",
+            "midiUrl": "/Carols & Anthems/Rutter/Quem-pastores.mid"
+          }
+        ]
+      },
+      {
+        "name": "Quittez, pasteurs (Come leave your sheep)",
+        "url": null,
+        "sections": [
+          {
+            "name": "Quittez, pasteurs (Come leave your sheep)",
+            "midiUrl": "/Carols & Anthems/Rutter/Quittez-pasteurs.mid"
           }
         ]
       },
@@ -28199,6 +29041,46 @@
         ]
       },
       {
+        "name": "Rise up, shepherd, and follow",
+        "url": null,
+        "sections": [
+          {
+            "name": "Rise up, shepherd, and follow",
+            "midiUrl": "/Carols & Anthems/Rutter/Rise-up-shepherd.mid"
+          }
+        ]
+      },
+      {
+        "name": "Sans day carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "Sans day carol",
+            "midiUrl": "/Carols & Anthems/Rutter/SANS-DAY.mid"
+          }
+        ]
+      },
+      {
+        "name": "Shepherd's pipe carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "Shepherd's pipe carol",
+            "midiUrl": "/Carols & Anthems/Rutter/Sheppipe.mid"
+          }
+        ]
+      },
+      {
+        "name": "Star carol",
+        "url": null,
+        "sections": [
+          {
+            "name": "Star carol",
+            "midiUrl": "/Carols & Anthems/Rutter/Star-carol.mid"
+          }
+        ]
+      },
+      {
         "name": "Te Deum",
         "url": "/Rutter/TeDeum/tedeum.html",
         "sections": [
@@ -28223,6 +29105,16 @@
           {
             "name": "3: Behold, the city of God",
             "midiUrl": "/Rutter/Falcon/3-Behold.mid"
+          }
+        ]
+      },
+      {
+        "name": "The holly and the ivy",
+        "url": null,
+        "sections": [
+          {
+            "name": "The holly and the ivy",
+            "midiUrl": "/Carols & Anthems/Rutter/Holly.mid"
           }
         ]
       },
@@ -28497,347 +29389,6 @@
         ]
       },
       {
-        "name": "When icicles hang",
-        "url": "/Rutter/Icicles/icicles.html",
-        "sections": [
-          {
-            "name": "1: Icicles",
-            "midiUrl": "/Rutter/Icicles/1-Icicle.mid"
-          },
-          {
-            "name": "2: Winter nights",
-            "midiUrl": "/Rutter/Icicles/2-Winter.mid"
-          },
-          {
-            "name": "3: Good ale",
-            "midiUrl": "/Rutter/Icicles/3-Ale.mid"
-          },
-          {
-            "name": "4: Blow, blow, thou winter wind",
-            "midiUrl": "/Rutter/Icicles/4-Blow.mid"
-          },
-          {
-            "name": "5: Winter, wakeneth all my care 6: Hay, ay",
-            "midiUrl": "/Rutter/Icicles/5-6-WinH.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Rutter (John)",
-    "works": [
-      {
-        "name": "All the bells in paradise",
-        "url": null,
-        "sections": [
-          {
-            "name": "All the bells in paradise",
-            "midiUrl": "/Carols & Anthems/Rutter/All-bells.mid"
-          }
-        ]
-      },
-      {
-        "name": "Angel tidings",
-        "url": null,
-        "sections": [
-          {
-            "name": "Angel tidings",
-            "midiUrl": "/Carols & Anthems/Rutter/Angel-tidings.mid"
-          }
-        ]
-      },
-      {
-        "name": "Candlelight Carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "Candlelight Carol",
-            "midiUrl": "/Carols & Anthems/Rutter/Candlelight.mid"
-          }
-        ]
-      },
-      {
-        "name": "Child in a manger",
-        "url": null,
-        "sections": [
-          {
-            "name": "Child in a manger",
-            "midiUrl": "/Carols & Anthems/Rutter/Child-manger.mid"
-          }
-        ]
-      },
-      {
-        "name": "Christmas Lullaby",
-        "url": null,
-        "sections": [
-          {
-            "name": "Christmas Lullaby",
-            "midiUrl": "/Carols & Anthems/Rutter/ChristmasLull.mid"
-          }
-        ]
-      },
-      {
-        "name": "Christmas night",
-        "url": null,
-        "sections": [
-          {
-            "name": "Christmas night",
-            "midiUrl": "/Carols & Anthems/Rutter/XmasNite.mid"
-          }
-        ]
-      },
-      {
-        "name": "Cradle song",
-        "url": null,
-        "sections": [
-          {
-            "name": "Cradle song",
-            "midiUrl": "/Carols & Anthems/Rutter/Cradle-song.mid"
-          }
-        ]
-      },
-      {
-        "name": "Donkey Carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "Donkey Carol",
-            "midiUrl": "/Carols & Anthems/Rutter/Donkey-carol.mid"
-          }
-        ]
-      },
-      {
-        "name": "Dormi Jesu",
-        "url": null,
-        "sections": [
-          {
-            "name": "Dormi Jesu",
-            "midiUrl": "/Carols & Anthems/Rutter/DormJesu.mid"
-          }
-        ]
-      },
-      {
-        "name": "Down in yon forest",
-        "url": null,
-        "sections": [
-          {
-            "name": "Down in yon forest",
-            "midiUrl": "/Carols & Anthems/Rutter/Down-in-forest.mid"
-          }
-        ]
-      },
-      {
-        "name": "Flemish carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "Flemish carol",
-            "midiUrl": "/Carols & Anthems/Rutter/Flemish-carol.mid"
-          }
-        ]
-      },
-      {
-        "name": "Here we come a-wassailing",
-        "url": null,
-        "sections": [
-          {
-            "name": "Here we come a-wassailing",
-            "midiUrl": "/Carols & Anthems/Rutter/2s-Wass.mid"
-          }
-        ]
-      },
-      {
-        "name": "Here we come a-wassailing (2nd version)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Here we come a-wassailing (2nd version)",
-            "midiUrl": "/Carols & Anthems/Rutter/HereWass.mid"
-          }
-        ]
-      },
-      {
-        "name": "I saw three ships",
-        "url": null,
-        "sections": [
-          {
-            "name": "I saw three ships",
-            "midiUrl": "/Carols & Anthems/Rutter/3-ships.mid"
-          }
-        ]
-      },
-      {
-        "name": "I wonder as I wander",
-        "url": null,
-        "sections": [
-          {
-            "name": "I wonder as I wander",
-            "midiUrl": "/Carols & Anthems/Rutter/Wonder.mid"
-          }
-        ]
-      },
-      {
-        "name": "Il est ne, le divin enfant",
-        "url": null,
-        "sections": [
-          {
-            "name": "Il est ne, le divin enfant",
-            "midiUrl": "/Carols & Anthems/Rutter/ENFANT.mid"
-          }
-        ]
-      },
-      {
-        "name": "In dulci jubilo",
-        "url": null,
-        "sections": [
-          {
-            "name": "In dulci jubilo",
-            "midiUrl": "/Carols & Anthems/Rutter/in-dulci.mid"
-          }
-        ]
-      },
-      {
-        "name": "Jesus child",
-        "url": null,
-        "sections": [
-          {
-            "name": "Jesus child",
-            "midiUrl": "/Carols & Anthems/Rutter/Jesus-child.mid"
-          }
-        ]
-      },
-      {
-        "name": "King Jesus hath a garden",
-        "url": null,
-        "sections": [
-          {
-            "name": "King Jesus hath a garden",
-            "midiUrl": "/Carols & Anthems/Rutter/King-Jesus.mid"
-          }
-        ]
-      },
-      {
-        "name": "Love came down at Christmas",
-        "url": null,
-        "sections": [
-          {
-            "name": "Love came down at Christmas",
-            "midiUrl": "/Carols & Anthems/Rutter/Love-came.mid"
-          }
-        ]
-      },
-      {
-        "name": "Mary's lullaby",
-        "url": null,
-        "sections": [
-          {
-            "name": "Mary's lullaby",
-            "midiUrl": "/Carols & Anthems/Rutter/Mary'sLullaby.mid"
-          }
-        ]
-      },
-      {
-        "name": "Nativity carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "Nativity carol",
-            "midiUrl": "/Carols & Anthems/Rutter/Nativity.mid"
-          }
-        ]
-      },
-      {
-        "name": "Noel nouvelet (Nowell, sing Nowell)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Noel nouvelet (Nowell, sing Nowell)",
-            "midiUrl": "/Carols & Anthems/Rutter/Noel-nouvelet.mid"
-          }
-        ]
-      },
-      {
-        "name": "Past three a clock",
-        "url": null,
-        "sections": [
-          {
-            "name": "Past three a clock",
-            "midiUrl": "/Carols & Anthems/Rutter/Past-3oC.mid"
-          }
-        ]
-      },
-      {
-        "name": "Quem pastores laudavere",
-        "url": null,
-        "sections": [
-          {
-            "name": "Quem pastores laudavere",
-            "midiUrl": "/Carols & Anthems/Rutter/Quem-pastores.mid"
-          }
-        ]
-      },
-      {
-        "name": "Quittez, pasteurs (Come leave your sheep)",
-        "url": null,
-        "sections": [
-          {
-            "name": "Quittez, pasteurs (Come leave your sheep)",
-            "midiUrl": "/Carols & Anthems/Rutter/Quittez-pasteurs.mid"
-          }
-        ]
-      },
-      {
-        "name": "Rise up, shepherd, and follow",
-        "url": null,
-        "sections": [
-          {
-            "name": "Rise up, shepherd, and follow",
-            "midiUrl": "/Carols & Anthems/Rutter/Rise-up-shepherd.mid"
-          }
-        ]
-      },
-      {
-        "name": "Sans day carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "Sans day carol",
-            "midiUrl": "/Carols & Anthems/Rutter/SANS-DAY.mid"
-          }
-        ]
-      },
-      {
-        "name": "Shepherd's pipe carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "Shepherd's pipe carol",
-            "midiUrl": "/Carols & Anthems/Rutter/Sheppipe.mid"
-          }
-        ]
-      },
-      {
-        "name": "Star carol",
-        "url": null,
-        "sections": [
-          {
-            "name": "Star carol",
-            "midiUrl": "/Carols & Anthems/Rutter/Star-carol.mid"
-          }
-        ]
-      },
-      {
-        "name": "The holly and the ivy",
-        "url": null,
-        "sections": [
-          {
-            "name": "The holly and the ivy",
-            "midiUrl": "/Carols & Anthems/Rutter/Holly.mid"
-          }
-        ]
-      },
-      {
         "name": "The twelve days of Christmas",
         "url": null,
         "sections": [
@@ -28874,6 +29425,32 @@
           {
             "name": "What sweeter music",
             "midiUrl": "/Carols & Anthems/Rutter/What-sweeter.mid"
+          }
+        ]
+      },
+      {
+        "name": "When icicles hang",
+        "url": "/Rutter/Icicles/icicles.html",
+        "sections": [
+          {
+            "name": "1: Icicles",
+            "midiUrl": "/Rutter/Icicles/1-Icicle.mid"
+          },
+          {
+            "name": "2: Winter nights",
+            "midiUrl": "/Rutter/Icicles/2-Winter.mid"
+          },
+          {
+            "name": "3: Good ale",
+            "midiUrl": "/Rutter/Icicles/3-Ale.mid"
+          },
+          {
+            "name": "4: Blow, blow, thou winter wind",
+            "midiUrl": "/Rutter/Icicles/4-Blow.mid"
+          },
+          {
+            "name": "5: Winter, wakeneth all my care 6: Hay, ay",
+            "midiUrl": "/Rutter/Icicles/5-6-WinH.mid"
           }
         ]
       }
@@ -29749,6 +30326,16 @@
           {
             "name": "19: Conclusion: Now let us thank Thee",
             "midiUrl": "/Schutz/Xmas-Story/19-Concl.mid"
+          }
+        ]
+      },
+      {
+        "name": "Das ist je gewisslich wahr, SWV 388",
+        "url": "/Schutz/Das ist je gewisslich wahr/das-ist-wahr.html",
+        "sections": [
+          {
+            "name": "Das ist je gewisslich wahr",
+            "midiUrl": "/Schutz/Das ist je gewisslich wahr/Das ist wahr.mid"
           }
         ]
       },
@@ -31736,6 +32323,16 @@
             "midiUrl": "/Turner/Geths-to-Gol/3-04-Hymn.mid"
           }
         ]
+      },
+      {
+        "name": "Great and Marvellous",
+        "url": "/Turner/Great and Marvellous/great-&-marv.html",
+        "sections": [
+          {
+            "name": "Great and Marvelous",
+            "midiUrl": "/Turner/Great and Marvellous/Great & Marv.mid"
+          }
+        ]
       }
     ]
   },
@@ -32207,6 +32804,16 @@
         ]
       },
       {
+        "name": "O vos omnes",
+        "url": "/Vaughan-Williams/O vos omnes/o-vos-omnes.html",
+        "sections": [
+          {
+            "name": "O vos omnes",
+            "midiUrl": "/Vaughan-Williams/O vos omnes/O vos omnes.mid"
+          }
+        ]
+      },
+      {
         "name": "Old Hundreth",
         "url": "/Vaughan-Williams/Old-100th/old-100th.html",
         "sections": [
@@ -32275,6 +32882,24 @@
           {
             "name": "3: O mistress mine",
             "midiUrl": "/Vaughan-Williams/Three Elizabethan Part-songs/3-Mistress-mine.mid"
+          }
+        ]
+      },
+      {
+        "name": "Three Shakespeare Songs",
+        "url": "/Vaughan-Williams/Three-Shakespeare-Songs/3-shakespeare-songs.html",
+        "sections": [
+          {
+            "name": "1: Full Fathom Five",
+            "midiUrl": "/Vaughan-Williams/Three-Shakespeare-Songs/1-FullFathom5.mid"
+          },
+          {
+            "name": "2: The Cloud-Capp'd Towers",
+            "midiUrl": "/Vaughan-Williams/Three-Shakespeare-Songs/2-Towers.mid"
+          },
+          {
+            "name": "3: Over Hill, Over Dale",
+            "midiUrl": "/Vaughan-Williams/Three-Shakespeare-Songs/3-OverHill-separated.mid"
           }
         ]
       },
@@ -33103,6 +33728,48 @@
             "midiUrl": "/Vivaldi/Magnificat-611/9-gloria.mid"
           }
         ]
+      },
+      {
+        "name": "Nisi Dominus",
+        "url": "/Vivaldi/Nisi Dominus/nisi-dominus.html",
+        "sections": [
+          {
+            "name": "1: Nisi, nisi Dominus aedificaverit domum",
+            "midiUrl": "/Vivaldi/Nisi Dominus/1-Nisi.mid"
+          },
+          {
+            "name": "2: Vanum est vobis ante lucem surgere",
+            "midiUrl": "/Vivaldi/Nisi Dominus/2-Vanum.mid"
+          },
+          {
+            "name": "3: Surgite post quam sederitis",
+            "midiUrl": "/Vivaldi/Nisi Dominus/3-Surgite.mid"
+          },
+          {
+            "name": "4: Cum dederit dilectis suis somnum",
+            "midiUrl": "/Vivaldi/Nisi Dominus/4-CumDed.mid"
+          },
+          {
+            "name": "5: Sicut sagitae in manu potentis",
+            "midiUrl": "/Vivaldi/Nisi Dominus/5-Sicut.mid"
+          },
+          {
+            "name": "6: Beatus vir qui implevit desiderium suum ex ipsis",
+            "midiUrl": "/Vivaldi/Nisi Dominus/6-Beatus.mid"
+          },
+          {
+            "name": "7: Gloria Patri et Filio",
+            "midiUrl": "/Vivaldi/Nisi Dominus/7-Gloria.mid"
+          },
+          {
+            "name": "8: Sicut erat in principio",
+            "midiUrl": "/Vivaldi/Nisi Dominus/8-Sicut.mid"
+          },
+          {
+            "name": "9: Amen, amen et in saecula saeculorum",
+            "midiUrl": "/Vivaldi/Nisi Dominus/9-Amen.mid"
+          }
+        ]
       }
     ]
   },
@@ -33300,6 +33967,16 @@
         ]
       },
       {
+        "name": "Bethlehem Down",
+        "url": "/Warlock/Bethlehem Down/bethlehem-down.html",
+        "sections": [
+          {
+            "name": "Bethlehem Down",
+            "midiUrl": "/Warlock/Bethlehem Down/Bethlehem Down.mid"
+          }
+        ]
+      },
+      {
         "name": "Yarmouth Fair",
         "url": "/Warlock/Yarmouth Fair/yarmouth-fair.html",
         "sections": [
@@ -33346,7 +34023,7 @@
     ]
   },
   {
-    "name": "Weelkes - See also the List for Partworks and Madrigals",
+    "name": "Weelkes (Thomas)",
     "works": [
       {
         "name": "Alleluia, I heard a voice",
@@ -33358,61 +34035,6 @@
           }
         ]
       },
-      {
-        "name": "David's lament for Jonathan",
-        "url": "/Weelkes/Davids-lament/davids-lament.html",
-        "sections": [
-          {
-            "name": "David's lament for Jonathan",
-            "midiUrl": "/Weelkes/Davids-lament/Davids-lament.mid"
-          }
-        ]
-      },
-      {
-        "name": "Give ear, O Lord",
-        "url": "/Weelkes/Give-ear/give-ear.html",
-        "sections": [
-          {
-            "name": "Give ear, O Lord",
-            "midiUrl": "/Weelkes/Give-ear/Give-ear.mid"
-          }
-        ]
-      },
-      {
-        "name": "Gloria in excelsis Deo",
-        "url": "/Weelkes/Gloria/gloria.html",
-        "sections": [
-          {
-            "name": "Gloria in excelsis Deo",
-            "midiUrl": "/Weelkes/Gloria/Gloria.mid"
-          }
-        ]
-      },
-      {
-        "name": "Hosanna to the Son of David",
-        "url": "/Weelkes/Hosanna-to-David/hosanna-to-david.html",
-        "sections": [
-          {
-            "name": "Hosanna to the Son of David",
-            "midiUrl": "/Weelkes/Hosanna-to-David/Hosanna.mid"
-          }
-        ]
-      },
-      {
-        "name": "When David heard",
-        "url": "/Weelkes/When-David/when-david.html",
-        "sections": [
-          {
-            "name": "When David heard",
-            "midiUrl": "/Weelkes/When-David/When-Dav.mid"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "name": "Weelkes (Thomas)",
-    "works": [
       {
         "name": "Alleluia. I heard a voice",
         "url": null,
@@ -33454,12 +34076,32 @@
         ]
       },
       {
+        "name": "David's lament for Jonathan",
+        "url": "/Weelkes/Davids-lament/davids-lament.html",
+        "sections": [
+          {
+            "name": "David's lament for Jonathan",
+            "midiUrl": "/Weelkes/Davids-lament/Davids-lament.mid"
+          }
+        ]
+      },
+      {
+        "name": "Give ear, O Lord",
+        "url": "/Weelkes/Give-ear/give-ear.html",
+        "sections": [
+          {
+            "name": "Give ear, O Lord",
+            "midiUrl": "/Weelkes/Give-ear/Give-ear.mid"
+          }
+        ]
+      },
+      {
         "name": "Gloria in excelsis Deo",
-        "url": null,
+        "url": "/Weelkes/Gloria/gloria.html",
         "sections": [
           {
             "name": "Gloria in excelsis Deo",
-            "midiUrl": "/Madrigals-etc/Weelkes/Gloria.mid"
+            "midiUrl": "/Weelkes/Gloria/Gloria.mid"
           }
         ]
       },
@@ -33475,11 +34117,11 @@
       },
       {
         "name": "Hosanna to the Son of David",
-        "url": null,
+        "url": "/Weelkes/Hosanna-to-David/hosanna-to-david.html",
         "sections": [
           {
             "name": "Hosanna to the Son of David",
-            "midiUrl": "/Madrigals-etc/Weelkes/Hosanna.mid"
+            "midiUrl": "/Weelkes/Hosanna-to-David/Hosanna.mid"
           }
         ]
       },
@@ -33530,6 +34172,16 @@
           {
             "name": "O Lord, arise",
             "midiUrl": "/Madrigals-etc/Weelkes/O-Lord-arise.mid"
+          }
+        ]
+      },
+      {
+        "name": "O Lord, grant the King a long life",
+        "url": "/Weelkes/O Lord, grant/o-lord-grant.html",
+        "sections": [
+          {
+            "name": "O Lord, grant the King a long life",
+            "midiUrl": "/Weelkes/O Lord, grant/O-Lord.mid"
           }
         ]
       },
@@ -33615,11 +34267,11 @@
       },
       {
         "name": "When David heard",
-        "url": null,
+        "url": "/Weelkes/When-David/when-david.html",
         "sections": [
           {
             "name": "When David heard",
-            "midiUrl": "/Madrigals-etc/Weelkes/When-David.mid"
+            "midiUrl": "/Weelkes/When-David/When-Dav.mid"
           }
         ]
       }
@@ -34611,6 +35263,16 @@
         ]
       },
       {
+        "name": "Full fathom five",
+        "url": "/Wood/Full-fathom-five/full-fathom-five.html",
+        "sections": [
+          {
+            "name": "Fullfathom five",
+            "midiUrl": "/Wood/Full-fathom-five/Full-fathom-5.mid"
+          }
+        ]
+      },
+      {
         "name": "Hail gladdening light",
         "url": "/Wood/Hail gladdening light/hail-glad-light.html",
         "sections": [
@@ -34784,6 +35446,16 @@
   {
     "name": "Zelenka",
     "works": [
+      {
+        "name": "Haec Dies",
+        "url": "/Zelenka/Haec Dies/haec-dies.html",
+        "sections": [
+          {
+            "name": "Haec Dies",
+            "midiUrl": "/Zelenka/Haec Dies/Haec Dies.mid"
+          }
+        ]
+      },
       {
         "name": "Magnificat in C (ZWV 107)",
         "url": "/Zelenka/Magnificat in C/magnificat-in-C.html",

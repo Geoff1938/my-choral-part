@@ -150,6 +150,86 @@ describe('fetchPage', () => {
   });
 });
 
+describe('Page parsing', () => {
+  // Serve pages from a map of decoded site paths to HTML
+  const servePages = (scraper, pages) =>
+    jest.spyOn(scraper, 'fetchPage').mockImplementation(async url => {
+      const pagePath = decodeURIComponent(url.replace(scraper.baseUrl, ''));
+      if (!(pagePath in pages)) throw { response: { status: 404 } };
+      return { data: pages[pagePath] };
+    });
+
+  test('reads an unemphasised column', async () => {
+    const scraper = new ChoralMusicScraper();
+    servePages(scraper, { '/W/Mass/mass.html': `<table>
+      <tr><td>Mass</td><td>UNemphasized</td><td>Soprano</td></tr>
+      <tr><td>1: Kyrie</td><td><a href="1-kyrie.mid">yes</a></td><td><a href="Soprano/1-kyrie.mid">yes</a></td></tr>
+    </table>` });
+
+    expect(await scraper.scrapeWorkSections('/W/Mass/mass.html')).toEqual([
+      { name: '1: Kyrie', midiUrl: '/W/Mass/1-kyrie.mid' }
+    ]);
+  });
+
+  test('takes the section link itself when there is no unemphasised column', async () => {
+    const scraper = new ChoralMusicScraper();
+    servePages(scraper, { '/H/Gloria/gloria.html': `<table>
+      <tr><td><strong>Gloria</strong></td></tr>
+      <tr><td><a href="1-Gloria.mid">1: Gloria in excelsis Deo</a></td></tr>
+      <tr><td><a href="2-Et-in-terra.mid">2: Et in terra pax </a></td><td><a href="Soprano/2-Et-in-terra.mid">yes</a></td></tr>
+    </table>` });
+
+    expect(await scraper.scrapeWorkSections('/H/Gloria/gloria.html')).toEqual([
+      { name: '1: Gloria in excelsis Deo', midiUrl: '/H/Gloria/1-Gloria.mid' },
+      { name: '2: Et in terra pax', midiUrl: '/H/Gloria/2-Et-in-terra.mid' }
+    ]);
+  });
+
+  test('does not fall back to voice files when the unemphasised files are not public', async () => {
+    const scraper = new ChoralMusicScraper();
+    servePages(scraper, { '/B/Req/req.html': `<table>
+      <tr><td>Requiem</td><td>UNemphasized</td><td>Trebles</td></tr>
+      <tr><td><a href="01-req.mid">1: Requiem</a></td><td><a href="../../not-public.html">no</a></td><td><a href="Trebles/01-req.mid">yes</a></td></tr>
+    </table>` });
+
+    expect(await scraper.scrapeWorkSections('/B/Req/req.html', new Set(), { unavailableWorks: [] })).toEqual([]);
+  });
+
+  test('keeps alternative versions of a song listed under the same title', async () => {
+    const scraper = new ChoralMusicScraper();
+    servePages(scraper, { '/Carols/list.html': `<table>
+      <tr><td><a name="Gauntlett">Gauntlett</a></td><td>
+        <a href="Gauntlett/Roydavid-Mann.mid">Once in royal David's city</a> <br>
+        <a href="Gauntlett/Roydavid-Wells.mid">Once in royal David's city</a> <font>(with Wells last verse)</font><br>
+        <a href="Gauntlett/Roydavid-Mann.mid">Once in royal David's city</a><br>
+      </td></tr>
+      <tr><td><a name="Render">Render</a></td><td>
+        <a href="Render/All-who-see.mid">All who would see</a><br>
+        <a href="Render/All-who-see-Alt.mid">All who would see</a><br>
+      </td></tr>
+    </table>` });
+
+    const composers = await scraper.scrapeSongsPage(`${scraper.baseUrl}/Carols/list.html`, 'carols', '/Carols', {});
+    expect(composers.map(c => c.songs.map(s => [s.name, s.midiUrl]))).toEqual([
+      [
+        ["Once in royal David's city", '/Carols/Gauntlett/Roydavid-Mann.mid'],
+        ["Once in royal David's city (with Wells last verse)", '/Carols/Gauntlett/Roydavid-Wells.mid']
+      ],
+      [
+        ['All who would see', '/Carols/Render/All-who-see.mid'],
+        ['All who would see (alternative version)', '/Carols/Render/All-who-see-Alt.mid']
+      ]
+    ]);
+  });
+
+  test('normalizes composer names whose site spelling has runs of spaces', () => {
+    const scraper = new ChoralMusicScraper();
+    expect(scraper.normalizeComposerName('Weelkes - See also\n the List for Partworks and Madrigals'))
+      .toBe('Weelkes (Thomas)');
+    expect(scraper.normalizeComposerName('Rutter - not publicly available')).toBe('Rutter (John)');
+  });
+});
+
 describe('Scheduler rebuild guard', () => {
   test('a second rebuild request while one is running does not start another', async () => {
     process.env.DATABASE_PATH = path.join(tempDir, 'activity.db');

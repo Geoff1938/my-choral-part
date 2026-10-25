@@ -170,6 +170,13 @@ class ChoralMusicScraper {
       'Bennett W S': 'Bennett (W S)'
     };
 
+    // Lookup keyed on whitespace-cleaned names, since scraped names are cleaned
+    // before lookup (keys above may contain runs of spaces copied from the site)
+    this.normalizedComposerNameMap = {};
+    for (const [variant, canonical] of Object.entries(this.composerNameMap)) {
+      this.normalizedComposerNameMap[this.cleanWhitespace(variant)] = canonical;
+    }
+
     // Configure axios with browser-like headers to avoid blocking
     this.axiosConfig = {
       timeout: this.requestTimeout,
@@ -207,7 +214,7 @@ class ChoralMusicScraper {
   normalizeComposerName(name) {
     if (!name) return name;
     const cleaned = this.cleanWhitespace(name);
-    return this.composerNameMap[cleaned] || cleaned;
+    return this.normalizedComposerNameMap[cleaned] || cleaned;
   }
 
   // Helper function to check if a section name is a continuation (starts with dashes)
@@ -285,6 +292,25 @@ class ChoralMusicScraper {
   isMidiFileUrl(url) {
     const lowerUrl = url.toLowerCase();
     return lowerUrl.endsWith('.mid') || lowerUrl.endsWith('.midi');
+  }
+
+  // Helper function to get the text following a link up to the next link or
+  // line break, e.g. "(with Wells last verse)" - empty if there is none
+  getTrailingNote($, link) {
+    let text = '';
+    for (let node = link.nextSibling; node; node = node.nextSibling) {
+      if (node.type === 'tag' && /^(a|br)$/i.test(node.name)) break;
+      text += $(node).text();
+    }
+    return this.cleanWhitespace(text);
+  }
+
+  // Helper function to turn a link on a work page into an index-relative MIDI URL
+  resolveMidiUrl(href, workUrl) {
+    const fullMidiUrl = href.startsWith('http') ? href :
+      href.startsWith('/') ? `${this.baseUrl}${href}` :
+      `${workUrl.substring(0, workUrl.lastIndexOf('/'))}/${href}`;
+    return this.toRelativeUrl(fullMidiUrl);
   }
 
   async initializeDataDirectory() {
@@ -429,6 +455,9 @@ class ChoralMusicScraper {
       // Track seen MIDI URLs to handle merged sections (avoid duplicates)
       const seenMidiUrls = new Set();
 
+      // Whether any table on the page has an unemphasised column
+      let foundUnemphasisedTable = false;
+
       // Look for tables with MIDI file information
       $('table').each((tableIndex, table) => {
         const $table = $(table);
@@ -453,6 +482,7 @@ class ChoralMusicScraper {
         });
 
         if (unemphasizedColumnIndex >= 0) {
+          foundUnemphasisedTable = true;
           console.log(`Processing table ${tableIndex}, UN column at index ${unemphasizedColumnIndex}`);
 
           // Track the last "parent" section for handling continuation rows
@@ -514,12 +544,7 @@ class ChoralMusicScraper {
                         });
                       }
                     } else {
-                      // Convert relative URL to absolute first
-                      const fullMidiUrl = midiUrl.startsWith('http') ? midiUrl :
-                        midiUrl.startsWith('/') ? `${this.baseUrl}${midiUrl}` :
-                        `${workUrl.substring(0, workUrl.lastIndexOf('/'))}/${midiUrl}`;
-
-                      const relativeMidiUrl = this.toRelativeUrl(fullMidiUrl);
+                      const relativeMidiUrl = this.resolveMidiUrl(midiUrl, workUrl);
 
                       // Check if this MIDI URL has a merged section name
                       const mergedName = this.getMergedSectionName(relativeMidiUrl);
@@ -551,6 +576,26 @@ class ChoralMusicScraper {
           });
         }
       });
+
+      // Some pages (mostly solo works) have no unemphasised column: the
+      // section name in the first cell is itself the link to the full MIDI file
+      if (!foundUnemphasisedTable) {
+        $('tr').each((rowIndex, row) => {
+          const $row = $(row);
+          if ($row.find('tr').length > 0) return; // only innermost rows
+          const firstLink = $row.find('td, th').first().find('a[href]').first();
+          const href = firstLink.attr('href');
+          const sectionName = this.cleanWhitespace(firstLink.text());
+          if (!href || !sectionName || !this.isMidiFileUrl(href)) return;
+
+          const relativeMidiUrl = this.resolveMidiUrl(href, workUrl);
+          if (!seenMidiUrls.has(relativeMidiUrl)) {
+            seenMidiUrls.add(relativeMidiUrl);
+            sections.push({ name: sectionName, midiUrl: relativeMidiUrl });
+            console.log(`Added section (no unemphasised column): ${sectionName} -> ${relativeMidiUrl}`);
+          }
+        });
+      }
 
       // Look for links to additional parts (Part 2, Part 3, next page, etc.)
       const additionalPartLinks = [];
@@ -1335,8 +1380,25 @@ class ChoralMusicScraper {
                       midiUrl = `${basePath}/${href}`;
                     }
 
+                    // A composer may list several versions of a song under the
+                    // same title - keep each distinct file under its own name
+                    const sameTitle = composerData.songs.filter(s => s.baseName === songName);
+                    if (sameTitle.some(s => s.midiUrl === midiUrl)) {
+                      return; // same file listed twice
+                    }
+                    let name = songName;
+                    if (sameTitle.length > 0) {
+                      const note = this.getTrailingNote($, link);
+                      name = note ? `${songName} ${note}` : `${songName} (alternative version)`;
+                      if (sameTitle.some(s => s.name === name)) {
+                        name = `${songName} (alternative version ${sameTitle.length + 1})`;
+                      }
+                      console.log(`  Alternative version: "${name}" -> ${midiUrl}`);
+                    }
+
                     composerData.songs.push({
-                      name: songName,
+                      name: name,
+                      baseName: songName,
                       midiUrl: midiUrl
                     });
                   } else {
