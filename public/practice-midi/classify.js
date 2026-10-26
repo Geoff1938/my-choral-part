@@ -26,7 +26,7 @@ const INSTRUMENT_WORDS = new Set([
     'oboes', 'flute', 'flutes', 'flauto', 'flauti', 'piccolo', 'recorder', 'recorders', 'clarinet', 'clarinets',
     'horn', 'horns', 'corno', 'corni', 'trumpet', 'trumpets', 'tromba', 'trombe', 'trombone', 'trombones', 'tuba',
     'cornett', 'anglais', 'sackbut', 'timpani', 'timp', 'drum', 'drums', 'percussion', 'perc', 'guitar', 'harp', 'lute',
-    'theorbo', 'synth', 'instrument', 'instr', 'reduction', 'rh', 'lh'
+    'theorbo', 'synth', 'instrument', 'instr', 'reduction', 'rh', 'lh', 'pedal', 'pedals', 'ped', 'manual', 'manuals'
 ]);
 
 const SOLO_WORDS = new Set(['solo', 'soli', 'soloist']);
@@ -77,7 +77,7 @@ export function nameWords(name) {
  * Work out what a part name says about the part
  * @param {string} name - Part name
  * @returns {{kind: string, section?: string, number?: number|null, choir?: number|null}}
- *     kind is 'instrument', 'solo', 'voice' or 'unknown'
+ *     kind is 'instrument', 'solo', 'voice', 'mixed' (several sections) or 'unknown'
  */
 export function parseName(name) {
     const words = nameWords(name);
@@ -101,17 +101,20 @@ export function parseName(name) {
     if (voiceWords.length <= 2 && SECTION_LETTERS[voiceWords[0]] && (voiceWords.length === 1 || NUMBER_WORDS[voiceWords[1]] !== undefined)) {
         section = SECTION_LETTERS[voiceWords[0]];
     } else {
-        // "Mezzo-soprano" is an alto part, so look for alto words first
-        for (const candidate of ['alto', 'soprano', 'tenor', 'bass']) {
-            if (voiceWords.some(w => SECTION_WORDS[candidate].includes(w))) {
-                section = candidate;
-                break;
-            }
+        const sections = new Set(Object.keys(SECTION_WORDS).filter(s => voiceWords.some(w => SECTION_WORDS[s].includes(w))));
+        // "Mezzo-soprano" is an alto part
+        if (voiceWords.includes('mezzo')) {
+            sections.delete('soprano');
         }
         // "Counter tenor" written as two words
-        if (section === 'tenor' && voiceWords.includes('counter')) {
-            section = 'alto';
+        if (voiceWords.includes('counter') && sections.delete('tenor')) {
+            sections.add('alto');
         }
+        // A part for more than one section, e.g. "Soprano Alto" in closed score
+        if (sections.size > 1) {
+            return { kind: 'mixed', sections: [...sections], choir };
+        }
+        section = sections.size ? [...sections][0] : null;
     }
 
     if (!section) {
@@ -122,6 +125,16 @@ export function parseName(name) {
     }
     const numberWord = voiceWords.find(w => NUMBER_WORDS[w] !== undefined);
     return { kind: 'voice', section, number: numberWord ? NUMBER_WORDS[numberWord] : null, choir };
+}
+
+/**
+ * Whether a part name means the whole choir ("Choir", "Chorus", "SATB"),
+ * as for a closed-score part
+ * @param {string} name - Part name
+ * @returns {boolean} True for a choir name
+ */
+export function isChoirName(name) {
+    return nameWords(name).some(w => CHOIR_WORDS.has(w) || /^(s{1,2}a{1,2}t{0,2}b{0,2}|t{1,2}b{1,2})$/.test(w));
 }
 
 function median(values) {

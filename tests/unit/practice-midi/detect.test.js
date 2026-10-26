@@ -2,53 +2,11 @@
  * Unit tests for public/practice-midi/detect.js and metadata.js
  */
 
-const { detectFormat, readZipDirectory, xmlRootElement, unwrapRiffMidi } = require('../../../public/practice-midi/detect.js');
+const { detectFormat, xmlRootElement, unwrapRiffMidi } = require('../../../public/practice-midi/detect.js');
+const { readZipDirectory } = require('../../../public/practice-midi/zip.js');
 const { suggestMetadata, titleFromFilename } = require('../../../public/practice-midi/metadata.js');
 const { encodeText, META } = require('../../../public/practice-midi/smf.js');
-const { track, song, line } = require('./helpers.js');
-
-/**
- * A zip archive with stored (uncompressed) entries, enough for directory reading
- */
-function zip(entries) {
-  const local = [];
-  const central = [];
-  let offset = 0;
-  for (const { name, size } of entries) {
-    const nameBytes = encodeText(name);
-    const header = new Uint8Array(30 + nameBytes.length);
-    const view = new DataView(header.buffer);
-    view.setUint32(0, 0x04034b50, true);
-    header.set(nameBytes, 30);
-    local.push(header);
-    const dir = new Uint8Array(46 + nameBytes.length);
-    const dv = new DataView(dir.buffer);
-    dv.setUint32(0, 0x02014b50, true);
-    dv.setUint32(20, size, true);
-    dv.setUint32(24, size, true);
-    dv.setUint16(28, nameBytes.length, true);
-    dv.setUint32(42, offset, true);
-    dir.set(nameBytes, 46);
-    central.push(dir);
-    offset += header.length;
-  }
-  const centralSize = central.reduce((n, d) => n + d.length, 0);
-  const eocd = new Uint8Array(22);
-  const ev = new DataView(eocd.buffer);
-  ev.setUint32(0, 0x06054b50, true);
-  ev.setUint16(8, entries.length, true);
-  ev.setUint16(10, entries.length, true);
-  ev.setUint32(12, centralSize, true);
-  ev.setUint32(16, offset, true);
-  const parts = [...local, ...central, eocd];
-  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-  let pos = 0;
-  for (const p of parts) {
-    out.set(p, pos);
-    pos += p.length;
-  }
-  return out;
-}
+const { track, song, line, zip } = require('./helpers.js');
 
 describe('detectFormat()', () => {
   test('MIDI by content, whatever the name', () => {

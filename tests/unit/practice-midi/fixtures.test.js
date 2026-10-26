@@ -94,8 +94,12 @@ describeIf(files.bach)(`${BACH}: the reference recipe`, () => {
 
 describeIf(files.bach)(`${BACH}: conversion`, () => {
   const source = files.bach && readMidi(files.bach);
-  const result = files.bach && convertFile(files.bach, '04-glori.mid');
-  const output = result && result.midi && readMidi(result.midi);
+  let result;
+  let output;
+  beforeAll(async () => {
+    result = await convertFile(files.bach, '04-glori.mid');
+    output = readMidi(result.midi);
+  });
 
   test('converts with no warnings', () => {
     expect(result.status).toBe('ok');
@@ -160,8 +164,12 @@ describeIf(files.bach)(`${BACH}: conversion`, () => {
 
 describeIf(files.schutz)(`${SCHUTZ}: conversion`, () => {
   const source = files.schutz && readMidi(files.schutz);
-  const result = files.schutz && convertFile(files.schutz, '137_Beschluss.midi');
-  const output = result && result.midi && readMidi(result.midi);
+  let result;
+  let output;
+  beforeAll(async () => {
+    result = await convertFile(files.schutz, '137_Beschluss.midi');
+    output = readMidi(result.midi);
+  });
 
   test('classifies the Latin-named voices as S, A, T, B', () => {
     expect(result.summary.parts.map(p => [p.sourceName, p.name, p.role, p.classifiedBy])).toEqual([
@@ -206,10 +214,138 @@ describeIf(files.schutz)(`${SCHUTZ}: conversion`, () => {
 });
 
 describeIf(files.ursic)('Bach, Kyrie, Ursic edition (Ws-bach-m1a.mid): merged voices', () => {
-  test('is rejected because the voices cannot be separated', () => {
-    const result = convertFile(files.ursic, 'Ws-bach-m1a.mid');
+  test('is rejected because the voices cannot be separated', async () => {
+    const result = await convertFile(files.ursic, 'Ws-bach-m1a.mid');
     expect(result.status).toBe('rejected');
     expect(result.midi).toBeNull();
     expect(result.messages.map(m => m.code)).toEqual(['voices-merged']);
+  });
+});
+
+const xmlFiles = {
+  gratias: fixture('Ws-bach-m06.mxl'),
+  gratiasMidi: fixture('Ws-bach-m06.mid'),
+  crucifixus: fixture('Bach-cru2.mxl')
+};
+
+describeIf(xmlFiles.gratias)('Bach, Gratias, Ursic edition (Ws-bach-m06.mxl): MusicXML', () => {
+  let result;
+  let output;
+  beforeAll(async () => {
+    result = await convertFile(xmlFiles.gratias, 'Ws-bach-m06.mxl');
+    output = readMidi(result.midi);
+  });
+
+  test('converts with a warning that there are no dynamics', () => {
+    expect(result.format).toBe('mxl');
+    expect(result.status).toBe('warning');
+    expect(result.messages.filter(m => m.level === 'warning').map(m => m.code)).toEqual(['no-dynamics']);
+  });
+
+  test('finds S, A, T, B by name and keeps the piano as accompaniment', () => {
+    expect(result.summary.parts.map(p => [p.sourceName, p.name, p.role, p.classifiedBy])).toEqual([
+      ['Sopran  I & II', 'Soprano', 'voice', 'name'],
+      ['Alt', 'Alto', 'voice', 'name'],
+      ['Tenor', 'Tenor', 'voice', 'name'],
+      ['Bass', 'Bass', 'voice', 'name'],
+      ['Grand Piano', 'Grand Piano', 'accompaniment', 'name']
+    ]);
+  });
+
+  test('output audits to the recipe', () => {
+    expectAuditsToRecipe(output);
+  });
+
+  test('has the expected notes, tempo and length', () => {
+    expect(result.summary.parts.slice(0, 4).map(p => p.noteCount)).toEqual([222, 223, 226, 217]);
+    expect(result.summary.parts.slice(0, 4).map(p => [p.lowestNote, p.highestNote])).toEqual([[62, 79], [59, 74], [50, 69], [42, 64]]);
+    expect(result.summary.initialBpm).toBeCloseTo(112, 3);
+    // 46 bars of 4/2 at 112 quarters a minute
+    expect(result.summary.durationSeconds).toBeCloseTo(46 * 8 * 60 / 112, 0);
+  });
+
+  test('keeps the lyrics on each voice', () => {
+    const lyricCounts = auditMidi(output).tracks.filter(t => isChoralTrackName(t.name)).map(t => t.lyricCount);
+    expect(lyricCounts.every(n => n > 100)).toBe(true);
+  });
+});
+
+describeIf(xmlFiles.gratias && xmlFiles.gratiasMidi)('Bach, Gratias, Ursic edition: MusicXML against the same edition\'s MIDI', () => {
+  // The MIDI has the four voices on one channel, so where two voices overlap
+  // on the same pitch its note-offs can't be matched to note-ons. Compare
+  // note starts and note ends separately (in quarter notes, as the
+  // resolutions differ), which is what is heard either way.
+  const noteEdges = (midi, tracks, edge) => tracks
+    .flatMap(i => extractNotes(midi.tracks[i].events))
+    .map(n => `${(edge === 'start' ? n.tick : n.tick + n.duration) / midi.ticksPerQuarter}:${n.note}`)
+    .sort();
+
+  let fromXml;
+  let fromMidi;
+  beforeAll(async () => {
+    fromXml = readMidi((await convertFile(xmlFiles.gratias, 'Ws-bach-m06.mxl')).midi);
+    fromMidi = readMidi(xmlFiles.gratiasMidi);
+  });
+
+  test('the voices have the same notes as the choir track of the MIDI', () => {
+    expect(metaText(fromMidi.tracks[2], META.TRACK_NAME)).toBe('Choir Aahs');
+    for (const edge of ['start', 'end']) {
+      expect(noteEdges(fromXml, [1, 2, 3, 4], edge)).toEqual(noteEdges(fromMidi, [2], edge));
+    }
+  });
+
+  test('the piano has the same notes as the piano track of the MIDI', () => {
+    expect(metaText(fromMidi.tracks[1], META.TRACK_NAME)).toBe('Grand Piano');
+    for (const edge of ['start', 'end']) {
+      expect(noteEdges(fromXml, [5], edge)).toEqual(noteEdges(fromMidi, [1], edge));
+    }
+  });
+});
+
+describeIf(xmlFiles.crucifixus)('Bach, Crucifixus, Nelson edition (Bach-cru2.mxl): MusicXML', () => {
+  let result;
+  let output;
+  beforeAll(async () => {
+    result = await convertFile(xmlFiles.crucifixus, 'Bach-cru2.mxl');
+    output = readMidi(result.midi);
+  });
+
+  test('finds S, A, T, B and keeps the organ and pedals as accompaniment', () => {
+    expect(result.summary.parts.map(p => [p.sourceName, p.name, p.role])).toEqual([
+      ['SOPRANO*', 'Soprano', 'voice'],
+      ['ALTO', 'Alto', 'voice'],
+      ['TENOR', 'Tenor', 'voice'],
+      ['BASS', 'Bass', 'voice'],
+      ['ORGAN', 'ORGAN', 'accompaniment'],
+      ['Pedals', 'Pedals', 'accompaniment']
+    ]);
+    expect(output.tracks.find(t => metaText(t, META.TRACK_NAME) === 'ORGAN').events.find(e => e.type === 'program').program).toBe(19);
+  });
+
+  test('warns only that there is no tempo', () => {
+    expect(result.messages.filter(m => m.level === 'warning').map(m => m.code)).toEqual(['no-tempo']);
+  });
+
+  test('output audits to the recipe', () => {
+    expectAuditsToRecipe(output);
+  });
+
+  test('plays the tenor at sung pitch despite the doubled octave transposition', () => {
+    const tenor = result.summary.parts.find(p => p.name === 'Tenor');
+    expect([tenor.lowestNote, tenor.highestNote]).toEqual([50, 64]);
+  });
+
+  test('applies the written p near the end', () => {
+    const velocities = Object.keys(auditMidi(output).tracks.find(t => t.name === 'Soprano').velocities);
+    expect(velocities).toEqual(['48', '75']);
+  });
+
+  test('takes title, composer and copyright from the score', () => {
+    expect(result.suggested).toEqual({ title: 'Messe in h-Moll: Crucifixus', composer: 'J.S. Bach' });
+    expect(auditMidi(output).copyright[0]).toMatch(/^Copyright © 2010 by Choral Public Domain Library/);
+  });
+
+  test('lasts 53 bars of 3/2 at the default tempo', () => {
+    expect(result.summary.durationSeconds).toBeCloseTo(53 * 6 * 60 / 120, 0);
   });
 });

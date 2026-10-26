@@ -4,41 +4,7 @@
  * give a more helpful message for notation program files.
  */
 
-/**
- * List the files in a zip archive from its central directory, without
- * extracting anything (so the uncompressed size can be checked first)
- * @param {Uint8Array} bytes - Zip file contents
- * @returns {Array<{name: string, compressedSize: number, uncompressedSize: number}>|null} Entries, or null if not a readable zip
- */
-export function readZipDirectory(bytes) {
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    // The end of central directory record is in the last 22 + 65535 bytes
-    let eocd = -1;
-    for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 22 - 65535); i--) {
-        if (view.getUint32(i, true) === 0x06054b50) {
-            eocd = i;
-            break;
-        }
-    }
-    if (eocd < 0) return null;
-
-    const count = view.getUint16(eocd + 10, true);
-    let pos = view.getUint32(eocd + 16, true);
-    const entries = [];
-    for (let i = 0; i < count; i++) {
-        if (pos + 46 > bytes.length || view.getUint32(pos, true) !== 0x02014b50) return null;
-        const compressedSize = view.getUint32(pos + 20, true);
-        const uncompressedSize = view.getUint32(pos + 24, true);
-        const nameLength = view.getUint16(pos + 28, true);
-        const extraLength = view.getUint16(pos + 30, true);
-        const commentLength = view.getUint16(pos + 32, true);
-        if (pos + 46 + nameLength > bytes.length) return null;
-        const name = new TextDecoder().decode(bytes.subarray(pos + 46, pos + 46 + nameLength));
-        entries.push({ name, compressedSize, uncompressedSize });
-        pos += 46 + nameLength + extraLength + commentLength;
-    }
-    return entries;
-}
+import { readZipDirectory } from './zip.js';
 
 /**
  * Name of the root element of an XML document, or null if it is not XML

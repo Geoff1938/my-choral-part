@@ -42,9 +42,14 @@ export const message = {
         level: 'reject', code: 'unknown-format',
         text: 'This doesn\'t look like a MIDI or MusicXML file. Please choose a MIDI (.mid) or MusicXML (.musicxml, .xml or .mxl) file.'
     }),
-    musicXmlNotYet: () => ({
-        level: 'reject', code: 'musicxml-not-supported',
-        text: 'MusicXML files can\'t be converted yet. Please use a MIDI file for now.'
+    musicXmlProblem: (code, detail) => ({
+        level: 'reject',
+        code,
+        text: {
+            'mxl-too-large': 'This compressed MusicXML file is too large when unpacked (the limit is 50 MB).',
+            'mxl-broken': 'This compressed MusicXML (.mxl) file is damaged or doesn\'t contain a score.',
+            'no-decompression': 'Your browser can\'t open compressed MusicXML (.mxl) files. Update your browser, or export uncompressed MusicXML (.musicxml) and upload that.'
+        }[code] || `This MusicXML file couldn't be read (${detail}). It may be damaged.`
     }),
     unreadable: reason => ({
         level: 'reject', code: 'unreadable',
@@ -89,6 +94,10 @@ export const message = {
     roleInferred: (sourceName, outputName) => ({
         level: 'warning', code: 'role-inferred',
         text: `We couldn't tell which voice ${quoted(sourceName)} is from its name, so it has been treated as ${outputName} because of its range. Please check this is right.`
+    }),
+    voicesSplit: partName => ({
+        level: 'warning', code: 'voices-split',
+        text: `The part ${quoted(partName)} had more than one voice on a stave, so it has been split into separate parts. Please check they are right.`
     }),
     noTempo: () => ({
         level: 'warning', code: 'no-tempo',
