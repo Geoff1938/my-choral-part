@@ -61,3 +61,6 @@ coverage/
 *.jpg
 *.bat
 nul
+
+# Private test fixtures (copyrighted; this repo is public)
+tests/fixtures/private/
