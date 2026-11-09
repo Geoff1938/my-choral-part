@@ -1,5 +1,5 @@
 /**
- * Integration tests for sharing pieces and sets (M5)
+ * Integration tests for sharing pieces and sets
  */
 
 const request = require('supertest');
@@ -22,7 +22,9 @@ describe('Sharing', () => {
   let practiceMidi;
 
   beforeAll(async () => {
-    app = require('../../server').app;
+    const server = require('../../server');
+    app = server.app;
+    await server.scraper.loadIndex();
     practiceMidi = Buffer.from((await convertFile(midiBytes(satb()), 'Anthem.mid')).midi);
   });
 
@@ -37,18 +39,20 @@ describe('Sharing', () => {
     res.on('end', () => cb(null, Buffer.concat(chunks)));
   });
 
-  // A library with saved pieces; returns its cookie and piece ids
-  async function owner(titles = ['Gloria']) {
+  // A library with uploaded pieces; returns its cookie and piece ids
+  async function owner(titles = ['Gloria'], composer = 'Vivaldi') {
     let cookie;
     const ids = [];
     for (const title of titles) {
       const saved = await send('post', '/api/library/pieces', cookie)
-        .send({ title, composer: 'Vivaldi', midi: practiceMidi.toString('base64') });
+        .send({ title, composer, midi: practiceMidi.toString('base64') });
       cookie = cookie || cookieOf(saved);
       ids.push(saved.body.piece.id);
     }
     return { cookie, ids };
   }
+  const attest = cookie => send('post', '/api/library/attest', cookie).send({ confirmed: true });
+  const uploads = ids => ids.map(pieceId => ({ kind: 'upload', pieceId }));
 
   test('sharing needs the owner\'s confirmation first', async () => {
     const { cookie, ids } = await owner();
@@ -57,16 +61,29 @@ describe('Sharing', () => {
     expect(refused.body.error).toMatch(/confirm/);
 
     expect((await send('post', '/api/library/attest', cookie).send({})).status).toBe(400);
-    expect((await send('post', '/api/library/attest', cookie).send({ confirmed: true })).body).toEqual({ attested: true });
+    expect((await attest(cookie)).body).toEqual({ attested: true });
     expect((await send('get', '/api/library', cookie)).body.attested).toBe(true);
+  });
+
+  test('a piece needs a composer before it can be shared', async () => {
+    const { cookie, ids } = await owner(['Anthem'], '');
+    await attest(cookie);
+    const refused = await send('post', `/api/library/pieces/${ids[0]}/share`, cookie);
+    expect(refused.status).toBe(400);
+    expect(refused.body.error).toMatch(/composer/);
+  });
+
+  test('share links are made from the name plus a short random ending', async () => {
+    const { cookie, ids } = await owner(['Gloria in excelsis']);
+    await attest(cookie);
+    const token = (await send('post', `/api/library/pieces/${ids[0]}/share`, cookie)).body.shareToken;
+    expect(token).toMatch(/^vivaldi-gloria-in-excelsis-[a-z0-9]{4}$/);
   });
 
   test('a shared piece can be opened and played by anyone with the link, then unshared', async () => {
     const { cookie, ids } = await owner();
-    await send('post', '/api/library/attest', cookie).send({ confirmed: true });
-    const shared = await send('post', `/api/library/pieces/${ids[0]}/share`, cookie);
-    const token = shared.body.shareToken;
-    expect(token).toMatch(/^[A-Za-z0-9_-]{16}$/);
+    await attest(cookie);
+    const token = (await send('post', `/api/library/pieces/${ids[0]}/share`, cookie)).body.shareToken;
     // Sharing again keeps the same link
     expect((await send('post', `/api/library/pieces/${ids[0]}/share`, cookie)).body.shareToken).toBe(token);
 
@@ -88,48 +105,65 @@ describe('Sharing', () => {
     expect((await request(app).get(`/p/${token}`)).status).toBe(404);
   });
 
-  test('sets keep their pieces in order and can be shared', async () => {
-    const { cookie, ids } = await owner(['Kyrie', 'Gloria', 'Credo']);
-    const created = await send('post', '/api/library/sets', cookie).send({ title: 'Spring concert', pieceIds: [ids[2], ids[0]] });
+  test('sets mix uploaded files with catalogue works and movements, in order', async () => {
+    const { cookie, ids } = await owner(['Kyrie', 'Credo']);
+    const items = [
+      { kind: 'work', composer: 'Handel', work: 'Messiah' },
+      { kind: 'upload', pieceId: ids[1] },
+      { kind: 'movement', composer: 'Handel', work: 'Messiah', movement: '3: And the glory of the Lord' },
+      { kind: 'upload', pieceId: ids[0] }
+    ];
+    const created = await send('post', '/api/library/sets', cookie).send({ title: 'Spring concert 2027', items });
     expect(created.status).toBe(201);
-    const setId = created.body.set.id;
-    expect(created.body.set.pieceIds).toEqual([ids[2], ids[0]]);
+    const set = created.body.set;
+    expect(set.items).toEqual([
+      { kind: 'work', composer: 'Handel', work: 'Messiah' },
+      { kind: 'upload', pieceId: ids[1], title: 'Credo', composer: 'Vivaldi' },
+      { kind: 'movement', composer: 'Handel', work: 'Messiah', movement: '3: And the glory of the Lord', midiUrl: '/Handel/Messiah/03-glory.mid' },
+      { kind: 'upload', pieceId: ids[0], title: 'Kyrie', composer: 'Vivaldi' }
+    ]);
 
-    const updated = await send('patch', `/api/library/sets/${setId}`, cookie).send({ pieceIds: [ids[0], ids[1], ids[2]] });
-    expect(updated.body.set.pieceIds).toEqual(ids);
+    // Reorder
+    const updated = await send('patch', `/api/library/sets/${set.id}`, cookie).send({ items: [items[3], items[0]] });
+    expect(updated.body.set.items.map(i => i.kind)).toEqual(['upload', 'work']);
 
-    await send('post', '/api/library/attest', cookie).send({ confirmed: true });
-    const token = (await send('post', `/api/library/sets/${setId}/share`, cookie)).body.shareToken;
+    await attest(cookie);
+    const token = (await send('post', `/api/library/sets/${set.id}/share`, cookie)).body.shareToken;
+    expect(token).toMatch(/^spring-concert-2027-[a-z0-9]{4}$/);
 
     const info = await request(app).get(`/api/shared/s/${token}`);
-    expect(info.body.title).toBe('Spring concert');
-    expect(info.body.pieces.map(p => p.title)).toEqual(['Kyrie', 'Gloria', 'Credo']);
+    expect(info.body.title).toBe('Spring concert 2027');
+    expect(info.body.items.map(i => i.kind)).toEqual(['upload', 'work']);
 
-    expect((await binary(request(app).get(`/api/shared/s/${token}/pieces/${ids[1]}/midi`))).status).toBe(200);
-    // Only pieces in the set can be fetched through its link
-    const other = await owner(['Not in the set']);
-    expect((await request(app).get(`/api/shared/s/${token}/pieces/${other.ids[0]}/midi`)).status).toBe(404);
+    expect((await binary(request(app).get(`/api/shared/s/${token}/pieces/${ids[0]}/midi`))).status).toBe(200);
+    // Only uploaded files in the set can be fetched through its link
+    expect((await request(app).get(`/api/shared/s/${token}/pieces/${ids[1]}/midi`)).status).toBe(404);
 
-    // Deleting a piece removes it from the set
-    await send('delete', `/api/library/pieces/${ids[1]}`, cookie);
-    expect((await request(app).get(`/api/shared/s/${token}`)).body.pieces.map(p => p.title)).toEqual(['Kyrie', 'Credo']);
+    // Deleting an uploaded file removes it from the set
+    await send('delete', `/api/library/pieces/${ids[0]}`, cookie);
+    expect((await request(app).get(`/api/shared/s/${token}`)).body.items.map(i => i.kind)).toEqual(['work']);
 
-    expect((await request(app).get(`/s/${token}`)).text).toContain('Spring concert - Shared Set');
+    expect((await request(app).get(`/s/${token}`)).text).toContain('Spring concert 2027 - Shared Set');
   });
 
-  test('a set can only contain the owner\'s own pieces', async () => {
+  test('set items must be the owner\'s uploads or real catalogue entries', async () => {
     const mine = await owner(['Mine']);
     const theirs = await owner(['Theirs']);
-    const response = await send('post', '/api/library/sets', mine.cookie).send({ title: 'Mixed', pieceIds: [mine.ids[0], theirs.ids[0]] });
-    expect(response.status).toBe(400);
-    expect((await send('post', '/api/library/sets', mine.cookie).send({ title: 'Twice', pieceIds: [mine.ids[0], mine.ids[0]] })).status).toBe(400);
+    const create = items => send('post', '/api/library/sets', mine.cookie).send({ title: 'Test', items });
+
+    expect((await create([{ kind: 'upload', pieceId: theirs.ids[0] }])).status).toBe(400);
+    expect((await create([{ kind: 'work', composer: 'Handel', work: 'No such work' }])).status).toBe(400);
+    expect((await create([{ kind: 'movement', composer: 'Handel', work: 'Messiah', movement: 'Not a movement' }])).status).toBe(400);
+    expect((await create([{ kind: 'something' }])).status).toBe(400);
+    // The same piece twice is fine (e.g. a reprise)
+    expect((await create(uploads([mine.ids[0], mine.ids[0]]))).status).toBe(201);
   });
 
-  test('recipients can add shared pieces and sets to their library, which follow the owner', async () => {
+  test('recipients can add shared pieces and sets to their list, which follow the owner', async () => {
     const { cookie, ids } = await owner(['Ave verum']);
-    await send('post', '/api/library/attest', cookie).send({ confirmed: true });
+    await attest(cookie);
     const pieceToken = (await send('post', `/api/library/pieces/${ids[0]}/share`, cookie)).body.shareToken;
-    const setId = (await send('post', '/api/library/sets', cookie).send({ title: 'Motets', pieceIds: ids })).body.set.id;
+    const setId = (await send('post', '/api/library/sets', cookie).send({ title: 'Motets', items: uploads(ids) })).body.set.id;
     const setToken = (await send('post', `/api/library/sets/${setId}/share`, cookie)).body.shareToken;
 
     // A new visitor adding a link gets a library (and cookie) of their own
@@ -142,27 +176,26 @@ describe('Sharing', () => {
     expect(list.pieces).toEqual([]);
     expect(list.references.map(r => [r.kind, r.title, r.available])).toEqual(
       expect.arrayContaining([['piece', 'Ave verum', true], ['set', 'Motets', true]]));
+    expect(list.references.find(r => r.kind === 'set').itemCount).toBe(1);
     expect((await request(app).get(`/api/shared/p/${pieceToken}`).set('Cookie', recipient)).body.inLibrary).toBe(true);
 
-    // The owner renames: the recipient sees the new title. The owner stops sharing: no longer available.
     await send('patch', `/api/library/pieces/${ids[0]}`, cookie).send({ title: 'Ave verum corpus' });
     await send('delete', `/api/library/sets/${setId}/share`, cookie);
     list = (await send('get', '/api/library', recipient)).body;
     expect(list.references.find(r => r.kind === 'piece').title).toBe('Ave verum corpus');
     expect(list.references.find(r => r.kind === 'set').available).toBe(false);
 
-    // Owners can't add their own links; unknown links are refused
     expect((await send('post', '/api/library/references', cookie).send({ kind: 'piece', token: pieceToken })).status).toBe(400);
-    expect((await send('post', '/api/library/references', recipient).send({ kind: 'piece', token: 'AAAAAAAAAAAAAAAA' })).status).toBe(404);
+    expect((await send('post', '/api/library/references', recipient).send({ kind: 'piece', token: 'no-such-link-abcd' })).status).toBe(404);
 
     expect((await send('delete', `/api/library/references/set/${setToken}`, recipient)).status).toBe(204);
     expect((await send('get', '/api/library', recipient)).body.references).toHaveLength(1);
   });
 
   test('unknown share links are not found', async () => {
-    expect((await request(app).get('/api/shared/p/AAAAAAAAAAAAAAAA')).status).toBe(404);
-    expect((await request(app).get('/api/shared/s/not-a-token')).status).toBe(404);
-    const page = await request(app).get('/s/AAAAAAAAAAAAAAAA');
+    expect((await request(app).get('/api/shared/p/no-such-link-abcd')).status).toBe(404);
+    expect((await request(app).get('/api/shared/s/Not_A_Token!')).status).toBe(404);
+    const page = await request(app).get('/s/no-such-link-abcd');
     expect(page.status).toBe(404);
     expect(page.text).toContain('Shared Link Not Available');
   });

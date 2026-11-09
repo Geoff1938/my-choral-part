@@ -188,7 +188,25 @@ app.use('/api/activity', activityLogLimiter, activityRouter);
 
 // Apply rate limiting to API routes
 // Users' saved pieces - mounted before /api so it has its own rate limit
-app.use('/api/library', libraryLimiter, requireSameOrigin, createLibraryRoutes());
+// Catalogue works and movements a user puts in a set are checked against the index
+const resolveCatalogueItem = item => {
+  const index = scraper.indexCache || [];
+  const composer = index.find(c => c.name === item.composer);
+  const work = composer && composer.works.find(w => w.name === item.work);
+  if (!work) return null;
+  if (item.kind === 'work') {
+    return { kind: 'work', composer: composer.name, work: work.name };
+  }
+  const section = work.sections.find(s => s.name === item.movement);
+  return section
+    ? { kind: 'movement', composer: composer.name, work: work.name, movement: section.name, midiUrl: section.midiUrl }
+    : null;
+};
+app.use('/api/library', libraryLimiter, requireSameOrigin, async (req, res, next) => {
+  // Make sure the index is loaded before set items are checked against it
+  await scraper.loadIndex();
+  next();
+}, createLibraryRoutes(resolveCatalogueItem));
 
 // Opening shared links (read-only, anyone with the link)
 app.use('/api/shared', libraryLimiter, createSharedRoutes());
@@ -257,7 +275,7 @@ function sendHtml(res, html, status = 200) {
 // Shared links: /p/<code> (a piece) and /s/<code> (a set). The player loads
 // them itself; the server only fills in a title for link previews. Must come
 // before the composer and work page routes.
-app.get(/^\/(p|s)\/([A-Za-z0-9_-]{16})$/, async (req, res, next) => {
+app.get(/^\/(p|s)\/([a-z0-9-]{6,50}|[A-Za-z0-9_-]{16})$/, async (req, res, next) => {
   try {
     const kind = req.params[0] === 's' ? 'set' : 'piece';
     const found = kind === 'set'

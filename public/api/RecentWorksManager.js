@@ -69,6 +69,27 @@ export class RecentWorksManager {
     }
 
     /**
+     * Save an uploaded file or set as a recent work
+     * @param {Object} entry - { type: 'upload', pieceId, title, composer },
+     *     { type: 'shared-piece', token, title, composer }, { type: 'set', setId, title }
+     *     or { type: 'shared-set', token, title }
+     * @returns {Promise<Array>} Updated array of recent works
+     */
+    async saveEntry(entry) {
+        try {
+            const key = item => `${item.type || 'work'}:${item.pieceId || item.setId || item.token || `${item.composer}|${item.work}`}`;
+            const recent = (await this.load()).filter(item => key(item) !== key(entry));
+            recent.unshift(entry);
+            const kept = recent.slice(0, this.maxCount);
+            localStorage.setItem(this.storageKey, JSON.stringify(kept));
+            return kept;
+        } catch (error) {
+            console.error('Error saving recent work to localStorage:', error);
+            return [];
+        }
+    }
+
+    /**
      * Clear all recent works
      * @returns {Promise<void>}
      */

@@ -2243,3 +2243,53 @@ section:last-child {
     margin: 6px 0 0;
     font-size: var(--font-size-small);
 }
+
+/* ===== My sets: adding items ===== */
+
+.library-add {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.library-add-label {
+    font-size: var(--font-size-small);
+    color: var(--text-secondary);
+}
+
+.library-search {
+    display: flex;
+    gap: 6px;
+}
+
+.library-search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: var(--font-size-small);
+    color: var(--text-primary);
+}
+
+.library-search .btn,
+.library-results .btn {
+    width: auto;
+    padding: 4px 10px;
+    font-size: var(--font-size-small);
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.library-results {
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.library-heading-row .library-summary {
+    margin: 0;
+    flex: 1 1 auto;
+}

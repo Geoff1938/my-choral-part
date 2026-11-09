@@ -1,11 +1,12 @@
 /**
  * ImportDialog
  * "Or load your own MIDI or MusicXML file..." on the Find Music tab. The user
- * picks a file, it is converted into a practice MIDI in the browser (nothing
- * is uploaded), and a report is shown with options to play or download it.
+ * picks a file, it is converted into a practice MIDI in the browser (the
+ * original file never leaves the device), and a report is shown. Play now
+ * saves the practice MIDI to the user's uploaded files (My uploaded files)
+ * and opens it in the player.
  *
- * The report wording and file naming are plain functions (below the class's
- * helpers) so they can be tested without a browser.
+ * The report wording is in plain functions so it can be tested without a browser.
  */
 
 import { escapeHtml } from '../utils/validation.js';
@@ -63,42 +64,26 @@ export function failureReport(filename) {
     }, filename);
 }
 
-/**
- * File name for the downloaded practice MIDI, e.g. "Gloria (practice).mid"
- * @param {string} title - Piece title
- * @returns {string} Safe file name
- */
-export function practiceFilename(title) {
-    const safe = String(title || 'Piece')
-        .replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 80) || 'Piece';
-    return `${safe} (practice).mid`;
-}
-
 export class ImportDialog {
     /**
      * @param {Object} options
      * @param {HTMLDialogElement} options.dialog - The dialog element
      * @param {HTMLElement} options.openButton - Control that opens the dialog
-     * @param {Function} options.onPlay - Called with (midiBytes, title, { pieceId, composer })
-     *     when the user chooses Play now; pieceId is set if the piece was saved first
-     * @param {Function} [options.onSaved] - Called with the saved piece after Save to my library
+     * @param {Function} options.onPlay - Called with (midiBytes, title, { pieceId, composer, kind, saveError })
+     *     when the user chooses Play now. The piece is saved to the user's
+     *     uploaded files first; if that fails it still plays, with saveError set.
      * @param {Function} [options.loadConverter] - Returns the converter module (for tests)
      * @param {Object} [options.api] - Library API (for tests)
      */
-    constructor({ dialog, openButton, onPlay, onSaved, loadConverter, api }) {
+    constructor({ dialog, openButton, onPlay, loadConverter, api }) {
         this.dialog = dialog;
         this.openButton = openButton;
         this.onPlay = onPlay;
-        this.onSaved = onSaved || (() => {});
         this.api = api || LibraryApi;
         // The converter is only downloaded when someone first uses this dialog
         this.loadConverter = loadConverter || (() => import('../practice-midi/convert.js'));
         this.result = null;
         this.report = null;
-        this.savedPiece = null;
 
         if (!dialog || !openButton) return;
         const find = id => dialog.querySelector(`#${id}`);
@@ -108,12 +93,10 @@ export class ImportDialog {
         this.workingPanel = find('import-working');
         this.reportPanel = find('import-report');
         this.playButton = find('import-play-btn');
-        this.downloadButton = find('import-download-btn');
         this.againButton = find('import-again-btn');
+        this.cancelButton = find('import-cancel-btn');
         this.closeButton = find('import-dialog-close');
         this.savedHint = find('import-saved-hint');
-        this.saveButton = find('import-save-btn');
-        this.saveStatus = find('import-save-status');
 
         this.bindEvents();
     }
@@ -121,6 +104,7 @@ export class ImportDialog {
     bindEvents() {
         this.openButton.addEventListener('click', () => this.open());
         this.closeButton.addEventListener('click', () => this.dialog.close());
+        this.cancelButton.addEventListener('click', () => this.dialog.close());
         // Clicking the shaded area outside the dialog closes it
         this.dialog.addEventListener('click', event => {
             if (event.target === this.dialog) this.dialog.close();
@@ -148,49 +132,29 @@ export class ImportDialog {
             if (file) this.handleFile(file);
         });
 
-        this.playButton.addEventListener('click', () => {
-            if (!this.result || !this.report || !this.report.canPlay) return;
-            this.dialog.close();
-            const saved = this.savedPiece;
-            this.onPlay(this.result.midi, saved ? saved.title : this.report.heading, {
-                pieceId: saved ? saved.id : null,
-                composer: saved ? saved.composer : this.report.subheading
-            });
-        });
-        this.downloadButton.addEventListener('click', () => this.download());
-        this.saveButton.addEventListener('click', () => this.save());
+        this.playButton.addEventListener('click', () => this.play());
     }
 
     /**
-     * Save the converted piece to the user's library
+     * Play now: save the piece to the user's uploaded files, then hand it to the player
      */
-    async save() {
-        if (!this.result || !this.report || !this.report.canPlay || this.savedPiece) return;
-        this.saveButton.disabled = true;
-        this.saveButton.textContent = 'Saving…';
-        this.setSaveStatus('', '');
+    async play() {
+        if (!this.result || !this.report || !this.report.canPlay || this.playButton.disabled) return;
+        const { heading: title, subheading: composer } = this.report;
+        const midi = this.result.midi;
+        this.playButton.disabled = true;
+        this.playButton.textContent = 'Saving…';
+        let options;
         try {
-            this.savedPiece = await this.api.save({
-                title: this.report.heading,
-                composer: this.report.subheading,
-                midi: this.result.midi
-            });
-            this.saveButton.textContent = 'Saved to your library';
-            this.setSaveStatus('Saved. Find it again under My library on the Find Music tab.', 'success');
-            if (this.savedHint) this.savedHint.hidden = true;
-            this.onSaved(this.savedPiece);
+            const saved = await this.api.save({ title, composer, midi });
+            options = { pieceId: saved.id, composer: saved.composer, kind: 'library' };
         } catch (error) {
-            this.saveButton.disabled = false;
-            this.saveButton.textContent = 'Save to my library';
-            this.setSaveStatus(error.message, 'error');
+            options = { pieceId: null, composer, kind: 'file', saveError: error.message };
         }
-    }
-
-    setSaveStatus(text, type) {
-        if (!this.saveStatus) return;
-        this.saveStatus.textContent = text;
-        this.saveStatus.className = `import-save-status${type ? ` import-save-status-${type}` : ''}`;
-        this.saveStatus.hidden = !text;
+        this.playButton.disabled = false;
+        this.playButton.textContent = 'Play now';
+        this.dialog.close();
+        this.onPlay(midi, title, options);
     }
 
     open() {
@@ -215,7 +179,6 @@ export class ImportDialog {
      */
     async handleFile(file) {
         this.result = null;
-        this.savedPiece = null;
         this.showPanel('working');
         try {
             const { convertFile } = await this.loadConverter();
@@ -240,36 +203,19 @@ export class ImportDialog {
         ).join('');
 
         this.reportPanel.querySelector('.import-report-body').innerHTML =
-            `<h4 class="import-title">${escapeHtml(report.heading)}</h4>` +
             (report.subheading ? `<p class="import-composer">${escapeHtml(report.subheading)}</p>` : '') +
+            `<h4 class="import-title">${escapeHtml(report.heading)}</h4>` +
             `<p class="import-status import-status-${escapeHtml(report.status)}">${escapeHtml(report.statusText)}</p>` +
             `<ul class="import-messages">${items}</ul>`;
 
+        // A playable file: Play now / Cancel. A rejected one: Choose another file / Cancel.
         this.playButton.hidden = !report.canPlay;
-        this.downloadButton.hidden = !report.canPlay;
-        this.saveButton.hidden = !report.canPlay;
-        this.saveButton.disabled = false;
-        this.saveButton.textContent = 'Save to my library';
-        this.setSaveStatus('', '');
+        this.againButton.hidden = report.canPlay;
         if (this.savedHint) this.savedHint.hidden = !report.canPlay;
         if (report.canPlay) {
             this.playButton.focus();
         } else {
             this.againButton.focus();
         }
-    }
-
-    download() {
-        if (!this.result || !this.result.midi) return;
-        const blob = new Blob([this.result.midi], { type: 'audio/midi' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = practiceFilename(this.report.heading);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        // Give the browser time to start the download before releasing the data
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
     }
 }

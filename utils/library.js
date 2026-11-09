@@ -16,11 +16,13 @@ const crypto = require('crypto');
 const initSqlJs = require('sql.js');
 const fs = require('fs-extra');
 const path = require('path');
+const { toSlug } = require('./slug');
 
 // Limits, all adjustable
 const LIMITS = {
     PIECES_PER_LIBRARY: 100,
     SETS_PER_LIBRARY: 50,
+    ITEMS_PER_SET: 200,
     // Shared pieces and sets added from other people's links
     REFERENCES_PER_LIBRARY: 200,
     MAX_PIECE_BYTES: 5 * 1024 * 1024,
@@ -128,6 +130,31 @@ async function openLibrary() {
             PRIMARY KEY (set_id, piece_id)
         )
     `);
+    // What a set contains, in order: an uploaded piece ('upload', piece_id),
+    // a whole catalogue work ('work', composer + work) or one catalogue
+    // movement ('movement', composer + work + movement + midi_url)
+    db.run(`
+        CREATE TABLE IF NOT EXISTS set_items (
+            set_id TEXT NOT NULL,
+            position INTEGER NOT NULL,
+            kind TEXT NOT NULL,
+            piece_id TEXT,
+            composer TEXT,
+            work TEXT,
+            movement TEXT,
+            midi_url TEXT,
+            PRIMARY KEY (set_id, position)
+        )
+    `);
+    db.run('CREATE INDEX IF NOT EXISTS idx_set_items_piece ON set_items(piece_id)');
+    // Sets saved before November 2026 listed uploaded pieces in set_pieces
+    const oldRows = rows('SELECT set_id, piece_id, position FROM set_pieces ORDER BY set_id, position');
+    for (const row of oldRows) {
+        db.run('INSERT OR IGNORE INTO set_items (set_id, position, kind, piece_id) VALUES (?, ?, ?, ?)',
+            [row.set_id, row.position, 'upload', row.piece_id]);
+    }
+    if (oldRows.length) db.run('DELETE FROM set_pieces');
+
     // Pieces and sets other people shared that this library has added (a
     // reference by share code, not a copy: if the owner stops sharing or
     // deletes it, it is no longer available here either)
@@ -331,7 +358,7 @@ async function addPiece(libraryId, { title, composer, midi }) {
     }
     const count = rows('SELECT COUNT(*) AS n FROM pieces WHERE library_id = ?', [libraryId])[0].n;
     if (count >= LIMITS.PIECES_PER_LIBRARY) {
-        throw new LibraryError(409, `Your library is full (${LIMITS.PIECES_PER_LIBRARY} pieces). Delete a piece to make room.`);
+        throw new LibraryError(409, `My uploaded files is full (${LIMITS.PIECES_PER_LIBRARY} files). Delete a file to make room.`);
     }
     if (await storedBytes() + midi.length > LIMITS.MAX_TOTAL_BYTES) {
         console.error('[Library] Storage limit reached - refusing new pieces');
@@ -395,7 +422,7 @@ async function updatePiece(libraryId, pieceId, changes) {
 
 async function removePieceRows(pieceIds) {
     for (const id of pieceIds) {
-        db.run('DELETE FROM set_pieces WHERE piece_id = ?', [id]);
+        db.run('DELETE FROM set_items WHERE kind = ? AND piece_id = ?', ['upload', id]);
         db.run('DELETE FROM pieces WHERE id = ?', [id]);
         await fs.remove(path.join(paths.filesDir, `${id}.mid`));
     }
@@ -419,12 +446,37 @@ async function deletePiece(libraryId, pieceId) {
 
 // ===== Sharing (M5) =====
 
-function newToken() {
-    return crypto.randomBytes(12).toString('base64url');
+const TOKEN_ALPHABET = 'abcdefghijkmnpqrstuvwxyz23456789';
+
+/**
+ * A share code made from the title plus a short random ending, e.g.
+ * "spring-concert-2027-k7q2". The random part makes codes impractical to
+ * guess (about a million possibilities per title); unique across pieces and sets.
+ * @param {string} title - Piece or set title
+ * @param {string} fallback - Used if the title has no letters or digits
+ * @returns {string} Share code
+ */
+function newToken(title, fallback) {
+    const base = (toSlug(title).slice(0, 40).replace(/-+$/, '')) || fallback;
+    for (;;) {
+        let ending = '';
+        for (let i = 0; i < 4; i++) {
+            ending += TOKEN_ALPHABET[crypto.randomInt(TOKEN_ALPHABET.length)];
+        }
+        const token = `${base}-${ending}`;
+        const taken = rows('SELECT 1 FROM pieces WHERE share_token = ? UNION SELECT 1 FROM sets WHERE share_token = ?', [token, token]);
+        if (!taken.length) return token;
+    }
 }
 
+/**
+ * Whether text could be a share code: the current "title-abcd" form, or the
+ * 16-character random codes used before November 2026
+ */
 function isToken(token) {
-    return typeof token === 'string' && /^[A-Za-z0-9_-]{16}$/.test(token);
+    return typeof token === 'string' &&
+        (/^[a-z0-9]+(?:-[a-z0-9]+)*-[a-z0-9]{4}$/.test(token) && token.length <= 50 ||
+         /^[A-Za-z0-9_-]{16}$/.test(token));
 }
 
 function isId(id) {
@@ -469,8 +521,11 @@ async function sharePiece(libraryId, pieceId) {
     await requireAttested(libraryId);
     const row = ownedPiece(libraryId, pieceId);
     if (!row) return null;
+    if (!row.composer) {
+        throw new LibraryError(400, 'Please add the composer before sharing, so people know what the piece is.');
+    }
     if (!row.share_token) {
-        db.run('UPDATE pieces SET share_token = ? WHERE id = ?', [newToken(), row.id]);
+        db.run('UPDATE pieces SET share_token = ? WHERE id = ?', [newToken(`${row.composer} ${row.title}`, 'piece'), row.id]);
         await saveLibrary();
     }
     return rows('SELECT share_token FROM pieces WHERE id = ?', [row.id])[0].share_token;
@@ -530,15 +585,35 @@ async function readSharedPiece(token) {
 
 // ----- Sets -----
 
-function setPieceIds(setId) {
-    return rows('SELECT piece_id FROM set_pieces WHERE set_id = ? ORDER BY position', [setId]).map(r => r.piece_id);
+/**
+ * A set's items in order. Uploaded pieces carry their current title and
+ * composer; pieces since deleted are left out.
+ * @param {string} setId - Set
+ * @returns {Array<Object>} Items: { kind: 'upload', pieceId, title, composer },
+ *     { kind: 'work', composer, work } or { kind: 'movement', composer, work, movement, midiUrl }
+ */
+function setItems(setId) {
+    const items = [];
+    for (const row of rows('SELECT * FROM set_items WHERE set_id = ? ORDER BY position', [setId])) {
+        if (row.kind === 'upload') {
+            const piece = rows('SELECT title, composer FROM pieces WHERE id = ?', [row.piece_id])[0];
+            if (piece) {
+                items.push({ kind: 'upload', pieceId: row.piece_id, title: piece.title, composer: piece.composer || '' });
+            }
+        } else if (row.kind === 'work') {
+            items.push({ kind: 'work', composer: row.composer, work: row.work });
+        } else {
+            items.push({ kind: 'movement', composer: row.composer, work: row.work, movement: row.movement, midiUrl: row.midi_url });
+        }
+    }
+    return items;
 }
 
 function toSet(row) {
     return {
         id: row.id,
         title: row.title,
-        pieceIds: setPieceIds(row.id),
+        items: setItems(row.id),
         createdAt: row.created_at,
         shareToken: row.share_token || null
     };
@@ -560,37 +635,57 @@ async function listSets(libraryId) {
 }
 
 /**
- * Check a list of piece ids all belong to the library, without repeats
+ * Check and tidy a set's items. Uploaded pieces must be the library's own;
+ * catalogue works and movements are looked up with resolveCatalogue (from
+ * the route, which has the catalogue index) so only real ones are stored.
+ * @param {number} libraryId - Library
+ * @param {Array<Object>} items - Items from the request
+ * @param {Function} resolveCatalogue - (item) => tidied catalogue item, or null if not found
+ * @returns {Array<Object>} Items to store
  */
-function checkSetPieces(libraryId, pieceIds) {
-    if (!Array.isArray(pieceIds) || pieceIds.length > LIMITS.PIECES_PER_LIBRARY ||
-        new Set(pieceIds).size !== pieceIds.length) {
-        throw new LibraryError(400, 'The list of pieces isn\'t valid.');
+function checkSetItems(libraryId, items, resolveCatalogue) {
+    if (!Array.isArray(items) || items.length > LIMITS.ITEMS_PER_SET) {
+        throw new LibraryError(400, `A set can have at most ${LIMITS.ITEMS_PER_SET} items.`);
     }
-    for (const id of pieceIds) {
-        if (!ownedPiece(libraryId, id)) {
-            throw new LibraryError(400, 'A set can only contain pieces from your own library.');
+    return items.map(item => {
+        if (item && item.kind === 'upload') {
+            if (!ownedPiece(libraryId, item.pieceId)) {
+                throw new LibraryError(400, 'A set can only contain your own uploaded files.');
+            }
+            return { kind: 'upload', pieceId: item.pieceId };
         }
-    }
+        if (item && (item.kind === 'work' || item.kind === 'movement')) {
+            const found = resolveCatalogue ? resolveCatalogue(item) : null;
+            if (!found) {
+                throw new LibraryError(400, 'A work or movement in this set couldn\'t be found in our collection.');
+            }
+            return found;
+        }
+        throw new LibraryError(400, 'The list of items in the set isn\'t valid.');
+    });
 }
 
-function writeSetPieces(setId, pieceIds) {
-    db.run('DELETE FROM set_pieces WHERE set_id = ?', [setId]);
-    pieceIds.forEach((pieceId, position) => {
-        db.run('INSERT INTO set_pieces (set_id, piece_id, position) VALUES (?, ?, ?)', [setId, pieceId, position]);
+function writeSetItems(setId, items) {
+    db.run('DELETE FROM set_items WHERE set_id = ?', [setId]);
+    items.forEach((item, position) => {
+        db.run(`INSERT INTO set_items (set_id, position, kind, piece_id, composer, work, movement, midi_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [setId, position, item.kind, item.pieceId || null, item.composer || null,
+                item.work || null, item.movement || null, item.midiUrl || null]);
     });
 }
 
 /**
  * Create a set
  * @param {number} libraryId - Library
- * @param {{title: string, pieceIds?: string[]}} set - Title and pieces in order
+ * @param {{title: string, items?: Array<Object>}} set - Title and items in order
+ * @param {Function} [resolveCatalogue] - See checkSetItems
  * @returns {Promise<Object>} The set
  */
-async function createSet(libraryId, { title, pieceIds = [] }) {
+async function createSet(libraryId, { title, items = [] }, resolveCatalogue = null) {
     await initLibrary();
     const cleanTitle = cleanText(title, true, 'title');
-    checkSetPieces(libraryId, pieceIds);
+    const cleanItems = checkSetItems(libraryId, items, resolveCatalogue);
     const count = rows('SELECT COUNT(*) AS n FROM sets WHERE library_id = ?', [libraryId])[0].n;
     if (count >= LIMITS.SETS_PER_LIBRARY) {
         throw new LibraryError(409, `You can have at most ${LIMITS.SETS_PER_LIBRARY} sets. Delete one to make room.`);
@@ -599,27 +694,27 @@ async function createSet(libraryId, { title, pieceIds = [] }) {
     const time = now();
     db.run('INSERT INTO sets (id, library_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
         [id, libraryId, cleanTitle, time, time]);
-    writeSetPieces(id, pieceIds);
+    writeSetItems(id, cleanItems);
     touchLibrary(libraryId);
     await saveLibrary();
     return toSet(rows('SELECT * FROM sets WHERE id = ?', [id])[0]);
 }
 
 /**
- * Rename a set and/or change its pieces
+ * Rename a set and/or change its items
  * @param {number} libraryId - Library
  * @param {string} setId - Set
- * @param {{title?: string, pieceIds?: string[]}} changes
+ * @param {{title?: string, items?: Array<Object>}} changes
+ * @param {Function} [resolveCatalogue] - See checkSetItems
  * @returns {Promise<Object|null>} The set, or null if not in this library
  */
-async function updateSet(libraryId, setId, { title, pieceIds }) {
+async function updateSet(libraryId, setId, { title, items }, resolveCatalogue = null) {
     await initLibrary();
     const row = ownedSet(libraryId, setId);
     if (!row) return null;
     const cleanTitle = title === undefined ? row.title : cleanText(title, true, 'title');
-    if (pieceIds !== undefined) {
-        checkSetPieces(libraryId, pieceIds);
-        writeSetPieces(row.id, pieceIds);
+    if (items !== undefined) {
+        writeSetItems(row.id, checkSetItems(libraryId, items, resolveCatalogue));
     }
     db.run('UPDATE sets SET title = ?, updated_at = ? WHERE id = ?', [cleanTitle, now(), row.id]);
     touchLibrary(libraryId);
@@ -635,7 +730,7 @@ async function deleteSet(libraryId, setId) {
     await initLibrary();
     const row = ownedSet(libraryId, setId);
     if (!row) return false;
-    db.run('DELETE FROM set_pieces WHERE set_id = ?', [row.id]);
+    db.run('DELETE FROM set_items WHERE set_id = ?', [row.id]);
     db.run('DELETE FROM sets WHERE id = ?', [row.id]);
     await saveLibrary();
     return true;
@@ -651,7 +746,7 @@ async function shareSet(libraryId, setId) {
     const row = ownedSet(libraryId, setId);
     if (!row) return null;
     if (!row.share_token) {
-        db.run('UPDATE sets SET share_token = ? WHERE id = ?', [newToken(), row.id]);
+        db.run('UPDATE sets SET share_token = ? WHERE id = ?', [newToken(row.title, 'set'), row.id]);
         await saveLibrary();
     }
     return rows('SELECT share_token FROM sets WHERE id = ?', [row.id])[0].share_token;
@@ -671,21 +766,15 @@ async function unshareSet(libraryId, setId) {
 }
 
 /**
- * A shared set by its share code, with its pieces in order
+ * A shared set by its share code, with its items in order
  * @param {string} token - Share code
- * @returns {Promise<{set: Object, pieces: Array<Object>, libraryId: number}|null>}
+ * @returns {Promise<{set: Object, libraryId: number}|null>}
  */
 async function findSharedSet(token) {
     await initLibrary();
     if (!isToken(token)) return null;
     const row = rows('SELECT * FROM sets WHERE share_token = ?', [token])[0];
-    if (!row) return null;
-    const set = toSet(row);
-    const pieces = set.pieceIds
-        .map(id => rows('SELECT * FROM pieces WHERE id = ?', [id])[0])
-        .filter(Boolean)
-        .map(toPiece);
-    return { set, pieces, libraryId: row.library_id };
+    return row ? { set: toSet(row), libraryId: row.library_id } : null;
 }
 
 /**
@@ -696,7 +785,7 @@ async function findSharedSet(token) {
  */
 async function readSharedSetPiece(token, pieceId) {
     const found = await findSharedSet(token);
-    if (!found || !found.set.pieceIds.includes(pieceId)) return null;
+    if (!found || !found.set.items.some(item => item.kind === 'upload' && item.pieceId === pieceId)) return null;
     touchShared([pieceId], found.libraryId);
     return fs.readFile(path.join(paths.filesDir, `${pieceId}.mid`));
 }
@@ -716,7 +805,7 @@ async function addReference(libraryId, kind, token) {
         : kind === 'set' ? await findSharedSet(token) : null;
     if (!found) return false;
     if (found.libraryId === libraryId) {
-        throw new LibraryError(400, 'This is already in your library.');
+        throw new LibraryError(400, 'This is already in your list.');
     }
     const count = rows('SELECT COUNT(*) AS n FROM library_refs WHERE library_id = ?', [libraryId])[0].n;
     if (count >= LIMITS.REFERENCES_PER_LIBRARY) {
@@ -760,7 +849,7 @@ async function listReferences(libraryId) {
         } else {
             const found = await findSharedSet(ref.token);
             result.push(found
-                ? { ...base, available: true, title: found.set.title, pieceCount: found.pieces.length }
+                ? { ...base, available: true, title: found.set.title, itemCount: found.set.items.length }
                 : { ...base, available: false });
         }
     }
@@ -790,7 +879,7 @@ async function purgeOldLibraries(years = LIMITS.RETENTION_YEARS) {
     for (const { id } of old) {
         await removePieceRows(rows('SELECT id FROM pieces WHERE library_id = ?', [id]).map(r => r.id));
         for (const set of rows('SELECT id FROM sets WHERE library_id = ?', [id])) {
-            db.run('DELETE FROM set_pieces WHERE set_id = ?', [set.id]);
+            db.run('DELETE FROM set_items WHERE set_id = ?', [set.id]);
         }
         db.run('DELETE FROM sets WHERE library_id = ?', [id]);
         db.run('DELETE FROM library_refs WHERE library_id = ?', [id]);

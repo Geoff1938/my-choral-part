@@ -48,6 +48,16 @@ Plan for letting users convert their own MIDI or MusicXML files into practice MI
 
 Stop for review after each milestone.
 
+## Changes after M5 (9 November 2026)
+
+- "My library" is now **My uploaded files**; sets have their own link and dialog, **My sets** (`public/ui/SetsDialog.js`).
+- The import dialog has only **Play now** (saves to My uploaded files automatically, then plays) and **Cancel**; a rejected file offers **Choose another file**. Download was removed.
+- Lists and the rename form put the composer before the title. Sharing a piece needs a composer and a title.
+- A set's items (`set_items`) can be uploaded files, whole catalogue works or single catalogue movements, in any order; catalogue items are checked against the index when saved. Playing a set expands whole works into their movements in the movement list. Old `set_pieces` rows are migrated on start-up.
+- Share links are the title plus a 4-character random ending, e.g. `/s/spring-concert-2027-k7q2` (about a million possibilities per title, so not guessable). Older 16-character codes still work.
+- Opening a shared link adds it to the visitor's list automatically (no "Add to my library" button).
+- Uploaded files and sets that are played are added to recent works (`RecentWorksManager.saveEntry`).
+
 ## Fixtures
 
 Reference files go in `tests/fixtures/private/` (git-ignored; this repo is public). Tests that need them skip when they are absent. No requests to cpdl.org from code.

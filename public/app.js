@@ -45,7 +45,8 @@ import { RecentWorksManager } from './api/RecentWorksManager.js';
 import { normalizeChannelName, detectVoicePartFromName } from './practice-midi/voiceParts.js';
 import { toSlug } from './utils/slug.js';
 import { ImportDialog } from './ui/ImportDialog.js';
-import { LibraryDialog } from './ui/LibraryDialog.js';
+import { LibraryDialog, pieceName } from './ui/LibraryDialog.js';
+import { SetsDialog, itemLabel } from './ui/SetsDialog.js';
 import { LibraryApi, SharedApi } from './api/LibraryApi.js';
 
 // Activity log "composer" for plays of pieces from users' own files, and
@@ -120,26 +121,25 @@ class MIDIPlayer {
         // A set being played ({ title, kind: 'library' | 'shared', token, pieces }):
         // its pieces are the movement list
         this.currentSet = null;
-        // A shared link opened from /p/... or /s/... ({ kind, token, inLibrary })
-        this.openedShare = null;
         const playOwnPiece = (midiBytes, title, options) => this.loadImportedPiece(midiBytes, title, options);
         this.importDialog = new ImportDialog({
             dialog: document.getElementById('import-dialog'),
             openButton: document.getElementById('import-file-link'),
             onPlay: playOwnPiece
         });
+        const openShared = (kind, token) => this.openSharedLink(kind, token);
         this.libraryDialog = new LibraryDialog({
             dialog: document.getElementById('library-dialog'),
             openButton: document.getElementById('library-link'),
             onPlay: playOwnPiece,
-            onPlaySet: set => this.playSet(set),
-            onOpenShared: (kind, token) => this.openSharedLink(kind, token)
+            onOpenShared: openShared
         });
-        this.addSharedButton = document.getElementById('add-shared-btn');
-        this.addSharedStatus = document.getElementById('add-shared-status');
-        if (this.addSharedButton) {
-            this.addSharedButton.addEventListener('click', () => this.addOpenedShareToLibrary());
-        }
+        this.setsDialog = new SetsDialog({
+            dialog: document.getElementById('sets-dialog'),
+            openButton: document.getElementById('sets-link'),
+            onPlaySet: set => this.playSet(set),
+            onOpenShared: openShared
+        });
 
         this.loadPreferences();
         this.attachEventListeners();
@@ -1365,15 +1365,16 @@ class MIDIPlayer {
                 '<strong>Your own files:</strong><br>' +
                 '• Click <strong>Or load your own MIDI or MusicXML file…</strong> to practise a piece that isn\'t in our collection<br>' +
                 '• Choose a MIDI (.mid) or MusicXML (.musicxml, .xml, .mxl) file with a separate part for each voice<br>' +
-                '• You\'ll see which voice parts were found and any problems, then you can play it, save it to your library or download the practice version<br>' +
-                '• Your file stays on your device. Only if you choose <strong>Save to my library</strong> is the practice version kept on our server<br><br>' +
-                '<strong>My library:</strong><br>' +
-                '• Click <strong>My library</strong> to play, rename or delete the pieces you have saved<br>' +
-                '• Make a <strong>set</strong> to group pieces in order (for example a concert programme): they play one after another like the movements of a work<br>' +
-                '• Choose <strong>Share</strong> on a piece or set to get a link for your choir. Anyone with the link can play it and add it to their own library; <strong>Stop sharing</strong> turns the link off<br>' +
-                '• Pieces and sets others shared with you appear under <strong>Shared with you</strong><br>' +
-                '• Your library is linked to this browser on this device, and holds up to 100 pieces<br>' +
-                '• A library that isn\'t used for 3 years is deleted';
+                '• You\'ll see which voice parts were found and any problems. <strong>Play now</strong> opens it in the player and keeps the practice version in <strong>My uploaded files</strong>; your original file stays on your device<br><br>' +
+                '<strong>My uploaded files:</strong><br>' +
+                '• Play, share, rename or delete the pieces you have loaded (up to 100)<br>' +
+                '• To share a piece it needs a composer and a title<br><br>' +
+                '<strong>My sets:</strong><br>' +
+                '• A set is a series of MIDI files in order, for example a complete work or a concert programme. Add works or single movements from our collection, or your uploaded files<br>' +
+                '• A set plays like the movements of a work: use previous/next, or let it carry on to the next piece<br><br>' +
+                '<strong>Sharing:</strong><br>' +
+                '• Choose <strong>Share</strong> to get a link for your choir. Anyone who opens it can play the piece or set, and it is added to their own list. <strong>Stop sharing</strong> turns the link off<br>' +
+                '• Your files and sets are linked to this browser on this device; anything not used for 3 years is deleted';
         } else if (activeTabId === 'play-music-tab') {
             title = 'Play Music - Help';
             content =
@@ -1814,10 +1815,7 @@ class MIDIPlayer {
                         this.stop();
                     }
 
-                    const workData = JSON.parse(e.target.value);
-                    this.selectComposer(workData.composer).then(() => {
-                        this.selectWork(workData.work);
-                    });
+                    this.playRecent(JSON.parse(e.target.value));
                 } catch (error) {
                     console.error('Error loading recent work:', error);
                 }
@@ -2483,7 +2481,7 @@ class MIDIPlayer {
         // is a shared link (/p/<code> for a piece, /s/<code> for a set)
         // Returns true if URL specified a work, false otherwise
         const path = window.location.pathname;
-        const shared = path.match(/^\/(p|s)\/([A-Za-z0-9_-]{16})$/);
+        const shared = path.match(/^\/(p|s)\/([a-z0-9-]{6,50}|[A-Za-z0-9_-]{16})$/);
         if (shared) {
             await this.openSharedLink(shared[1] === 's' ? 'set' : 'piece', shared[2]);
             return true;
@@ -2516,18 +2514,15 @@ class MIDIPlayer {
     }
 
     updateWorkDisplay() {
-        if (this.selectedComposer && this.selectedWork) {
+        if (this.currentSet) {
+            this.currentWorkDisplay.textContent = `${this.currentSet.kind === 'shared' ? 'Shared set' : 'Set'}: ${this.currentSet.title}`;
+            this.updateShareableURL();
+        } else if (this.selectedComposer && this.selectedWork) {
             this.currentWorkDisplay.textContent = `${this.selectedComposer}, ${this.selectedWork}`;
             this.updateShareableURL();
         } else if (this.importedPiece) {
             const piece = this.importedPiece;
-            if (piece.set) {
-                this.currentWorkDisplay.textContent = `${piece.kind === 'shared' ? 'Shared set' : 'My set'}: ${piece.set.title}`;
-            } else {
-                const label = { library: 'My library', shared: 'Shared', file: 'Your file' }[piece.kind] || 'Your file';
-                const composer = piece.composer ? ` (${piece.composer})` : '';
-                this.currentWorkDisplay.textContent = `${label}: ${piece.title}${composer}`;
-            }
+            this.currentWorkDisplay.textContent = piece.kind === 'shared' ? `Shared: ${pieceName(piece)}` : pieceName(piece);
             this.updateShareableURL();
         } else {
             this.currentWorkDisplay.textContent = 'No work selected';
@@ -2871,18 +2866,64 @@ class MIDIPlayer {
 
             this.recentWorksSelect.innerHTML = '<option value="" disabled selected>Choose a recent work...</option>' +
                 recentToShow.map(item => {
-                    const composerDisplay = escapeHtml(item.composer);
-                    const workDisplay = escapeHtml(item.work);
-                    const movementDisplay = item.movement ? escapeHtml(item.movement) : '';
-                    const displayText = item.movement
-                        ? `${composerDisplay}, ${workDisplay} - ${movementDisplay}`
-                        : `${composerDisplay}, ${workDisplay}`;
-                    const jsonValue = JSON.stringify({ composer: item.composer, work: item.work });
-                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${displayText}</option>`;
+                    let displayText;
+                    if (item.type === 'upload' || item.type === 'shared-piece') {
+                        displayText = pieceName(item);
+                    } else if (item.type === 'set' || item.type === 'shared-set') {
+                        displayText = `Set: ${item.title}`;
+                    } else {
+                        displayText = item.movement
+                            ? `${item.composer}, ${item.work} - ${item.movement}`
+                            : `${item.composer}, ${item.work}`;
+                    }
+                    const jsonValue = JSON.stringify(item.type ? item : { composer: item.composer, work: item.work });
+                    return `<option value="${escapeHtmlAttribute(jsonValue)}">${escapeHtml(displayText)}</option>`;
                 }).join('');
             this.recentWorksDropdown.style.display = 'block';
         } catch (error) {
             console.error('Error loading recent works:', error);
+        }
+    }
+
+    /**
+     * Add an uploaded file or set to recent works:
+     * { type: 'upload', pieceId, title, composer }, { type: 'shared-piece', token, title, composer },
+     * { type: 'set', setId, title } or { type: 'shared-set', token, title }
+     * @param {Object} entry
+     */
+    async saveRecentEntry(entry) {
+        try {
+            await this.recentWorksManager.saveEntry(entry);
+            await this.loadRecentWorks();
+        } catch (error) {
+            console.error('Error saving recent work:', error);
+        }
+    }
+
+    /**
+     * Open an entry chosen from recent works
+     * @param {Object} entry - A catalogue work { composer, work } or an entry from saveRecentEntry
+     */
+    async playRecent(entry) {
+        try {
+            if (entry.type === 'upload') {
+                const midi = await LibraryApi.fetchMidi(entry.pieceId);
+                await this.loadImportedPiece(midi, entry.title, { pieceId: entry.pieceId, composer: entry.composer, kind: 'library' });
+            } else if (entry.type === 'shared-piece') {
+                await this.openSharedLink('piece', entry.token);
+            } else if (entry.type === 'shared-set') {
+                await this.openSharedLink('set', entry.token);
+            } else if (entry.type === 'set') {
+                const set = ((await LibraryApi.list()).sets || []).find(s => s.id === entry.setId);
+                if (!set) throw new Error('This set is no longer in My sets.');
+                await this.playSet({ id: set.id, title: set.title, kind: 'library', items: set.items });
+            } else {
+                await this.selectComposer(entry.composer);
+                await this.selectWork(entry.work);
+            }
+        } catch (error) {
+            this.switchTab('play-music');
+            this.showStatus(error.message, 'error');
         }
     }
 
@@ -3015,7 +3056,7 @@ class MIDIPlayer {
         }
     }
 
-    async loadMIDIFromURL(url, title = null, skipSaveRecent = false) {
+    async loadMIDIFromURL(url, title = null, skipSaveRecent = false, { set = null } = {}) {
         if (!url) {
             this.showStatus('Invalid MIDI URL', 'error');
             return;
@@ -3030,7 +3071,7 @@ class MIDIPlayer {
             return;
         }
 
-        await this.loadMIDI({ url }, title, skipSaveRecent);
+        await this.loadMIDI({ url, set }, title, skipSaveRecent);
     }
 
     /**
@@ -3042,46 +3083,102 @@ class MIDIPlayer {
      * @param {{pieceId?: string|null, composer?: string}} [options] - pieceId
      *     if the piece is saved in the library (its settings are then remembered)
      */
-    async loadImportedPiece(midiBytes, title, { pieceId = null, composer = '', kind = null, share = null } = {}) {
+    async loadImportedPiece(midiBytes, title, { pieceId = null, composer = '', kind = null, share = null, saveError = null } = {}) {
         this.switchTab('play-music');
+        const pieceKind = kind || (pieceId ? 'library' : 'file');
         // Copy into a standalone buffer (the bytes may be a view on a larger one)
         await this.loadMIDI({
             arrayBuffer: midiBytes.slice().buffer,
-            imported: { title, composer: composer || '', pieceId, kind: kind || (pieceId ? 'library' : 'file'), share }
+            imported: { title, composer: composer || '', pieceId, kind: pieceKind, share }
         }, title, true);
+        if (pieceKind === 'library' && pieceId) {
+            this.saveRecentEntry({ type: 'upload', pieceId, title, composer: composer || '' });
+        } else if (pieceKind === 'shared' && share) {
+            this.saveRecentEntry({ type: 'shared-piece', token: share.token, title, composer: composer || '' });
+        }
+        if (saveError) {
+            this.showStatus(`Playing, but this piece couldn't be kept in My uploaded files: ${saveError}`, 'error');
+        }
     }
 
     /**
-     * Load a movement-list entry: a catalogue movement ({ name, midiUrl }) or
-     * a piece in the set being played ({ name, setPiece: { id, composer } })
+     * Load a movement-list entry: a catalogue movement ({ name, midiUrl }),
+     * or an item of the set being played - an uploaded file
+     * ({ name, setPiece: { id, composer } }) or a catalogue movement
+     * ({ name, midiUrl, composer, work })
      * @param {Object} movementData - Parsed option value
      */
     async loadMovementOption(movementData) {
         if (movementData.setPiece && this.currentSet) {
             return this.loadSetPiece(movementData);
         }
+        if (movementData.composer && this.currentSet) {
+            this.selectedComposer = movementData.composer;
+            this.selectedWork = movementData.work;
+            return this.loadMIDIFromURL(this.toAbsoluteUrl(movementData.midiUrl), movementData.name, true, { set: this.currentSet });
+        }
         return this.loadMIDIFromURL(this.toAbsoluteUrl(movementData.midiUrl), movementData.name);
     }
 
     /**
-     * Play a set: its pieces become the movement list (so previous/next and
+     * The movement list for a set: one entry per uploaded file or catalogue
+     * movement; a whole work adds all its movements in order
+     * @param {{items: Array<Object>}} set
+     * @returns {Promise<Array<Object>>} Option data, each with a label
+     */
+    async setMovementOptions(set) {
+        const options = [];
+        for (const item of set.items) {
+            if (item.kind === 'upload') {
+                options.push({ label: pieceName(item), name: item.title, setPiece: { id: item.pieceId, composer: item.composer } });
+            } else if (item.kind === 'movement') {
+                options.push({ label: itemLabel(item), name: item.movement, midiUrl: item.midiUrl, composer: item.composer, work: item.work });
+            } else if (item.kind === 'work') {
+                const response = await fetch(`/api/composer/${encodeURIComponent(item.composer)}/work/${encodeURIComponent(item.work)}/sections`);
+                const sections = response.ok ? await response.json() : [];
+                for (const section of sections) {
+                    options.push({
+                        label: itemLabel({ kind: 'movement', composer: item.composer, work: item.work, movement: section.name }),
+                        name: section.name,
+                        midiUrl: section.midiUrl,
+                        composer: item.composer,
+                        work: item.work
+                    });
+                }
+            }
+        }
+        return options;
+    }
+
+    /**
+     * Play a set: its items become the movement list (so previous/next and
      * auto-advance work as for a work's movements), starting with the first
-     * @param {{title: string, kind: 'library'|'shared', token?: string,
-     *          pieces: Array<{id: string, title: string, composer: string}>}} set
+     * @param {{id?: string, token?: string, title: string, kind: 'library'|'shared', items: Array<Object>}} set
      */
     async playSet(set) {
         this.switchTab('play-music');
-        if (!set.pieces.length) {
-            this.showStatus('This set has no pieces yet', 'error');
+        if (!set.items.length) {
+            this.showStatus('This set is empty', 'error');
+            return;
+        }
+        let options;
+        try {
+            options = await this.setMovementOptions(set);
+        } catch (error) {
+            this.showStatus('Couldn\'t open this set. Check your connection and try again.', 'error');
+            return;
+        }
+        if (!options.length) {
+            this.showStatus('Nothing in this set could be found', 'error');
             return;
         }
         this.currentSet = set;
         this.movementSelect.innerHTML = '<option value="">Choose a piece...</option>' +
-            set.pieces.map(piece => {
-                const value = JSON.stringify({ name: piece.title, setPiece: { id: piece.id, composer: piece.composer } });
-                return `<option value="${escapeHtmlAttribute(value)}">${escapeHtml(piece.title)}</option>`;
-            }).join('');
+            options.map(option => `<option value="${escapeHtmlAttribute(JSON.stringify(option))}">${escapeHtml(option.label)}</option>`).join('');
         this.movementSelect.selectedIndex = 1;
+        this.saveRecentEntry(set.token
+            ? { type: 'shared-set', token: set.token, title: set.title }
+            : { type: 'set', setId: set.id, title: set.title });
         await this.loadMovementOption(JSON.parse(this.movementSelect.value));
     }
 
@@ -3110,7 +3207,9 @@ class MIDIPlayer {
     }
 
     /**
-     * Open a shared link (/p/<code> or /s/<code>) in the player
+     * Open a shared link (/p/<code> or /s/<code>) in the player. Unless it is
+     * the user's own, it is added to their uploaded files or sets
+     * automatically, so they can find it again.
      * @param {'piece'|'set'} kind - What is shared
      * @param {string} token - Share code
      */
@@ -3118,9 +3217,17 @@ class MIDIPlayer {
         this.switchTab('play-music');
         try {
             const info = await SharedApi.info(kind, token);
-            this.openedShare = { kind, token, inLibrary: Boolean(info.inLibrary) };
+            let added = false;
+            if (!info.isOwner && !info.inLibrary) {
+                try {
+                    await LibraryApi.addReference(kind, token);
+                    added = true;
+                } catch (error) {
+                    console.warn('[Share] Could not add to the list:', error.message);
+                }
+            }
             if (kind === 'set') {
-                await this.playSet({ title: info.title, kind: info.isOwner ? 'library' : 'shared', token, pieces: info.pieces });
+                await this.playSet({ token, title: info.title, kind: info.isOwner ? 'library' : 'shared', items: info.items });
             } else {
                 const midi = await SharedApi.pieceMidi(token);
                 await this.loadImportedPiece(midi, info.title, {
@@ -3130,46 +3237,13 @@ class MIDIPlayer {
                     share: info.isOwner ? null : { kind: 'piece', token }
                 });
             }
+            if (added) {
+                this.showStatus(`Added to ${kind === 'set' ? 'My sets' : 'My uploaded files'} on the Find Music tab, so you can play it again`, 'success');
+            }
         } catch (error) {
-            this.openedShare = null;
             this.showStatus(error.message, 'error');
             this.currentWorkDisplay.textContent = 'Shared link not available';
         }
-        this.updateAddSharedButton();
-    }
-
-    /**
-     * Show "Add to my library" while a shared piece or set (not the user's
-     * own, and not already added) is loaded
-     */
-    updateAddSharedButton() {
-        if (!this.addSharedButton) return;
-        const share = this.importedPiece && this.importedPiece.share;
-        const show = Boolean(share && this.openedShare && !this.openedShare.inLibrary &&
-            share.kind === this.openedShare.kind && share.token === this.openedShare.token);
-        this.addSharedButton.hidden = !show;
-        this.addSharedButton.textContent = share && share.kind === 'set' ? 'Add this set to my library' : 'Add to my library';
-        if (!show && this.addSharedStatus && !(this.openedShare && this.openedShare.inLibrary)) {
-            this.addSharedStatus.hidden = true;
-        }
-    }
-
-    async addOpenedShareToLibrary() {
-        const share = this.openedShare;
-        if (!share) return;
-        this.addSharedButton.disabled = true;
-        try {
-            await LibraryApi.addReference(share.kind, share.token);
-            share.inLibrary = true;
-            this.addSharedStatus.textContent = 'Added. Find it under My library on the Find Music tab.';
-            this.addSharedStatus.className = 'add-shared-status import-save-status-success';
-        } catch (error) {
-            this.addSharedStatus.textContent = error.message;
-            this.addSharedStatus.className = 'add-shared-status import-save-status-error';
-        }
-        this.addSharedStatus.hidden = false;
-        this.addSharedButton.disabled = false;
-        this.updateAddSharedButton();
     }
 
     /**
@@ -3201,16 +3275,15 @@ class MIDIPlayer {
             // The previous piece's practice time has been reported, so it is
             // now safe to switch between library works and imported pieces
             this.importedPiece = source.imported || null;
-            this.currentSet = (source.imported && source.imported.set) || null;
+            this.currentSet = source.set || (source.imported && source.imported.set) || null;
             if (source.imported) {
                 this.selectedComposer = null;
                 this.selectedWork = null;
                 if (!source.keepMovementList) {
                     this.movementSelect.innerHTML = `<option value="">${escapeHtml(title)}</option>`;
                 }
-                this.updateWorkDisplay();
             }
-            this.updateAddSharedButton();
+            this.updateWorkDisplay();
 
             let arrayBuffer;
             if (source.arrayBuffer) {

@@ -91,7 +91,11 @@ function handleError(error, res, next) {
     next(error);
 }
 
-function createLibraryRoutes() {
+/**
+ * @param {Function} [resolveCatalogue] - Looks up a catalogue work or movement
+ *     for a set item: (item) => tidied item, or null if it isn't in the catalogue
+ */
+function createLibraryRoutes(resolveCatalogue = null) {
     const router = express.Router();
 
     // List the pieces in this user's library (empty if they have none yet)
@@ -145,7 +149,7 @@ function createLibraryRoutes() {
             const found = await currentLibrary(req, res);
             const result = found ? await library.readPiece(found.id, req.params.id) : null;
             if (!result) {
-                return res.status(404).json({ error: 'This piece isn\'t in your library.' });
+                return res.status(404).json({ error: 'This piece isn\'t in My uploaded files.' });
             }
             res.setHeader('Content-Type', 'audio/midi');
             res.setHeader('Cache-Control', 'private, no-store');
@@ -162,7 +166,7 @@ function createLibraryRoutes() {
             const { title, composer } = req.body || {};
             const piece = found ? await library.updatePiece(found.id, req.params.id, { title, composer }) : null;
             if (!piece) {
-                return res.status(404).json({ error: 'This piece isn\'t in your library.' });
+                return res.status(404).json({ error: 'This piece isn\'t in My uploaded files.' });
             }
             res.json({ piece });
         } catch (error) {
@@ -175,7 +179,7 @@ function createLibraryRoutes() {
             const found = await currentLibrary(req, res);
             const deleted = found ? await library.deletePiece(found.id, req.params.id) : false;
             if (!deleted) {
-                return res.status(404).json({ error: 'This piece isn\'t in your library.' });
+                return res.status(404).json({ error: 'This piece isn\'t in My uploaded files.' });
             }
             res.status(204).end();
         } catch (error) {
@@ -190,14 +194,14 @@ function createLibraryRoutes() {
         try {
             const found = await currentLibrary(req, res);
             if (!found) {
-                return res.status(404).json({ error: 'You don\'t have a library yet.' });
+                return res.status(404).json({ error: 'You haven\'t uploaded any files or made any sets yet.' });
             }
             await handler(found, req, res);
         } catch (error) {
             handleError(error, res, next);
         }
     };
-    const notFound = (res, what = 'piece') => res.status(404).json({ error: `This ${what} isn't in your library.` });
+    const notFound = (res, what = 'piece') => res.status(404).json({ error: `This ${what} isn't in your list.` });
 
     // The owner confirms they have the right to share (asked once, before the first share)
     router.post('/attest', withLibrary(async (found, req, res) => {
@@ -220,13 +224,13 @@ function createLibraryRoutes() {
     // ----- Sets -----
 
     router.post('/sets', withLibrary(async (found, req, res) => {
-        const { title, pieceIds } = req.body || {};
-        res.status(201).json({ set: await library.createSet(found.id, { title, pieceIds: pieceIds || [] }) });
+        const { title, items } = req.body || {};
+        res.status(201).json({ set: await library.createSet(found.id, { title, items: items || [] }, resolveCatalogue) });
     }));
 
     router.patch('/sets/:id', withLibrary(async (found, req, res) => {
-        const { title, pieceIds } = req.body || {};
-        const set = await library.updateSet(found.id, req.params.id, { title, pieceIds });
+        const { title, items } = req.body || {};
+        const set = await library.updateSet(found.id, req.params.id, { title, items }, resolveCatalogue);
         return set ? res.json({ set }) : notFound(res, 'set');
     }));
 
@@ -272,7 +276,7 @@ function createLibraryRoutes() {
     router.delete('/references/:kind/:token', withLibrary(async (found, req, res) => {
         return (await library.removeReference(found.id, req.params.kind, req.params.token))
             ? res.status(204).end()
-            : res.status(404).json({ error: 'This isn\'t in your library.' });
+            : res.status(404).json({ error: 'This isn\'t in your list.' });
     }));
 
     return router;
@@ -341,7 +345,7 @@ function createSharedRoutes() {
             res.json({
                 kind: 'set',
                 title: found.set.title,
-                pieces: found.pieces.map(p => ({ id: p.id, title: p.title, composer: p.composer })),
+                items: found.set.items,
                 ...(await visitorStatus(req, res, 'set', req.params.token, found.libraryId))
             });
         } catch (error) {

@@ -77,12 +77,16 @@
                     <!-- Load your own file (import dialog) and the pieces saved from them (library dialog) -->
                     <div class="own-files-links">
                         <button type="button" id="import-file-link" class="import-file-link"
-                            title="Practise a piece that isn't in our collection: choose a MIDI or MusicXML file from your device and it will be turned into a practice file you can play here. Your file stays on your device; nothing is uploaded unless you choose to save it to your library.">
+                            title="Practise a piece that isn't in our collection: choose a MIDI or MusicXML file from your device and it will be turned into a practice file you can play here. When you play it, the practice version is kept in My uploaded files.">
                             Or load your own MIDI or MusicXML file&hellip;
                         </button>
                         <button type="button" id="library-link" class="import-file-link"
-                            title="Pieces you have saved from your own files: play, rename or delete them">
-                            My library
+                            title="Pieces you have loaded from your own files, and pieces others shared with you: play, share, rename or delete them">
+                            My uploaded files
+                        </button>
+                        <button type="button" id="sets-link" class="import-file-link"
+                            title="Series of pieces in order, for example a complete work or a concert programme: play them together or share them with one link">
+                            My sets
                         </button>
                     </div>
                 </div>
@@ -117,10 +121,6 @@
                     <div class="work-title">
                         <h2 id="current-work-display">No work selected</h2>
                     </div>
-                    <!-- Shown while playing a piece or set someone shared with you -->
-                    <button type="button" id="add-shared-btn" class="btn add-shared-btn" hidden
-                        title="Keep this in My library so you can play it again without the link. If the person who shared it stops sharing, it will no longer be available.">Add to my library</button>
-                    <p id="add-shared-status" class="add-shared-status" role="status" hidden></p>
                 </div>
 
                 <!-- Status Messages -->
@@ -351,8 +351,8 @@
                     <h3>Privacy & Saved Data</h3>
                     <p><strong>Stored on your device:</strong> Your preferences (voice part, recent works, playback settings) are stored locally on your device to remember your choices between visits.</p>
                     <p><strong>Stored on our server:</strong> When you open and play a work, we record which work and movement it is, how long you play it for, an anonymous random identifier created by your browser, and your browser type (its "user agent"). This is used only to understand which works are most used and how much the player is used. We keep it for up to 5 years and then delete it. We do not record your IP address, and we do not collect any personal information such as your name or email address. Questions about this can be sent to the address under Contact Us below.</p>
-                    <p><strong>Your own files:</strong> Files you load are converted on your device and are not sent to us. When you play one, we record its title (and composer, if known) in the same way as works from our collection. If you choose <strong>Save to my library</strong>, we keep the converted practice file, its title and composer on our server, linked to a random code stored in a cookie in your browser. You can delete saved pieces at any time under <strong>My library</strong>; a library that isn't used for 3 years is deleted. Clearing your browser's cookies for this site disconnects your browser from its library.</p>
-                    <p><strong>Sharing:</strong> If you share a piece or set, anyone with its link can play it and add it to their own library; we don't record who opens a link. Plays of shared pieces are recorded by title in the same way. Choose <strong>Stop sharing</strong> in My library to turn a link off. To report something shared without permission, email the address under Contact Us below.</p>
+                    <p><strong>Your own files:</strong> Files you load are converted into a practice version on your device; the original file is not sent to us. When you choose <strong>Play now</strong>, we keep the practice version with its title and composer on our server, linked to a random code stored in a cookie in your browser, so you can play it again from <strong>My uploaded files</strong>. Your sets are kept the same way. Plays are recorded by title in the same way as works from our collection. You can delete files and sets at any time; files and sets that aren't used for 3 years are deleted. Clearing your browser's cookies for this site disconnects your browser from them.</p>
+                    <p><strong>Sharing:</strong> If you share a piece or set, anyone with its link can play it, and it is added to their own list when they open the link; we don't record who opens a link. Choose <strong>Stop sharing</strong> to turn a link off. To report something shared without permission, email the address under Contact Us below.</p>
                     <button id="clear-saved-data-btn" class="btn btn-small" style="margin-top: 10px;" title="Clear all saved data and reset to defaults">Clear All Saved Data</button>
                     <p style="margin-top: 8px; font-size: 0.85em; color: #666;">This will reset all local preferences to defaults.</p>
                 </div>
@@ -444,25 +444,22 @@
                 <div class="import-report-body" aria-live="polite"></div>
                 <div class="import-actions">
                     <button type="button" id="import-play-btn" class="btn btn-primary"
-                        title="Open this piece in the player on the Play Music tab">Play now</button>
-                    <button type="button" id="import-save-btn" class="btn"
-                        title="Keep this piece in your library on our server, so you can play it again later without loading the file">Save to my library</button>
-                    <button type="button" id="import-download-btn" class="btn"
-                        title="Save the practice version of this piece to your device as a MIDI file">Download practice MIDI</button>
+                        title="Keep this piece in My uploaded files and open it in the player on the Play Music tab">Play now</button>
                     <button type="button" id="import-again-btn" class="btn"
                         title="Choose a different file from your device">Choose another file&hellip;</button>
+                    <button type="button" id="import-cancel-btn" class="btn"
+                        title="Close and go back to Find Music">Cancel</button>
                 </div>
-                <p id="import-save-status" class="import-save-status" role="status" hidden></p>
-                <p id="import-saved-hint" class="import-hint">To play this piece again later, save it to your library, or load the file again.</p>
+                <p id="import-saved-hint" class="import-hint">Play now keeps the practice version in My uploaded files, so you can play it again later.</p>
             </div>
         </div>
     </dialog>
 
-    <!-- My library: managed by public/ui/LibraryDialog.js -->
+    <!-- My uploaded files: managed by public/ui/LibraryDialog.js -->
     <dialog id="library-dialog" class="import-dialog" aria-labelledby="library-dialog-title">
         <div class="channel-dialog-header">
-            <h3 id="library-dialog-title">My library</h3>
-            <button type="button" id="library-dialog-close" class="channel-dialog-close-btn" aria-label="Close" title="Close your library">&times;</button>
+            <h3 id="library-dialog-title">My uploaded files</h3>
+            <button type="button" id="library-dialog-close" class="channel-dialog-close-btn" aria-label="Close" title="Close">&times;</button>
         </div>
         <div class="import-dialog-body">
             <!-- Asked once, before the first share -->
@@ -470,7 +467,7 @@
                 <p><strong>Before you share</strong></p>
                 <label class="library-attest-check" title="You must confirm this before sharing">
                     <input type="checkbox" id="library-attest-checkbox">
-                    <span>I have the right to share these files: for example, the music is out of copyright, I made the file myself, or I have permission. I understand that anyone with the link can play the music and add it to their own library.</span>
+                    <span>I have the right to share these files: for example, the music is out of copyright, I made the file myself, or I have permission. I understand that anyone with the link can play the music and add it to their own list.</span>
                 </label>
                 <p class="import-hint">If you believe something shared here infringes your rights, email <a href="mailto:hello@mychoralpart.com">hello@mychoralpart.com</a> and we will remove it.</p>
                 <div class="library-buttons">
@@ -480,24 +477,53 @@
             </div>
 
             <p id="library-status" class="import-save-status" role="status" hidden></p>
-
-            <h4 class="library-heading">Your pieces</h4>
             <p id="library-summary" class="library-summary"></p>
             <ul id="library-list" class="library-list"></ul>
-
-            <div class="library-heading-row">
-                <h4 class="library-heading">Sets</h4>
-                <button type="button" id="library-new-set" class="btn" data-action="new-set"
-                    title="Group some of your pieces in order, for example a concert programme, to play or share them together">New set</button>
-            </div>
-            <ul id="library-sets" class="library-list"></ul>
 
             <div id="library-refs-section" hidden>
                 <h4 class="library-heading">Shared with you</h4>
                 <ul id="library-refs" class="library-list"></ul>
             </div>
 
-            <p class="import-hint">Your library is linked to this browser on this device. Pieces are kept on our server until you delete them; a library that isn't used for 3 years is deleted.</p>
+            <p class="import-hint">Your uploaded files are linked to this browser on this device. They are kept on our server until you delete them; files that aren't used for 3 years are deleted.</p>
+        </div>
+    </dialog>
+
+    <!-- My sets: managed by public/ui/SetsDialog.js -->
+    <dialog id="sets-dialog" class="import-dialog" aria-labelledby="sets-dialog-title">
+        <div class="channel-dialog-header">
+            <h3 id="sets-dialog-title">My sets</h3>
+            <button type="button" id="sets-dialog-close" class="channel-dialog-close-btn" aria-label="Close" title="Close">&times;</button>
+        </div>
+        <div class="import-dialog-body">
+            <!-- Asked once, before the first share -->
+            <div id="sets-attest" class="library-attest" hidden>
+                <p><strong>Before you share</strong></p>
+                <label class="library-attest-check" title="You must confirm this before sharing">
+                    <input type="checkbox" id="sets-attest-checkbox">
+                    <span>I have the right to share these files: for example, the music is out of copyright, I made the file myself, or I have permission. I understand that anyone with the link can play the music and add it to their own list.</span>
+                </label>
+                <p class="import-hint">If you believe something shared here infringes your rights, email <a href="mailto:hello@mychoralpart.com">hello@mychoralpart.com</a> and we will remove it.</p>
+                <div class="library-buttons">
+                    <button type="button" class="btn btn-primary" data-action="attest-confirm" title="Confirm and share">Confirm and share</button>
+                    <button type="button" class="btn" data-action="attest-cancel" title="Don't share">Cancel</button>
+                </div>
+            </div>
+
+            <p id="sets-status" class="import-save-status" role="status" hidden></p>
+            <div class="library-heading-row">
+                <p class="library-summary">A set is a series of MIDI files in order, for example representing a complete work or programme, so you can play or share them together.</p>
+                <button type="button" id="sets-new" class="btn" data-action="new"
+                    title="Start a new set: add works and movements from our collection, or your uploaded files">New set</button>
+            </div>
+            <ul id="sets-list" class="library-list"></ul>
+
+            <div id="sets-refs-section" hidden>
+                <h4 class="library-heading">Shared with you</h4>
+                <ul id="sets-refs" class="library-list"></ul>
+            </div>
+
+            <p class="import-hint">Your sets are linked to this browser on this device. A set that isn't used for 3 years is deleted.</p>
         </div>
     </dialog>
 

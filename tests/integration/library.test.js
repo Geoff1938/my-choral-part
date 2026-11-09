@@ -120,7 +120,7 @@ describe('Library API', () => {
       const first = await save();
       const second = await save(cookieOf(first));
       expect(second.status).toBe(409);
-      expect(second.body.error).toMatch(/library is full/);
+      expect(second.body.error).toMatch(/My uploaded files is full/);
     } finally {
       library.LIMITS.PIECES_PER_LIBRARY = original;
     }

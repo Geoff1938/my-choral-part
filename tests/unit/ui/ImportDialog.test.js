@@ -2,7 +2,7 @@
  * Unit tests for the "load your own file" dialog (public/ui/ImportDialog.js)
  */
 
-const { ImportDialog, buildReport, failureReport, practiceFilename } = require('../../../public/ui/ImportDialog.js');
+const { ImportDialog, buildReport, failureReport } = require('../../../public/ui/ImportDialog.js');
 const { convertFile } = require('../../../public/practice-midi/convert.js');
 const { TPQ, track, song, line, notes, midiBytes } = require('../practice-midi/helpers.js');
 
@@ -41,13 +41,7 @@ describe('buildReport', () => {
   });
 
   test('a rejected file cannot be played and falls back to the file name', () => {
-    const report = buildReport({
-      status: 'rejected',
-      messages: [{ level: 'reject', text: 'No.' }],
-      suggested: null,
-      midi: null
-    }, 'score.pdf');
-
+    const report = buildReport({ status: 'rejected', messages: [{ level: 'reject', text: 'No.' }], suggested: null, midi: null }, 'score.pdf');
     expect(report.heading).toBe('score.pdf');
     expect(report.canPlay).toBe(false);
     expect(report.statusText).toBe('This file can\'t be used.');
@@ -62,26 +56,9 @@ describe('buildReport', () => {
   test('works with a real conversion', async () => {
     const result = await convertFile(midiBytes(satb()), 'My Anthem.mid');
     const report = buildReport(result, 'My Anthem.mid');
-
     expect(report.canPlay).toBe(true);
     expect(report.heading).toBe('My Anthem');
     expect(report.messages.some(m => m.text.startsWith('Voice parts:'))).toBe(true);
-  });
-});
-
-describe('practiceFilename', () => {
-  test.each([
-    ['Gloria', 'Gloria (practice).mid'],
-    ['Ave / Verum: "Corpus"?', 'Ave Verum Corpus (practice).mid'],
-    ['', 'Piece (practice).mid'],
-    [null, 'Piece (practice).mid'],
-    ['   ', 'Piece (practice).mid']
-  ])('%p -> %p', (title, filename) => {
-    expect(practiceFilename(title)).toBe(filename);
-  });
-
-  test('long titles are shortened', () => {
-    expect(practiceFilename('x'.repeat(200))).toHaveLength(80 + ' (practice).mid'.length);
   });
 });
 
@@ -90,10 +67,7 @@ describe('ImportDialog', () => {
   function fakeElement() {
     const listeners = {};
     return {
-      hidden: false,
-      innerHTML: '',
-      value: '',
-      files: null,
+      hidden: false, innerHTML: '', value: '', textContent: '', disabled: false, files: null,
       classList: { add: jest.fn(), remove: jest.fn() },
       addEventListener: (type, fn) => { listeners[type] = fn; },
       fire: (type, event = {}) => listeners[type]({ preventDefault: () => {}, ...event }),
@@ -104,9 +78,8 @@ describe('ImportDialog', () => {
   }
 
   function setup(loadConverter, api) {
-    const ids = ['import-file-input', 'import-choose-btn', 'import-drop-zone', 'import-working',
-      'import-report', 'import-play-btn', 'import-download-btn', 'import-again-btn', 'import-dialog-close',
-      'import-saved-hint', 'import-save-btn', 'import-save-status'];
+    const ids = ['import-file-input', 'import-choose-btn', 'import-drop-zone', 'import-working', 'import-report',
+      'import-play-btn', 'import-again-btn', 'import-cancel-btn', 'import-dialog-close', 'import-saved-hint'];
     const elements = Object.fromEntries(ids.map(id => [id, fakeElement()]));
     const reportBody = fakeElement();
     elements['import-report'].querySelector = () => reportBody;
@@ -116,12 +89,12 @@ describe('ImportDialog', () => {
     dialog.close = jest.fn();
     const openButton = fakeElement();
     const onPlay = jest.fn();
-    const onSaved = jest.fn();
-    const importDialog = new ImportDialog({ dialog, openButton, onPlay, onSaved, loadConverter, api });
-    return { importDialog, elements, reportBody, dialog, openButton, onPlay, onSaved };
+    const importDialog = new ImportDialog({ dialog, openButton, onPlay, loadConverter, api });
+    return { importDialog, elements, reportBody, dialog, openButton, onPlay };
   }
 
   const file = (name, bytes) => ({ name, arrayBuffer: async () => bytes.buffer.slice(0) });
+  const converter = async () => ({ convertFile });
 
   test('opening shows the file chooser', () => {
     const { elements, dialog, openButton } = setup();
@@ -132,64 +105,60 @@ describe('ImportDialog', () => {
     expect(elements['import-report'].hidden).toBe(true);
   });
 
-  test('a converted file is reported and can be played', async () => {
-    const { importDialog, elements, reportBody, dialog, onPlay } = setup(async () => ({ convertFile }));
+  test('a converted file offers Play now and Cancel, composer above title', async () => {
+    const { importDialog, elements, reportBody } = setup(converter);
     await importDialog.handleFile(file('Anthem.mid', midiBytes(satb())));
 
     expect(elements['import-report'].hidden).toBe(false);
     expect(elements['import-play-btn'].hidden).toBe(false);
+    expect(elements['import-again-btn'].hidden).toBe(true);
+    expect(elements['import-cancel-btn'].hidden).toBe(false);
     expect(reportBody.innerHTML).toContain('<h4 class="import-title">Anthem</h4>');
     expect(reportBody.innerHTML).toContain('Ready to play');
-
-    elements['import-play-btn'].fire('click');
-    expect(dialog.close).toHaveBeenCalled();
-    expect(onPlay).toHaveBeenCalledWith(expect.any(Uint8Array), 'Anthem', { pieceId: null, composer: '' });
   });
 
-  test('saving to the library, then playing, passes the saved piece on', async () => {
+  test('Play now saves to the uploaded files, then plays the saved piece', async () => {
     const api = { save: jest.fn(async piece => ({ id: 'abcdefghijkl', title: piece.title, composer: 'Smith' })) };
-    const { importDialog, elements, onPlay, onSaved } = setup(async () => ({ convertFile }), api);
+    const { importDialog, dialog, onPlay } = setup(converter, api);
     await importDialog.handleFile(file('Anthem.mid', midiBytes(satb())));
-    expect(elements['import-save-btn'].hidden).toBe(false);
+    await importDialog.play();
 
-    await importDialog.save();
     expect(api.save).toHaveBeenCalledWith({ title: 'Anthem', composer: '', midi: expect.any(Uint8Array) });
-    expect(elements['import-save-btn'].disabled).toBe(true);
-    expect(elements['import-save-btn'].textContent).toBe('Saved to your library');
-    expect(elements['import-save-status'].textContent).toMatch(/My library/);
-    expect(onSaved).toHaveBeenCalled();
-
-    // Saving twice does nothing
-    await importDialog.save();
-    expect(api.save).toHaveBeenCalledTimes(1);
-
-    elements['import-play-btn'].fire('click');
-    expect(onPlay).toHaveBeenCalledWith(expect.any(Uint8Array), 'Anthem', { pieceId: 'abcdefghijkl', composer: 'Smith' });
+    expect(dialog.close).toHaveBeenCalled();
+    expect(onPlay).toHaveBeenCalledWith(expect.any(Uint8Array), 'Anthem', { pieceId: 'abcdefghijkl', composer: 'Smith', kind: 'library' });
   });
 
-  test('a failed save shows the server message and can be retried', async () => {
+  test('if saving fails the piece still plays, with the reason', async () => {
     const api = { save: jest.fn(async () => { throw new Error('Your library is full (100 pieces).'); }) };
-    const { importDialog, elements } = setup(async () => ({ convertFile }), api);
+    const { importDialog, onPlay } = setup(converter, api);
     await importDialog.handleFile(file('Anthem.mid', midiBytes(satb())));
-    await importDialog.save();
+    await importDialog.play();
 
-    expect(elements['import-save-status'].textContent).toBe('Your library is full (100 pieces).');
-    expect(elements['import-save-btn'].disabled).toBe(false);
+    expect(onPlay).toHaveBeenCalledWith(expect.any(Uint8Array), 'Anthem',
+      { pieceId: null, composer: '', kind: 'file', saveError: 'Your library is full (100 pieces).' });
   });
 
-  test('a rejected file offers only another choice, with names escaped', async () => {
-    const { importDialog, elements, reportBody, onPlay } = setup(async () => ({ convertFile }));
+  test('Cancel closes the dialog without playing', () => {
+    const { elements, dialog, onPlay } = setup();
+    elements['import-cancel-btn'].fire('click');
+    expect(dialog.close).toHaveBeenCalled();
+    expect(onPlay).not.toHaveBeenCalled();
+  });
+
+  test('a rejected file offers another choice, with names escaped', async () => {
+    const api = { save: jest.fn() };
+    const { importDialog, elements, reportBody, onPlay } = setup(converter, api);
     await importDialog.handleFile(file('<b>score</b>.pdf', new TextEncoder().encode('%PDF-1.4 not music')));
 
     expect(elements['import-play-btn'].hidden).toBe(true);
-    expect(elements['import-download-btn'].hidden).toBe(true);
+    expect(elements['import-again-btn'].hidden).toBe(false);
     expect(elements['import-saved-hint'].hidden).toBe(true);
-    expect(elements['import-save-btn'].hidden).toBe(true);
     expect(elements['import-again-btn'].focus).toHaveBeenCalled();
     expect(reportBody.innerHTML).toContain('&lt;b&gt;score&lt;/b&gt;.pdf');
     expect(reportBody.innerHTML).not.toContain('<b>score');
 
-    elements['import-play-btn'].fire('click');
+    await importDialog.play();
+    expect(api.save).not.toHaveBeenCalled();
     expect(onPlay).not.toHaveBeenCalled();
   });
 
