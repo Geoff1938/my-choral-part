@@ -655,7 +655,12 @@ function checkSetItems(libraryId, items, resolveCatalogue) {
             return { kind: 'upload', pieceId: item.pieceId };
         }
         if (item && (item.kind === 'work' || item.kind === 'movement')) {
-            const found = resolveCatalogue ? resolveCatalogue(item) : null;
+            // November 2026: sets are limited to uploaded files until adding
+            // from the catalogue is designed properly (no resolver is passed)
+            if (!resolveCatalogue) {
+                throw new LibraryError(400, 'For now, sets can only contain your uploaded files. Take out any works or movements from our collection, then save again.');
+            }
+            const found = resolveCatalogue(item);
             if (!found) {
                 throw new LibraryError(400, 'A work or movement in this set couldn\'t be found in our collection.');
             }

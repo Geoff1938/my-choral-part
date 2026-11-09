@@ -188,25 +188,9 @@ app.use('/api/activity', activityLogLimiter, activityRouter);
 
 // Apply rate limiting to API routes
 // Users' saved pieces - mounted before /api so it has its own rate limit
-// Catalogue works and movements a user puts in a set are checked against the index
-const resolveCatalogueItem = item => {
-  const index = scraper.indexCache || [];
-  const composer = index.find(c => c.name === item.composer);
-  const work = composer && composer.works.find(w => w.name === item.work);
-  if (!work) return null;
-  if (item.kind === 'work') {
-    return { kind: 'work', composer: composer.name, work: work.name };
-  }
-  const section = work.sections.find(s => s.name === item.movement);
-  return section
-    ? { kind: 'movement', composer: composer.name, work: work.name, movement: section.name, midiUrl: section.midiUrl }
-    : null;
-};
-app.use('/api/library', libraryLimiter, requireSameOrigin, async (req, res, next) => {
-  // Make sure the index is loaded before set items are checked against it
-  await scraper.loadIndex();
-  next();
-}, createLibraryRoutes(resolveCatalogueItem));
+// Sets are limited to uploaded files for now, so no catalogue lookup is
+// passed (see checkSetItems in utils/library.js)
+app.use('/api/library', libraryLimiter, requireSameOrigin, createLibraryRoutes());
 
 // Opening shared links (read-only, anyone with the link)
 app.use('/api/shared', libraryLimiter, createSharedRoutes());

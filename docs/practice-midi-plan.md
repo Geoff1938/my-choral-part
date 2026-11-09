@@ -57,6 +57,7 @@ Stop for review after each milestone.
 - Share links are the title plus a 4-character random ending, e.g. `/s/spring-concert-2027-k7q2` (about a million possibilities per title, so not guessable). Older 16-character codes still work.
 - Opening a shared link adds it to the visitor's list automatically (no "Add to my library" button).
 - Uploaded files and sets that are played are added to recent works (`RecentWorksManager.saveEntry`).
+- Later the same day: sets were limited to **uploaded files only** until adding from the catalogue is designed properly (catalogue search in the set editor removed; the server refuses catalogue items; sets that already contain catalogue items still play). Points for that design: the catalogue search matches composers, works and movements separately, so searching a composer's name finds their works but not their movements.
 
 ## Fixtures
 

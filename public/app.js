@@ -1370,7 +1370,7 @@ class MIDIPlayer {
                 '• Play, share, rename or delete the pieces you have loaded (up to 100)<br>' +
                 '• To share a piece it needs a composer and a title<br><br>' +
                 '<strong>My sets:</strong><br>' +
-                '• A set is a series of MIDI files in order, for example a complete work or a concert programme. Add works or single movements from our collection, or your uploaded files<br>' +
+                '• A set is a series of MIDI files in order, for example a complete work or a concert programme, made from your uploaded files<br>' +
                 '• A set plays like the movements of a work: use previous/next, or let it carry on to the next piece<br><br>' +
                 '<strong>Sharing:</strong><br>' +
                 '• Choose <strong>Share</strong> to get a link for your choir. Anyone who opens it can play the piece or set, and it is added to their own list. <strong>Stop sharing</strong> turns the link off<br>' +

@@ -105,27 +105,18 @@ describe('Sharing', () => {
     expect((await request(app).get(`/p/${token}`)).status).toBe(404);
   });
 
-  test('sets mix uploaded files with catalogue works and movements, in order', async () => {
-    const { cookie, ids } = await owner(['Kyrie', 'Credo']);
-    const items = [
-      { kind: 'work', composer: 'Handel', work: 'Messiah' },
-      { kind: 'upload', pieceId: ids[1] },
-      { kind: 'movement', composer: 'Handel', work: 'Messiah', movement: '3: And the glory of the Lord' },
-      { kind: 'upload', pieceId: ids[0] }
-    ];
-    const created = await send('post', '/api/library/sets', cookie).send({ title: 'Spring concert 2027', items });
+  test('sets of uploaded files keep their order and can be shared', async () => {
+    const { cookie, ids } = await owner(['Kyrie', 'Gloria', 'Credo']);
+    const created = await send('post', '/api/library/sets', cookie).send({ title: 'Spring concert 2027', items: uploads([ids[2], ids[0]]) });
     expect(created.status).toBe(201);
     const set = created.body.set;
     expect(set.items).toEqual([
-      { kind: 'work', composer: 'Handel', work: 'Messiah' },
-      { kind: 'upload', pieceId: ids[1], title: 'Credo', composer: 'Vivaldi' },
-      { kind: 'movement', composer: 'Handel', work: 'Messiah', movement: '3: And the glory of the Lord', midiUrl: '/Handel/Messiah/03-glory.mid' },
+      { kind: 'upload', pieceId: ids[2], title: 'Credo', composer: 'Vivaldi' },
       { kind: 'upload', pieceId: ids[0], title: 'Kyrie', composer: 'Vivaldi' }
     ]);
 
-    // Reorder
-    const updated = await send('patch', `/api/library/sets/${set.id}`, cookie).send({ items: [items[3], items[0]] });
-    expect(updated.body.set.items.map(i => i.kind)).toEqual(['upload', 'work']);
+    const updated = await send('patch', `/api/library/sets/${set.id}`, cookie).send({ items: uploads(ids) });
+    expect(updated.body.set.items.map(i => i.title)).toEqual(['Kyrie', 'Gloria', 'Credo']);
 
     await attest(cookie);
     const token = (await send('post', `/api/library/sets/${set.id}/share`, cookie)).body.shareToken;
@@ -133,29 +124,31 @@ describe('Sharing', () => {
 
     const info = await request(app).get(`/api/shared/s/${token}`);
     expect(info.body.title).toBe('Spring concert 2027');
-    expect(info.body.items.map(i => i.kind)).toEqual(['upload', 'work']);
+    expect(info.body.items.map(i => i.title)).toEqual(['Kyrie', 'Gloria', 'Credo']);
 
-    expect((await binary(request(app).get(`/api/shared/s/${token}/pieces/${ids[0]}/midi`))).status).toBe(200);
-    // Only uploaded files in the set can be fetched through its link
-    expect((await request(app).get(`/api/shared/s/${token}/pieces/${ids[1]}/midi`)).status).toBe(404);
+    expect((await binary(request(app).get(`/api/shared/s/${token}/pieces/${ids[1]}/midi`))).status).toBe(200);
+    // Only files in the set can be fetched through its link
+    const other = await owner(['Not in the set']);
+    expect((await request(app).get(`/api/shared/s/${token}/pieces/${other.ids[0]}/midi`)).status).toBe(404);
 
     // Deleting an uploaded file removes it from the set
-    await send('delete', `/api/library/pieces/${ids[0]}`, cookie);
-    expect((await request(app).get(`/api/shared/s/${token}`)).body.items.map(i => i.kind)).toEqual(['work']);
+    await send('delete', `/api/library/pieces/${ids[1]}`, cookie);
+    expect((await request(app).get(`/api/shared/s/${token}`)).body.items.map(i => i.title)).toEqual(['Kyrie', 'Credo']);
 
     expect((await request(app).get(`/s/${token}`)).text).toContain('Spring concert 2027 - Shared Set');
   });
 
-  test('set items must be the owner\'s uploads or real catalogue entries', async () => {
+  test('sets can only contain the owner\'s uploaded files for now', async () => {
     const mine = await owner(['Mine']);
     const theirs = await owner(['Theirs']);
     const create = items => send('post', '/api/library/sets', mine.cookie).send({ title: 'Test', items });
 
     expect((await create([{ kind: 'upload', pieceId: theirs.ids[0] }])).status).toBe(400);
-    expect((await create([{ kind: 'work', composer: 'Handel', work: 'No such work' }])).status).toBe(400);
-    expect((await create([{ kind: 'movement', composer: 'Handel', work: 'Messiah', movement: 'Not a movement' }])).status).toBe(400);
+    const catalogue = await create([{ kind: 'work', composer: 'Handel', work: 'Messiah' }]);
+    expect(catalogue.status).toBe(400);
+    expect(catalogue.body.error).toMatch(/only contain your uploaded files/);
     expect((await create([{ kind: 'something' }])).status).toBe(400);
-    // The same piece twice is fine (e.g. a reprise)
+    // The same file twice is fine (e.g. a reprise)
     expect((await create(uploads([mine.ids[0], mine.ids[0]]))).status).toBe(201);
   });
 

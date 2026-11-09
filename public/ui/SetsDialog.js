@@ -1,10 +1,12 @@
 /**
  * SetsDialog
  * "My sets" on the Find Music tab. A set is a series of MIDI files in order,
- * for example a complete work or a concert programme. Its items can be the
- * user's uploaded files, whole works from the catalogue, or single
- * movements. Sets can be played (the items become the movement list) and
- * shared by link. Sets others shared with the user are listed too.
+ * for example a complete work or a concert programme. For now a set is made
+ * of the user's uploaded files (November 2026: adding works and movements
+ * from the catalogue was taken out until it is designed properly; sets that
+ * already contain catalogue items still play). Sets can be played (the items
+ * become the movement list) and shared by link. Sets others shared with the
+ * user are listed too.
  */
 
 import { escapeHtml, escapeHtmlAttribute } from '../utils/validation.js';
@@ -39,21 +41,6 @@ export function itemForApi(item) {
     return { kind: 'movement', composer: item.composer, work: item.work, movement: item.movement };
 }
 
-/**
- * Search the catalogue for works and movements to add to a set
- * @param {string} query - Search text
- * @returns {Promise<{works: Array<Object>, movements: Array<Object>}>}
- */
-export async function searchCatalogue(query) {
-    const params = new URLSearchParams({ q: query, composers: 'false', works: 'true', movements: 'true' });
-    const response = await fetch(`/api/search?${params}`);
-    if (!response.ok) throw new Error('Search isn\'t available at the moment. Please try again.');
-    const results = await response.json();
-    return { works: results.works || [], movements: results.movements || [] };
-}
-
-const MAX_RESULTS = 15;
-
 export class SetsDialog {
     /**
      * @param {Object} options
@@ -62,16 +49,14 @@ export class SetsDialog {
      * @param {Function} options.onPlaySet - Called with { id, title, kind: 'library', items }
      * @param {Function} [options.onOpenShared] - Called with (kind, token) for a set shared with the user
      * @param {Object} [options.api] - Library API (for tests)
-     * @param {Function} [options.search] - Catalogue search (for tests)
      * @param {string} [options.origin] - Site address for share links (for tests)
      */
-    constructor({ dialog, openButton, onPlaySet, onOpenShared, api, search, origin }) {
+    constructor({ dialog, openButton, onPlaySet, onOpenShared, api, origin }) {
         this.dialog = dialog;
         this.openButton = openButton;
         this.onPlaySet = onPlaySet;
         this.onOpenShared = onOpenShared || (() => {});
         this.api = api || LibraryApi;
-        this.search = search || searchCatalogue;
         this.origin = origin;
         this.pieces = [];
         this.sets = [];
@@ -80,7 +65,6 @@ export class SetsDialog {
         this.mode = null;
         // A set being created or edited: { id (null if new), title, items }
         this.draft = null;
-        this.searchResults = null;
         this.pendingShare = null;
 
         if (!dialog || !openButton) return;
@@ -110,12 +94,6 @@ export class SetsDialog {
         });
         dialog.addEventListener('submit', event => {
             event.preventDefault();
-            // Enter in the search box searches rather than saving the set
-            const active = typeof document !== 'undefined' ? document.activeElement : null;
-            if (active && active.name === 'query') {
-                this.handleAction('search', '');
-                return;
-            }
             this.handleAction(event.target.dataset.action, event.target.dataset.id || '');
         });
     }
@@ -123,7 +101,6 @@ export class SetsDialog {
     async open() {
         this.mode = null;
         this.draft = null;
-        this.searchResults = null;
         this.pendingShare = null;
         this.setStatus('', '');
         this.setsList.innerHTML = '<li class="library-empty">Loading…</li>';
@@ -197,50 +174,31 @@ export class SetsDialog {
                     ${button('remove-item', String(index), '✕', 'Take out of the set')}
                 </span>
             </li>`).join('');
+        // Every uploaded file is offered (a piece can appear twice, e.g. a reprise);
+        // those already in the set are marked
+        const inSet = id => draft.items.some(item => item.kind === 'upload' && item.pieceId === id);
         const uploads = this.pieces
-            .filter(p => !draft.items.some(item => item.kind === 'upload' && item.pieceId === p.id))
-            .map(p => `<option value="${escapeHtmlAttribute(p.id)}">${escapeHtml(pieceName(p))}</option>`).join('');
+            .map(p => `<option value="${escapeHtmlAttribute(p.id)}">${escapeHtml(pieceName(p))}${inSet(p.id) ? ' (already in this set)' : ''}</option>`)
+            .join('');
+        const addUploads = uploads
+            ? `<select data-action="add-upload" aria-label="Add one of your uploaded files" title="Add one of your uploaded files to the end of the set">
+                   <option value="">Choose a file…</option>${uploads}</select>`
+            : '<p class="library-empty">You haven\'t uploaded any files yet. Use "Or load your own MIDI or MusicXML file…" on the Find Music tab, then Play now: the file is kept in My uploaded files and can be added here.</p>';
         return `<li class="library-item">
             <form class="library-rename library-set-form" data-action="save" data-id="${escapeHtmlAttribute(draft.id || '')}">
                 <label>Set name <input name="title" required maxlength="200" value="${escapeHtmlAttribute(draft.title)}"
                     placeholder="e.g. Spring concert 2027" title="The name shown in your sets, the player and the shared link"></label>
-                <ol class="library-set-pieces">${items || '<li class="library-empty">Nothing in this set yet: add items below.</li>'}</ol>
+                <ol class="library-set-pieces">${items || '<li class="library-empty">Nothing in this set yet: add files below.</li>'}</ol>
                 <div class="library-add">
-                    <span class="library-add-label">Add from our collection</span>
-                    <div class="library-search">
-                        <input type="search" name="query" placeholder="Search for a work or movement" aria-label="Search our collection"
-                            title="Type part of a composer, work or movement name, then press Search">
-                        ${button('search', '', 'Search', 'Search our collection for works and movements')}
-                    </div>
-                    ${this.renderSearchResults()}
-                </div>
-                ${uploads ? `<div class="library-add">
                     <span class="library-add-label">Add one of your uploaded files</span>
-                    <select data-action="add-upload" aria-label="Add one of your uploaded files" title="Add one of your uploaded files to the end of the set">
-                        <option value="">Choose a file…</option>${uploads}</select>
-                </div>` : ''}
+                    ${addUploads}
+                </div>
                 <div class="library-buttons">
                     <button type="submit" class="btn btn-primary" title="Save this set">Save set</button>
                     ${button('cancel-edit', '', 'Cancel', 'Discard these changes')}
                 </div>
             </form>
         </li>`;
-    }
-
-    renderSearchResults() {
-        const results = this.searchResults;
-        if (!results) return '';
-        if (results.error) return `<p class="library-empty">${escapeHtml(results.error)}</p>`;
-        const works = results.works.slice(0, MAX_RESULTS).map((w, i) => `<li class="library-set-piece">
-                <span>${escapeHtml(`${w.composer} – ${w.work}`)}</span>
-                ${button('add-work', String(i), 'Add whole work', 'Add every movement of this work, in order')}
-            </li>`).join('');
-        const movements = results.movements.slice(0, MAX_RESULTS).map((m, i) => `<li class="library-set-piece">
-                <span>${escapeHtml(itemLabel({ kind: 'movement', ...m }))}</span>
-                ${button('add-movement', String(i), 'Add', 'Add just this movement')}
-            </li>`).join('');
-        if (!works && !movements) return '<p class="library-empty">Nothing found. Try fewer or different words.</p>';
-        return `<ul class="library-set-pieces library-results">${works}${movements}</ul>`;
     }
 
     // Keep what the user has typed when the form is redrawn
@@ -261,7 +219,7 @@ export class SetsDialog {
     /**
      * Respond to a button or form in the dialog
      * @param {string} action - data-action of the control
-     * @param {string} id - Set, item position, search result position or "kind:token"
+     * @param {string} id - Set, item position, uploaded file or "kind:token"
      */
     async handleAction(action, id) {
         this.setStatus('', '');
@@ -270,26 +228,13 @@ export class SetsDialog {
         switch (action) {
             case 'new':
                 this.draft = { id: null, title: '', items: [] };
-                this.searchResults = null;
                 return this.render();
             case 'edit':
-                if (set) {
-                    this.draft = { id: set.id, title: set.title, items: set.items.map(item => ({ ...item })) };
-                    this.searchResults = null;
-                }
+                if (set) this.draft = { id: set.id, title: set.title, items: set.items.map(item => ({ ...item })) };
                 return this.render();
             case 'cancel-edit':
                 this.draft = null;
                 return this.render();
-            case 'search': return this.runSearch();
-            case 'add-work': {
-                const work = this.searchResults && this.searchResults.works[index];
-                return work && this.changeItems(items => [...items, { kind: 'work', composer: work.composer, work: work.work }]);
-            }
-            case 'add-movement': {
-                const m = this.searchResults && this.searchResults.movements[index];
-                return m && this.changeItems(items => [...items, { kind: 'movement', composer: m.composer, work: m.work, movement: m.movement }]);
-            }
             case 'add-upload': {
                 const piece = this.pieces.find(p => p.id === id);
                 return piece && this.changeItems(items => [...items, { kind: 'upload', pieceId: piece.id, title: piece.title, composer: piece.composer }]);
@@ -326,20 +271,6 @@ export class SetsDialog {
         return items;
     }
 
-    async runSearch() {
-        const form = this.readForm();
-        const query = form ? form.elements.query.value.trim() : '';
-        if (!query) return;
-        try {
-            this.searchResults = await this.search(query);
-        } catch (error) {
-            this.searchResults = { error: error.message };
-        }
-        this.render();
-        const input = this.setsList.querySelector && this.setsList.querySelector('.library-set-form input[name="query"]');
-        if (input) input.value = query;
-    }
-
     async save() {
         this.readForm();
         const draft = this.draft;
@@ -349,7 +280,6 @@ export class SetsDialog {
             const saved = draft.id ? await this.api.updateSet(draft.id, body) : await this.api.createSet(body);
             this.sets = draft.id ? this.sets.map(s => (s.id === saved.id ? saved : s)) : [saved, ...this.sets];
             this.draft = null;
-            this.searchResults = null;
             this.render();
             this.setStatus(`Saved the set "${saved.title}".`, 'success');
         } catch (error) {

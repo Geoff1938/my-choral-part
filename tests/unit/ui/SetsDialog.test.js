@@ -57,14 +57,10 @@ describe('SetsDialog', () => {
       removeReference: jest.fn(async () => {}),
       ...apiOverrides
     };
-    const search = jest.fn(async () => ({
-      works: [{ composer: 'Faure', work: 'Requiem' }],
-      movements: [{ composer: 'Handel', work: 'Messiah', movement: '3: And the glory', midiUrl: '/Handel/Messiah/03.mid' }]
-    }));
     const onPlaySet = jest.fn();
     const onOpenShared = jest.fn();
-    const setsDialog = new SetsDialog({ dialog, openButton: fakeElement(), api, search, onPlaySet, onOpenShared, origin: 'https://player.test' });
-    return { setsDialog, elements, dialog, api, search, onPlaySet, onOpenShared };
+    const setsDialog = new SetsDialog({ dialog, openButton: fakeElement(), api, onPlaySet, onOpenShared, origin: 'https://player.test' });
+    return { setsDialog, elements, dialog, api, onPlaySet, onOpenShared };
   }
 
   test('an empty list explains how to start', async () => {
@@ -73,38 +69,48 @@ describe('SetsDialog', () => {
     expect(elements['sets-list'].innerHTML).toContain('You haven\'t made any sets yet');
   });
 
-  test('a set can mix a whole work, a movement and an uploaded file, then be played', async () => {
-    const { setsDialog, elements, api, search, onPlaySet } = setup();
+  test('a set of uploaded files can be built, reordered, saved and played', async () => {
+    const twoPieces = [...pieces, { id: 'bbbbbbbbbbbb', title: 'Ave verum', composer: 'Mozart', createdAt: '2026-11-09T10:00:00Z' }];
+    const { setsDialog, elements, api, onPlaySet } = setup({}, { pieces: twoPieces });
     await setsDialog.open();
     await setsDialog.handleAction('new', '');
     expect(elements['sets-new'].hidden).toBe(true);
+    expect(elements['sets-list'].innerHTML).not.toContain('Search');
 
-    // Searching (the search text is read from the form, so set the results directly)
-    setsDialog.searchResults = await search('requiem');
-    setsDialog.render();
-    expect(elements['sets-list'].innerHTML).toContain('Add whole work');
-
-    await setsDialog.handleAction('add-work', '0');
-    await setsDialog.handleAction('add-movement', '0');
     await setsDialog.handleAction('add-upload', 'aaaaaaaaaaaa');
-    await setsDialog.handleAction('up', '2');
+    await setsDialog.handleAction('add-upload', 'bbbbbbbbbbbb');
+    await setsDialog.handleAction('up', '1');
     setsDialog.draft.title = 'Spring concert';
     await setsDialog.handleAction('save', '');
 
     expect(api.createSet).toHaveBeenCalledWith({
       title: 'Spring concert',
-      items: [
-        { kind: 'work', composer: 'Faure', work: 'Requiem' },
-        { kind: 'upload', pieceId: 'aaaaaaaaaaaa' },
-        { kind: 'movement', composer: 'Handel', work: 'Messiah', movement: '3: And the glory' }
-      ]
+      items: [{ kind: 'upload', pieceId: 'bbbbbbbbbbbb' }, { kind: 'upload', pieceId: 'aaaaaaaaaaaa' }]
     });
     expect(elements['sets-list'].innerHTML).toContain('Spring concert');
-    expect(elements['sets-list'].innerHTML).toContain('3 items');
+    expect(elements['sets-list'].innerHTML).toContain('2 items');
 
     await setsDialog.handleAction('play', 'ssssssssssss');
     expect(onPlaySet).toHaveBeenCalledWith(expect.objectContaining({ id: 'ssssssssssss', title: 'Spring concert', kind: 'library' }));
-    expect(onPlaySet.mock.calls[0][0].items).toHaveLength(3);
+  });
+
+  test('the uploaded files list stays available, marking files already in the set', async () => {
+    const { setsDialog, elements } = setup();
+    await setsDialog.open();
+    await setsDialog.handleAction('new', '');
+    await setsDialog.handleAction('add-upload', 'aaaaaaaaaaaa');
+
+    const html = elements['sets-list'].innerHTML;
+    expect(html).toContain('data-action="add-upload"');
+    expect(html).toContain('Vivaldi – Gloria (already in this set)');
+  });
+
+  test('with no uploaded files, the editor explains how to add one', async () => {
+    const { setsDialog, elements } = setup({}, { pieces: [] });
+    await setsDialog.open();
+    await setsDialog.handleAction('new', '');
+    expect(elements['sets-list'].innerHTML).toContain('You haven\'t uploaded any files yet');
+    expect(elements['sets-list'].innerHTML).not.toContain('data-action="add-upload"');
   });
 
   test('sharing a set asks once for confirmation', async () => {
