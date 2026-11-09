@@ -43,7 +43,7 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 
 ### Caching and versioning
 
-`index.html` is served with the build version substituted into `?v=` asset URLs, and the server rewrites relative ES module imports to carry `?v=` too, so versioned JS/CSS can be cached for a year. Unversioned JS/CSS URLs are revalidated (`no-cache`). Always serve pages through `serveIndex` so the `{{VERSION}}` placeholder is replaced.
+`index.html` is served with the build version substituted into `?v=` asset URLs, and the server rewrites relative ES module imports to carry `?v=` too, so versioned JS/CSS can be cached for a year. Unversioned JS/CSS URLs are revalidated (`no-cache`). An open page checks `/version.json` when it comes back into view (and every 30 minutes) and reloads itself onto a newer version, but only when nothing would be lost: not while playing or loading, and not with a pop-up open (`MIDIPlayer.setupAutoUpdate`). After a reload it reopens the page address, or the most recent entry in recent works (catalogue work, uploaded file or set). Always serve pages through `serveIndex` so the `{{VERSION}}` placeholder is replaced.
 
 ### Data and privacy
 

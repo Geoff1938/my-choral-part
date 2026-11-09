@@ -54,6 +54,10 @@ import { LibraryApi, SharedApi } from './api/LibraryApi.js';
 const OWN_FILE_COMPOSER = '(own file)';
 const SHARED_PIECE_COMPOSER = '(shared piece)';
 
+// How often an open page checks for a newer version (it also checks
+// whenever it comes back into view)
+const UPDATE_CHECK_INTERVAL_MS = 30 * 60 * 1000;
+
 // The server accepts activity fields of at most this many characters
 function truncateText(text, max) {
     return text.length > max ? text.slice(0, max) : text;
@@ -143,6 +147,7 @@ class MIDIPlayer {
 
         this.loadPreferences();
         this.attachEventListeners();
+        this.setupAutoUpdate(); // Reload onto newer versions when it is safe to
         this.populateTimeSignatureSettings(); // Initialize time signature section (will show "not loaded" initially)
         this.initializeAudioContext(); // Initialize audio context on first user interaction
         this.checkDeviceCapabilities(); // Check device memory and show warning if limited
@@ -1610,12 +1615,19 @@ class MIDIPlayer {
             // Check if there are recent works in localStorage
             const recentWorks = await this.recentWorksManager.load();
 
+            // If the most recent was an uploaded file or a set, reopen that
+            if (recentWorks.length > 0 && recentWorks[0].type && await this.playRecent(recentWorks[0], { quiet: true })) {
+                return;
+            }
+            // Otherwise the most recent catalogue work
+            const catalogueWorks = recentWorks.filter(item => !item.type);
+
             let composer, work, movements;
             let isDefaultMozart = false; // Track if we're loading default Mozart (not from recent)
 
-            if (recentWorks && recentWorks.length > 0) {
+            if (catalogueWorks.length > 0) {
                 // Load the most recent work
-                const mostRecent = recentWorks[0];
+                const mostRecent = catalogueWorks[0];
                 composer = mostRecent.composer;
                 work = mostRecent.work;
                 const recentMovement = mostRecent.movement; // Store recent movement if available
@@ -2904,15 +2916,14 @@ class MIDIPlayer {
      * Open an entry chosen from recent works
      * @param {Object} entry - A catalogue work { composer, work } or an entry from saveRecentEntry
      */
-    async playRecent(entry) {
+    async playRecent(entry, { quiet = false } = {}) {
         try {
             if (entry.type === 'upload') {
                 const midi = await LibraryApi.fetchMidi(entry.pieceId);
                 await this.loadImportedPiece(midi, entry.title, { pieceId: entry.pieceId, composer: entry.composer, kind: 'library' });
-            } else if (entry.type === 'shared-piece') {
-                await this.openSharedLink('piece', entry.token);
-            } else if (entry.type === 'shared-set') {
-                await this.openSharedLink('set', entry.token);
+            } else if (entry.type === 'shared-piece' || entry.type === 'shared-set') {
+                const opened = await this.openSharedLink(entry.type === 'shared-set' ? 'set' : 'piece', entry.token, { quiet });
+                if (!opened) return false;
             } else if (entry.type === 'set') {
                 const set = ((await LibraryApi.list()).sets || []).find(s => s.id === entry.setId);
                 if (!set) throw new Error('This set is no longer in My sets.');
@@ -2921,9 +2932,13 @@ class MIDIPlayer {
                 await this.selectComposer(entry.composer);
                 await this.selectWork(entry.work);
             }
+            return true;
         } catch (error) {
-            this.switchTab('play-music');
-            this.showStatus(error.message, 'error');
+            if (!quiet) {
+                this.switchTab('play-music');
+                this.showStatus(error.message, 'error');
+            }
+            return false;
         }
     }
 
@@ -3212,8 +3227,10 @@ class MIDIPlayer {
      * automatically, so they can find it again.
      * @param {'piece'|'set'} kind - What is shared
      * @param {string} token - Share code
+     * @param {{quiet?: boolean}} [options] - quiet: don't report a link that no longer works
+     * @returns {Promise<boolean>} Whether it opened
      */
-    async openSharedLink(kind, token) {
+    async openSharedLink(kind, token, { quiet = false } = {}) {
         this.switchTab('play-music');
         try {
             const info = await SharedApi.info(kind, token);
@@ -3240,10 +3257,64 @@ class MIDIPlayer {
             if (added) {
                 this.showStatus(`Added to ${kind === 'set' ? 'My sets' : 'My uploaded files'} on the Find Music tab, so you can play it again`, 'success');
             }
+            return true;
         } catch (error) {
-            this.showStatus(error.message, 'error');
-            this.currentWorkDisplay.textContent = 'Shared link not available';
+            if (!quiet) {
+                this.showStatus(error.message, 'error');
+                this.currentWorkDisplay.textContent = 'Shared link not available';
+            }
+            return false;
         }
+    }
+
+    // ==================== Automatic updates ====================
+
+    /**
+     * Reload onto a newer version when one has been deployed. Checked when the
+     * page comes back into view (switching back to the tab or app) and every
+     * 30 minutes while it is open. The reload only happens when nothing would
+     * be lost - not while music is playing or loading, and not while a pop-up
+     * is open - otherwise the next check tries again. After reloading, the
+     * player reopens what was playing (the page address, or recent works).
+     */
+    setupAutoUpdate() {
+        const script = document.querySelector('script[src*="/app.js?v="]');
+        this.loadedVersion = script ? new URL(script.src, window.location.href).searchParams.get('v') : null;
+        if (!this.loadedVersion || this.loadedVersion === 'unknown') return;
+
+        const check = () => this.checkForUpdate();
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') check();
+        });
+        window.addEventListener('focus', check);
+        setInterval(check, UPDATE_CHECK_INTERVAL_MS);
+    }
+
+    async checkForUpdate() {
+        const now = Date.now();
+        // At most one check a minute (focus and visibility often fire together)
+        if (this.lastUpdateCheck && now - this.lastUpdateCheck < 60 * 1000) return;
+        this.lastUpdateCheck = now;
+        try {
+            const response = await fetch('/version.json', { cache: 'no-store' });
+            if (!response.ok) return;
+            const { version } = await response.json();
+            if (version && version !== 'unknown' && version !== this.loadedVersion && this.canReloadSafely()) {
+                console.log(`[Update] New version ${version} (running ${this.loadedVersion}) - reloading`);
+                window.location.reload();
+            }
+        } catch (error) {
+            // Offline or the server is restarting - try again next time
+        }
+    }
+
+    /**
+     * Whether reloading now would interrupt anything
+     * @returns {boolean}
+     */
+    canReloadSafely() {
+        const helpOpen = this.helpModal && this.helpModal.style.display === 'flex';
+        return !this.isPlaying && !this.loadingMidi && !document.querySelector('dialog[open]') && !helpOpen;
     }
 
     /**
