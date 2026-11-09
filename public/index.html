@@ -11,8 +11,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/branding/logo-icon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/branding/logo-icon-256.png">
     <link rel="stylesheet" href="/styles.css?v={{VERSION}}">
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Icons are inline SVGs from Font Awesome Free 6.4.0 (https://fontawesome.com, CC BY 4.0) -->
 </head>
 <body>
     <!-- seo:body -->
@@ -28,10 +27,10 @@
                 </div>
                 <div class="header-right">
                     <button id="header-help-btn" class="help-link" title="Help" aria-label="Help">
-                        <i class="fa-solid fa-circle-question"></i>
+                        <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3h58.3c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24V250.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1H222.6c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/></svg>
                     </button>
                     <a href="https://mychoralpart.com/" class="home-link" title="Go to landing page">
-                        <i class="fa-solid fa-house"></i>
+                        <svg class="icon" viewBox="0 0 576 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"/></svg>
                     </a>
                 </div>
             </div>
@@ -165,28 +164,28 @@
                     <!-- Transport Controls Toolbar -->
                     <div class="transport-toolbar" title="Playback controls — play, pause, skip and repeat">
                         <button id="stop-btn" class="btn-transport" aria-label="Stop" title="Stop playback and return to beginning">
-                            <i class="fa-solid fa-stop"></i>
+                            <svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"/></svg>
                         </button>
                         <button id="play-btn" class="btn-transport btn-transport-primary" aria-label="Play" title="Start playback">
-                            <i class="fa-solid fa-play"></i>
+                            <svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg>
                         </button>
                         <button id="pause-btn" class="btn-transport" aria-label="Pause" style="display: none;" title="Pause playback">
-                            <i class="fa-solid fa-pause"></i>
+                            <svg class="icon" viewBox="0 0 320 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"/></svg>
                         </button>
                         <button id="backward-btn" class="btn-transport" aria-label="Go back 10 seconds" title="Skip backward 10 seconds">
-                            <i class="fa-solid fa-backward"></i>
+                            <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M459.5 440.6c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4L288 214.3V256v41.7L459.5 440.6zM256 352V256 128 96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4l-192 160C4.2 237.5 0 246.5 0 256s4.2 18.5 11.5 24.6l192 160c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V352z"/></svg>
                         </button>
                         <button id="forward-btn" class="btn-transport" aria-label="Go forward 10 seconds" title="Skip forward 10 seconds">
-                            <i class="fa-solid fa-forward"></i>
+                            <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4L224 214.3V256v41.7L52.5 440.6zM256 352V256 128 96c0-12.4 7.2-23.7 18.4-29s24.5-3.6 34.1 4.4l192 160c7.3 6.1 11.5 15.1 11.5 24.6s-4.2 18.5-11.5 24.6l-192 160c-9.5 7.9-22.8 9.7-34.1 4.4s-18.4-16.6-18.4-29V352z"/></svg>
                         </button>
                         <button id="prev-movement-btn" class="btn-transport" aria-label="Skip to previous movement" title="Single click: Go to start | Double click: Previous movement">
-                            <i class="fa-solid fa-backward-step"></i>
+                            <svg class="icon" viewBox="0 0 320 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M267.5 440.6c9.5 7.9 22.8 9.7 34.1 4.4s18.4-16.6 18.4-29V96c0-12.4-7.2-23.7-18.4-29s-24.5-3.6-34.1 4.4l-192 160L64 241V96c0-17.7-14.3-32-32-32S0 78.3 0 96V416c0 17.7 14.3 32 32 32s32-14.3 32-32V271l11.5 9.6 192 160z"/></svg>
                         </button>
                         <button id="next-movement-btn" class="btn-transport" aria-label="Skip to next movement" title="Skip to start of next movement">
-                            <i class="fa-solid fa-forward-step"></i>
+                            <svg class="icon" viewBox="0 0 320 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M52.5 440.6c-9.5 7.9-22.8 9.7-34.1 4.4S0 428.4 0 416V96C0 83.6 7.2 72.3 18.4 67s24.5-3.6 34.1 4.4l192 160L256 241V96c0-17.7 14.3-32 32-32s32 14.3 32 32V416c0 17.7-14.3 32-32 32s-32-14.3-32-32V271l-11.5 9.6-192 160z"/></svg>
                         </button>
                         <button id="repeat-btn" class="btn-transport" aria-label="Toggle repeat movement" title="Repeat current movement (off: auto-advance to next movement)">
-                            <i class="fa-solid fa-repeat"></i>
+                            <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path fill="currentColor" d="M0 224c0 17.7 14.3 32 32 32s32-14.3 32-32c0-53 43-96 96-96H320v32c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-9.2-9.2-22.9-11.9-34.9-6.9S320 19.1 320 32V64H160C71.6 64 0 135.6 0 224zm512 64c0-17.7-14.3-32-32-32s-32 14.3-32 32c0 53-43 96-96 96H192V352c0-12.9-7.8-24.6-19.8-29.6s-25.7-2.2-34.9 6.9l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V448H352c88.4 0 160-71.6 160-160z"/></svg>
                         </button>
                     </div>
 

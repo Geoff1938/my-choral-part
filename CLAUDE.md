@@ -18,7 +18,8 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 - `middleware/` - rate limiting (keyed on `CF-Connecting-IP`), admin Basic Auth, same-origin check for admin POSTs, error handler
 - `scraper.js` - builds the MIDI index by scraping learnchoralmusic.co.uk; refuses to overwrite the index if a rebuild comes back much smaller
 - `utils/database.js` - activity database (sql.js / SQLite in memory, saved atomically to disk), admin users, retention
-- `utils/seo.js` - per-work title, description, canonical and social tags for `/:composer/:work` pages (unknown works get a 404 with noindex), and `/sitemap.xml` built from the index. `public/index.html` marks the replaceable parts with `<!-- seo:start -->`/`<!-- seo:end -->` and `<!-- seo:body -->`
+- `utils/seo.js` - search engine support: per-work title, description, canonical, social tags and MusicComposition structured data for `/:composer/:work` pages (unknown works 404 with noindex); server-rendered composer pages (`/:composer`) and composer list (`/composers`); `/sitemap.xml` built from the index. `public/index.html` marks the replaceable parts with `<!-- seo:start -->`/`<!-- seo:end -->` and `<!-- seo:body -->`
+- `utils/slug.js` - URL slugs (`Haydn (Joseph)` -> `haydn-joseph`) and name/slug lookup used by the API and pages. Older share links (`/haydn-(joseph)/...`) still resolve and get a 301 to the clean URL. `public/utils/slug.js` is the browser copy for share links - keep the two in sync (a test checks)
 - `utils/scheduler.js` - nightly jobs (node-cron, Europe/London): index rebuild 02:00; backup and 5-year purge 03:30
 
 ### Client (vanilla JS ES modules, no build step)

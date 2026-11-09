@@ -60,9 +60,9 @@ describe('workMeta', () => {
     expect(meta.robots).toBeNull();
   });
 
-  test('canonical URL percent-encodes punctuation in slugs', () => {
+  test('canonical URL uses clean slugs', () => {
     const meta = seo.workMeta(bach, bach.works[0]);
-    expect(meta.canonical).toBe('https://player.mychoralpart.com/bach%2C-js/cantata-140');
+    expect(meta.canonical).toBe('https://player.mychoralpart.com/bach-js/cantata-140');
   });
 
   test('single-movement works do not mention movements', () => {
@@ -124,7 +124,7 @@ describe('renderPage', () => {
 });
 
 describe('buildSitemap', () => {
-  test('lists the home page and each playable work once', () => {
+  test('lists the home page, composers and each playable work once', () => {
     const blocked = {
       name: 'Bennett - not publicly available',
       works: [{ name: 'Song', sections: [{ name: 'x', midiUrl: '/a.mid' }] }]
@@ -133,8 +133,87 @@ describe('buildSitemap', () => {
 
     expect(xml).toContain('<loc>https://player.mychoralpart.com/</loc>');
     expect(xml).toContain('<loc>https://player.mychoralpart.com/handel/messiah</loc>');
-    expect(xml).toContain('<loc>https://player.mychoralpart.com/bach%2C-js/cantata-140</loc>');
+    expect(xml).toContain('<loc>https://player.mychoralpart.com/bach-js/cantata-140</loc>');
     expect(xml).not.toContain('bennett');
-    expect(xml.match(/<url>/g)).toHaveLength(3);
+    expect(xml).toContain('<loc>https://player.mychoralpart.com/composers</loc>');
+    expect(xml).toContain('<loc>https://player.mychoralpart.com/bach-js</loc>');
+    expect(xml.match(/<url>/g)).toHaveLength(6);
+  });
+});
+
+describe('work structured data', () => {
+  const scriptJson = html => JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/)[1]);
+
+  test('describes the work, its composer and movements', () => {
+    const html = seo.renderPage(TEMPLATE, seo.workMeta(handel, handel.works[0]));
+    const graph = scriptJson(html)['@graph'];
+    const composition = graph.find(node => node['@type'] === 'MusicComposition');
+
+    expect(composition.name).toBe('Messiah');
+    expect(composition.composer).toEqual({
+      '@type': 'Person', name: 'Handel', url: 'https://player.mychoralpart.com/handel'
+    });
+    expect(composition.hasPart.map(part => part.name)).toEqual(['1: Overture', '2: Comfort ye']);
+    expect(graph.find(node => node['@type'] === 'BreadcrumbList').itemListElement).toHaveLength(3);
+  });
+
+  test('a name cannot close the script element early', () => {
+    const work = { name: '</script><b>x', sections: [{ name: 'a', midiUrl: '/a.mid' }] };
+    const html = seo.renderPage(TEMPLATE, seo.workMeta(handel, work));
+    expect(html).not.toContain('</script><b>');
+    expect(scriptJson(html)['@graph'][0].name).toBe('</script><b>x');
+  });
+
+  test('noindex pages carry no structured data', () => {
+    const work = { name: 'Secret', sections: [{ name: 'x', midiUrl: '/not-public.html' }] };
+    expect(seo.renderPage(TEMPLATE, seo.workMeta(handel, work))).not.toContain('application/ld+json');
+  });
+});
+
+describe('composer pages', () => {
+  const split = [
+    { name: 'Gilbert & Sullivan', works: [{ name: 'Trial by Jury', sections: [{ name: 'a', midiUrl: '/a.mid' }, { name: 'b', midiUrl: '/b.mid' }] }] },
+    { name: 'Gilbert&Sullivan', works: [{ name: 'Merry Madrigal', sections: [{ name: 'a', midiUrl: '/c.mid' }] }] },
+    { name: 'Haydn (Joseph)', works: [{ name: 'Creation', sections: [{ name: 'a', midiUrl: '/d.mid' }] }] }
+  ];
+
+  test('combines composers listed twice under the same slug', () => {
+    const composer = seo.findComposer(split, 'gilbert-and-sullivan');
+    expect(composer.works.map(item => item.path)).toEqual([
+      '/gilbert-and-sullivan/merry-madrigal',
+      '/gilbert-and-sullivan/trial-by-jury'
+    ]);
+  });
+
+  test('page links to each work with its movement count', () => {
+    const html = seo.renderComposerPage(seo.findComposer(split, 'haydn-joseph'));
+    expect(html).toContain('<title>Joseph Haydn - Choral Works to Rehearse | MyChoralPart</title>');
+    expect(html).toContain('<link rel="canonical" href="https://player.mychoralpart.com/haydn-joseph">');
+    expect(html).toContain('<a href="/haydn-joseph/creation">Creation</a>');
+
+    const gilbert = seo.renderComposerPage(seo.findComposer(split, 'gilbert-and-sullivan'));
+    expect(gilbert).toContain('Trial by Jury<span>2 movements</span>');
+  });
+
+  test('composer list counts works and links each composer once', () => {
+    expect(seo.listComposers(split)).toEqual([
+      { name: 'Gilbert & Sullivan', path: '/gilbert-and-sullivan', count: 2 },
+      { name: 'Haydn (Joseph)', path: '/haydn-joseph', count: 1 }
+    ]);
+    const html = seo.renderComposersPage(split);
+    expect(html).toContain('3 choral works by 2 composers');
+    expect(html.match(/href="\/gilbert-and-sullivan"/g)).toHaveLength(1);
+  });
+
+  test('lists numbered works in natural order', () => {
+    const numbered = [{ name: 'Haydn', works: ['10. Paukenmesse', '2. Missa brevis', '1. Missa'].map(name => ({
+      name, sections: [{ name: 'a', midiUrl: '/a.mid' }]
+    })) }];
+    expect(seo.findComposer(numbered, 'haydn').works.map(item => item.work.name))
+      .toEqual(['1. Missa', '2. Missa brevis', '10. Paukenmesse']);
+  });
+
+  test('unknown composer returns null', () => {
+    expect(seo.findComposer(split, 'nobody')).toBeNull();
   });
 });

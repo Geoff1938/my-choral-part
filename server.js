@@ -210,18 +210,79 @@ app.get('/sitemap.xml', async (req, res, next) => {
   }
 });
 
+// Send a permanent redirect to the clean URL when a page was requested by an
+// older or untidy slug (e.g. /haydn-(joseph)/... -> /haydn-joseph/...), so
+// links shared before November 2026 keep working. Returns true if redirected.
+function redirectToCanonical(req, res, canonicalPath) {
+  const requested = '/' + Object.values(req.params).map(encodeURIComponent).join('/');
+  if (requested === canonicalPath) {
+    return false;
+  }
+  const query = req.originalUrl.includes('?') ? req.originalUrl.slice(req.originalUrl.indexOf('?')) : '';
+  res.redirect(301, canonicalPath + query);
+  return true;
+}
+
+// Paths the composer and work routes must leave alone: API and asset
+// folders, and anything that looks like a missing file (e.g. /favicon.ico)
+const RESERVED_SEGMENTS = new Set(['api', 'proxy', 'admin', 'vendor', 'branding', 'soundfonts', 'utils', 'ui', 'player', 'practice-midi']);
+function isPagePath(req) {
+  const first = String(req.params.composer || '').toLowerCase();
+  if (RESERVED_SEGMENTS.has(first)) return false;
+  const last = Object.values(req.params).pop();
+  return !/\.(js|mjs|css|map|json|txt|xml|html?|png|jpe?g|gif|svg|ico|webp|webmanifest|woff2?|ttf|mid|midi|sf2|sf3)$/i.test(String(last));
+}
+
+// Server-rendered HTML pages (composer list and composer pages)
+function sendHtml(res, html, status = 200) {
+  res.status(status);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.send(html);
+}
+
+// List of all composers, linking to their pages
+app.get('/composers', async (req, res, next) => {
+  try {
+    sendHtml(res, seo.renderComposersPage(await scraper.loadIndex()));
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Composer pages (e.g. /handel) listing the composer's works
+app.get('/:composer', async (req, res, next) => {
+  if (!isPagePath(req)) return next();
+  try {
+    const composer = seo.findComposer(await scraper.loadIndex(), req.params.composer);
+    if (!composer || composer.works.length === 0) {
+      return sendHtml(res, seo.renderComposerNotFoundPage(), 404);
+    }
+    if (redirectToCanonical(req, res, seo.composerPath(composer.name))) {
+      return;
+    }
+    sendHtml(res, seo.renderComposerPage(composer));
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Catch-all route for composer/work URLs (e.g., /domenico-scarlatti/magnificat)
 // This allows sharing direct links to works. Uses the pre-rendered index so
 // the asset URLs carry the real version, not the {{VERSION}} placeholder.
 // Each work gets its own title, description and canonical URL for search
 // engines; unknown works get a 404 status so they are not indexed.
 app.get('/:composer/:work', async (req, res, next) => {
+  if (!isPagePath(req)) return next();
   try {
     const index = await scraper.loadIndex();
     const found = seo.findWork(index, req.params.composer, req.params.work);
     if (!found) {
       res.status(404);
       return serveIndex(req, res, seo.renderPage(INDEX_HTML, seo.notFoundMeta()));
+    }
+    if (redirectToCanonical(req, res, seo.workPath(found.composer.name, found.work.name))) {
+      return;
     }
     serveIndex(req, res, seo.renderPage(INDEX_HTML, seo.workMeta(found.composer, found.work)));
   } catch (error) {

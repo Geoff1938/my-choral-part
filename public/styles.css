@@ -739,10 +739,18 @@ section:last-child {
     border-color: #229954;
 }
 
-.btn-transport i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Inline SVG icons (Font Awesome Free shapes), sized like the icon font:
+   1em tall, width from the icon's own proportions, coloured by the text */
+.icon {
+    display: inline-block;
+    height: 1em;
+    width: auto;
+    overflow: visible;
+    vertical-align: -0.125em;
+}
+
+.btn-transport .icon {
+    display: block;
     font-size: 1rem;
 }
 

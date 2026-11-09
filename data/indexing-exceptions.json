@@ -1333,6 +1333,69 @@
     },
     {
       "composer": "Rutter (John)",
+      "work": "Christiana Canticles",
+      "section": "Magnificat",
+      "url": "/Rutter/Christiana Canticles/Magnificat.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Christiana Canticles",
+      "section": "Nunc Dimittis",
+      "url": "/Rutter/Christiana Canticles/Nunc Dimittis.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Feel the spirit",
+      "section": "1: Joshua fit the battle of Jericho",
+      "url": "/Rutter/Feel the spirit/1-Joshua.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Feel the spirit",
+      "section": "2: Steal away",
+      "url": "/Rutter/Feel the spirit/2-Steal.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Feel the spirit",
+      "section": "3: I got a robe",
+      "url": "/Rutter/Feel the spirit/3-Robe.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Feel the spirit",
+      "section": "4: Sometimes I feel like a motherless child",
+      "url": "/Rutter/Feel the spirit/4-Child.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Feel the spirit",
+      "section": "5: Ev'ry time I feel the spirit",
+      "url": "/Rutter/Feel the spirit/5-Spirit.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Feel the spirit",
+      "section": "6: Deep river",
+      "url": "/Rutter/Feel the spirit/6-River.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Feel the spirit",
+      "section": "7: When the saints go marching in",
+      "url": "/Rutter/Feel the spirit/7-Saints.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
       "work": "Gloria",
       "section": "1: Gloria",
       "url": "../../not-public.html",
@@ -1351,6 +1414,13 @@
       "section": "3: Quoniam",
       "url": "../../not-public.html",
       "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Hymn to the Creator of Light",
+      "section": "Hymn to the Creator of Light",
+      "url": "/Rutter/Creator-Light/Creator.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
     },
     {
       "composer": "Rutter (John)",
@@ -1400,6 +1470,41 @@
       "section": "7: Gloria Patri",
       "url": "../../not-public.html",
       "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Mass of the Children",
+      "section": "1: Kyrie",
+      "url": "/Rutter/children.mss/01-Kyrie.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Mass of the Children",
+      "section": "2: Gloria",
+      "url": "/Rutter/children.mss/02-Glori.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Mass of the Children",
+      "section": "3: Sanctus and Benedictus",
+      "url": "/Rutter/children.mss/03-S&Ben.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Mass of the Children",
+      "section": "4: Agnus Dei",
+      "url": "/Rutter/children.mss/04-Agnus.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Mass of the Children",
+      "section": "5: Finale (Dona nobis pacem)",
+      "url": "/Rutter/children.mss/05-Final.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
     },
     {
       "composer": "Rutter (John)",
@@ -1466,6 +1571,90 @@
     },
     {
       "composer": "Rutter (John)",
+      "work": "Requiem",
+      "section": "1: Requiem Aeternam",
+      "url": "/Rutter/Requiem/1-requim.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Requiem",
+      "section": "2: Out of the deep",
+      "url": "/Rutter/Requiem/2-deep.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Requiem",
+      "section": "3: Pie Jesu",
+      "url": "/Rutter/Requiem/3-p-jesu.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Requiem",
+      "section": "4: Sanctus",
+      "url": "/Rutter/Requiem/4-sancts.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Requiem",
+      "section": "5: Agnus Dei",
+      "url": "/Rutter/Requiem/5-agnus.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Requiem",
+      "section": "6: The Lord is my shepherd",
+      "url": "/Rutter/Requiem/6-shephd.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Requiem",
+      "section": "7: Lux Aeterna",
+      "url": "/Rutter/Requiem/7-luxaet.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "Te Deum",
+      "section": "Te Deum",
+      "url": "/Rutter/TeDeum/Te-Deum.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Falcon",
+      "section": "1: O sing unto the Lord a new song",
+      "url": "/Rutter/Falcon/1-O-sing.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Falcon",
+      "section": "2: Lully, lullay, lullay",
+      "url": "/Rutter/Falcon/2-Lully.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Falcon",
+      "section": "3: Behold, the city of God",
+      "url": "/Rutter/Falcon/3-Behold.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Lord is my light and my salvation",
+      "section": "The Lord is my light and my salvation",
+      "url": "/Rutter/Lord-Light/LordLite.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
       "work": "The Reluctant Dragon",
       "section": "1: Prologue (Once upon a time)",
       "url": "../../not-public.html",
@@ -1529,10 +1718,479 @@
     },
     {
       "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "A Clare Benediction",
+      "url": "/Rutter/The Rutter Collection/Clarebene/ClareBen.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "A Gaelic Blessing",
+      "url": "/Rutter/The Rutter Collection/GAELIC/Gaelic2.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "All things bright and beautiful",
+      "url": "/Rutter/The Rutter Collection/All-things-beautiful/Beautful.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Angels' Carol (Harp/Piano)",
+      "url": "/Rutter/The Rutter Collection/Angels' Carol/Angels.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Angels' Carol (Orchestrated)",
+      "url": "/Rutter/The Rutter Collection/Angels' Carol/AngelsOr.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Angel tidings",
+      "url": "/Rutter/The Rutter Collection/Angel-tidings/Angel-tidings.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "As the Bridegroom to His chosen",
+      "url": "/Rutter/The Rutter Collection/BRIDEGR.OOM/BRIDEGRM.MID",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Banquet Fugue",
+      "url": "/Rutter/The Rutter Collection/BANQUET/BANQUET.MID",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Candlelight Carol",
+      "url": "/Rutter/The Rutter Collection/Candlelight/Candlelight.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Child in a manger",
+      "url": "/Rutter/The Rutter Collection/ChildInManger/ChildMang.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Christmas Lullaby",
+      "url": "/Rutter/The Rutter Collection/XMASLULL.ABY/XMASLULL.MID",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Christmas night",
+      "url": "/Rutter/The Rutter Collection/XmasNite/XmasNite.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Christ the Lord is risen again",
+      "url": "/Rutter/The Rutter Collection/Christ-the-Lord/Christ.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Cradle song",
+      "url": "/Rutter/The Rutter Collection/CradleSong/CradSong.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Donkey Carol",
+      "url": "/Rutter/The Rutter Collection/Donkey-Carol/Donkey.MID",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Dormi Jesu",
+      "url": "/Rutter/The Rutter Collection/Dormi-Jesu/DormJesu.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Down in yon forest",
+      "url": "/Rutter/The Rutter Collection/DownInForest/Downfor.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Flemish carol",
+      "url": "/Rutter/The Rutter Collection/FlemishCarol/Flemish-carol.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "For the Beauty of the Earth",
+      "url": "/Rutter/The Rutter Collection/Beauty/Beauty.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "God be in my head",
+      "url": "/Rutter/The Rutter Collection/God in head/God-i-hd.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Here we come a-wassailing",
+      "url": "/Rutter/The Rutter Collection/Wassail/Wass.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Here we come a-wassailing (2nd version)",
+      "url": "/Rutter/The Rutter Collection/HereWass-8Voices/HereWass-8voices.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Home is a special kind of feeling",
+      "url": "/Rutter/The Rutter Collection/Home/Home-is.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Il est ne le divin enfant",
+      "url": "/Rutter/The Rutter Collection/ENFANT/ENFANT.MID",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "In dulci jubilo",
+      "url": "/Rutter/The Rutter Collection/InDulci/in-dulci.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "I saw three ships",
+      "url": "/Rutter/The Rutter Collection/ThreeShips/3-ships.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "I wonder as I wander",
+      "url": "/Rutter/The Rutter Collection/Wonder/Wonder.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Jesus child",
+      "url": "/Rutter/The Rutter Collection/Jesus-child/Jesuschl.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "King Jesus hath a garden",
+      "url": "/Rutter/The Rutter Collection/KingJesus/KingJesu.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Let's begin again",
+      "url": "/Rutter/The Rutter Collection/Let's begin again/Begin-ag.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Love came down at Christmas",
+      "url": "/Rutter/The Rutter Collection/Love-came-down/Lovecame.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Mary's lullaby",
+      "url": "/Rutter/The Rutter Collection/Mary'sLullaby/MarysLul.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Nativity carol",
+      "url": "/Rutter/The Rutter Collection/Nativity/Nativity.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Noel nouvelet (Nowell, sing Nowell)",
+      "url": "/Rutter/The Rutter Collection/NoelNouvelet/NoelNouv.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "O come, O come Imannuel",
+      "url": "/Rutter/The Rutter Collection/O come Immanuel/O-come.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "O Waly, Waly",
+      "url": "/Rutter/The Rutter Collection/O-Waly, Waly.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Past three a clock",
+      "url": "/Rutter/The Rutter Collection/Past-3oC/Past3.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Quem pastores laudavere (Shepherds left their flocks a-straying)",
+      "url": "/Rutter/The Rutter Collection/QuemPastores/QuemPast.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Quittez, pasteurs (Come leave your sheep)",
+      "url": "/Rutter/The Rutter Collection/QuittezPast/Quittez.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Rise up, shepherd, and follow",
+      "url": "/Rutter/The Rutter Collection/SHEPHERD/SHEPHERD.MID",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Sans Day Carol",
+      "url": "/Rutter/The Rutter Collection/SANS-DAY/SANS-DAY.MID",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Shepherd's pipe carol",
+      "url": "/Rutter/The Rutter Collection/Shepherd's Pipe/Sheppipe.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Star carol",
+      "url": "/Rutter/The Rutter Collection/StarCarol/Star-carol.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "The heavenly aeroplane",
+      "url": "/Rutter/The Rutter Collection/Aeroplane/Aeroplane.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "The Lord bless you and keep you",
+      "url": "/Rutter/The Rutter Collection/BLESSYOU/Blessyou.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "There is a flower",
+      "url": "/Rutter/The Rutter Collection/Flower/Flower.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "This is the day",
+      "url": "/Rutter/The Rutter Collection/This-is-the-day/This-is-the-day.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "The twelve days of Christmas",
+      "url": "/Rutter/The Rutter Collection/TwelveDays/12-days.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "What sweeter music",
+      "url": "/Rutter/The Rutter Collection/Sweeter/Sweeter.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "Wexford Carol",
+      "url": "/Rutter/The Rutter Collection/Wexford/Wexford.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Rutter Collection",
+      "section": "When the Saints go marching in",
+      "url": "/Rutter/The Rutter Collection/SAINTS/SAINTS2.MID",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
       "work": "The Sprig of Thyme",
       "section": "All Files",
       "url": "Unemph.zip",
       "reason": "Link points to HTML page, not MIDI file"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "1: The bold grenadier",
+      "url": "/Rutter/Sprig of Thyme/01-gren.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "2: The keel row",
+      "url": "/Rutter/Sprig of Thyme/02-keel.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "3: The willow tree",
+      "url": "/Rutter/Sprig of Thyme/03-wtree.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "4: The sprig of thyme",
+      "url": "/Rutter/Sprig of Thyme/04-sprig.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "5: Down by the sally gardens",
+      "url": "/Rutter/Sprig of Thyme/05-sally.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "6: The cuckoo",
+      "url": "/Rutter/Sprig of Thyme/06-cucko.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "7: I know where I'm going",
+      "url": "/Rutter/Sprig of Thyme/07-iknow.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "8: Willow song",
+      "url": "/Rutter/Sprig of Thyme/08-willo.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "9: O can ye sew cushions?",
+      "url": "/Rutter/Sprig of Thyme/09-sew.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "10: The miller of Dee",
+      "url": "/Rutter/Sprig of Thyme/10-millr.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "The Sprig of Thyme",
+      "section": "11: Afton water",
+      "url": "/Rutter/Sprig of Thyme/11-afton.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "When icicles hang",
+      "section": "1: Icicles",
+      "url": "/Rutter/Icicles/1-Icicle.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "When icicles hang",
+      "section": "2: Winter nights",
+      "url": "/Rutter/Icicles/2-Winter.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "When icicles hang",
+      "section": "3: Good ale",
+      "url": "/Rutter/Icicles/3-Ale.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "When icicles hang",
+      "section": "4: Blow, blow, thou winter wind",
+      "url": "/Rutter/Icicles/4-Blow.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
+    },
+    {
+      "composer": "Rutter (John)",
+      "work": "When icicles hang",
+      "section": "5: Winter, wakeneth all my care 6: Hay, ay",
+      "url": "/Rutter/Icicles/5-6-WinH.mid",
+      "reason": "MIDI file withdrawn (page says files are no longer publicly available)"
     },
     {
       "composer": "Shearing",
@@ -2042,5 +2700,5 @@
       "reason": "Link points to non-MIDI file"
     }
   ],
-  "timestamp": "2026-10-25T22:20:40.698Z"
+  "timestamp": "2026-11-09T12:32:15.546Z"
 }

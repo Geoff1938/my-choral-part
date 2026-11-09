@@ -43,6 +43,7 @@ import { InstrumentLoader } from './player/InstrumentLoader.js';
 import { StatusManager } from './ui/StatusManager.js';
 import { RecentWorksManager } from './api/RecentWorksManager.js';
 import { normalizeChannelName, detectVoicePartFromName } from './practice-midi/voiceParts.js';
+import { toSlug } from './utils/slug.js';
 
 class MIDIPlayer {
     constructor() {
@@ -2448,9 +2449,7 @@ class MIDIPlayer {
 
     updateShareableURL() {
         if (this.selectedComposer && this.selectedWork) {
-            const composerSlug = this.selectedComposer.toLowerCase().replace(/\s+/g, '-');
-            const workSlug = this.selectedWork.toLowerCase().replace(/\s+/g, '-');
-            const url = `${window.location.origin}/${composerSlug}/${workSlug}`;
+            const url = `${window.location.origin}/${toSlug(this.selectedComposer)}/${toSlug(this.selectedWork)}`;
 
             // Update Settings tab shareable URL
             this.shareableUrlInputSettings.value = url;

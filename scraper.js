@@ -2,6 +2,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs-extra');
 const path = require('path');
+const { findByNameOrSlug, findWork } = require('./utils/slug');
 
 // The index files shipped with the repo (used to seed DATA_DIR and as a fallback)
 const SHIPPED_DATA_DIR = path.join(__dirname, 'data');
@@ -1298,56 +1299,27 @@ class ChoralMusicScraper {
    */
   async getComposerWorks(composerName) {
     const index = await this.loadIndex();
-    // Support both exact match and slug-style lookup (case-insensitive, hyphens = spaces)
-    const composer = index.find(c =>
-      c.name === composerName ||
-      this.nameToSlug(c.name) === composerName.toLowerCase()
-    );
+    const composer = findByNameOrSlug(index, composerName);
     return composer ? composer.works : [];
   }
 
   /**
-   * Convert a name to a URL-safe slug
-   * @param {string} name - Name to convert
-   * @returns {string} Slug version
-   */
-  nameToSlug(name) {
-    return name.toLowerCase().replace(/\s+/g, '-');
-  }
-
-  /**
-   * Resolve slugs to actual composer and work names
-   * @param {string} composerSlug - Composer slug (lowercase, hyphenated)
-   * @param {string} workSlug - Work slug (lowercase, hyphenated)
+   * Resolve slugs to actual composer and work names. Accepts exact names,
+   * clean slugs ("haydn-joseph") and the older share-link slugs
+   * ("haydn-(joseph)"), ignoring punctuation picked up when a link is
+   * pasted into a sentence.
+   * @param {string} composerSlug - Composer slug
+   * @param {string} workSlug - Work slug
    * @returns {Promise<Object|null>} Object with composer and work names, or null if not found
    */
   async resolveSlug(composerSlug, workSlug) {
-    // Strip trailing punctuation that gets appended when URLs appear in sentences
-    // e.g., "Check out https://player.mychoralpart.com/verdi/requiem." (trailing period)
-    // Remove one trailing character at a time, so names ending in ")" still match
-    const findByNameOrSlug = (items, slug) => {
-      let candidate = slug;
-      while (true) {
-        const match = items.find(item =>
-          item.name === candidate ||
-          this.nameToSlug(item.name) === candidate.toLowerCase()
-        );
-        if (match) return match;
-        if (!/[.,;:!?)]$/.test(candidate)) return null;
-        candidate = candidate.slice(0, -1);
-      }
-    };
-
     const index = await this.loadIndex();
-    const composer = findByNameOrSlug(index, composerSlug);
-    if (!composer) return null;
-
-    const work = findByNameOrSlug(composer.works, workSlug);
-    if (!work) return null;
+    const found = findWork(index, composerSlug, workSlug);
+    if (!found) return null;
 
     return {
-      composer: composer.name,
-      work: work.name
+      composer: found.composer.name,
+      work: found.work.name
     };
   }
 
@@ -1362,17 +1334,10 @@ class ChoralMusicScraper {
    */
   async getWorkSections(composerName, workName) {
     const index = await this.loadIndex();
-    // Support both exact match and slug-style lookup
-    const composer = index.find(c =>
-      c.name === composerName ||
-      this.nameToSlug(c.name) === composerName.toLowerCase()
-    );
+    const composer = findByNameOrSlug(index, composerName);
     if (!composer) return [];
 
-    const work = composer.works.find(w =>
-      w.name === workName ||
-      this.nameToSlug(w.name) === workName.toLowerCase()
-    );
+    const work = findByNameOrSlug(composer.works, workName);
     return work ? work.sections : [];
   }
 
