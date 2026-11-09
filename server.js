@@ -4,6 +4,7 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 const compression = require('compression');
 const ChoralMusicScraper = require('./scraper');
+const seo = require('./utils/seo');
 
 // Generate version.json at startup so it's available as a static file.
 // Returns the version string so we can also use it to cache-bust HTML asset references.
@@ -51,6 +52,7 @@ function buildIndexHtml() {
 }
 
 const INDEX_HTML = buildIndexHtml();
+const HOME_HTML = seo.renderPage(INDEX_HTML, seo.homeMeta());
 
 // Import routes
 const createApiRoutes = require('./routes/api');
@@ -89,13 +91,13 @@ app.use(express.json());
 // Serve the pre-rendered index.html for "/" and "/index.html" so the
 // {{VERSION}} placeholder gets substituted with the current build version.
 // Must come BEFORE express.static so static doesn't intercept the raw file.
-function serveIndex(req, res) {
+function serveIndex(req, res, html = HOME_HTML) {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.send(INDEX_HTML);
+  res.send(html);
 }
-app.get('/', serveIndex);
-app.get('/index.html', serveIndex);
+app.get('/', (req, res) => serveIndex(req, res));
+app.get('/index.html', (req, res) => serveIndex(req, res));
 
 // Note whether the request carries the ?v= version, so the static handler
 // below only caches for a year when the URL changes on every deploy.
@@ -191,10 +193,41 @@ app.use('/admin', adminLimiter, requireSameOrigin, basicAuthMiddleware, adminRou
 // old bookmarks to the normal player
 app.get('/fullfonts', (req, res) => res.redirect(301, '/'));
 
+// Sitemap of the home page and every playable work, rebuilt when the index
+// changes (the scraper replaces its cached index object after a rebuild)
+let sitemapCache = { index: null, xml: '' };
+app.get('/sitemap.xml', async (req, res, next) => {
+  try {
+    const index = await scraper.loadIndex();
+    if (sitemapCache.index !== index) {
+      sitemapCache = { index, xml: seo.buildSitemap(index) };
+    }
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(sitemapCache.xml);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Catch-all route for composer/work URLs (e.g., /domenico-scarlatti/magnificat)
 // This allows sharing direct links to works. Uses the pre-rendered index so
 // the asset URLs carry the real version, not the {{VERSION}} placeholder.
-app.get('/:composer/:work', serveIndex);
+// Each work gets its own title, description and canonical URL for search
+// engines; unknown works get a 404 status so they are not indexed.
+app.get('/:composer/:work', async (req, res, next) => {
+  try {
+    const index = await scraper.loadIndex();
+    const found = seo.findWork(index, req.params.composer, req.params.work);
+    if (!found) {
+      res.status(404);
+      return serveIndex(req, res, seo.renderPage(INDEX_HTML, seo.notFoundMeta()));
+    }
+    serveIndex(req, res, seo.renderPage(INDEX_HTML, seo.workMeta(found.composer, found.work)));
+  } catch (error) {
+    next(error);
+  }
+});
 
 // 404 handler - must be after all other routes
 app.use(notFoundHandler);

@@ -18,6 +18,7 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 - `middleware/` - rate limiting (keyed on `CF-Connecting-IP`), admin Basic Auth, same-origin check for admin POSTs, error handler
 - `scraper.js` - builds the MIDI index by scraping learnchoralmusic.co.uk; refuses to overwrite the index if a rebuild comes back much smaller
 - `utils/database.js` - activity database (sql.js / SQLite in memory, saved atomically to disk), admin users, retention
+- `utils/seo.js` - per-work title, description, canonical and social tags for `/:composer/:work` pages (unknown works get a 404 with noindex), and `/sitemap.xml` built from the index. `public/index.html` marks the replaceable parts with `<!-- seo:start -->`/`<!-- seo:end -->` and `<!-- seo:body -->`
 - `utils/scheduler.js` - nightly jobs (node-cron, Europe/London): index rebuild 02:00; backup and 5-year purge 03:30
 
 ### Client (vanilla JS ES modules, no build step)

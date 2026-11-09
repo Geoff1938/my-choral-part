@@ -64,7 +64,7 @@ describe('JS module versioning', () => {
   });
 
   test('deep links get the version-substituted page', async () => {
-    for (const url of ['/mozart/requiem', '/']) {
+    for (const url of ['/handel/messiah', '/']) {
       const response = await request(app).get(url);
 
       expect(response.status).toBe(200);

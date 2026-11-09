@@ -1,0 +1,6 @@
+# /api/ stays crawlable: the player calls it to show the work when Google renders a page
+User-agent: *
+Disallow: /proxy
+Disallow: /admin
+
+Sitemap: https://player.mychoralpart.com/sitemap.xml
