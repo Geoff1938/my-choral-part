@@ -101,6 +101,9 @@ function createLibraryRoutes() {
             res.setHeader('Cache-Control', 'no-store');
             res.json({
                 pieces: found ? await library.listPieces(found.id) : [],
+                sets: found ? await library.listSets(found.id) : [],
+                references: found ? await library.listReferences(found.id) : [],
+                attested: found ? await library.hasAttested(found.id) : false,
                 limit: library.LIMITS.PIECES_PER_LIBRARY
             });
         } catch (error) {
@@ -180,7 +183,182 @@ function createLibraryRoutes() {
         }
     });
 
+    // ----- Sharing -----
+
+    // Run a handler with the user's library, or answer 404 if they have none
+    const withLibrary = handler => async (req, res, next) => {
+        try {
+            const found = await currentLibrary(req, res);
+            if (!found) {
+                return res.status(404).json({ error: 'You don\'t have a library yet.' });
+            }
+            await handler(found, req, res);
+        } catch (error) {
+            handleError(error, res, next);
+        }
+    };
+    const notFound = (res, what = 'piece') => res.status(404).json({ error: `This ${what} isn't in your library.` });
+
+    // The owner confirms they have the right to share (asked once, before the first share)
+    router.post('/attest', withLibrary(async (found, req, res) => {
+        if (!req.body || req.body.confirmed !== true) {
+            throw new library.LibraryError(400, 'Please tick the box to confirm.');
+        }
+        await library.attest(found.id);
+        res.json({ attested: true });
+    }));
+
+    router.post('/pieces/:id/share', withLibrary(async (found, req, res) => {
+        const token = await library.sharePiece(found.id, req.params.id);
+        return token ? res.json({ shareToken: token }) : notFound(res);
+    }));
+
+    router.delete('/pieces/:id/share', withLibrary(async (found, req, res) => {
+        return (await library.unsharePiece(found.id, req.params.id)) ? res.status(204).end() : notFound(res);
+    }));
+
+    // ----- Sets -----
+
+    router.post('/sets', withLibrary(async (found, req, res) => {
+        const { title, pieceIds } = req.body || {};
+        res.status(201).json({ set: await library.createSet(found.id, { title, pieceIds: pieceIds || [] }) });
+    }));
+
+    router.patch('/sets/:id', withLibrary(async (found, req, res) => {
+        const { title, pieceIds } = req.body || {};
+        const set = await library.updateSet(found.id, req.params.id, { title, pieceIds });
+        return set ? res.json({ set }) : notFound(res, 'set');
+    }));
+
+    router.delete('/sets/:id', withLibrary(async (found, req, res) => {
+        return (await library.deleteSet(found.id, req.params.id)) ? res.status(204).end() : notFound(res, 'set');
+    }));
+
+    router.post('/sets/:id/share', withLibrary(async (found, req, res) => {
+        const token = await library.shareSet(found.id, req.params.id);
+        return token ? res.json({ shareToken: token }) : notFound(res, 'set');
+    }));
+
+    router.delete('/sets/:id/share', withLibrary(async (found, req, res) => {
+        return (await library.unshareSet(found.id, req.params.id)) ? res.status(204).end() : notFound(res, 'set');
+    }));
+
+    // ----- Pieces and sets shared by others -----
+
+    // Add a shared piece or set: { kind: 'piece'|'set', token }. Creates the
+    // library (and its cookie) if this is the user's first.
+    router.post('/references', async (req, res, next) => {
+        try {
+            const { kind, token } = req.body || {};
+            if (kind !== 'piece' && kind !== 'set') {
+                throw new library.LibraryError(400, 'Unknown kind of link.');
+            }
+            let key = readKey(req);
+            let found = key ? await library.findLibrary(key) : null;
+            if (!found) {
+                key = library.newKey();
+                found = await library.findLibrary(key, { create: true });
+            }
+            if (!(await library.addReference(found.id, kind, token))) {
+                return res.status(404).json({ error: SHARED_GONE });
+            }
+            setKeyCookie(req, res, key);
+            res.status(201).json({ added: true });
+        } catch (error) {
+            handleError(error, res, next);
+        }
+    });
+
+    router.delete('/references/:kind/:token', withLibrary(async (found, req, res) => {
+        return (await library.removeReference(found.id, req.params.kind, req.params.token))
+            ? res.status(204).end()
+            : res.status(404).json({ error: 'This isn\'t in your library.' });
+    }));
+
     return router;
 }
 
-module.exports = { createLibraryRoutes, COOKIE_NAME, readKey };
+const SHARED_GONE = 'This shared link is no longer available. The person who shared it may have stopped sharing it or deleted it.';
+
+/**
+ * Public routes for opening shared links (/api/shared). Anyone with the
+ * link can play the piece or set; nothing else of the owner's is visible.
+ */
+function createSharedRoutes() {
+    const router = express.Router();
+
+    // Whether the visitor owns this, or has already added it to their library
+    async function visitorStatus(req, res, kind, token, ownerLibraryId) {
+        const found = await currentLibrary(req, res);
+        const isOwner = Boolean(found && found.id === ownerLibraryId);
+        return {
+            isOwner,
+            inLibrary: isOwner || Boolean(found && await library.hasReference(found.id, kind, token))
+        };
+    }
+
+    const sendMidi = (res, midi) => {
+        res.setHeader('Content-Type', 'audio/midi');
+        res.setHeader('Cache-Control', 'private, no-store');
+        res.send(midi);
+    };
+    const gone = res => res.status(404).json({ error: SHARED_GONE });
+
+    router.use((req, res, next) => {
+        res.setHeader('X-Robots-Tag', 'noindex');
+        next();
+    });
+
+    router.get('/p/:token', async (req, res, next) => {
+        try {
+            const found = await library.findSharedPiece(req.params.token);
+            if (!found) return gone(res);
+            res.json({
+                kind: 'piece',
+                title: found.piece.title,
+                composer: found.piece.composer,
+                pieceId: found.piece.id,
+                ...(await visitorStatus(req, res, 'piece', req.params.token, found.libraryId))
+            });
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    router.get('/p/:token/midi', async (req, res, next) => {
+        try {
+            const midi = await library.readSharedPiece(req.params.token);
+            return midi ? sendMidi(res, midi) : gone(res);
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    router.get('/s/:token', async (req, res, next) => {
+        try {
+            const found = await library.findSharedSet(req.params.token);
+            if (!found) return gone(res);
+            res.json({
+                kind: 'set',
+                title: found.set.title,
+                pieces: found.pieces.map(p => ({ id: p.id, title: p.title, composer: p.composer })),
+                ...(await visitorStatus(req, res, 'set', req.params.token, found.libraryId))
+            });
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    router.get('/s/:token/pieces/:pieceId/midi', async (req, res, next) => {
+        try {
+            const midi = await library.readSharedSetPiece(req.params.token, req.params.pieceId);
+            return midi ? sendMidi(res, midi) : gone(res);
+        } catch (error) {
+            next(error);
+        }
+    });
+
+    return router;
+}
+
+module.exports = { createLibraryRoutes, createSharedRoutes, COOKIE_NAME, readKey, SHARED_GONE };

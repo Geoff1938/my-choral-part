@@ -117,6 +117,10 @@
                     <div class="work-title">
                         <h2 id="current-work-display">No work selected</h2>
                     </div>
+                    <!-- Shown while playing a piece or set someone shared with you -->
+                    <button type="button" id="add-shared-btn" class="btn add-shared-btn" hidden
+                        title="Keep this in My library so you can play it again without the link. If the person who shared it stops sharing, it will no longer be available.">Add to my library</button>
+                    <p id="add-shared-status" class="add-shared-status" role="status" hidden></p>
                 </div>
 
                 <!-- Status Messages -->
@@ -348,6 +352,7 @@
                     <p><strong>Stored on your device:</strong> Your preferences (voice part, recent works, playback settings) are stored locally on your device to remember your choices between visits.</p>
                     <p><strong>Stored on our server:</strong> When you open and play a work, we record which work and movement it is, how long you play it for, an anonymous random identifier created by your browser, and your browser type (its "user agent"). This is used only to understand which works are most used and how much the player is used. We keep it for up to 5 years and then delete it. We do not record your IP address, and we do not collect any personal information such as your name or email address. Questions about this can be sent to the address under Contact Us below.</p>
                     <p><strong>Your own files:</strong> Files you load are converted on your device and are not sent to us. When you play one, we record its title (and composer, if known) in the same way as works from our collection. If you choose <strong>Save to my library</strong>, we keep the converted practice file, its title and composer on our server, linked to a random code stored in a cookie in your browser. You can delete saved pieces at any time under <strong>My library</strong>; a library that isn't used for 3 years is deleted. Clearing your browser's cookies for this site disconnects your browser from its library.</p>
+                    <p><strong>Sharing:</strong> If you share a piece or set, anyone with its link can play it and add it to their own library; we don't record who opens a link. Plays of shared pieces are recorded by title in the same way. Choose <strong>Stop sharing</strong> in My library to turn a link off. To report something shared without permission, email the address under Contact Us below.</p>
                     <button id="clear-saved-data-btn" class="btn btn-small" style="margin-top: 10px;" title="Clear all saved data and reset to defaults">Clear All Saved Data</button>
                     <p style="margin-top: 8px; font-size: 0.85em; color: #666;">This will reset all local preferences to defaults.</p>
                 </div>
@@ -460,9 +465,38 @@
             <button type="button" id="library-dialog-close" class="channel-dialog-close-btn" aria-label="Close" title="Close your library">&times;</button>
         </div>
         <div class="import-dialog-body">
+            <!-- Asked once, before the first share -->
+            <div id="library-attest" class="library-attest" hidden>
+                <p><strong>Before you share</strong></p>
+                <label class="library-attest-check" title="You must confirm this before sharing">
+                    <input type="checkbox" id="library-attest-checkbox">
+                    <span>I have the right to share these files: for example, the music is out of copyright, I made the file myself, or I have permission. I understand that anyone with the link can play the music and add it to their own library.</span>
+                </label>
+                <p class="import-hint">If you believe something shared here infringes your rights, email <a href="mailto:hello@mychoralpart.com">hello@mychoralpart.com</a> and we will remove it.</p>
+                <div class="library-buttons">
+                    <button type="button" class="btn btn-primary" data-action="attest-confirm" title="Confirm and share">Confirm and share</button>
+                    <button type="button" class="btn" data-action="attest-cancel" title="Don't share">Cancel</button>
+                </div>
+            </div>
+
+            <p id="library-status" class="import-save-status" role="status" hidden></p>
+
+            <h4 class="library-heading">Your pieces</h4>
             <p id="library-summary" class="library-summary"></p>
             <ul id="library-list" class="library-list"></ul>
-            <p id="library-status" class="import-save-status" role="status" hidden></p>
+
+            <div class="library-heading-row">
+                <h4 class="library-heading">Sets</h4>
+                <button type="button" id="library-new-set" class="btn" data-action="new-set"
+                    title="Group some of your pieces in order, for example a concert programme, to play or share them together">New set</button>
+            </div>
+            <ul id="library-sets" class="library-list"></ul>
+
+            <div id="library-refs-section" hidden>
+                <h4 class="library-heading">Shared with you</h4>
+                <ul id="library-refs" class="library-list"></ul>
+            </div>
+
             <p class="import-hint">Your library is linked to this browser on this device. Pieces are kept on our server until you delete them; a library that isn't used for 3 years is deleted.</p>
         </div>
     </dialog>

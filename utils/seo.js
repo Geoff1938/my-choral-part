@@ -203,6 +203,32 @@ function notFoundMeta() {
 }
 
 /**
+ * Tags for a shared piece or set (/p/... or /s/...). Shared links are
+ * unlisted, so never indexed; the title shows in link previews.
+ * @param {string|null} title - Piece or set title, or null if the link no longer works
+ * @param {'piece'|'set'} kind - What is shared
+ * @returns {Object} Page metadata
+ */
+function sharedMeta(title, kind) {
+  if (!title) {
+    return {
+      title: `Shared Link Not Available | ${SITE_NAME}`,
+      description: 'This shared link is no longer available.',
+      canonical: null,
+      robots: 'noindex'
+    };
+  }
+  return {
+    title: `${displayName(title)} - Shared ${kind === 'set' ? 'Set' : 'Piece'} | ${SITE_NAME}`,
+    description: kind === 'set'
+      ? 'A set of pieces shared with you to practise your choir part in the free MyChoralPart player.'
+      : 'A piece shared with you to practise your choir part in the free MyChoralPart player.',
+    canonical: null,
+    robots: 'noindex'
+  };
+}
+
+/**
  * Build the <head> tags for a page
  * @param {Object} meta - Page metadata
  * @returns {string} HTML
@@ -560,6 +586,7 @@ module.exports = {
   homeMeta,
   workMeta,
   notFoundMeta,
+  sharedMeta,
   renderPage,
   findWork,
   findComposer,

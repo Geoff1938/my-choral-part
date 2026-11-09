@@ -14,7 +14,7 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 - `routes/api.js` - composer search, works, sections, deep-link resolve (`/api/...`)
 - `routes/proxy.js` - `/proxy?url=` fetches MIDI files from learnchoralmusic.co.uk only (domain allowlist, re-checked on redirects)
 - `routes/activity.js` - `POST /api/activity/log` usage events from the player
-- `routes/library.js` - `/api/library`: users' saved pieces (list, save, MIDI, rename, delete), identified by the HttpOnly `mcp_library` cookie
+- `routes/library.js` - `/api/library`: users' saved pieces, sets, sharing and pieces/sets added from others' links, identified by the HttpOnly `mcp_library` cookie; `/api/shared`: public read-only access to shared pieces (`/p/<code>`) and sets (`/s/<code>`). `server.js` serves the `/p/` and `/s/` pages (noindex) before the composer/work routes
 - `routes/admin.js` - `/admin` dashboard: summary, CSV export, index status, manual index rebuild
 - `middleware/` - rate limiting (keyed on `CF-Connecting-IP`), admin Basic Auth, same-origin check for admin POSTs, error handler
 - `scraper.js` - builds the MIDI index by scraping learnchoralmusic.co.uk; refuses to overwrite the index if a rebuild comes back much smaller
@@ -28,7 +28,7 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 
 - `public/app.js` - the `MIDIPlayer` class: search and selection, MIDI loading, playback, balance, tempo, bars and loops, activity logging
 - `public/ui/ImportDialog.js` - "Or load your own MIDI or MusicXML file..." dialog on the Find Music tab: converts the file in the browser with `public/practice-midi/` (nothing is uploaded) and hands the practice MIDI to `MIDIPlayer.loadImportedPiece()`. Imported and library pieces (`this.importedPiece`) are logged as composer "(own file)", are not added to recent works or shared, and keep settings under `piece:<id>` keys once saved
-- `public/ui/LibraryDialog.js` and `public/api/LibraryApi.js` - "My library" dialog (play, rename, delete) and the `/api/library` client
+- `public/ui/LibraryDialog.js` and `public/api/LibraryApi.js` - "My library" dialog (your pieces, sets, shared with you; share with a one-time right-to-share confirmation) and the `/api/library` and `/api/shared` clients. A set plays with its pieces as the movement list (`MIDIPlayer.playSet`, `loadMovementOption`)
 - `public/constants.js`, `public/utils/`, `public/ui/StatusManager.js`, `public/api/RecentWorksManager.js`, `public/player/InstrumentLoader.js` (General MIDI names, used to identify voice parts)
 - `public/service-worker.js` - caches the soundfont after first use; navigations always fetch fresh
 - `public/vendor/` - not in git; copied from node_modules by `scripts/copy-vendor.js` (runs on `npm install`)

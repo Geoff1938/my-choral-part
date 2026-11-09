@@ -59,7 +59,8 @@ const createApiRoutes = require('./routes/api');
 const proxyRouter = require('./routes/proxy');
 const activityRouter = require('./routes/activity');
 const adminRouter = require('./routes/admin');
-const { createLibraryRoutes } = require('./routes/library');
+const { createLibraryRoutes, createSharedRoutes } = require('./routes/library');
+const library = require('./utils/library');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const {
   apiLimiter,
@@ -189,6 +190,9 @@ app.use('/api/activity', activityLogLimiter, activityRouter);
 // Users' saved pieces - mounted before /api so it has its own rate limit
 app.use('/api/library', libraryLimiter, requireSameOrigin, createLibraryRoutes());
 
+// Opening shared links (read-only, anyone with the link)
+app.use('/api/shared', libraryLimiter, createSharedRoutes());
+
 app.use('/api', apiLimiter, createApiRoutes(scraper));
 
 // Apply stricter rate limiting to proxy route
@@ -249,6 +253,24 @@ function sendHtml(res, html, status = 200) {
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.send(html);
 }
+
+// Shared links: /p/<code> (a piece) and /s/<code> (a set). The player loads
+// them itself; the server only fills in a title for link previews. Must come
+// before the composer and work page routes.
+app.get(/^\/(p|s)\/([A-Za-z0-9_-]{16})$/, async (req, res, next) => {
+  try {
+    const kind = req.params[0] === 's' ? 'set' : 'piece';
+    const found = kind === 'set'
+      ? await library.findSharedSet(req.params[1])
+      : await library.findSharedPiece(req.params[1]);
+    const title = found ? (kind === 'set' ? found.set.title : found.piece.title) : null;
+    res.setHeader('X-Robots-Tag', 'noindex');
+    if (!found) res.status(404);
+    serveIndex(req, res, seo.renderPage(INDEX_HTML, seo.sharedMeta(title, kind)));
+  } catch (error) {
+    next(error);
+  }
+});
 
 // List of all composers, linking to their pages
 app.get('/composers', async (req, res, next) => {

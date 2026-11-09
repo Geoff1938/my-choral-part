@@ -41,7 +41,7 @@ describe('Library API', () => {
   test('a new visitor has an empty library and no cookie', async () => {
     const response = await send('get', '/api/library');
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ pieces: [], limit: 100 });
+    expect(response.body).toEqual({ pieces: [], sets: [], references: [], attested: false, limit: 100 });
     expect(response.headers['set-cookie']).toBeUndefined();
   });
 

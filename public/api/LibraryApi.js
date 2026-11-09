@@ -104,5 +104,112 @@ export const LibraryApi = {
      */
     async remove(id) {
         await call(`/api/library/pieces/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    },
+
+    // ----- Sharing -----
+
+    /** Confirm the user has the right to share (asked once, before the first share) */
+    async attest() {
+        await call('/api/library/attest', jsonRequest('POST', { confirmed: true }));
+    },
+
+    /**
+     * Share a piece or set
+     * @param {'piece'|'set'} kind
+     * @param {string} id
+     * @returns {Promise<string>} Share code
+     */
+    async share(kind, id) {
+        const path = kind === 'set' ? 'sets' : 'pieces';
+        const response = await call(`/api/library/${path}/${encodeURIComponent(id)}/share`, { method: 'POST' });
+        return (await response.json()).shareToken;
+    },
+
+    /**
+     * Stop sharing a piece or set (its link stops working)
+     * @param {'piece'|'set'} kind
+     * @param {string} id
+     */
+    async unshare(kind, id) {
+        const path = kind === 'set' ? 'sets' : 'pieces';
+        await call(`/api/library/${path}/${encodeURIComponent(id)}/share`, { method: 'DELETE' });
+    },
+
+    // ----- Sets -----
+
+    /**
+     * @param {{title: string, pieceIds: string[]}} set
+     * @returns {Promise<Object>} The new set
+     */
+    async createSet(set) {
+        return (await (await call('/api/library/sets', jsonRequest('POST', set))).json()).set;
+    },
+
+    /**
+     * @param {string} id - Set
+     * @param {{title?: string, pieceIds?: string[]}} changes
+     * @returns {Promise<Object>} The updated set
+     */
+    async updateSet(id, changes) {
+        return (await (await call(`/api/library/sets/${encodeURIComponent(id)}`, jsonRequest('PATCH', changes))).json()).set;
+    },
+
+    /** @param {string} id - Set (its pieces stay in the library) */
+    async deleteSet(id) {
+        await call(`/api/library/sets/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    },
+
+    // ----- Pieces and sets shared by others -----
+
+    /**
+     * Add a shared piece or set to the user's library
+     * @param {'piece'|'set'} kind
+     * @param {string} token - Share code
+     */
+    async addReference(kind, token) {
+        await call('/api/library/references', jsonRequest('POST', { kind, token }));
+    },
+
+    /** Remove a shared piece or set from the user's library */
+    async removeReference(kind, token) {
+        await call(`/api/library/references/${encodeURIComponent(kind)}/${encodeURIComponent(token)}`, { method: 'DELETE' });
     }
 };
+
+/**
+ * Opening shared links (/p/... and /s/...)
+ */
+export const SharedApi = {
+    /**
+     * What a share code points to
+     * @param {'piece'|'set'} kind
+     * @param {string} token - Share code
+     * @returns {Promise<Object>} { kind, title, composer | pieces, isOwner, inLibrary }
+     */
+    async info(kind, token) {
+        return (await call(`/api/shared/${kind === 'set' ? 's' : 'p'}/${encodeURIComponent(token)}`)).json();
+    },
+
+    /** @returns {Promise<Uint8Array>} A shared piece's MIDI */
+    async pieceMidi(token) {
+        const response = await call(`/api/shared/p/${encodeURIComponent(token)}/midi`);
+        return new Uint8Array(await response.arrayBuffer());
+    },
+
+    /** @returns {Promise<Uint8Array>} The MIDI of one piece in a shared set */
+    async setPieceMidi(token, pieceId) {
+        const response = await call(`/api/shared/s/${encodeURIComponent(token)}/pieces/${encodeURIComponent(pieceId)}/midi`);
+        return new Uint8Array(await response.arrayBuffer());
+    }
+};
+
+/**
+ * Full link for a share code
+ * @param {'piece'|'set'} kind
+ * @param {string} token - Share code
+ * @param {string} [origin] - Site address (defaults to this page's)
+ * @returns {string} URL
+ */
+export function shareUrl(kind, token, origin = window.location.origin) {
+    return `${origin}/${kind === 'set' ? 's' : 'p'}/${token}`;
+}

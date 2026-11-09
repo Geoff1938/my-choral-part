@@ -2095,3 +2095,151 @@ section:last-child {
     font-family: inherit;
     color: var(--text-primary);
 }
+
+/* ===== Sharing and sets ===== */
+
+.library-heading {
+    margin: 18px 0 6px;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.library-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.library-heading-row .btn {
+    margin-top: 12px;
+    padding: 6px 12px;
+    font-size: var(--font-size-small);
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.library-heading-row [hidden] {
+    display: none;
+}
+
+.library-empty {
+    color: var(--text-secondary);
+    font-size: var(--font-size-small);
+    padding: 6px 0;
+}
+
+.library-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: var(--success);
+    color: white;
+    font-size: var(--font-size-tiny);
+    font-weight: var(--font-weight-semibold);
+    vertical-align: middle;
+}
+
+.library-share {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+}
+
+.library-share input {
+    flex: 1 1 220px;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: var(--font-size-small);
+    font-family: inherit;
+    color: var(--text-primary);
+    background: var(--background);
+}
+
+.library-share .btn {
+    width: auto;
+    padding: 6px 12px;
+    font-size: var(--font-size-small);
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.library-attest {
+    margin: 0 0 12px;
+    padding: 12px 14px;
+    border: 2px solid var(--color-highlight);
+    border-radius: 10px;
+    background: #FEF9E7;
+}
+
+.library-attest p {
+    margin: 0 0 8px;
+}
+
+.library-attest-check {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.library-attest-check input {
+    margin-top: 4px;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    accent-color: var(--primary-color);
+}
+
+.library-set-pieces {
+    margin: 4px 0;
+    padding: 0;
+    list-style: none;
+}
+
+.library-set-piece {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.library-set-piece .btn {
+    padding: 2px 8px;
+}
+
+.library-set-form select {
+    padding: 6px 10px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: var(--font-size-small);
+    color: var(--text-primary);
+    background: white;
+}
+
+.work-info-section .add-shared-btn {
+    margin-top: 8px;
+    padding: 8px 16px;
+    font-size: var(--font-size-small);
+    background: var(--success);
+    color: white;
+}
+
+.work-info-section .add-shared-btn[hidden] {
+    display: none;
+}
+
+.add-shared-status {
+    margin: 6px 0 0;
+    font-size: var(--font-size-small);
+}

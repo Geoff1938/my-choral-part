@@ -20,6 +20,9 @@ const path = require('path');
 // Limits, all adjustable
 const LIMITS = {
     PIECES_PER_LIBRARY: 100,
+    SETS_PER_LIBRARY: 50,
+    // Shared pieces and sets added from other people's links
+    REFERENCES_PER_LIBRARY: 200,
     MAX_PIECE_BYTES: 5 * 1024 * 1024,
     // Stop accepting new pieces when the stored files reach this total, so
     // the library can never fill the 1 GB disk the index and backups share
@@ -125,10 +128,35 @@ async function openLibrary() {
             PRIMARY KEY (set_id, piece_id)
         )
     `);
+    // Pieces and sets other people shared that this library has added (a
+    // reference by share code, not a copy: if the owner stops sharing or
+    // deletes it, it is no longer available here either)
+    db.run(`
+        CREATE TABLE IF NOT EXISTS library_refs (
+            library_id INTEGER NOT NULL,
+            kind TEXT NOT NULL,
+            token TEXT NOT NULL,
+            added_at TEXT NOT NULL,
+            PRIMARY KEY (library_id, kind, token)
+        )
+    `);
+    // Sharing (M5): share codes, and when the owner confirmed they may share
+    addColumnIfMissing('pieces', 'share_token', 'TEXT');
+    addColumnIfMissing('sets', 'share_token', 'TEXT');
+    addColumnIfMissing('libraries', 'attested_at', 'TEXT');
+    db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_pieces_share ON pieces(share_token)');
+    db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_sets_share ON sets(share_token)');
     db.run('CREATE INDEX IF NOT EXISTS idx_pieces_library ON pieces(library_id)');
     db.run('CREATE INDEX IF NOT EXISTS idx_sets_library ON sets(library_id)');
 
     await saveLibrary();
+}
+
+function addColumnIfMissing(table, column, type) {
+    const columns = db.exec(`PRAGMA table_info(${table})`)[0].values.map(row => row[1]);
+    if (!columns.includes(column)) {
+        db.run(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
+    }
 }
 
 async function writeDatabaseFile(targetPath) {
@@ -233,7 +261,8 @@ function toPiece(row) {
         composer: row.composer || '',
         sizeBytes: row.size_bytes,
         createdAt: row.created_at,
-        lastUsedAt: row.last_used_at
+        lastUsedAt: row.last_used_at,
+        shareToken: row.share_token || null
     };
 }
 
@@ -388,6 +417,365 @@ async function deletePiece(libraryId, pieceId) {
     return true;
 }
 
+// ===== Sharing (M5) =====
+
+function newToken() {
+    return crypto.randomBytes(12).toString('base64url');
+}
+
+function isToken(token) {
+    return typeof token === 'string' && /^[A-Za-z0-9_-]{16}$/.test(token);
+}
+
+function isId(id) {
+    return typeof id === 'string' && /^[A-Za-z0-9_-]{12}$/.test(id);
+}
+
+/**
+ * Whether the library's owner has confirmed they may share files
+ * @param {number} libraryId - Library
+ * @returns {Promise<boolean>}
+ */
+async function hasAttested(libraryId) {
+    await initLibrary();
+    const row = rows('SELECT attested_at FROM libraries WHERE id = ?', [libraryId])[0];
+    return Boolean(row && row.attested_at);
+}
+
+/**
+ * Record the owner's confirmation that they have the right to share
+ * @param {number} libraryId - Library
+ */
+async function attest(libraryId) {
+    await initLibrary();
+    db.run('UPDATE libraries SET attested_at = COALESCE(attested_at, ?) WHERE id = ?', [now(), libraryId]);
+    await saveLibrary();
+}
+
+async function requireAttested(libraryId) {
+    if (!(await hasAttested(libraryId))) {
+        throw new LibraryError(403, 'Please confirm that you have the right to share before sharing.');
+    }
+}
+
+/**
+ * Share a piece: give it a share code (keeping an existing one)
+ * @param {number} libraryId - Library
+ * @param {string} pieceId - Piece
+ * @returns {Promise<string|null>} Share code, or null if the piece isn't in this library
+ */
+async function sharePiece(libraryId, pieceId) {
+    await initLibrary();
+    await requireAttested(libraryId);
+    const row = ownedPiece(libraryId, pieceId);
+    if (!row) return null;
+    if (!row.share_token) {
+        db.run('UPDATE pieces SET share_token = ? WHERE id = ?', [newToken(), row.id]);
+        await saveLibrary();
+    }
+    return rows('SELECT share_token FROM pieces WHERE id = ?', [row.id])[0].share_token;
+}
+
+/**
+ * Stop sharing a piece: its link stops working. Sharing again gives a new link.
+ * @param {number} libraryId - Library
+ * @param {string} pieceId - Piece
+ * @returns {Promise<boolean>} False if the piece isn't in this library
+ */
+async function unsharePiece(libraryId, pieceId) {
+    await initLibrary();
+    const row = ownedPiece(libraryId, pieceId);
+    if (!row) return false;
+    db.run('UPDATE pieces SET share_token = NULL WHERE id = ?', [row.id]);
+    await saveLibrary();
+    return true;
+}
+
+/**
+ * Record that a shared piece was used: keeps the piece and its owner's
+ * library from being deleted as unused while anyone is playing it
+ */
+function touchShared(pieceIds, libraryId) {
+    const time = now();
+    for (const id of pieceIds) {
+        db.run('UPDATE pieces SET last_used_at = ? WHERE id = ?', [time, id]);
+    }
+    db.run('UPDATE libraries SET last_used_at = ? WHERE id = ?', [time, libraryId]);
+    saveLibrary();
+}
+
+/**
+ * A shared piece by its share code
+ * @param {string} token - Share code
+ * @returns {Promise<{piece: Object, libraryId: number}|null>}
+ */
+async function findSharedPiece(token) {
+    await initLibrary();
+    if (!isToken(token)) return null;
+    const row = rows('SELECT * FROM pieces WHERE share_token = ?', [token])[0];
+    return row ? { piece: toPiece(row), libraryId: row.library_id } : null;
+}
+
+/**
+ * The MIDI file of a shared piece (marks it used)
+ * @param {string} token - Share code
+ * @returns {Promise<Buffer|null>}
+ */
+async function readSharedPiece(token) {
+    const found = await findSharedPiece(token);
+    if (!found) return null;
+    touchShared([found.piece.id], found.libraryId);
+    return fs.readFile(path.join(paths.filesDir, `${found.piece.id}.mid`));
+}
+
+// ----- Sets -----
+
+function setPieceIds(setId) {
+    return rows('SELECT piece_id FROM set_pieces WHERE set_id = ? ORDER BY position', [setId]).map(r => r.piece_id);
+}
+
+function toSet(row) {
+    return {
+        id: row.id,
+        title: row.title,
+        pieceIds: setPieceIds(row.id),
+        createdAt: row.created_at,
+        shareToken: row.share_token || null
+    };
+}
+
+function ownedSet(libraryId, setId) {
+    if (!isId(setId)) return null;
+    return rows('SELECT * FROM sets WHERE id = ? AND library_id = ?', [setId, libraryId])[0] || null;
+}
+
+/**
+ * The library's sets, newest first
+ * @param {number} libraryId - Library
+ * @returns {Promise<Array<Object>>}
+ */
+async function listSets(libraryId) {
+    await initLibrary();
+    return rows('SELECT * FROM sets WHERE library_id = ? ORDER BY created_at DESC', [libraryId]).map(toSet);
+}
+
+/**
+ * Check a list of piece ids all belong to the library, without repeats
+ */
+function checkSetPieces(libraryId, pieceIds) {
+    if (!Array.isArray(pieceIds) || pieceIds.length > LIMITS.PIECES_PER_LIBRARY ||
+        new Set(pieceIds).size !== pieceIds.length) {
+        throw new LibraryError(400, 'The list of pieces isn\'t valid.');
+    }
+    for (const id of pieceIds) {
+        if (!ownedPiece(libraryId, id)) {
+            throw new LibraryError(400, 'A set can only contain pieces from your own library.');
+        }
+    }
+}
+
+function writeSetPieces(setId, pieceIds) {
+    db.run('DELETE FROM set_pieces WHERE set_id = ?', [setId]);
+    pieceIds.forEach((pieceId, position) => {
+        db.run('INSERT INTO set_pieces (set_id, piece_id, position) VALUES (?, ?, ?)', [setId, pieceId, position]);
+    });
+}
+
+/**
+ * Create a set
+ * @param {number} libraryId - Library
+ * @param {{title: string, pieceIds?: string[]}} set - Title and pieces in order
+ * @returns {Promise<Object>} The set
+ */
+async function createSet(libraryId, { title, pieceIds = [] }) {
+    await initLibrary();
+    const cleanTitle = cleanText(title, true, 'title');
+    checkSetPieces(libraryId, pieceIds);
+    const count = rows('SELECT COUNT(*) AS n FROM sets WHERE library_id = ?', [libraryId])[0].n;
+    if (count >= LIMITS.SETS_PER_LIBRARY) {
+        throw new LibraryError(409, `You can have at most ${LIMITS.SETS_PER_LIBRARY} sets. Delete one to make room.`);
+    }
+    const id = crypto.randomBytes(9).toString('base64url');
+    const time = now();
+    db.run('INSERT INTO sets (id, library_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+        [id, libraryId, cleanTitle, time, time]);
+    writeSetPieces(id, pieceIds);
+    touchLibrary(libraryId);
+    await saveLibrary();
+    return toSet(rows('SELECT * FROM sets WHERE id = ?', [id])[0]);
+}
+
+/**
+ * Rename a set and/or change its pieces
+ * @param {number} libraryId - Library
+ * @param {string} setId - Set
+ * @param {{title?: string, pieceIds?: string[]}} changes
+ * @returns {Promise<Object|null>} The set, or null if not in this library
+ */
+async function updateSet(libraryId, setId, { title, pieceIds }) {
+    await initLibrary();
+    const row = ownedSet(libraryId, setId);
+    if (!row) return null;
+    const cleanTitle = title === undefined ? row.title : cleanText(title, true, 'title');
+    if (pieceIds !== undefined) {
+        checkSetPieces(libraryId, pieceIds);
+        writeSetPieces(row.id, pieceIds);
+    }
+    db.run('UPDATE sets SET title = ?, updated_at = ? WHERE id = ?', [cleanTitle, now(), row.id]);
+    touchLibrary(libraryId);
+    await saveLibrary();
+    return toSet(rows('SELECT * FROM sets WHERE id = ?', [row.id])[0]);
+}
+
+/**
+ * Delete a set (its pieces stay in the library)
+ * @returns {Promise<boolean>} False if not in this library
+ */
+async function deleteSet(libraryId, setId) {
+    await initLibrary();
+    const row = ownedSet(libraryId, setId);
+    if (!row) return false;
+    db.run('DELETE FROM set_pieces WHERE set_id = ?', [row.id]);
+    db.run('DELETE FROM sets WHERE id = ?', [row.id]);
+    await saveLibrary();
+    return true;
+}
+
+/**
+ * Share a set (keeping an existing share code)
+ * @returns {Promise<string|null>} Share code, or null if not in this library
+ */
+async function shareSet(libraryId, setId) {
+    await initLibrary();
+    await requireAttested(libraryId);
+    const row = ownedSet(libraryId, setId);
+    if (!row) return null;
+    if (!row.share_token) {
+        db.run('UPDATE sets SET share_token = ? WHERE id = ?', [newToken(), row.id]);
+        await saveLibrary();
+    }
+    return rows('SELECT share_token FROM sets WHERE id = ?', [row.id])[0].share_token;
+}
+
+/**
+ * Stop sharing a set
+ * @returns {Promise<boolean>} False if not in this library
+ */
+async function unshareSet(libraryId, setId) {
+    await initLibrary();
+    const row = ownedSet(libraryId, setId);
+    if (!row) return false;
+    db.run('UPDATE sets SET share_token = NULL WHERE id = ?', [row.id]);
+    await saveLibrary();
+    return true;
+}
+
+/**
+ * A shared set by its share code, with its pieces in order
+ * @param {string} token - Share code
+ * @returns {Promise<{set: Object, pieces: Array<Object>, libraryId: number}|null>}
+ */
+async function findSharedSet(token) {
+    await initLibrary();
+    if (!isToken(token)) return null;
+    const row = rows('SELECT * FROM sets WHERE share_token = ?', [token])[0];
+    if (!row) return null;
+    const set = toSet(row);
+    const pieces = set.pieceIds
+        .map(id => rows('SELECT * FROM pieces WHERE id = ?', [id])[0])
+        .filter(Boolean)
+        .map(toPiece);
+    return { set, pieces, libraryId: row.library_id };
+}
+
+/**
+ * The MIDI file of one piece in a shared set (marks it used)
+ * @param {string} token - Set share code
+ * @param {string} pieceId - Piece in the set
+ * @returns {Promise<Buffer|null>}
+ */
+async function readSharedSetPiece(token, pieceId) {
+    const found = await findSharedSet(token);
+    if (!found || !found.set.pieceIds.includes(pieceId)) return null;
+    touchShared([pieceId], found.libraryId);
+    return fs.readFile(path.join(paths.filesDir, `${pieceId}.mid`));
+}
+
+// ----- Pieces and sets added from other people's links -----
+
+/**
+ * Add a shared piece or set to a library (as a reference)
+ * @param {number} libraryId - Library
+ * @param {'piece'|'set'} kind - What the link is to
+ * @param {string} token - Its share code
+ * @returns {Promise<boolean>} False if the link isn't (or is no longer) shared
+ */
+async function addReference(libraryId, kind, token) {
+    await initLibrary();
+    const found = kind === 'piece' ? await findSharedPiece(token)
+        : kind === 'set' ? await findSharedSet(token) : null;
+    if (!found) return false;
+    if (found.libraryId === libraryId) {
+        throw new LibraryError(400, 'This is already in your library.');
+    }
+    const count = rows('SELECT COUNT(*) AS n FROM library_refs WHERE library_id = ?', [libraryId])[0].n;
+    if (count >= LIMITS.REFERENCES_PER_LIBRARY) {
+        throw new LibraryError(409, `You can add at most ${LIMITS.REFERENCES_PER_LIBRARY} shared pieces and sets. Remove one to make room.`);
+    }
+    db.run('INSERT OR IGNORE INTO library_refs (library_id, kind, token, added_at) VALUES (?, ?, ?, ?)',
+        [libraryId, kind, token, now()]);
+    touchLibrary(libraryId);
+    await saveLibrary();
+    return true;
+}
+
+/**
+ * Remove a shared piece or set from a library
+ * @returns {Promise<boolean>} False if it wasn't there
+ */
+async function removeReference(libraryId, kind, token) {
+    await initLibrary();
+    db.run('DELETE FROM library_refs WHERE library_id = ? AND kind = ? AND token = ?', [libraryId, kind, token]);
+    const removed = db.getRowsModified() > 0;
+    if (removed) await saveLibrary();
+    return removed;
+}
+
+/**
+ * Shared pieces and sets a library has added, with their current titles,
+ * or available: false if the owner has stopped sharing or deleted them
+ * @param {number} libraryId - Library
+ * @returns {Promise<Array<Object>>}
+ */
+async function listReferences(libraryId) {
+    await initLibrary();
+    const result = [];
+    for (const ref of rows('SELECT * FROM library_refs WHERE library_id = ? ORDER BY added_at DESC', [libraryId])) {
+        const base = { kind: ref.kind, token: ref.token, addedAt: ref.added_at };
+        if (ref.kind === 'piece') {
+            const found = await findSharedPiece(ref.token);
+            result.push(found
+                ? { ...base, available: true, title: found.piece.title, composer: found.piece.composer }
+                : { ...base, available: false });
+        } else {
+            const found = await findSharedSet(ref.token);
+            result.push(found
+                ? { ...base, available: true, title: found.set.title, pieceCount: found.pieces.length }
+                : { ...base, available: false });
+        }
+    }
+    return result;
+}
+
+/**
+ * Whether a library has added a shared piece or set
+ */
+async function hasReference(libraryId, kind, token) {
+    await initLibrary();
+    return rows('SELECT 1 FROM library_refs WHERE library_id = ? AND kind = ? AND token = ?',
+        [libraryId, kind, token]).length > 0;
+}
+
 /**
  * Delete libraries (with their pieces, sets and files) not used for the
  * retention period
@@ -405,6 +793,7 @@ async function purgeOldLibraries(years = LIMITS.RETENTION_YEARS) {
             db.run('DELETE FROM set_pieces WHERE set_id = ?', [set.id]);
         }
         db.run('DELETE FROM sets WHERE library_id = ?', [id]);
+        db.run('DELETE FROM library_refs WHERE library_id = ?', [id]);
         db.run('DELETE FROM libraries WHERE id = ?', [id]);
     }
     if (old.length) await saveLibrary();
@@ -455,6 +844,24 @@ module.exports = {
     readPiece,
     updatePiece,
     deletePiece,
+    hasAttested,
+    attest,
+    sharePiece,
+    unsharePiece,
+    findSharedPiece,
+    readSharedPiece,
+    listSets,
+    createSet,
+    updateSet,
+    deleteSet,
+    shareSet,
+    unshareSet,
+    findSharedSet,
+    readSharedSetPiece,
+    addReference,
+    removeReference,
+    listReferences,
+    hasReference,
     purgeOldLibraries,
     backupLibrary,
     resetForTests
