@@ -45,6 +45,15 @@ import { RecentWorksManager } from './api/RecentWorksManager.js';
 import { normalizeChannelName, detectVoicePartFromName } from './practice-midi/voiceParts.js';
 import { toSlug } from './utils/slug.js';
 import { ImportDialog } from './ui/ImportDialog.js';
+import { LibraryDialog } from './ui/LibraryDialog.js';
+
+// Activity log "composer" for plays of pieces from users' own files
+const OWN_FILE_COMPOSER = '(own file)';
+
+// The server accepts activity fields of at most this many characters
+function truncateText(text, max) {
+    return text.length > max ? text.slice(0, max) : text;
+}
 
 class MIDIPlayer {
     constructor() {
@@ -99,14 +108,20 @@ class MIDIPlayer {
         this.statusManager = new StatusManager(this.loadingStatus);
         this.recentWorksManager = new RecentWorksManager();
 
-        // A piece loaded from the user's own file ({ title }), or null for
-        // library works. Imported pieces are not logged, saved to recent
-        // works or shared.
+        // A piece from the user's own file ({ title, composer, pieceId }),
+        // or null for library works. pieceId is set once it is saved to the
+        // user's library. These pieces are not added to recent works or shared.
         this.importedPiece = null;
+        const playOwnPiece = (midiBytes, title, options) => this.loadImportedPiece(midiBytes, title, options);
         this.importDialog = new ImportDialog({
             dialog: document.getElementById('import-dialog'),
             openButton: document.getElementById('import-file-link'),
-            onPlay: (midiBytes, title) => this.loadImportedPiece(midiBytes, title)
+            onPlay: playOwnPiece
+        });
+        this.libraryDialog = new LibraryDialog({
+            dialog: document.getElementById('library-dialog'),
+            openButton: document.getElementById('library-link'),
+            onPlay: playOwnPiece
         });
 
         this.loadPreferences();
@@ -389,16 +404,16 @@ class MIDIPlayer {
      * @param {boolean} [options.useBeacon] - Send with sendBeacon (survives the page closing)
      */
     async logActivity(eventType, { durationSeconds = null, useBeacon = false } = {}) {
-        // Pieces loaded from the user's own files are not logged (the
-        // privacy text only covers library works)
-        if (this.importedPiece) return;
-
+        // Pieces from the user's own files are logged under "(own file)" with
+        // their title, so they are kept apart from works in the catalogue
+        // (the privacy text in index.html says so)
+        const own = this.importedPiece;
         const body = JSON.stringify({
             deviceId: this.deviceId,
             eventType,
-            composer: this.selectedComposer || null,
-            work: this.selectedWork || null,
-            movement: this.currentMovement || null,
+            composer: own ? OWN_FILE_COMPOSER : (this.selectedComposer || null),
+            work: own ? truncateText(own.composer ? `${own.title} (${own.composer})` : own.title, 200) : (this.selectedWork || null),
+            movement: own ? null : (this.currentMovement || null),
             durationSeconds
         });
 
@@ -553,13 +568,27 @@ class MIDIPlayer {
         return normalizeChannelName(name);
     }
 
-    getChannelOverrideKey() {
-        // Generate a unique key for storing channel override per movement
-        // Uses composer + work + movement to create unique key
+    /**
+     * The part of saved-setting keys (localStorage) that identifies what is
+     * loaded: "<composer>_<work>_<movement>" for catalogue works, or
+     * "piece:<id>" for a piece in the user's library
+     * @returns {string|null} Key part, or null if settings can't be saved
+     *     (nothing loaded, or a file that hasn't been saved to the library)
+     */
+    overrideKeyPart() {
+        if (this.importedPiece) {
+            return this.importedPiece.pieceId ? `piece:${this.importedPiece.pieceId}` : null;
+        }
         if (!this.selectedComposer || !this.selectedWork || !this.currentMovement) {
             return null;
         }
-        return `channelOverride_${this.selectedComposer}_${this.selectedWork}_${this.currentMovement}_${this.voicePart}`;
+        return `${this.selectedComposer}_${this.selectedWork}_${this.currentMovement}`;
+    }
+
+    getChannelOverrideKey() {
+        // Unique key for storing the channel override per movement and voice part
+        const keyPart = this.overrideKeyPart();
+        return keyPart ? `channelOverride_${keyPart}_${this.voicePart}` : null;
     }
 
     saveChannelOverride() {
@@ -1076,11 +1105,12 @@ class MIDIPlayer {
 
     // Load time signature overrides from localStorage
     loadTimeSignatureOverrides() {
-        if (!this.selectedComposer || !this.selectedWork || !this.currentMovement) {
+        const keyPart = this.overrideKeyPart();
+        if (!keyPart) {
             return;
         }
 
-        const key = `ts_override_${this.selectedComposer}_${this.selectedWork}_${this.currentMovement}`;
+        const key = `ts_override_${keyPart}`;
         const stored = localStorage.getItem(key);
 
         if (stored) {
@@ -1101,11 +1131,12 @@ class MIDIPlayer {
 
     // Save time signature overrides to localStorage
     saveTimeSignatureOverrides() {
-        if (!this.selectedComposer || !this.selectedWork || !this.currentMovement) {
+        const keyPart = this.overrideKeyPart();
+        if (!keyPart) {
             return;
         }
 
-        const key = `ts_override_${this.selectedComposer}_${this.selectedWork}_${this.currentMovement}`;
+        const key = `ts_override_${keyPart}`;
         const data = {
             overrides: this.timeSignatureOverrides,
             startingBarOffset: this.startingBarOffset
@@ -1315,10 +1346,14 @@ class MIDIPlayer {
                 '• Search matches the beginning of words (e.g., "bach" finds "Bach" and "Pachelbel")<br>' +
                 '• You can search by composer name, work title, or movement name<br><br>' +
                 '<strong>Your own files:</strong><br>' +
-                '• Click <strong>Or load your own MIDI or MusicXML file…</strong> to practise a piece that isn\'t in the library<br>' +
+                '• Click <strong>Or load your own MIDI or MusicXML file…</strong> to practise a piece that isn\'t in our collection<br>' +
                 '• Choose a MIDI (.mid) or MusicXML (.musicxml, .xml, .mxl) file with a separate part for each voice<br>' +
-                '• You\'ll see which voice parts were found and any problems, then you can play it or download the practice version<br>' +
-                '• Your file stays on your device; nothing is uploaded. Pieces you load aren\'t saved, so load the file again to play it another time';
+                '• You\'ll see which voice parts were found and any problems, then you can play it, save it to your library or download the practice version<br>' +
+                '• Your file stays on your device. Only if you choose <strong>Save to my library</strong> is the practice version kept on our server<br><br>' +
+                '<strong>My library:</strong><br>' +
+                '• Click <strong>My library</strong> to play, rename or delete the pieces you have saved<br>' +
+                '• Your library is linked to this browser on this device, and holds up to 100 pieces<br>' +
+                '• A library that isn\'t used for 3 years is deleted';
         } else if (activeTabId === 'play-music-tab') {
             title = 'Play Music - Help';
             content =
@@ -2462,7 +2497,9 @@ class MIDIPlayer {
             this.currentWorkDisplay.textContent = `${this.selectedComposer}, ${this.selectedWork}`;
             this.updateShareableURL();
         } else if (this.importedPiece) {
-            this.currentWorkDisplay.textContent = `Your file: ${this.importedPiece.title}`;
+            const label = this.importedPiece.pieceId ? 'My library' : 'Your file';
+            const composer = this.importedPiece.composer ? ` (${this.importedPiece.composer})` : '';
+            this.currentWorkDisplay.textContent = `${label}: ${this.importedPiece.title}${composer}`;
             this.updateShareableURL();
         } else {
             this.currentWorkDisplay.textContent = 'No work selected';
@@ -2969,16 +3006,21 @@ class MIDIPlayer {
     }
 
     /**
-     * Load a practice MIDI converted from the user's own file (see
-     * ui/ImportDialog.js) and show it on the Play Music tab. It is not
-     * logged, added to recent works or given a share link.
+     * Load a practice MIDI from the user's own file (ui/ImportDialog.js) or
+     * their library (ui/LibraryDialog.js) and show it on the Play Music tab.
+     * It is not added to recent works or given a share link.
      * @param {Uint8Array} midiBytes - Practice MIDI file contents
      * @param {string} title - Piece title
+     * @param {{pieceId?: string|null, composer?: string}} [options] - pieceId
+     *     if the piece is saved in the library (its settings are then remembered)
      */
-    async loadImportedPiece(midiBytes, title) {
+    async loadImportedPiece(midiBytes, title, { pieceId = null, composer = '' } = {}) {
         this.switchTab('play-music');
         // Copy into a standalone buffer (the bytes may be a view on a larger one)
-        await this.loadMIDI({ arrayBuffer: midiBytes.slice().buffer, imported: { title } }, title, true);
+        await this.loadMIDI({
+            arrayBuffer: midiBytes.slice().buffer,
+            imported: { title, composer: composer || '', pieceId }
+        }, title, true);
     }
 
     /**

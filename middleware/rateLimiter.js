@@ -95,7 +95,18 @@ const adminLimiter = rateLimit({
   },
 });
 
+// Users' saved pieces (/api/library): listing, playing, saving, renaming
+const libraryLimiter = rateLimit({
+  ...commonOptions,
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60, // Limit each client to 60 library requests per minute
+  message: {
+    error: 'Too many library requests. Please slow down.'
+  },
+});
+
 module.exports = {
+  libraryLimiter,
   clientKey,
   apiLimiter,
   proxyLimiter,

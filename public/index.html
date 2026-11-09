@@ -74,11 +74,17 @@
                         title="Enter search terms (searches word beginnings only)"
                     >
 
-                    <!-- Load your own file (opens the import dialog) -->
-                    <button type="button" id="import-file-link" class="import-file-link"
-                        title="Practise a piece that isn't in the library: choose a MIDI or MusicXML file from your device and it will be turned into a practice file you can play here. The file stays on your device; nothing is uploaded.">
-                        Or load your own MIDI or MusicXML file&hellip;
-                    </button>
+                    <!-- Load your own file (import dialog) and the pieces saved from them (library dialog) -->
+                    <div class="own-files-links">
+                        <button type="button" id="import-file-link" class="import-file-link"
+                            title="Practise a piece that isn't in our collection: choose a MIDI or MusicXML file from your device and it will be turned into a practice file you can play here. Your file stays on your device; nothing is uploaded unless you choose to save it to your library.">
+                            Or load your own MIDI or MusicXML file&hellip;
+                        </button>
+                        <button type="button" id="library-link" class="import-file-link"
+                            title="Pieces you have saved from your own files: play, rename or delete them">
+                            My library
+                        </button>
+                    </div>
                 </div>
                 <div id="composer-results" class="search-results"></div>
 
@@ -341,6 +347,7 @@
                     <h3>Privacy & Saved Data</h3>
                     <p><strong>Stored on your device:</strong> Your preferences (voice part, recent works, playback settings) are stored locally on your device to remember your choices between visits.</p>
                     <p><strong>Stored on our server:</strong> When you open and play a work, we record which work and movement it is, how long you play it for, an anonymous random identifier created by your browser, and your browser type (its "user agent"). This is used only to understand which works are most used and how much the player is used. We keep it for up to 5 years and then delete it. We do not record your IP address, and we do not collect any personal information such as your name or email address. Questions about this can be sent to the address under Contact Us below.</p>
+                    <p><strong>Your own files:</strong> Files you load are converted on your device and are not sent to us. When you play one, we record its title (and composer, if known) in the same way as works from our collection. If you choose <strong>Save to my library</strong>, we keep the converted practice file, its title and composer on our server, linked to a random code stored in a cookie in your browser. You can delete saved pieces at any time under <strong>My library</strong>; a library that isn't used for 3 years is deleted. Clearing your browser's cookies for this site disconnects your browser from its library.</p>
                     <button id="clear-saved-data-btn" class="btn btn-small" style="margin-top: 10px;" title="Clear all saved data and reset to defaults">Clear All Saved Data</button>
                     <p style="margin-top: 8px; font-size: 0.85em; color: #666;">This will reset all local preferences to defaults.</p>
                 </div>
@@ -433,13 +440,30 @@
                 <div class="import-actions">
                     <button type="button" id="import-play-btn" class="btn btn-primary"
                         title="Open this piece in the player on the Play Music tab">Play now</button>
+                    <button type="button" id="import-save-btn" class="btn"
+                        title="Keep this piece in your library on our server, so you can play it again later without loading the file">Save to my library</button>
                     <button type="button" id="import-download-btn" class="btn"
                         title="Save the practice version of this piece to your device as a MIDI file">Download practice MIDI</button>
                     <button type="button" id="import-again-btn" class="btn"
                         title="Choose a different file from your device">Choose another file&hellip;</button>
                 </div>
-                <p id="import-saved-hint" class="import-hint">Pieces you load aren't saved: to play this one again later, load the file again.</p>
+                <p id="import-save-status" class="import-save-status" role="status" hidden></p>
+                <p id="import-saved-hint" class="import-hint">To play this piece again later, save it to your library, or load the file again.</p>
             </div>
+        </div>
+    </dialog>
+
+    <!-- My library: managed by public/ui/LibraryDialog.js -->
+    <dialog id="library-dialog" class="import-dialog" aria-labelledby="library-dialog-title">
+        <div class="channel-dialog-header">
+            <h3 id="library-dialog-title">My library</h3>
+            <button type="button" id="library-dialog-close" class="channel-dialog-close-btn" aria-label="Close" title="Close your library">&times;</button>
+        </div>
+        <div class="import-dialog-body">
+            <p id="library-summary" class="library-summary"></p>
+            <ul id="library-list" class="library-list"></ul>
+            <p id="library-status" class="import-save-status" role="status" hidden></p>
+            <p class="import-hint">Your library is linked to this browser on this device. Pieces are kept on our server until you delete them; a library that isn't used for 3 years is deleted.</p>
         </div>
     </dialog>
 

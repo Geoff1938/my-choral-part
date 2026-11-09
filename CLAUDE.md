@@ -14,18 +14,21 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 - `routes/api.js` - composer search, works, sections, deep-link resolve (`/api/...`)
 - `routes/proxy.js` - `/proxy?url=` fetches MIDI files from learnchoralmusic.co.uk only (domain allowlist, re-checked on redirects)
 - `routes/activity.js` - `POST /api/activity/log` usage events from the player
+- `routes/library.js` - `/api/library`: users' saved pieces (list, save, MIDI, rename, delete), identified by the HttpOnly `mcp_library` cookie
 - `routes/admin.js` - `/admin` dashboard: summary, CSV export, index status, manual index rebuild
 - `middleware/` - rate limiting (keyed on `CF-Connecting-IP`), admin Basic Auth, same-origin check for admin POSTs, error handler
 - `scraper.js` - builds the MIDI index by scraping learnchoralmusic.co.uk; refuses to overwrite the index if a rebuild comes back much smaller
 - `utils/database.js` - activity database (sql.js / SQLite in memory, saved atomically to disk), admin users, retention
 - `utils/seo.js` - search engine support: per-work title, description, canonical, social tags and MusicComposition structured data for `/:composer/:work` pages (unknown works 404 with noindex); server-rendered composer pages (`/:composer`) and composer list (`/composers`); `/sitemap.xml` built from the index. `public/index.html` marks the replaceable parts with `<!-- seo:start -->`/`<!-- seo:end -->` and `<!-- seo:body -->`
 - `utils/slug.js` - URL slugs (`Haydn (Joseph)` -> `haydn-joseph`) and name/slug lookup used by the API and pages. Older share links (`/haydn-(joseph)/...`) still resolve and get a 301 to the clean URL. `public/utils/slug.js` is the browser copy for share links - keep the two in sync (a test checks)
-- `utils/scheduler.js` - nightly jobs (node-cron, Europe/London): index rebuild 02:00; backup and 5-year purge 03:30
+- `utils/library.js` - library storage: metadata in `library.db`, MIDI files in `library/<piece id>.mid` (both in the data directory). Limits: 100 pieces per library, 5 MB per piece, 400 MB total. Libraries unused for 3 years are deleted
+- `utils/scheduler.js` - nightly jobs (node-cron, Europe/London): index rebuild 02:00; at 03:30 activity backup and 5-year purge, library 3-year purge and `library.db` backup
 
 ### Client (vanilla JS ES modules, no build step)
 
 - `public/app.js` - the `MIDIPlayer` class: search and selection, MIDI loading, playback, balance, tempo, bars and loops, activity logging
-- `public/ui/ImportDialog.js` - "Or load your own MIDI or MusicXML file..." dialog on the Find Music tab: converts the file in the browser with `public/practice-midi/` (nothing is uploaded) and hands the practice MIDI to `MIDIPlayer.loadImportedPiece()`. Imported pieces (`this.importedPiece`) are not logged, saved to recent works or shared
+- `public/ui/ImportDialog.js` - "Or load your own MIDI or MusicXML file..." dialog on the Find Music tab: converts the file in the browser with `public/practice-midi/` (nothing is uploaded) and hands the practice MIDI to `MIDIPlayer.loadImportedPiece()`. Imported and library pieces (`this.importedPiece`) are logged as composer "(own file)", are not added to recent works or shared, and keep settings under `piece:<id>` keys once saved
+- `public/ui/LibraryDialog.js` and `public/api/LibraryApi.js` - "My library" dialog (play, rename, delete) and the `/api/library` client
 - `public/constants.js`, `public/utils/`, `public/ui/StatusManager.js`, `public/api/RecentWorksManager.js`, `public/player/InstrumentLoader.js` (General MIDI names, used to identify voice parts)
 - `public/service-worker.js` - caches the soundfont after first use; navigations always fetch fresh
 - `public/vendor/` - not in git; copied from node_modules by `scripts/copy-vendor.js` (runs on `npm install`)
@@ -45,7 +48,7 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 ### Data and privacy
 
 - Activity events: anonymous random device ID, event type (`download`, `rehearsal_start`, `rehearsal_time` with `duration_seconds`), composer/work/movement, user agent. No IP addresses. Kept 5 years. The privacy text in `index.html` must stay accurate.
-- Production data lives on the Render disk at `/var/data`: `activity.db`, `backups/` (7 nightly copies), and the index files, seeded from the repo's `data/` on first start. After that the disk copy wins - a newer index committed to git does not replace it.
+- Production data lives on the Render disk at `/var/data` (1 GB): `activity.db`, `library.db`, `library/` (saved MIDIs), `backups/` (7 nightly copies of each database), and the index files, seeded from the repo's `data/` on first start. After that the disk copy wins - a newer index committed to git does not replace it.
 
 ## Commands
 

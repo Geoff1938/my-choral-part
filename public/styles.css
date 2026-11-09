@@ -1979,3 +1979,119 @@ section:last-child {
         flex: 1 1 100%;
     }
 }
+
+/* ===== My library ===== */
+
+.own-files-links {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 20px;
+}
+
+.import-save-status {
+    margin: 12px 0 0;
+    font-size: var(--font-size-small);
+}
+
+.import-save-status-success {
+    color: #1E8449;
+}
+
+.import-save-status-error {
+    color: #C0392B;
+}
+
+.import-save-status-info {
+    color: var(--text-secondary);
+}
+
+.library-summary {
+    margin: 0 0 12px;
+    color: var(--text-secondary);
+}
+
+.library-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.library-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+}
+
+.library-piece {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1 1 200px;
+}
+
+.library-title {
+    font-weight: var(--font-weight-semibold);
+    overflow-wrap: anywhere;
+}
+
+.library-details {
+    color: var(--text-secondary);
+    font-size: var(--font-size-small);
+}
+
+.library-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.library-buttons .btn {
+    width: auto;
+    padding: 6px 12px;
+    font-size: var(--font-size-small);
+}
+
+.library-buttons .btn:not(.btn-primary):not(.btn-danger) {
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.library-confirm {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-semibold);
+}
+
+.library-rename {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.library-rename label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: var(--font-size-small);
+    color: var(--text-secondary);
+}
+
+.library-rename input {
+    padding: 6px 10px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    font-size: var(--font-size-base);
+    font-family: inherit;
+    color: var(--text-primary);
+}

@@ -11,6 +11,7 @@ const {
     purgeOldActivities,
     backupDatabase
 } = require('./database');
+const { purgeOldLibraries, backupLibrary } = require('./library');
 
 // Activities older than this are deleted nightly (see the privacy notice)
 const RETENTION_MONTHS = 60;
@@ -123,6 +124,19 @@ async function runNightlyMaintenance() {
         await backupDatabase(new Date(), BACKUPS_TO_KEEP);
     } catch (error) {
         console.error('[Scheduler] Database backup failed:', error.message);
+    }
+
+    // Users' saved pieces: delete libraries unused for 3 years, back up library.db
+    try {
+        await purgeOldLibraries();
+    } catch (error) {
+        console.error('[Scheduler] Library retention purge failed:', error.message);
+    }
+
+    try {
+        await backupLibrary(new Date(), BACKUPS_TO_KEEP);
+    } catch (error) {
+        console.error('[Scheduler] Library backup failed:', error.message);
     }
 }
 

@@ -9,6 +9,7 @@
  */
 
 import { escapeHtml } from '../utils/validation.js';
+import { LibraryApi } from '../api/LibraryApi.js';
 
 /** Overall status of a conversion, as shown at the top of the report */
 const STATUS_TEXT = {
@@ -81,17 +82,23 @@ export class ImportDialog {
      * @param {Object} options
      * @param {HTMLDialogElement} options.dialog - The dialog element
      * @param {HTMLElement} options.openButton - Control that opens the dialog
-     * @param {Function} options.onPlay - Called with (midiBytes, title) when the user chooses Play now
+     * @param {Function} options.onPlay - Called with (midiBytes, title, { pieceId, composer })
+     *     when the user chooses Play now; pieceId is set if the piece was saved first
+     * @param {Function} [options.onSaved] - Called with the saved piece after Save to my library
      * @param {Function} [options.loadConverter] - Returns the converter module (for tests)
+     * @param {Object} [options.api] - Library API (for tests)
      */
-    constructor({ dialog, openButton, onPlay, loadConverter }) {
+    constructor({ dialog, openButton, onPlay, onSaved, loadConverter, api }) {
         this.dialog = dialog;
         this.openButton = openButton;
         this.onPlay = onPlay;
+        this.onSaved = onSaved || (() => {});
+        this.api = api || LibraryApi;
         // The converter is only downloaded when someone first uses this dialog
         this.loadConverter = loadConverter || (() => import('../practice-midi/convert.js'));
         this.result = null;
         this.report = null;
+        this.savedPiece = null;
 
         if (!dialog || !openButton) return;
         const find = id => dialog.querySelector(`#${id}`);
@@ -105,6 +112,8 @@ export class ImportDialog {
         this.againButton = find('import-again-btn');
         this.closeButton = find('import-dialog-close');
         this.savedHint = find('import-saved-hint');
+        this.saveButton = find('import-save-btn');
+        this.saveStatus = find('import-save-status');
 
         this.bindEvents();
     }
@@ -142,9 +151,46 @@ export class ImportDialog {
         this.playButton.addEventListener('click', () => {
             if (!this.result || !this.report || !this.report.canPlay) return;
             this.dialog.close();
-            this.onPlay(this.result.midi, this.report.heading);
+            const saved = this.savedPiece;
+            this.onPlay(this.result.midi, saved ? saved.title : this.report.heading, {
+                pieceId: saved ? saved.id : null,
+                composer: saved ? saved.composer : this.report.subheading
+            });
         });
         this.downloadButton.addEventListener('click', () => this.download());
+        this.saveButton.addEventListener('click', () => this.save());
+    }
+
+    /**
+     * Save the converted piece to the user's library
+     */
+    async save() {
+        if (!this.result || !this.report || !this.report.canPlay || this.savedPiece) return;
+        this.saveButton.disabled = true;
+        this.saveButton.textContent = 'Saving…';
+        this.setSaveStatus('', '');
+        try {
+            this.savedPiece = await this.api.save({
+                title: this.report.heading,
+                composer: this.report.subheading,
+                midi: this.result.midi
+            });
+            this.saveButton.textContent = 'Saved to your library';
+            this.setSaveStatus('Saved. Find it again under My library on the Find Music tab.', 'success');
+            if (this.savedHint) this.savedHint.hidden = true;
+            this.onSaved(this.savedPiece);
+        } catch (error) {
+            this.saveButton.disabled = false;
+            this.saveButton.textContent = 'Save to my library';
+            this.setSaveStatus(error.message, 'error');
+        }
+    }
+
+    setSaveStatus(text, type) {
+        if (!this.saveStatus) return;
+        this.saveStatus.textContent = text;
+        this.saveStatus.className = `import-save-status${type ? ` import-save-status-${type}` : ''}`;
+        this.saveStatus.hidden = !text;
     }
 
     open() {
@@ -169,6 +215,7 @@ export class ImportDialog {
      */
     async handleFile(file) {
         this.result = null;
+        this.savedPiece = null;
         this.showPanel('working');
         try {
             const { convertFile } = await this.loadConverter();
@@ -200,6 +247,10 @@ export class ImportDialog {
 
         this.playButton.hidden = !report.canPlay;
         this.downloadButton.hidden = !report.canPlay;
+        this.saveButton.hidden = !report.canPlay;
+        this.saveButton.disabled = false;
+        this.saveButton.textContent = 'Save to my library';
+        this.setSaveStatus('', '');
         if (this.savedHint) this.savedHint.hidden = !report.canPlay;
         if (report.canPlay) {
             this.playButton.focus();

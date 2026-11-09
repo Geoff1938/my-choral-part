@@ -10,9 +10,11 @@ Plan for letting users convert their own MIDI or MusicXML files into practice MI
 | MusicXML | JS reader first (`DOMParser`, `fflate` for `.mxl`); a Python/music21 service on Render only if JS falls short. |
 | Library storage | Separate sql.js database `library.db` on the existing `/var/data` disk. Keep costs to a minimum. |
 | Repeats | Play as written (not expanded), so bar numbers match the player's straight-through counting. |
-| Activity logging | Log plays of converted/library pieces with their title (or filename). Privacy text must say so. Not done in M3: imported pieces are not logged until the privacy text is updated. |
+| Activity logging | Log plays of converted/library pieces with their title (or filename). Privacy text must say so. Done in M4: logged as composer "(own file)" with the title; privacy text updated. |
 | Retention | Delete libraries 3 years after last use. A shared piece counts as used when anyone plays it, including recipients, so it is kept while anyone uses it. |
-| Still open | Piece limit per library, email recovery, takedown address, multi-file works (asked at the milestone that needs them). |
+| Piece limit | 100 pieces per library (decided 9 November 2026). |
+| Sets | Choirs will want to share a set of pieces (e.g. a concert programme) with one link; the library schema allows for sets from M4, screens and sharing in M5. |
+| Still open | Email recovery, takedown address, multi-file works (asked at the milestone that needs them). |
 
 ## Architecture
 
@@ -39,7 +41,7 @@ Plan for letting users convert their own MIDI or MusicXML files into practice MI
 1. **M1** MIDI path in `public/practice-midi/`, Jest tests against private fixtures.
 2. **M2** MusicXML reader feeding the M1 pipeline.
 3. **M3** Convert in the front end: picker, report, hand-off to the player, download. *(Done, 9 November 2026.)* No separate tab: an "Or load your own MIDI or MusicXML file..." link under the Find Music search box opens a dialog (`public/ui/ImportDialog.js`) with the file picker and drag-and-drop, the conversion report, and Play now / Download practice MIDI / Choose another file. Imported pieces show as "Your file: <title>", have a single-entry movement list, no share link and no recent-works entry, and are **not** logged (logging with the title waits for the privacy wording in M7). Correcting voice assignments in the dialog is deferred to a later phase.
-4. **M4** Library: `library.db`, cookie, save (server re-validates), list, rename, delete, retention job.
+4. **M4** Library: `library.db`, cookie, save (server re-validates), list, rename, delete, retention job. *(Done, 9 November 2026.)* `utils/library.js` keeps metadata in `library.db` and each MIDI as `library/<id>.mid` on the data disk (sql.js holds the database in memory, so files stay out of it); only `library.db` is backed up nightly (7 copies) since saved files never change. Cookie `mcp_library` (HttpOnly, SameSite=Lax, renewed on use, 400 days). API `/api/library` (`routes/library.js`): list, save (base64 JSON, re-validated as a readable MIDI with a voice track), MIDI, rename, delete; own rate limit; same-origin for changes. Limits: 100 pieces per library, 5 MB per piece, 400 MB in total (`LIBRARY_MAX_TOTAL_BYTES`). Front end: "Save to my library" in the import dialog, "My library" link and dialog (`public/ui/LibraryDialog.js`) with Play, Rename, Delete. Library pieces keep their part and time-signature settings under `piece:<id>` keys. Plays of own files are now logged as composer "(own file)" with the title, and the privacy text covers files and the library. Schema includes `sets`/`set_pieces` for choir programmes (no screens yet). Recent works for library pieces not done yet.
 5. **M5** Sharing.
 6. **M6** Multiple devices.
 7. **M7** Privacy wording and deploy.

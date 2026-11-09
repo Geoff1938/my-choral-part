@@ -59,16 +59,19 @@ const createApiRoutes = require('./routes/api');
 const proxyRouter = require('./routes/proxy');
 const activityRouter = require('./routes/activity');
 const adminRouter = require('./routes/admin');
+const { createLibraryRoutes } = require('./routes/library');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const {
   apiLimiter,
   proxyLimiter,
   activityLogLimiter,
-  adminLimiter
+  adminLimiter,
+  libraryLimiter
 } = require('./middleware/rateLimiter');
 const basicAuthMiddleware = require('./middleware/basicAuth');
 const requireSameOrigin = require('./middleware/sameOrigin');
 const { initDatabase, flushDatabase } = require('./utils/database');
+const { initLibrary, flushLibrary } = require('./utils/library');
 const { startScheduler, stopScheduler } = require('./utils/scheduler');
 
 const app = express();
@@ -84,6 +87,9 @@ app.use(compression());
 // Activity events are tiny - parse them with a small body limit (this runs
 // first, so the general parser below skips these requests)
 app.use('/api/activity', express.json({ limit: '10kb' }));
+
+// Saved library pieces arrive as base64 MIDI (up to 5 MB, a third more as base64)
+app.use('/api/library', express.json({ limit: '7mb' }));
 
 // Middleware to parse JSON
 app.use(express.json());
@@ -180,6 +186,9 @@ app.get('/health', (req, res) => {
 app.use('/api/activity', activityLogLimiter, activityRouter);
 
 // Apply rate limiting to API routes
+// Users' saved pieces - mounted before /api so it has its own rate limit
+app.use('/api/library', libraryLimiter, requireSameOrigin, createLibraryRoutes());
+
 app.use('/api', apiLimiter, createApiRoutes(scraper));
 
 // Apply stricter rate limiting to proxy route
@@ -307,6 +316,10 @@ if (require.main === module) {
     await initDatabase();
     console.log('Activity database ready');
 
+    // Users' saved pieces (library.db and the library/ folder)
+    await initLibrary();
+    console.log('Library ready');
+
     // Initialize scraper
     console.log('Initializing MIDI index scraper...');
 
@@ -349,6 +362,7 @@ if (require.main === module) {
     stopScheduler();
     try {
       await flushDatabase();
+      await flushLibrary();
     } catch (error) {
       console.error('Error saving database on shutdown:', error);
     }
