@@ -637,17 +637,23 @@ section:last-child {
     text-align: center;
 }
 
+/* The browser's own dropdown arrow is small and pale; the movement list and
+   My Part use a white arrow in a blue circle so they read as choices */
 .movement-select-main {
     width: 100%;
-    padding: 10px 16px;
+    /* Equal side padding keeps the centred text clear of the arrow */
+    padding: 10px 52px;
     border: 2px solid var(--border);
     border-radius: 6px;
     font-size: 1.3rem;
     font-weight: 600;
-    background: white;
+    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%233498DB'/%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center / 28px 28px;
+    -webkit-appearance: none;
+    appearance: none;
     color: var(--primary-color);
     cursor: pointer;
     text-align: center;
+    text-align-last: center;
     transition: border-color 0.3s;
 }
 
@@ -959,12 +965,38 @@ section:last-child {
 
 #voice-part-select {
     font-size: 1rem;
-    padding: 2px 4px;
-    border-radius: 4px;
-    border: 1px solid var(--border-color);
-    background: var(--card-background);
-    color: var(--text-color);
+    padding: 3px 32px 3px 8px;
+    border-radius: 6px;
+    border: 2px solid var(--primary-color);
+    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%233498DB'/%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 6px center / 20px 20px;
+    -webkit-appearance: none;
+    appearance: none;
+    color: var(--text-primary);
     font-weight: 600;
+    cursor: pointer;
+}
+
+#voice-part-select:hover,
+#voice-part-select:focus,
+#recent-works-select:hover,
+#recent-works-select:focus {
+    border-color: var(--primary-hover);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+/* Recently played works: the same look as My Part */
+#recent-works-select {
+    font-size: 0.95rem;
+    padding: 4px 32px 4px 8px;
+    border-radius: 6px;
+    border: 2px solid var(--primary-color);
+    background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='12' fill='%233498DB'/%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 6px center / 20px 20px;
+    -webkit-appearance: none;
+    appearance: none;
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
 }
 
 #balance-voice-part-instrument {
