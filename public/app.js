@@ -44,6 +44,7 @@ import { StatusManager } from './ui/StatusManager.js';
 import { RecentWorksManager } from './api/RecentWorksManager.js';
 import { normalizeChannelName, detectVoicePartFromName } from './practice-midi/voiceParts.js';
 import { toSlug } from './utils/slug.js';
+import { ImportDialog } from './ui/ImportDialog.js';
 
 class MIDIPlayer {
     constructor() {
@@ -97,6 +98,16 @@ class MIDIPlayer {
         this.instrumentLoader = new InstrumentLoader();
         this.statusManager = new StatusManager(this.loadingStatus);
         this.recentWorksManager = new RecentWorksManager();
+
+        // A piece loaded from the user's own file ({ title }), or null for
+        // library works. Imported pieces are not logged, saved to recent
+        // works or shared.
+        this.importedPiece = null;
+        this.importDialog = new ImportDialog({
+            dialog: document.getElementById('import-dialog'),
+            openButton: document.getElementById('import-file-link'),
+            onPlay: (midiBytes, title) => this.loadImportedPiece(midiBytes, title)
+        });
 
         this.loadPreferences();
         this.attachEventListeners();
@@ -378,6 +389,10 @@ class MIDIPlayer {
      * @param {boolean} [options.useBeacon] - Send with sendBeacon (survives the page closing)
      */
     async logActivity(eventType, { durationSeconds = null, useBeacon = false } = {}) {
+        // Pieces loaded from the user's own files are not logged (the
+        // privacy text only covers library works)
+        if (this.importedPiece) return;
+
         const body = JSON.stringify({
             deviceId: this.deviceId,
             eventType,
@@ -1298,7 +1313,12 @@ class MIDIPlayer {
                 '• Click on a work to select it for playback<br><br>' +
                 '<strong>Search tips:</strong><br>' +
                 '• Search matches the beginning of words (e.g., "bach" finds "Bach" and "Pachelbel")<br>' +
-                '• You can search by composer name, work title, or movement name';
+                '• You can search by composer name, work title, or movement name<br><br>' +
+                '<strong>Your own files:</strong><br>' +
+                '• Click <strong>Or load your own MIDI or MusicXML file…</strong> to practise a piece that isn\'t in the library<br>' +
+                '• Choose a MIDI (.mid) or MusicXML (.musicxml, .xml, .mxl) file with a separate part for each voice<br>' +
+                '• You\'ll see which voice parts were found and any problems, then you can play it or download the practice version<br>' +
+                '• Your file stays on your device; nothing is uploaded. Pieces you load aren\'t saved, so load the file again to play it another time';
         } else if (activeTabId === 'play-music-tab') {
             title = 'Play Music - Help';
             content =
@@ -2441,6 +2461,9 @@ class MIDIPlayer {
         if (this.selectedComposer && this.selectedWork) {
             this.currentWorkDisplay.textContent = `${this.selectedComposer}, ${this.selectedWork}`;
             this.updateShareableURL();
+        } else if (this.importedPiece) {
+            this.currentWorkDisplay.textContent = `Your file: ${this.importedPiece.title}`;
+            this.updateShareableURL();
         } else {
             this.currentWorkDisplay.textContent = 'No work selected';
             this.updateShareableURL();
@@ -2942,6 +2965,32 @@ class MIDIPlayer {
             return;
         }
 
+        await this.loadMIDI({ url }, title, skipSaveRecent);
+    }
+
+    /**
+     * Load a practice MIDI converted from the user's own file (see
+     * ui/ImportDialog.js) and show it on the Play Music tab. It is not
+     * logged, added to recent works or given a share link.
+     * @param {Uint8Array} midiBytes - Practice MIDI file contents
+     * @param {string} title - Piece title
+     */
+    async loadImportedPiece(midiBytes, title) {
+        this.switchTab('play-music');
+        // Copy into a standalone buffer (the bytes may be a view on a larger one)
+        await this.loadMIDI({ arrayBuffer: midiBytes.slice().buffer, imported: { title } }, title, true);
+    }
+
+    /**
+     * Load a MIDI file into the player
+     * @param {{url?: string, arrayBuffer?: ArrayBuffer, imported?: {title: string}}} source -
+     *     A library MIDI to fetch by URL, or the contents of an imported file
+     * @param {string|null} title - Movement (or piece) title
+     * @param {boolean} [skipSaveRecent] - Don't add to recent works
+     */
+    async loadMIDI(source, title = null, skipSaveRecent = false) {
+        const url = source.url || null;
+
         // A newer load (e.g. the user clicking quickly through movements)
         // makes this one stale; its results are then discarded
         const loadId = ++this.loadId;
@@ -2958,26 +3007,41 @@ class MIDIPlayer {
             this.reportRehearsalTime({ minSeconds: 1 });
             this.cleanup();
 
-            // Fetch and parse MIDI file via proxy to avoid CORS issues (with retry logic)
-            const proxyUrl = `/proxy?url=${encodeURIComponent(url)}`;
-            const response = await this.fetchWithRetry(proxyUrl);
-            if (isStale()) return;
-            if (!response.ok) {
-                // Try to get error message from response
-                let errorMsg = response.statusText;
-                try {
-                    const errorData = await response.json();
-                    if (errorData.error) {
-                        errorMsg = errorData.error;
-                    }
-                } catch (e) {
-                    // Ignore JSON parse errors
-                }
-                throw new MIDILoadError(errorMsg, url);
+            // The previous piece's practice time has been reported, so it is
+            // now safe to switch between library works and imported pieces
+            this.importedPiece = source.imported || null;
+            if (source.imported) {
+                this.selectedComposer = null;
+                this.selectedWork = null;
+                this.movementSelect.innerHTML = `<option value="">${escapeHtml(title)}</option>`;
+                this.updateWorkDisplay();
             }
 
-            const arrayBuffer = await response.arrayBuffer();
-            if (isStale()) return;
+            let arrayBuffer;
+            if (source.arrayBuffer) {
+                arrayBuffer = source.arrayBuffer;
+            } else {
+                // Fetch and parse MIDI file via proxy to avoid CORS issues (with retry logic)
+                const proxyUrl = `/proxy?url=${encodeURIComponent(url)}`;
+                const response = await this.fetchWithRetry(proxyUrl);
+                if (isStale()) return;
+                if (!response.ok) {
+                    // Try to get error message from response
+                    let errorMsg = response.statusText;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.error) {
+                            errorMsg = errorData.error;
+                        }
+                    } catch (e) {
+                        // Ignore JSON parse errors
+                    }
+                    throw new MIDILoadError(errorMsg, url);
+                }
+
+                arrayBuffer = await response.arrayBuffer();
+                if (isStale()) return;
+            }
             // Store the raw ArrayBuffer for SpessaSynth (it needs raw MIDI data, not parsed)
             this.lastMidiArrayBuffer = arrayBuffer;
             this.midi = new Midi(arrayBuffer);

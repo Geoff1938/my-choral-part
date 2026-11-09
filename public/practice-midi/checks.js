@@ -4,6 +4,16 @@
  * (converted, with a caveat) or 'info'.
  */
 
+import { PROGRAM, SECTIONS, VOICE_SLOTS } from './recipe.js';
+
+// Names of the instruments the recipe gives each voice section, as singers would say them
+const INSTRUMENT_NAMES = {
+    [PROGRAM.PICCOLO]: 'piccolo',
+    [PROGRAM.CLARINET]: 'clarinet',
+    [PROGRAM.FRENCH_HORN]: 'French horn',
+    [PROGRAM.BASSOON]: 'bassoon'
+};
+
 // Limits, all adjustable
 export const LIMITS = {
     MAX_FILE_BYTES: 5 * 1024 * 1024,
@@ -106,6 +116,14 @@ export const message = {
     partsFound: outputParts => ({
         level: 'info', code: 'parts-found',
         text: `Voice parts: ${outputParts.map(o => (o.part.sourceName && o.part.sourceName !== o.name ? `${o.name} (from ${quoted(o.part.sourceName)})` : o.name)).join(', ')}.`
+    }),
+    voiceInstruments: (sections, hasAccompaniment) => ({
+        level: 'info', code: 'voice-instruments',
+        text: 'Voice parts are played on the player\'s standard instruments, so each is easy to pick out: ' +
+            SECTIONS.filter(section => sections.includes(section))
+                .map(section => `${SECTION_LABEL[section]} ${INSTRUMENT_NAMES[VOICE_SLOTS.find(s => s.section === section).program]}`)
+                .join(', ') +
+            '.' + (hasAccompaniment ? ' Accompaniment keeps its own instruments.' : '')
     }),
     accompanimentKept: outputParts => ({
         level: 'info', code: 'accompaniment-kept',

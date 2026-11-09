@@ -36,7 +36,25 @@ describe('convertFile()', () => {
     expect(result.format).toBe('midi');
     expect(result.midi).toBeInstanceOf(Uint8Array);
     expect(result.summary.parts.map(p => [p.name, p.channel])).toEqual([['Soprano', 0], ['Alto', 5], ['Tenor', 6], ['Bass', 7]]);
-    expect(codes(result)).toEqual(['parts-found', 'timing']);
+    expect(codes(result)).toEqual(['parts-found', 'voice-instruments', 'timing']);
+  });
+
+  test('says which instruments the voices are played on', async () => {
+    const satbResult = await convertFile(midiBytes(satb()));
+    expect(satbResult.messages.find(m => m.code === 'voice-instruments').text).toBe(
+      'Voice parts are played on the player\'s standard instruments, so each is easy to pick out: ' +
+      'soprano piccolo, alto clarinet, tenor French horn, bass bassoon.');
+
+    // Only the sections present are listed; accompaniment is mentioned when there is some
+    const s = song([
+      track('Soprano', line(0, 72)),
+      track('Alto', line(1, 65)),
+      track('Organ', line(8, 48))
+    ]);
+    const result = await convertFile(midiBytes(s));
+    expect(result.messages.find(m => m.code === 'voice-instruments').text).toBe(
+      'Voice parts are played on the player\'s standard instruments, so each is easy to pick out: ' +
+      'soprano piccolo, alto clarinet. Accompaniment keeps its own instruments.');
   });
 
   test('keeps varied velocities', async () => {
@@ -124,6 +142,34 @@ describe('convertFile()', () => {
     expect(organ.program).toBe(19);
     expect(organ.pan).toBe(20);
     expect(organ.volumeStart).toBe(64);
+  });
+
+  test('the player\'s MIDI reader keeps every track whole and named', async () => {
+    // @tonejs/midi starts a new, unnamed track when a program change follows
+    // other events on a channel, which loses the name of the part's notes
+    const { Midi } = require('@tonejs/midi');
+    const s = satb();
+    s.tracks.push(track('Organ', { tick: 0, type: 'program', channel: 2, program: 19 }, line(2, 55)));
+    s.tracks.push(track('Strings', { tick: 0, type: 'program', channel: 4, program: 48 }, line(4, 60)));
+    const result = await convertFile(midiBytes(s));
+    const tracks = new Midi(result.midi).tracks;
+
+    expect(tracks.filter(t => t.notes.length > 0).map(t => t.name))
+      .toEqual(['Soprano', 'Alto', 'Tenor', 'Bass', 'Organ', 'Strings']);
+    expect(tracks.filter(t => t.notes.length === 0 && t.channel !== 0)).toEqual([]);
+  });
+
+  test('a bank select stays before its program change', async () => {
+    const s = satb();
+    s.tracks.push(track('Organ', { tick: 0, type: 'controller', channel: 2, controller: 0, value: 8 },
+      { tick: 0, type: 'program', channel: 2, program: 19 }, line(2, 55)));
+    const result = await convertFile(midiBytes(s));
+    const organ = readMidi(result.midi).tracks.find(t => metaText(t, META.TRACK_NAME) === 'Organ');
+    const channelEvents = organ.events.filter(e => e.channel !== undefined);
+    const bank = channelEvents.findIndex(e => e.type === 'controller' && e.controller === 0);
+    const program = channelEvents.findIndex(e => e.type === 'program');
+    expect(bank).toBeGreaterThanOrEqual(0);
+    expect(bank).toBeLessThan(program);
   });
 
   test('moves lyrics from a following lyric-only track onto the voice', async () => {

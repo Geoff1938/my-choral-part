@@ -114,6 +114,7 @@ function convertSong(song, format, suggested, sourceWarnings = []) {
         messages.push(message.noTempo());
     }
     messages.push(message.partsFound(voiceOutputs));
+    messages.push(message.voiceInstruments(Object.keys(voices), otherOutputs.length > 0));
     if (otherOutputs.length) {
         messages.push(message.accompanimentKept(otherOutputs));
     }

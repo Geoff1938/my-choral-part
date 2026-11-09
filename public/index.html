@@ -73,6 +73,12 @@
                         aria-label="Search for music"
                         title="Enter search terms (searches word beginnings only)"
                     >
+
+                    <!-- Load your own file (opens the import dialog) -->
+                    <button type="button" id="import-file-link" class="import-file-link"
+                        title="Practise a piece that isn't in the library: choose a MIDI or MusicXML file from your device and it will be turned into a practice file you can play here. The file stays on your device; nothing is uploaded.">
+                        Or load your own MIDI or MusicXML file&hellip;
+                    </button>
                 </div>
                 <div id="composer-results" class="search-results"></div>
 
@@ -395,6 +401,45 @@
                     <!-- Dynamically populated -->
                 </tbody>
             </table>
+        </div>
+    </dialog>
+
+    <!-- Load your own file: managed by public/ui/ImportDialog.js -->
+    <dialog id="import-dialog" class="import-dialog" aria-labelledby="import-dialog-title">
+        <div class="channel-dialog-header">
+            <h3 id="import-dialog-title">Load your own file</h3>
+            <button type="button" id="import-dialog-close" class="channel-dialog-close-btn" aria-label="Close" title="Close without loading a file">&times;</button>
+        </div>
+        <div class="import-dialog-body">
+            <input type="file" id="import-file-input" hidden>
+
+            <!-- Step 1: choose a file -->
+            <div id="import-drop-zone" class="import-drop-zone"
+                title="Drag and drop a MIDI or MusicXML file here, or use the button to choose one from your device">
+                <p>Choose a MIDI file (.mid) or a MusicXML score (.musicxml, .xml or .mxl) with a separate part for each voice. We'll turn it into a practice file you can play here.</p>
+                <button type="button" id="import-choose-btn" class="btn btn-primary"
+                    title="Choose a MIDI or MusicXML file from your device">Choose a file&hellip;</button>
+                <p class="import-hint import-drop-hint">Or drag and drop a file here. Your file stays on your device; nothing is uploaded.</p>
+            </div>
+
+            <!-- Step 2: converting -->
+            <div id="import-working" class="import-working" hidden>
+                <p>Reading your file&hellip;</p>
+            </div>
+
+            <!-- Step 3: report and actions -->
+            <div id="import-report" class="import-report" hidden>
+                <div class="import-report-body" aria-live="polite"></div>
+                <div class="import-actions">
+                    <button type="button" id="import-play-btn" class="btn btn-primary"
+                        title="Open this piece in the player on the Play Music tab">Play now</button>
+                    <button type="button" id="import-download-btn" class="btn"
+                        title="Save the practice version of this piece to your device as a MIDI file">Download practice MIDI</button>
+                    <button type="button" id="import-again-btn" class="btn"
+                        title="Choose a different file from your device">Choose another file&hellip;</button>
+                </div>
+                <p id="import-saved-hint" class="import-hint">Pieces you load aren't saved: to play this one again later, load the file again.</p>
+            </div>
         </div>
     </dialog>
 

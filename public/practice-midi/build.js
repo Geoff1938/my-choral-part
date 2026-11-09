@@ -186,14 +186,22 @@ export function buildPracticeSong(song, classified, voices, accompanimentChannel
         const kept = part.controlEvents
             .filter(e => !(e.type === 'controller' && ACCOMPANIMENT_REPLACED_CC.has(e.controller)))
             .map(e => ({ ...e, channel }));
+        // The opening program change goes before the added controllers: the
+        // player's MIDI reader (@tonejs/midi) starts a new, unnamed track when
+        // a program change follows other events on the channel. A bank select
+        // must precede its program change, so then the source order is kept.
+        const selectsBank = kept.some(e => e.tick === 0 && e.type === 'controller' &&
+            (e.controller === CC.BANK_SELECT || e.controller === CC.BANK_SELECT_LSB));
+        const openingPrograms = selectsBank ? [] : kept.filter(e => e.tick === 0 && e.type === 'program');
         tracks.push({
             events: [
                 nameEvent(name),
+                ...openingPrograms,
                 ...startVolumeEvents(part.controlEvents, channel),
                 ...(hasPan ? [] : [controller(channel, CC.PAN, ACCOMPANIMENT_PAN)]),
                 controller(channel, CC.REVERB, REVERB),
                 controller(channel, CC.CHORUS, CHORUS),
-                ...kept,
+                ...kept.filter(e => !openingPrograms.includes(e)),
                 ...part.otherEvents,
                 ...noteEvents(part.notes, channel, velocityOf)
             ]

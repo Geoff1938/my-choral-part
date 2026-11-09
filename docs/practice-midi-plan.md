@@ -10,7 +10,7 @@ Plan for letting users convert their own MIDI or MusicXML files into practice MI
 | MusicXML | JS reader first (`DOMParser`, `fflate` for `.mxl`); a Python/music21 service on Render only if JS falls short. |
 | Library storage | Separate sql.js database `library.db` on the existing `/var/data` disk. Keep costs to a minimum. |
 | Repeats | Play as written (not expanded), so bar numbers match the player's straight-through counting. |
-| Activity logging | Log plays of converted/library pieces with their title (or filename). Privacy text must say so. |
+| Activity logging | Log plays of converted/library pieces with their title (or filename). Privacy text must say so. Not done in M3: imported pieces are not logged until the privacy text is updated. |
 | Retention | Delete libraries 3 years after last use. A shared piece counts as used when anyone plays it, including recipients, so it is kept while anyone uses it. |
 | Still open | Piece limit per library, email recovery, takedown address, multi-file works (asked at the milestone that needs them). |
 
@@ -32,13 +32,13 @@ Plan for letting users convert their own MIDI or MusicXML files into practice MI
 - Library key: `secrets`-strength random, held in an HttpOnly, Secure, SameSite=Lax cookie set by the server; only its SHA-256 hash is stored. Created on first save.
 - Other devices: QR code / link `https://player.mychoralpart.com/library#k=<key>` (key in the fragment, never in logs), claimed via `POST /library/claim/`. Reset rotates the key.
 - Share links: `/p/<share_token>`, unlisted, `noindex`, one piece only. "Add to my library" adds a reference, not a copy; owner deletion gives 410 for everyone; revoke issues a new token. Attestation required before first share.
-- All changing routes use `requireSameOrigin` and one ownership middleware. Register `/p/...` and `/library` before the `/:composer/:work` catch-all.
+- All changing routes use `requireSameOrigin` and one ownership middleware. Register `/p/...` and `/library` before the `/:composer` and `/:composer/:work` page routes (added November 2026 for composer pages and SEO), or they will be treated as a composer name.
 
 ## Milestones
 
 1. **M1** MIDI path in `public/practice-midi/`, Jest tests against private fixtures.
 2. **M2** MusicXML reader feeding the M1 pipeline.
-3. **M3** Convert in the front end: picker, report, hand-off to the player, download.
+3. **M3** Convert in the front end: picker, report, hand-off to the player, download. *(Done, 9 November 2026.)* No separate tab: an "Or load your own MIDI or MusicXML file..." link under the Find Music search box opens a dialog (`public/ui/ImportDialog.js`) with the file picker and drag-and-drop, the conversion report, and Play now / Download practice MIDI / Choose another file. Imported pieces show as "Your file: <title>", have a single-entry movement list, no share link and no recent-works entry, and are **not** logged (logging with the title waits for the privacy wording in M7). Correcting voice assignments in the dialog is deferred to a later phase.
 4. **M4** Library: `library.db`, cookie, save (server re-validates), list, rename, delete, retention job.
 5. **M5** Sharing.
 6. **M6** Multiple devices.

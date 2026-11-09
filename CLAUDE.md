@@ -25,6 +25,7 @@ My Choral Part (https://player.mychoralpart.com) is a web app for choir singers 
 ### Client (vanilla JS ES modules, no build step)
 
 - `public/app.js` - the `MIDIPlayer` class: search and selection, MIDI loading, playback, balance, tempo, bars and loops, activity logging
+- `public/ui/ImportDialog.js` - "Or load your own MIDI or MusicXML file..." dialog on the Find Music tab: converts the file in the browser with `public/practice-midi/` (nothing is uploaded) and hands the practice MIDI to `MIDIPlayer.loadImportedPiece()`. Imported pieces (`this.importedPiece`) are not logged, saved to recent works or shared
 - `public/constants.js`, `public/utils/`, `public/ui/StatusManager.js`, `public/api/RecentWorksManager.js`, `public/player/InstrumentLoader.js` (General MIDI names, used to identify voice parts)
 - `public/service-worker.js` - caches the soundfont after first use; navigations always fetch fresh
 - `public/vendor/` - not in git; copied from node_modules by `scripts/copy-vendor.js` (runs on `npm install`)

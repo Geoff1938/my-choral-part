@@ -1793,3 +1793,189 @@ section:last-child {
         transform: translateY(0);
     }
 }
+
+/* ===== Load your own file (Find Music tab) ===== */
+
+.import-file-link {
+    display: inline-block;
+    /* More space above (from the search box), less below: the negative
+       bottom margin pulls the search section's own bottom margin in */
+    margin: 14px 0 -6px;
+    padding: 4px 0;
+    background: none;
+    border: none;
+    color: var(--primary-hover);
+    /* Same size and weight as the Composers / Works checkboxes */
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.import-file-link:hover,
+.import-file-link:focus-visible {
+    color: var(--text-primary);
+}
+
+.import-dialog {
+    /* The page reset sets margin: 0 on everything; auto centres the dialog */
+    margin: auto;
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    max-width: 520px;
+    width: 90%;
+    max-height: 85vh;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    color: var(--text-primary);
+}
+
+.import-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.import-dialog-body {
+    padding: 16px 20px 20px;
+    overflow-y: auto;
+    max-height: calc(85vh - 60px);
+    line-height: var(--line-height-normal);
+}
+
+.import-drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+
+.import-drop-zone.drag-over {
+    border-color: var(--primary-color);
+    background: var(--background);
+}
+
+.import-drop-zone p {
+    margin: 0 0 16px;
+}
+
+.import-drop-zone .btn-primary {
+    width: auto;
+    padding: 10px 20px;
+    font-size: var(--font-size-base);
+}
+
+.import-hint {
+    margin: 12px 0 0;
+    color: var(--text-secondary);
+    font-size: var(--font-size-small);
+}
+
+.import-drop-zone .import-drop-hint {
+    margin: 18px 0 0;
+}
+
+.import-working {
+    padding: 24px 0;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.import-title {
+    margin: 0;
+    font-size: 1.15rem;
+}
+
+.import-composer {
+    margin: 2px 0 0;
+    color: var(--text-secondary);
+}
+
+.import-status {
+    margin: 12px 0 8px;
+    font-weight: var(--font-weight-semibold);
+}
+
+.import-status-ok,
+.import-status-warning {
+    color: #1E8449;
+}
+
+.import-status-rejected {
+    color: #C0392B;
+}
+
+.import-messages {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+}
+
+.import-message {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+    font-size: var(--font-size-small);
+}
+
+.import-message-symbol {
+    flex: 0 0 22px;
+    height: 22px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 22px;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-tiny);
+    color: white;
+    background: var(--color-text-light);
+}
+
+.import-message-warning .import-message-symbol {
+    background: var(--color-highlight);
+}
+
+.import-message-reject .import-message-symbol {
+    background: var(--danger);
+}
+
+.import-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.import-actions .btn {
+    width: auto;
+    padding: 10px 16px;
+    font-size: var(--font-size-small);
+}
+
+.import-actions .btn:not(.btn-primary) {
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.import-actions [hidden] {
+    display: none;
+}
+
+/* Phones: the report can be long, so use the whole screen */
+@media (max-width: 480px) {
+    .import-dialog {
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    .import-dialog-body {
+        max-height: calc(100% - 60px);
+    }
+
+    .import-actions .btn {
+        flex: 1 1 100%;
+    }
+}
