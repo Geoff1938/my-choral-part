@@ -213,6 +213,103 @@ describe('convertFile()', () => {
   });
 });
 
+describe('more parts named for a voice than it can take', () => {
+  // As in a file of Bruckner's SAATTBB "Ave Maria": the first tenor part is named "Alto"
+  test('the part whose range suits a neighbouring voice moves there, with a warning', async () => {
+    const result = await convertFile(midiBytes(song([
+      track('Treble', line(0, 72)),
+      track('Countertenor', line(2, 69)),
+      track('Countertenor 2', line(3, 65)),
+      track('Alto', line(4, 60)),
+      track('Tenor', line(5, 59)),
+      track('Bass 1', line(6, 53)),
+      track('Bass 2', line(7, 47))
+    ])));
+
+    expect(result.status).toBe('warning');
+    expect(result.summary.parts.map(p => `${p.sourceName} -> ${p.name}`)).toEqual([
+      'Treble -> Soprano',
+      'Countertenor -> Alto 1',
+      'Countertenor 2 -> Alto 2',
+      'Alto -> Tenor 1',
+      'Tenor -> Tenor 2',
+      'Bass 1 -> Bass 1',
+      'Bass 2 -> Bass 2'
+    ]);
+    expect(result.messages.find(m => m.code === 'section-moved').text).toBe(
+      'The file has more than two alto parts, so "Alto" has been treated as Tenor 1 because of its range. Please check this is right.');
+  });
+
+  test('a third part is kept when no neighbouring voice suits it (Carmina Burana: Tenor 1, 2, 3)', async () => {
+    const result = await convertFile(midiBytes(song([
+      track('Tenor 1', line(0, 64)), track('Tenor 2', line(1, 60)), track('Tenor 3', line(2, 57)),
+      track('Baritone', line(3, 53)), track('Bass', line(4, 48))
+    ])));
+    expect(result.status).not.toBe('rejected');
+    expect(result.summary.parts.map(p => p.name)).toEqual(['Tenor 1', 'Tenor 2', 'Tenor 3', 'Bass 1', 'Bass 2']);
+    // Each part on its own channel; the third tenor uses a spare one
+    expect(new Set(result.summary.parts.map(p => p.channel)).size).toBe(5);
+    expect(codes(result)).not.toContain('section-moved');
+  });
+
+  test('more than three parts in a voice is rejected', async () => {
+    const result = await convertFile(midiBytes(song([
+      track('Soprano 1', line(0, 76)), track('Soprano 2', line(1, 74)), track('Soprano 3', line(2, 72)), track('Soprano 4', line(3, 70))
+    ])));
+    expect(result.status).toBe('rejected');
+    expect(codes(result)).toEqual(['too-many-voices']);
+  });
+});
+
+describe('choosing which parts are choir parts', () => {
+  test('a track with only a stray note or two is not a voice (a notation program\'s "Tempo Track")', async () => {
+    const s = satb();
+    s.tracks.push(track('Tempo Track', notes(10, [[0, 71, TPQ]])));
+    const result = await convertFile(midiBytes(s));
+    expect(result.summary.parts.filter(p => p.role === 'voice').map(p => p.name)).toEqual(['Soprano', 'Alto', 'Tenor', 'Bass']);
+  });
+
+  test('beside a named choir, parts with other names are soloists (HMS Pinafore characters)', async () => {
+    const result = await convertFile(midiBytes(song([
+      track('Cousin Hebe', line(0, 70)),
+      track('Sir Joseph', line(1, 55)),
+      track('Sopranos', line(2, 72)), track('Altos', line(3, 66)), track('Tenors', line(4, 59)), track('Basses', line(5, 52))
+    ])));
+    const voices = result.summary.parts.filter(p => p.role === 'voice').map(p => p.name);
+    expect(voices).toEqual(['Soprano', 'Alto', 'Tenor', 'Bass']);
+    expect(result.summary.parts.filter(p => p.role === 'solo').map(p => p.name)).toEqual(['Cousin Hebe', 'Sir Joseph']);
+  });
+
+  test('an unrecognised name in a section with no named part is the part for that section (a bass part named "Base")', async () => {
+    const result = await convertFile(midiBytes(song([
+      track('Treble', line(0, 72)), track('Alto', line(1, 65)), track('Tenor', line(2, 59)), track('Base', line(3, 50))
+    ])));
+    expect(result.summary.parts.map(p => p.name)).toEqual(['Soprano', 'Alto', 'Tenor', 'Bass']);
+  });
+
+  test('"Contraltos" is an alto part', async () => {
+    const result = await convertFile(midiBytes(song([
+      track('Sopranos', line(0, 72)), track('Contraltos', line(1, 65)), track('Tenors', line(2, 59)), track('Basses', line(3, 52))
+    ])));
+    expect(result.summary.parts.filter(p => p.role === 'voice').map(p => p.name)).toEqual(['Soprano', 'Alto', 'Tenor', 'Bass']);
+  });
+
+  test('Renaissance names without a section are still choir parts', async () => {
+    const result = await convertFile(midiBytes(song([
+      track('Cantus', line(0, 72)), track('Altus', line(1, 65)), track('Quintus', line(2, 61)),
+      track('Tenor', line(3, 58)), track('Bassus', line(4, 50))
+    ])));
+    expect(result.summary.parts.every(p => p.role === 'voice')).toBe(true);
+  });
+
+  test('a solo movement is rejected with a message that says so', async () => {
+    const result = await convertFile(midiBytes(song([
+      track('Tenor Solo', line(0, 60)), track('1st violins', line(1, 76)), track('Cellos', line(2, 48))
+    ])));
+    expect(codes(result)).toEqual(['solo-only']);
+  });
+});
+
 describe('rejections', () => {
   test('voices merged into chords on one track', async () => {
     const chords = [];
@@ -241,9 +338,23 @@ describe('rejections', () => {
     expect(codes(result)).toEqual(['double-choir']);
   });
 
-  test('more than two parts in a section', async () => {
-    const result = await convertFile(midiBytes(song([track('Soprano 1', line(0, 74)), track('Soprano 2', line(1, 72)), track('Soprano 3', line(2, 70))])));
+  test('more than three parts in a section', async () => {
+    const result = await convertFile(midiBytes(song([track('Soprano 1', line(0, 76)), track('Soprano 2', line(1, 74)),
+      track('Soprano 3', line(2, 72)), track('Soprano 4', line(3, 70))])));
     expect(codes(result)).toEqual(['too-many-voices']);
+  });
+
+  test('accompaniment can use voice channels the piece doesn\'t need', async () => {
+    // Four voices and nine instruments: more than the seven usual accompaniment channels
+    const s = satb();
+    for (let i = 0; i < 9; i++) {
+      s.tracks.push(track(`Instrument ${i + 1}`, { tick: 0, type: 'program', channel: 8, program: 40 + i }, line(8, 60 + i)));
+    }
+    const result = await convertFile(midiBytes(s));
+    expect(result.status).not.toBe('rejected');
+    const channels = result.summary.parts.map(p => p.channel);
+    expect(new Set(channels).size).toBe(13);
+    expect(channels).not.toContain(9);
   });
 
   test('a damaged file', async () => {

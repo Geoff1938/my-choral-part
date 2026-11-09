@@ -4,13 +4,15 @@
  */
 
 import { META, extractNotes, metaText } from './smf.js';
+import { PREFERRED_PER_SECTION } from './recipe.js';
 
 // Words in a part name that mean a voice section
 const SECTION_WORDS = {
     soprano: ['soprano', 'sopranos', 'sopran', 'sopr', 'sop', 'treble', 'trebles', 'cantus', 'canto', 'superius', 'discantus', 'dessus'],
-    alto: ['alto', 'altos', 'alt', 'altus', 'contralto', 'contratenor', 'countertenor', 'mezzo', 'haute'],
+    alto: ['alto', 'altos', 'alt', 'altus', 'contralto', 'contraltos', 'contratenor', 'countertenor', 'countertenors', 'mezzo', 'haute'],
     tenor: ['tenor', 'tenors', 'tenore', 'tenori', 'taille'],
-    bass: ['bass', 'basses', 'bassus', 'basse', 'basso', 'bassi', 'baritone', 'bariton', 'baritono']
+    // 'base' is a common misspelling of bass in part names
+    bass: ['bass', 'basses', 'bassus', 'basse', 'basso', 'bassi', 'baritone', 'baritones', 'bariton', 'baritono', 'base']
 };
 
 // Single-letter abbreviations, accepted only when they are the whole name (e.g. "S", "S2", "T 1")
@@ -25,7 +27,7 @@ const INSTRUMENT_WORDS = new Set([
     'contrabass', 'contrabasso', 'doublebass', 'double', 'bassoon', 'bassoons', 'fagotto', 'fagott', 'oboe',
     'oboes', 'flute', 'flutes', 'flauto', 'flauti', 'piccolo', 'recorder', 'recorders', 'clarinet', 'clarinets',
     'horn', 'horns', 'corno', 'corni', 'trumpet', 'trumpets', 'tromba', 'trombe', 'trombone', 'trombones', 'tuba',
-    'cornett', 'anglais', 'sackbut', 'timpani', 'timp', 'drum', 'drums', 'percussion', 'perc', 'guitar', 'harp', 'lute',
+    'cornett', 'anglais', 'sackbut', 'timpani', 'timp', 'timps', 'tymps', 'tympani', 'drum', 'drums', 'percussion', 'perc', 'guitar', 'harp', 'lute',
     'theorbo', 'synth', 'instrument', 'instr', 'reduction', 'rh', 'lh', 'pedal', 'pedals', 'ped', 'manual', 'manuals'
 ]);
 
@@ -47,6 +49,13 @@ const CHORD_SHARE = 0.15;
 
 // A part wider than this (in semitones) is not a single voice
 const MAX_VOICE_RANGE = 30;
+
+// Names for a voice part that don't say which section it belongs to
+const GENERIC_VOICE_NAME = /\b(quintus|sextus|septimus|octavus|nonus|vagans|voice|voices|vox|part|stimme)\b|^\s*$/i;
+
+// A part with fewer notes than this is not a voice unless its name says so
+// (e.g. a "Tempo Track" left with a stray note or two by a notation program)
+const MIN_VOICE_NOTES = 8;
 
 // Meta events that belong in the conductor track wherever they appear
 const CONDUCTOR_META = new Set([META.TEMPO, META.TIME_SIGNATURE, META.SMPTE_OFFSET, META.COPYRIGHT, META.MARKER, META.CUE]);
@@ -261,6 +270,8 @@ export function classifyParts(song) {
             Object.assign(part, { role: 'accompaniment', classifiedBy: 'chords' });
         } else if (part.highestNote - part.lowestNote > MAX_VOICE_RANGE) {
             Object.assign(part, { role: 'accompaniment', classifiedBy: 'range' });
+        } else if (part.notes.length < MIN_VOICE_NOTES) {
+            Object.assign(part, { role: 'accompaniment', classifiedBy: 'few-notes' });
         } else {
             part.role = 'unknown';
         }
@@ -274,6 +285,15 @@ export function classifyParts(song) {
             reference[section] = median(named.map(p => p.medianNote));
         }
     }
+    // When the choir's parts are named for two or more sections, a part whose
+    // name doesn't say what it is, sitting in a section that already has a
+    // named choir part, is a soloist (e.g. character names in an opera
+    // chorus: "Cousin Hebe" beside "Altos"), not another choir part. One in a
+    // section with no named part is that section's part (e.g. a bass part
+    // misspelt "Base"). Names that mean a voice without saying which
+    // (Renaissance "Quintus", "Sextus", or "Voice 5", "Part 5") are always
+    // choir parts, placed by pitch.
+    const namedSections = new Set(parts.filter(p => p.role === 'voice').map(p => p.section));
     for (const part of parts.filter(p => p.role === 'unknown')) {
         let best = null;
         for (const [section, typical] of Object.entries(reference)) {
@@ -281,10 +301,62 @@ export function classifyParts(song) {
                 best = section;
             }
         }
-        Object.assign(part, { role: 'voice', section: best, nameNumber: null, classifiedBy: 'pitch' });
+        if (namedSections.size >= 2 && namedSections.has(best) && !GENERIC_VOICE_NAME.test(part.sourceName)) {
+            Object.assign(part, { role: 'solo', classifiedBy: 'unnamed-beside-choir' });
+        } else {
+            Object.assign(part, { role: 'voice', section: best, nameNumber: null, classifiedBy: 'pitch' });
+        }
     }
 
+    rebalanceSections(parts);
+
     return { parts, conductorEvents, conductorName, doubleChoir };
+}
+
+// Voice sections from highest to lowest
+const SECTION_ORDER = ['soprano', 'alto', 'tenor', 'bass'];
+
+/**
+ * When the names give a section more than two parts, move the part that
+ * best suits a neighbouring section with room into it (keeping the usual
+ * two-per-section layout; a third part is allowed only when no move fits). For
+ * example a file of Bruckner's SAATTBB "Ave Maria" names its parts Treble,
+ * Countertenor, Countertenor 2, Alto, Tenor, Bass 1, Bass 2: the "Alto"
+ * part has a tenor range and becomes Tenor 1. Only a neighbour that already
+ * has parts receives one, so a men's piece for Tenor 1, 2 and 3 doesn't gain
+ * an "Alto". Moved parts are marked classifiedBy 'rebalanced' (with
+ * movedFrom) so the report can say so.
+ * @param {Array<Object>} parts - Classified parts (changed in place)
+ */
+export function rebalanceSections(parts) {
+    const voices = section => parts.filter(p => p.role === 'voice' && p.section === section);
+    for (let moves = 0; moves < parts.length; moves++) {
+        const over = SECTION_ORDER.find(section => voices(section).length > PREFERRED_PER_SECTION &&
+            !voices(section).every(p => p.rebalanceChecked));
+        if (!over) return;
+        const index = SECTION_ORDER.indexOf(over);
+        const group = voices(over);
+        let best = null;
+        for (const neighbour of [SECTION_ORDER[index - 1], SECTION_ORDER[index + 1]]) {
+            const size = neighbour ? voices(neighbour).length : 0;
+            if (!neighbour || size === 0 || size >= PREFERRED_PER_SECTION) continue;
+            const goingDown = SECTION_ORDER.indexOf(neighbour) > index;
+            // Moving down, the lowest part goes; moving up, the highest
+            const part = group.reduce((a, b) => ((goingDown ? b.medianNote < a.medianNote : b.medianNote > a.medianNote) ? b : a));
+            // How much better the part fits the neighbour than its named section
+            const fit = Math.abs(part.medianNote - TYPICAL_MEDIAN[neighbour]) - Math.abs(part.medianNote - TYPICAL_MEDIAN[over]);
+            // Only a part that sits nearer the neighbour's range than its own moves
+            if (fit < 0 && (!best || fit < best.fit)) {
+                best = { part, neighbour, fit };
+            }
+        }
+        if (!best) {
+            // Nothing fits a neighbour: this section keeps its parts
+            group.forEach(p => { p.rebalanceChecked = true; });
+            continue;
+        }
+        Object.assign(best.part, { section: best.neighbour, nameNumber: null, classifiedBy: 'rebalanced', movedFrom: over });
+    }
 }
 
 /**

@@ -11,7 +11,7 @@ import { auditMidi, tempoMap } from './audit.js';
 import { suggestMetadata, titleFromFilename } from './metadata.js';
 import { readMusicXml, MusicXmlError } from './musicxml.js';
 import { LIMITS, message, overallStatus } from './checks.js';
-import { MAX_PER_SECTION } from './recipe.js';
+import { MAX_PER_SECTION, planChannels } from './recipe.js';
 
 function rejected(format, messages, suggested = null) {
     return { status: 'rejected', format, summary: null, messages, suggested, midi: null };
@@ -77,6 +77,10 @@ function convertSong(song, format, suggested, sourceWarnings = []) {
 
     const voices = groupVoices(parts);
     if (Object.keys(voices).length === 0) {
+        // A solo movement (an aria or recitative) has no choir part to practise
+        if (parts.some(p => p.role === 'solo')) {
+            return rejected(format, [message.soloOnly()], suggested);
+        }
         // A part playing chords across several voices' range is probably the voices merged together
         const merged = parts.some(looksLikeMergedVoices);
         return rejected(format, [merged ? message.voicesMerged() : message.noVoices()], suggested);
@@ -89,12 +93,14 @@ function convertSong(song, format, suggested, sourceWarnings = []) {
             return rejected(format, [message.tooManyVoices(section)], suggested);
         }
     }
-    const accompanimentChannels = assignAccompanimentChannels(parts.filter(p => p.role === 'accompaniment' || p.role === 'solo'));
+    const plan = planChannels(voices);
+    const accompanimentChannels = assignAccompanimentChannels(
+        parts.filter(p => p.role === 'accompaniment' || p.role === 'solo'), plan.accompanimentChannels);
     if (!accompanimentChannels) {
         return rejected(format, [message.tooManyAccompaniment()], suggested);
     }
 
-    const built = buildPracticeSong(song, classified, voices, accompanimentChannels);
+    const built = buildPracticeSong(song, classified, voices, accompanimentChannels, plan.slots);
     const midi = writeMidi(built.song);
     const audit = auditMidi(built.song);
 
@@ -109,6 +115,9 @@ function convertSong(song, format, suggested, sourceWarnings = []) {
     }
     for (const output of voiceOutputs.filter(o => o.part.classifiedBy === 'pitch')) {
         messages.push(message.roleInferred(output.part.sourceName, output.name));
+    }
+    for (const output of voiceOutputs.filter(o => o.part.classifiedBy === 'rebalanced')) {
+        messages.push(message.sectionMoved(output.part.sourceName, output.name, output.part.movedFrom));
     }
     if (tempoMap(song).length === 0) {
         messages.push(message.noTempo());

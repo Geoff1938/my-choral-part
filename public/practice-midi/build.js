@@ -7,7 +7,7 @@
 import { META, encodeText } from './smf.js';
 import {
     CC, SECTIONS, ACCOMPANIMENT_CHANNELS, START_VOLUME, REVERB, CHORUS,
-    ACCOMPANIMENT_PAN, DEFAULT_VELOCITY, voiceTrackName, voiceSlot
+    ACCOMPANIMENT_PAN, DEFAULT_VELOCITY, voiceTrackName
 } from './recipe.js';
 import { isChoralTrackName } from './voiceParts.js';
 
@@ -77,14 +77,18 @@ export function accompanimentName(part, position) {
  * the channels run out, a part may share with another that plays the same
  * single instrument.
  * @param {Array<Object>} parts - Accompaniment and solo parts, in order
+ * @param {number[]} [available] - Channels accompaniment may use (planChannels), in order of preference
  * @returns {Map<Object, number>|null} Channel for each part, or null if they don't fit
  */
-export function assignAccompanimentChannels(parts) {
+export function assignAccompanimentChannels(parts, available = ACCOMPANIMENT_CHANNELS) {
     const channels = new Map();
     const used = new Set();
     const pending = [];
     for (const part of parts) {
-        if (ACCOMPANIMENT_CHANNELS.includes(part.sourceChannel) && !used.has(part.sourceChannel)) {
+        // A part keeps its own channel only if it is a usual accompaniment
+        // channel; spare voice channels are used only when those run out
+        if (ACCOMPANIMENT_CHANNELS.includes(part.sourceChannel) && available.includes(part.sourceChannel) &&
+            !used.has(part.sourceChannel)) {
             channels.set(part, part.sourceChannel);
             used.add(part.sourceChannel);
         } else {
@@ -93,7 +97,7 @@ export function assignAccompanimentChannels(parts) {
     }
     const programsOf = part => [...new Set(part.controlEvents.filter(e => e.type === 'program').map(e => e.program))];
     for (const part of pending) {
-        const free = ACCOMPANIMENT_CHANNELS.find(c => !used.has(c));
+        const free = available.find(c => !used.has(c));
         if (free !== undefined) {
             channels.set(part, free);
             used.add(free);
@@ -118,11 +122,12 @@ export function assignAccompanimentChannels(parts) {
  * @param {{parts: Array<Object>, conductorEvents: Array<Object>, conductorName: string|null}} classified - Result of classifyParts
  * @param {Object<string, Array<Object>>} voices - Result of groupVoices
  * @param {Map<Object, number>} accompanimentChannels - Result of assignAccompanimentChannels
+ * @param {Map<Object, {channel: number, program: number, pan: number}>} voiceSlots - From planChannels
  * @returns {{song: Object, velocityScale: number|null, outputParts: Array<Object>}}
  *     The output file, the factor applied to velocities when the source had no
  *     dynamics (null otherwise), and each part's output name and channel
  */
-export function buildPracticeSong(song, classified, voices, accompanimentChannels) {
+export function buildPracticeSong(song, classified, voices, accompanimentChannels, voiceSlots) {
     // Constant velocity across the voices means the source has no dynamics:
     // voices move to the default level, accompaniment by the same factor
     const voiceVelocities = new Set();
@@ -156,7 +161,7 @@ export function buildPracticeSong(song, classified, voices, accompanimentChannel
     for (const section of SECTIONS) {
         const group = voices[section] || [];
         group.forEach((part, i) => {
-            const slot = voiceSlot(section, i + 1);
+            const slot = voiceSlots.get(part);
             const name = voiceTrackName(section, i + 1, group.length);
             const kept = part.controlEvents
                 .filter(e => e.type !== 'program' && !(e.type === 'controller' && VOICE_REPLACED_CC.has(e.controller)))

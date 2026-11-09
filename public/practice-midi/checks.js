@@ -77,6 +77,10 @@ export const message = {
         level: 'reject', code: 'voices-merged',
         text: 'All the voices in this file are played together as chords on a single track, so they can\'t be separated into parts. Look for a version with a separate track for each voice.'
     }),
+    soloOnly: () => ({
+        level: 'reject', code: 'solo-only',
+        text: 'This looks like a solo movement (a soloist with accompaniment), with no choir parts to practise.'
+    }),
     noVoices: () => ({
         level: 'reject', code: 'no-voices',
         text: 'We couldn\'t find any voice parts in this file, only instruments.'
@@ -87,7 +91,7 @@ export const message = {
     }),
     tooManyVoices: section => ({
         level: 'reject', code: 'too-many-voices',
-        text: `This file has more than two ${SECTION_LABEL[section]} parts. At most two parts per voice (soprano, alto, tenor, bass) are supported.`
+        text: `This file has more than three ${SECTION_LABEL[section]} parts. At most three parts per voice (soprano, alto, tenor, bass) are supported.`
     }),
     tooManyAccompaniment: () => ({
         level: 'reject', code: 'too-many-accompaniment',
@@ -104,6 +108,10 @@ export const message = {
     roleInferred: (sourceName, outputName) => ({
         level: 'warning', code: 'role-inferred',
         text: `We couldn't tell which voice ${quoted(sourceName)} is from its name, so it has been treated as ${outputName} because of its range. Please check this is right.`
+    }),
+    sectionMoved: (sourceName, outputName, fromSection) => ({
+        level: 'warning', code: 'section-moved',
+        text: `The file has more than two ${SECTION_LABEL[fromSection]} parts, so ${quoted(sourceName)} has been treated as ${outputName} because of its range. Please check this is right.`
     }),
     voicesSplit: partName => ({
         level: 'warning', code: 'voices-split',

@@ -82,6 +82,14 @@ describe('suggestMetadata()', () => {
     expect(suggestMetadata(s, 'C:\\music\\Ave_verum-corpus.mid')).toEqual({ title: 'Ave verum corpus', composer: '' });
   });
 
+  test('ignores placeholder composers such as "By Author" from NoteWorthy Composer', () => {
+    const s = song([track('Soprano', line(0, 72))], { title: 'Ave Maria' });
+    s.tracks[0].events.push({ tick: 0, type: 'meta', metaType: META.TEXT, data: encodeText('By Author') });
+    expect(suggestMetadata(s, 'x.mid').composer).toBe('');
+    s.tracks[0].events.push({ tick: 0, type: 'meta', metaType: META.TEXT, data: encodeText('By Anon') });
+    expect(suggestMetadata(s, 'x.mid').composer).toBe('Anon');
+  });
+
   test('does not take a title from a first track that has notes', () => {
     const s = { format: 0, ticksPerQuarter: 480, tracks: [track('Soprano', line(0, 72))] };
     expect(suggestMetadata(s, 'piece.mid').title).toBe('piece');

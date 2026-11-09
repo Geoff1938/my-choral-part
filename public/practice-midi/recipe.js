@@ -48,8 +48,11 @@ export const SECTION_NAMES = {
     bass: 'Bass'
 };
 
-// Most parts a section can have
-export const MAX_PER_SECTION = 2;
+// Parts per section: two is the usual layout (and parts are moved between
+// neighbouring sections to keep it, see classify.js); a third is allowed when
+// the piece needs it (e.g. Tenor 1, 2 and 3), on a spare channel
+export const PREFERRED_PER_SECTION = 2;
+export const MAX_PER_SECTION = 3;
 
 // Channels for accompaniment, in order of use. Channel 9 is percussion and is never used.
 export const ACCOMPANIMENT_CHANNELS = [8, 10, 11, 12, 13, 14, 15];
@@ -72,6 +75,41 @@ export const DEFAULT_VELOCITY = 75;
  */
 export function voiceTrackName(section, number, sectionSize) {
     return sectionSize > 1 ? `${SECTION_NAMES[section]} ${number}` : SECTION_NAMES[section];
+}
+
+/**
+ * Choose the channel, program and pan for every voice part, and the channels
+ * left for accompaniment. First and second parts use the recipe's slots;
+ * a third part takes a spare channel - a voice channel the piece doesn't
+ * use, or else an accompaniment channel. Accompaniment gets the usual
+ * accompaniment channels plus any voice channels left unused.
+ * @param {Object<string, Array<Object>>} voices - Voice parts by section, in order (groupVoices)
+ * @returns {{slots: Map<Object, {channel: number, program: number, pan: number}>, accompanimentChannels: number[]}}
+ */
+export function planChannels(voices) {
+    const slots = new Map();
+    const usedVoiceChannels = new Set();
+    const extras = [];
+    for (const section of SECTIONS) {
+        (voices[section] || []).forEach((part, i) => {
+            const slot = voiceSlot(section, i + 1);
+            if (slot) {
+                slots.set(part, { channel: slot.channel, program: slot.program, pan: slot.pan });
+                usedVoiceChannels.add(slot.channel);
+            } else {
+                extras.push({ part, section });
+            }
+        });
+    }
+    const spareVoiceChannels = VOICE_SLOTS.map(slot => slot.channel).filter(c => !usedVoiceChannels.has(c));
+    const free = [...spareVoiceChannels, ...ACCOMPANIMENT_CHANNELS];
+    for (const { part, section } of extras) {
+        const first = voiceSlot(section, 1);
+        slots.set(part, { channel: free.shift(), program: first.program, pan: first.pan });
+    }
+    // Accompaniment: the usual channels first, then unused voice channels
+    const accompanimentChannels = [...ACCOMPANIMENT_CHANNELS, ...spareVoiceChannels].filter(c => free.includes(c));
+    return { slots, accompanimentChannels };
 }
 
 /**

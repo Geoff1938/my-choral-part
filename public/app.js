@@ -44,6 +44,7 @@ import { StatusManager } from './ui/StatusManager.js';
 import { RecentWorksManager } from './api/RecentWorksManager.js';
 import { normalizeChannelName, detectVoicePartFromName } from './practice-midi/voiceParts.js';
 import { toSlug } from './utils/slug.js';
+import { nameSplitTracks } from './utils/midiTracks.js';
 import { ImportDialog } from './ui/ImportDialog.js';
 import { LibraryDialog, pieceName } from './ui/LibraryDialog.js';
 import { SetsDialog, itemLabel } from './ui/SetsDialog.js';
@@ -3384,6 +3385,8 @@ class MIDIPlayer {
             // Store the raw ArrayBuffer for SpessaSynth (it needs raw MIDI data, not parsed)
             this.lastMidiArrayBuffer = arrayBuffer;
             this.midi = new Midi(arrayBuffer);
+            // Name the unnamed tracks the MIDI reader splits off at instrument changes
+            nameSplitTracks(this.midi.tracks);
 
             if (!this.midi || !this.midi.tracks || this.midi.tracks.length === 0) {
                 throw new MIDILoadError('Invalid MIDI file or no tracks found', url);

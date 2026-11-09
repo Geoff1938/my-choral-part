@@ -11,6 +11,10 @@ const PLACEHOLDER_TITLE = /^(control track|tempo( control| track| map)?|conducto
 // Text events that state the composer, e.g. "By J S Bach", "Composer: Schütz"
 const COMPOSER_TEXT = /^\s*(?:music\s+by|composed\s+by|composer\s*:|by)\s+(.+?)\s*$/i;
 
+// Composer names that notation programs leave as defaults (NoteWorthy
+// Composer writes "By Author"); "Anon" and "Anonymous" are real attributions
+const PLACEHOLDER_COMPOSER = /^(author|the author|composer|unknown|name|your name|\?+|-+)$/i;
+
 /**
  * Make a title from a file name: no extension, underscores and dashes as spaces
  * @param {string} filename - File name
@@ -47,7 +51,7 @@ export function suggestMetadata(song, filename = '') {
     for (const event of first.events) {
         if (event.type === 'meta' && event.metaType === META.TEXT) {
             const match = decodeText(event.data).match(COMPOSER_TEXT);
-            if (match) {
+            if (match && !PLACEHOLDER_COMPOSER.test(match[1])) {
                 composer = match[1];
                 break;
             }
