@@ -288,6 +288,64 @@ class ChoralMusicScraper {
     return null;
   }
 
+  /**
+   * Whether a work page says its MIDI files have been withdrawn, e.g. "Because
+   * of Copyright problems the Midi Files identified below are no longer
+   * publicly available". Such pages still link to the .mid files, which 404.
+   * @param {string} pageText - Text content of the page
+   * @returns {boolean} True if the page carries the notice
+   */
+  hasWithdrawnNotice(pageText) {
+    return /no\s+longer\s+publicly\s+available/i.test(pageText);
+  }
+
+  /**
+   * Check that a MIDI file can still be downloaded from the site
+   * @param {string} midiUrl - Site-relative MIDI path as stored in the index
+   * @returns {Promise<boolean>} True if the site returns a MIDI file
+   */
+  async isMidiAvailable(midiUrl) {
+    const encodedPath = midiUrl.split('/').map(part => encodeURIComponent(part)).join('/');
+    try {
+      const response = await axios.head(`${this.baseUrl}${encodedPath}`, this.axiosConfig);
+      const contentType = String(response.headers['content-type'] || '').toLowerCase();
+      return response.status === 200 && !contentType.includes('text/html');
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * On a page with a withdrawn notice, keep only the sections whose MIDI
+   * file can still be downloaded, recording the rest as unavailable
+   * @param {Array} sections - Sections found on the page (modified in place)
+   * @param {Object|null} exceptions - Exception tracking object
+   * @param {string} composerName - Composer name
+   * @param {string} workName - Work name
+   * @returns {Promise<void>}
+   */
+  async removeWithdrawnSections(sections, exceptions, composerName, workName) {
+    const available = [];
+    for (const section of sections) {
+      await new Promise(resolve => setTimeout(resolve, this.requestDelay));
+      if (await this.isMidiAvailable(section.midiUrl)) {
+        available.push(section);
+      } else {
+        console.log(`  WITHDRAWN: ${section.midiUrl} is no longer available`);
+        if (exceptions) {
+          exceptions.unavailableWorks.push({
+            composer: composerName,
+            work: workName,
+            section: section.name,
+            url: section.midiUrl,
+            reason: 'MIDI file withdrawn (page says files are no longer publicly available)'
+          });
+        }
+      }
+    }
+    sections.splice(0, sections.length, ...available);
+  }
+
   // Helper function to check if a URL points to a MIDI file (not an HTML page)
   isMidiFileUrl(url) {
     const lowerUrl = url.toLowerCase();
@@ -595,6 +653,13 @@ class ChoralMusicScraper {
             console.log(`Added section (no unemphasised column): ${sectionName} -> ${relativeMidiUrl}`);
           }
         });
+      }
+
+      // Pages whose files were withdrawn for copyright still link to them;
+      // keep only the files that can actually be downloaded
+      if (sections.length > 0 && this.hasWithdrawnNotice($('body').text())) {
+        console.log(`Page says MIDI files are no longer publicly available: checking ${sections.length} files`);
+        await this.removeWithdrawnSections(sections, exceptions, composerName, workName);
       }
 
       // Look for links to additional parts (Part 2, Part 3, next page, etc.)

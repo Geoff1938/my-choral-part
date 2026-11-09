@@ -195,6 +195,53 @@ describe('Page parsing', () => {
     expect(await scraper.scrapeWorkSections('/B/Req/req.html', new Set(), { unavailableWorks: [] })).toEqual([]);
   });
 
+  test('drops withdrawn files on a page with a copyright notice', async () => {
+    const scraper = new ChoralMusicScraper();
+    scraper.requestDelay = 0;
+    servePages(scraper, { '/R/Req/req.html': `<p>Because of Copyright problems the Midi Files
+      identified below are no longer publicly available.</p><table>
+      <tr><td>Requiem</td><td>UNemphasized</td></tr>
+      <tr><td>1: Requiem</td><td><a href="1-req.mid">yes</a></td></tr>
+      <tr><td>2: Pie Jesu</td><td><a href="2-pie.mid">yes</a></td></tr>
+    </table>` });
+    const head = jest.spyOn(axios, 'head').mockImplementation(async url => {
+      if (url.endsWith('/R/Req/2-pie.mid')) {
+        return { status: 200, headers: { 'content-type': 'audio/midi' } };
+      }
+      throw { response: { status: 404 } };
+    });
+    const exceptions = { unavailableWorks: [] };
+
+    const sections = await scraper.scrapeWorkSections('/R/Req/req.html', new Set(), exceptions, 'R', 'Requiem');
+
+    expect(sections).toEqual([{ name: '2: Pie Jesu', midiUrl: '/R/Req/2-pie.mid' }]);
+    expect(head).toHaveBeenCalledTimes(2);
+    expect(exceptions.unavailableWorks).toEqual([expect.objectContaining({
+      composer: 'R', work: 'Requiem', section: '1: Requiem', url: '/R/Req/1-req.mid'
+    })]);
+  });
+
+  test('treats an HTML response as a withdrawn file', async () => {
+    const scraper = new ChoralMusicScraper();
+    jest.spyOn(axios, 'head').mockResolvedValue({ status: 200, headers: { 'content-type': 'text/html' } });
+
+    expect(await scraper.isMidiAvailable('/Carols & Anthems/R/x.mid')).toBe(false);
+    expect(axios.head).toHaveBeenCalledWith(
+      `${scraper.baseUrl}/Carols%20%26%20Anthems/R/x.mid`, scraper.axiosConfig);
+  });
+
+  test('does not check files on pages without the notice', async () => {
+    const scraper = new ChoralMusicScraper();
+    servePages(scraper, { '/W/Mass/mass.html': `<table>
+      <tr><td>Mass</td><td>UNemphasized</td></tr>
+      <tr><td>1: Kyrie</td><td><a href="1-kyrie.mid">yes</a></td></tr>
+    </table>` });
+    const head = jest.spyOn(axios, 'head');
+
+    expect(await scraper.scrapeWorkSections('/W/Mass/mass.html')).toHaveLength(1);
+    expect(head).not.toHaveBeenCalled();
+  });
+
   test('keeps alternative versions of a song listed under the same title', async () => {
     const scraper = new ChoralMusicScraper();
     servePages(scraper, { '/Carols/list.html': `<table>
