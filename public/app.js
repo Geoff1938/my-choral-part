@@ -42,9 +42,10 @@ import {
 import { InstrumentLoader } from './player/InstrumentLoader.js';
 import { StatusManager } from './ui/StatusManager.js';
 import { RecentWorksManager } from './api/RecentWorksManager.js';
-import { normalizeChannelName, detectVoicePartFromName } from './practice-midi/voiceParts.js';
+import { normalizeChannelName } from './practice-midi/voiceParts.js';
 import { toSlug } from './utils/slug.js';
 import { nameSplitTracks } from './utils/midiTracks.js';
+import { listChoralParts, choosePart, rememberPart } from './utils/choralParts.js';
 import { ImportDialog } from './ui/ImportDialog.js';
 import { LibraryDialog, pieceName } from './ui/LibraryDialog.js';
 import { SetsDialog, itemLabel } from './ui/SetsDialog.js';
@@ -82,8 +83,8 @@ class MIDIPlayer {
         this.masterVolume = 1.0;
         this.balance = 60; // -100 to 100, 0 is equal, default 60 to emphasize user's part
         this.voicePart = 'soprano'; // Default voice part
+        this.voicePartNumber = null; // Which line when the section divides (e.g. 2 for Tenor 2), or null
         this.selectedChannelIndex = null; // Specific channel index when multiple exist
-        this.lastSelectedTrackName = null; // Track name for cross-movement continuity (session only)
         this.loopStart = 0;
         this.loopEnd = 0;
         this.repeatMode = false; // If true, repeat current movement; if false, auto-advance to next
@@ -348,6 +349,8 @@ class MIDIPlayer {
             this.voicePart = savedVoicePart;
             this.voicePartSelect.value = savedVoicePart;
         }
+        const savedNumber = parseInt(localStorage.getItem('voicePartNumber'));
+        this.voicePartNumber = Number.isInteger(savedNumber) ? savedNumber : null;
         // Always update balance label to show current voice part (even if default)
         this.updateBalanceLabel();
 
@@ -375,6 +378,11 @@ class MIDIPlayer {
 
     savePreferences() {
         localStorage.setItem('voicePart', this.voicePart);
+        if (this.voicePartNumber === null) {
+            localStorage.removeItem('voicePartNumber');
+        } else {
+            localStorage.setItem('voicePartNumber', this.voicePartNumber.toString());
+        }
         localStorage.setItem('balance', this.balance);
         // Note: masterVolume is intentionally not persisted - always starts at 100%
     }
@@ -383,6 +391,7 @@ class MIDIPlayer {
         if (confirm('Are you sure you want to clear all saved data? This will reset your voice part, balance, and recent works list.')) {
             // Clear all localStorage items used by this app
             localStorage.removeItem('voicePart');
+            localStorage.removeItem('voicePartNumber');
             localStorage.removeItem('balance');
             localStorage.removeItem('recentWorks');
             localStorage.removeItem('masterVolume'); // In case old value exists
@@ -628,6 +637,14 @@ class MIDIPlayer {
         }
     }
 
+    clearChannelOverride() {
+        // Forget any channel saved for this movement, so it follows the remembered part
+        const key = this.getChannelOverrideKey();
+        if (key) {
+            localStorage.removeItem(key);
+        }
+    }
+
     loadChannelOverride() {
         // Load saved channel override for this movement
         const key = this.getChannelOverrideKey();
@@ -645,72 +662,29 @@ class MIDIPlayer {
     }
 
     getChoralChannels() {
-        // Returns array of vocal (non-solo) channels from the loaded MIDI
-        // Uses track name matching against vocal keywords, excludes solo parts
-        const tracksWithNotes = this.getTracksWithNotes();
-        const choralChannels = [];
-
-        for (let i = 0; i < tracksWithNotes.length; i++) {
-            const { track, trackIndex } = tracksWithNotes[i];
-            const rawName = track.name || `Channel ${trackIndex + 1}`;
-            const normalizedName = this.normalizeChannelName(rawName);
-            const instrumentName = this.getInstrumentName(track);
-
-            // Detect voice part from track name
-            const voicePart = this.detectVoicePartFromName(normalizedName);
-            if (!voicePart) continue;
-
-            // Exclude solo parts
-            if (/\bsolo\b/i.test(normalizedName)) continue;
-
-            choralChannels.push({
-                index: i,
-                trackName: normalizedName,
-                instrumentName: instrumentName,
-                voicePart: voicePart
-            });
-        }
-
-        // Number voice parts consistently when there are multiple of the same type
-        // e.g. "Soprano 1" and "Soprano" become "Soprano 1" and "Soprano 2"
-        // e.g. two tracks both named "Soprano" become "Soprano 1" and "Soprano 2"
-        const partGroups = {};
-        for (const ch of choralChannels) {
-            if (!partGroups[ch.voicePart]) partGroups[ch.voicePart] = [];
-            partGroups[ch.voicePart].push(ch);
-        }
-        for (const channels of Object.values(partGroups)) {
-            if (channels.length <= 1) continue;
-
-            // Find which numbers are already used (e.g., "Soprano 1" already has 1)
-            const usedNumbers = new Set();
-            const unnumbered = [];
-            for (const ch of channels) {
-                const match = ch.trackName.match(/\s+(\d+)\s*$/);
-                if (match) {
-                    usedNumbers.add(parseInt(match[1]));
-                } else {
-                    unnumbered.push(ch);
-                }
-            }
-
-            // Assign numbers to unnumbered tracks
-            let nextNum = 1;
-            for (const ch of unnumbered) {
-                while (usedNumbers.has(nextNum)) nextNum++;
-                ch.trackName = `${ch.trackName} ${nextNum}`;
-                usedNumbers.add(nextNum);
-                nextNum++;
-            }
-        }
-
-        return choralChannels;
+        // Returns the choral (non-solo) channels of the loaded MIDI, each with
+        // voicePart, number (null when the section has one line) and label
+        // ("Tenor", or "Tenor 1"/"Tenor 2" when the tenors divide)
+        const tracks = this.getTracksWithNotes().map(({ track, trackIndex }, i) => ({
+            index: i,
+            name: track.name || `Channel ${trackIndex + 1}`,
+            instrumentName: this.getInstrumentName(track)
+        }));
+        return listChoralParts(tracks);
     }
 
-    detectVoicePartFromName(name) {
-        // Returns 'soprano', 'alto', 'tenor', 'bass', or null if not a vocal part
-        return detectVoicePartFromName(name);
+    /**
+     * Remember the part the singer picked (section and line number) for
+     * every later movement and work
+     * @param {{voicePart: string, number: number|null}} part - The picked choral channel
+     */
+    rememberVoicePart(part) {
+        const remembered = rememberPart({ voicePart: this.voicePart, number: this.voicePartNumber }, part);
+        this.voicePart = remembered.voicePart;
+        this.voicePartNumber = remembered.number;
+        this.savePreferences();
     }
+
 
     populateVoicePartDropdown() {
         // Dynamically populate the "My Part" dropdown with choral channels from loaded MIDI
@@ -731,7 +705,7 @@ class MIDIPlayer {
             const option = document.createElement('option');
             option.value = `channel:${ch.index}`;
             const displayInstrument = ch.instrumentName.replace(/_/g, ' ');
-            option.textContent = `${ch.trackName} (${displayInstrument})`;
+            option.textContent = `${ch.label} (${displayInstrument})`;
             this.voicePartSelect.appendChild(option);
         }
 
@@ -763,42 +737,23 @@ class MIDIPlayer {
 
     autoSelectDropdownChannel(choralChannels) {
         // Auto-select the best matching channel in the dynamic dropdown
-        // Priority: 1) saved override, 2) track name match, 3) voice part match, 4) first channel
+        // Priority: 1) a non-choral channel saved for this movement via "Other...",
+        // 2) the singer's remembered part (e.g. Tenor 2, or the only tenor line), 3) first channel
 
-        // Priority 1: Saved channel override for this movement
-        if (this.selectedChannelIndex !== null) {
-            const matchByIndex = choralChannels.find(ch => ch.index === this.selectedChannelIndex);
-            if (matchByIndex) {
-                this.voicePartSelect.value = `channel:${matchByIndex.index}`;
-                this.lastSelectedTrackName = matchByIndex.trackName;
-                return;
-            }
-        }
-
-        // Priority 2: Match by track name from previous movement (same work)
-        if (this.lastSelectedTrackName) {
-            const matchByName = choralChannels.find(ch => ch.trackName === this.lastSelectedTrackName);
-            if (matchByName) {
-                this.voicePartSelect.value = `channel:${matchByName.index}`;
-                this.selectedChannelIndex = matchByName.index;
-                return;
-            }
-        }
-
-        // Priority 3: First channel matching saved voicePart preference
-        const matchByVoicePart = choralChannels.find(ch => ch.voicePart === this.voicePart);
-        if (matchByVoicePart) {
-            this.voicePartSelect.value = `channel:${matchByVoicePart.index}`;
-            this.selectedChannelIndex = matchByVoicePart.index;
-            this.lastSelectedTrackName = matchByVoicePart.trackName;
+        // Priority 1: Saved override for this movement, if it is not a choral channel
+        // (choral channels follow the remembered part instead)
+        if (this.selectedChannelIndex !== null &&
+            !choralChannels.some(ch => ch.index === this.selectedChannelIndex)) {
+            this.syncDropdownToChannel();
             return;
         }
 
-        // Priority 4: First choral channel
-        if (choralChannels.length > 0) {
-            this.voicePartSelect.value = `channel:${choralChannels[0].index}`;
-            this.selectedChannelIndex = choralChannels[0].index;
-            this.lastSelectedTrackName = choralChannels[0].trackName;
+        // Priority 2: The remembered part
+        const chosen = choosePart(choralChannels, { voicePart: this.voicePart, number: this.voicePartNumber })
+            || choralChannels[0];
+        if (chosen) {
+            this.voicePartSelect.value = `channel:${chosen.index}`;
+            this.selectedChannelIndex = chosen.index;
         }
     }
 
@@ -819,11 +774,6 @@ class MIDIPlayer {
         if (existingOption) {
             // Channel is already in the dropdown (choral channel)
             this.voicePartSelect.value = targetValue;
-            const choralChannels = this.getChoralChannels();
-            const matched = choralChannels.find(ch => ch.index === this.selectedChannelIndex);
-            if (matched) {
-                this.lastSelectedTrackName = matched.trackName;
-            }
         } else {
             // Non-choral channel selected via Settings - add it as a temporary option
             const tracksWithNotes = this.getTracksWithNotes();
@@ -848,7 +798,6 @@ class MIDIPlayer {
                 }
 
                 this.voicePartSelect.value = targetValue;
-                this.lastSelectedTrackName = channelName;
             }
         }
     }
@@ -1687,11 +1636,6 @@ class MIDIPlayer {
                 }
             }
 
-            // Clear track name continuity when switching to a different work
-            if (this.selectedComposer !== composer || this.selectedWork !== work) {
-                this.lastSelectedTrackName = null;
-            }
-
             this.selectedComposer = composer;
             this.selectedWork = work;
 
@@ -1736,7 +1680,6 @@ class MIDIPlayer {
         } catch (error) {
             console.error('Error loading default work:', error);
             // Fall back to hardcoded Mozart Requiem if API fails
-            this.lastSelectedTrackName = null;
             this.selectedComposer = 'Mozart';
             this.selectedWork = 'Requiem (Sussmayr completion)';
 
@@ -1907,29 +1850,20 @@ class MIDIPlayer {
                     const channelIndex = parseInt(value.split(':')[1]);
                     this.selectedChannelIndex = channelIndex;
 
-                    // Derive voicePart and save track name
-                    // Check choral channels first, then fall back to all tracks
-                    const choralChannels = this.getChoralChannels();
-                    const selected = choralChannels.find(ch => ch.index === channelIndex);
+                    // A choral channel becomes the remembered part for every movement;
+                    // a non-choral one (added via the channel selection dialog) is saved
+                    // for this movement only
+                    const selected = this.getChoralChannels().find(ch => ch.index === channelIndex);
                     if (selected) {
-                        this.voicePart = selected.voicePart;
-                        this.lastSelectedTrackName = selected.trackName;
+                        this.rememberVoicePart(selected);
+                        this.clearChannelOverride();
                     } else {
-                        // Non-choral channel selected (added via channel selection dialog)
-                        const tracksWithNotes = this.getTracksWithNotes();
-                        if (channelIndex < tracksWithNotes.length) {
-                            const { track, trackIndex } = tracksWithNotes[channelIndex];
-                            const rawName = track.name || `Channel ${trackIndex + 1}`;
-                            this.lastSelectedTrackName = this.normalizeChannelName(rawName);
-                        }
+                        this.saveChannelOverride();
                     }
-
-                    this.saveChannelOverride();
                 } else {
                     // Static mode: user selected a general voice part
-                    this.voicePart = value;
+                    this.rememberVoicePart({ voicePart: value, number: null });
                     this.selectedChannelIndex = null;
-                    this.lastSelectedTrackName = null;
                 }
 
                 this.savePreferences();
@@ -2445,18 +2379,15 @@ class MIDIPlayer {
                 const channelIndex = parseInt(row.dataset.channelIndex);
                 this.selectedChannelIndex = channelIndex;
 
-                // Derive voicePart from the track name if possible
-                const { track, trackIndex: tIdx } = tracksWithNotes[channelIndex];
-                const rawName = track.name || `Channel ${tIdx + 1}`;
-                const normalizedName = this.normalizeChannelName(rawName);
-                const detectedPart = this.detectVoicePartFromName(normalizedName);
-                if (detectedPart) {
-                    this.voicePart = detectedPart;
-                    this.savePreferences();
+                // A choral channel becomes the remembered part for every movement;
+                // any other channel is saved for this movement only
+                const selected = this.getChoralChannels().find(ch => ch.index === channelIndex);
+                if (selected) {
+                    this.rememberVoicePart(selected);
+                    this.clearChannelOverride();
+                } else {
+                    this.saveChannelOverride();
                 }
-                this.lastSelectedTrackName = normalizedName;
-
-                this.saveChannelOverride();
                 this.syncDropdownToChannel();
                 this.updateBalanceLabel();
                 this.applyBalance();

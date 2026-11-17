@@ -98,4 +98,11 @@ describe('voiceParts', () => {
     expect(isChoralTrackName('Organ')).toBe(false);
     expect(detectVoicePartFromName('D\'Bass')).toBeNull();
   });
+
+  test('soprano abbreviations are recognised', () => {
+    for (const name of ['Sop 2', 'Sopr.', 'Sopran', 'sop']) {
+      expect(detectVoicePartFromName(name)).toBe('soprano');
+      expect(isChoralTrackName(name)).toBe(true);
+    }
+  });
 });

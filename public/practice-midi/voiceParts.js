@@ -7,7 +7,7 @@
 /**
  * Normalize voice part synonyms in a track name
  * @param {string} name - Track name
- * @returns {string} Name with Treble -> Soprano and Countertenor -> Alto
+ * @returns {string} Name with Treble and Sop -> Soprano, and Countertenor -> Alto
  */
 export function normalizeChannelName(name) {
     if (!name) return name;
@@ -17,6 +17,9 @@ export function normalizeChannelName(name) {
 
     // Treble -> Soprano
     normalized = normalized.replace(/\bTreble\b/gi, 'Soprano');
+
+    // Sop / Sopr / Sopran -> Soprano
+    normalized = normalized.replace(/\bSop(r|ran)?\b\.?/gi, 'Soprano');
 
     // Counter-tenor / Countertenor / Counter tenor -> Alto
     normalized = normalized.replace(/\bCounter[-\s]?tenor\b/gi, 'Alto');
@@ -40,6 +43,8 @@ export function detectVoicePartFromName(name) {
     // Order matters: check more specific patterns before general ones
     if (/\bmezzo[-\s]?soprano\b/.test(lower)) return 'alto';
     if (/\bsoprano\b/.test(lower)) return 'soprano';
+    // Abbreviations: "Sop 2", "Sopr.", "Sopran"
+    if (/\bsop(r|ran)?\b/.test(lower)) return 'soprano';
     if (/\btreble\b/.test(lower)) return 'soprano';
     if (/\bcounter[-\s]?tenor\b/.test(lower)) return 'alto';
     if (/\balto\b/.test(lower)) return 'alto';
